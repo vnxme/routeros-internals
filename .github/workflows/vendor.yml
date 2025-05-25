@@ -64,4 +64,5 @@ jobs:
       - name: Add files and push
         run: |
           git add .
-          git push --force -u origin ${{ env.BRANCH_NAME }}
+          git commit --allow-empty -m "$(date +'%s')"
+          git push --force
