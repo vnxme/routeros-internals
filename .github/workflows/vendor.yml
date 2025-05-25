@@ -52,9 +52,6 @@ jobs:
           BRANCH_NAME="${{ env.BRANCH_PREFIX }}-${{ matrix.channel }}-${{ env.BRANCH_VERSION }}"
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
           git switch --orphan ${BRANCH_NAME}
-          #git lfs install
-          #git lfs track "*.img.zip"
-          #git lfs track "*.iso"
 
       - name: Get a changelog
         run: |
@@ -78,18 +75,14 @@ jobs:
             else
               SUFFIX="-${ARCH}"
             fi
-            IMG_FILE="${ARCH}/img/packed/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
+            IMG_FILE="${ARCH}/img/packed/chr.img.zip"
             IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
             wget -nv -O ${IMG_FILE} ${IMG_URL} || true
-            #if [ -f ${IMG_FILE} ]; then
-            #  unzip ${IMG_FILE}
-            #  rm ${IMG_FILE}
-            #fi
-            ISO_FILE="${ARCH}/iso/packed/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
+            ISO_FILE="${ARCH}/iso/packed/mikrotik.iso"
             ISO_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
             wget -nv -O ${ISO_FILE} ${ISO_URL} || true
             for PACKAGE in ${PACKAGES[@]}; do
-              FILE="${ARCH}/npk/packed/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
+              FILE="${ARCH}/npk/packed/${PACKAGE}.npk"
               URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
               wget -nv -O ${FILE} ${URL} || true
             done
