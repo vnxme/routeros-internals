@@ -17,9 +17,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        arch: [ x86 ]
         channel: [ stable ]
-        #arch: [ arm, arm64, mipsbe, mmips, smips, tile, ppc, x86 ]
         #channel: [ stable, testing ]
     env:
       TZ: 'Europe/London'
