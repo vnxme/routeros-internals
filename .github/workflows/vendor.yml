@@ -1,0 +1,56 @@
+name: Vendor RouterOS 7.x Internals Workflow
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+env:
+  BRANCH_HOST: 'download.mikrotik.com'
+  BRANCH_PREFIX: 'vendor'
+  BRANCH_VERSION: ${{ secrets.VENDOR_BRANCH_VERSION }}
+
+jobs:
+  Obtain_Internals:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        arch: [ x86 ]
+        channel: [ stable ]
+        #arch: [ arm, arm64, mipsbe, mmips, smips, tile, ppc, x86 ]
+        #channel: [ stable, testing ]
+    env:
+      TZ: 'Europe/London'
+    steps:
+      - name: Install requirements
+        run: |
+          echo $(uname -a)
+          sudo apt-get update > /dev/null
+          sudo apt-get install -y dosfstools extlinux mkisofs rsync qemu-utils xorriso zip zstd > /dev/null
+          sudo modprobe nbd > /dev/null
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Get the latest version
+        run: |
+          if [[ -z "${{ env.BRANCH_VERSION }}" ]]; then
+            BRANCH_VERSION_URL="https://${{ env.BRANCH_HOST }}/routeros/NEWESTa7.${{ matrix.channel }}"
+            echo "BRANCH_VERSION_URL=${BRANCH_URL}"
+            BRANCH_VERSION=$(wget -nv -O - ${BRANCH_URL} | cut -d ' ' -f1)
+            echo "BRANCH_VERSION=${BRANCH_VERSION}"
+          fi
+          echo "BRANCH_VERSION=${BRANCH_VERSION}" >> $GITHUB_ENV
+          echo "PWD=$(pwd)"
+
+      - name: Get a changelog
+        run: |
+          wget -nv -O changelog.txt https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/CHANGELOG
+          cat changelog.txt
