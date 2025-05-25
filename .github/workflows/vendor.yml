@@ -96,7 +96,7 @@ jobs:
           mkdir -p /tmp/iso
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
-            ISO_FILES=$(find "${ARCH}/iso/packed/*.iso")
+            ISO_FILES=$(find ${ARCH}/iso/packed/*.iso)
             for ISO_FILE in ${ISO_FILES}; do
               sudo mount -o loop,ro ${ISO_FILE} /tmp/iso
               mkdir -p "${ARCH}/iso/unpacked/$(basename ${ISO_FILE})"
