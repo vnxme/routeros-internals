@@ -101,7 +101,7 @@ jobs:
               sudo mount -o loop,ro ${ISO_FILE} /tmp/iso
               mkdir -p "${ARCH}/iso/unpacked/$(basename ${ISO_FILE})"
               rsync -a /tmp/iso/ "${ARCH}/iso/unpacked/$(basename ${ISO_FILE})/"
-              ls -alR /tmp/iso/ > ${ARCH}/iso/unpacked/$(basename ${ISO_FILE})/listing.txt
+              sudo ls -alR /tmp/iso/ > ${ARCH}/iso/unpacked/$(basename ${ISO_FILE})/listing.txt
               ISO_NPK_FILES=$(find ${ARCH}/iso/unpacked/$(basename ${ISO_FILE})/*.npk)
               for ISO_NPK_FILE in ${ISO_NPK_FILES}; do
                 if [ "$(md5sum ${ISO_NPK_FILE})" == "$(md5sum ${ARCH}/npk/packed/$(basename ${ISO_NPK_FILE}))" ]; then
