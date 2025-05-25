@@ -52,5 +52,6 @@ jobs:
 
       - name: Get a changelog
         run: |
-          wget -nv -O changelog.txt https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/CHANGELOG
+          BRANCH_CHANGELOG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/CHANGELOG"
+          wget -nv -O changelog.txt ${BRANCH_CHANGELOG_URL}
           cat changelog.txt
