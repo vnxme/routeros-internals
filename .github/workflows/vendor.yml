@@ -78,14 +78,14 @@ jobs:
             else
               SUFFIX="-${ARCH}"
             fi
-            IMG_FILE="${ARCH}/img/packed/chr.img.zip"
+            IMG_FILE="${ARCH}/img/packed/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
             IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
             wget -nv -O ${IMG_FILE} ${IMG_URL} || true
-            ISO_FILE="${ARCH}/iso/packed/mikrotik.iso"
+            ISO_FILE="${ARCH}/iso/packed/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
             ISO_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
             wget -nv -O ${ISO_FILE} ${ISO_URL} || true
             for PACKAGE in ${PACKAGES[@]}; do
-              FILE="${ARCH}/npk/packed/${PACKAGE}.npk"
+              FILE="${ARCH}/npk/packed/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
               URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
               wget -nv -O ${FILE} ${URL} || true
             done
@@ -101,6 +101,14 @@ jobs:
               sudo mount -o loop,ro ${ISO_FILE} /tmp/iso
               mkdir -p "${ARCH}/iso/unpacked/$(basename ${ISO_FILE})"
               rsync -a /tmp/iso/ "${ARCH}/iso/unpacked/$(basename ${ISO_FILE})/"
+              ls -alR /tmp/iso/ > ${ARCH}/iso/unpacked/$(basename ${ISO_FILE})/listing.txt
+              ISO_NPK_FILES=$(find ${ARCH}/iso/unpacked/$(basename ${ISO_FILE})/*.npk)
+              for ISO_NPK_FILE in ${ISO_NPK_FILES}; do
+                if [ "$(md5sum ${ISO_NPK_FILE})" == "$(md5sum ${ARCH}/npk/packed/$(basename ${ISO_NPK_FILE}))" ]; then
+                  rm ${ISO_NPK_FILE}
+                  ln -s ../../../npk/packed/$(basename ${ISO_NPK_FILE}) ${ISO_NPK_FILE}
+                fi
+              done
               sudo umount /tmp/iso
             done
           done
