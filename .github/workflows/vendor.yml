@@ -49,9 +49,19 @@ jobs:
           fi
           echo "BRANCH_VERSION=${BRANCH_VERSION}" >> $GITHUB_ENV
 
+      - name: Prepare an empty branch
+        run: |
+          BRANCH_NAME="${{ env.BRANCH_PREFIX }}-${{ matrix.channel }}-${{ env.BRANCH_VERSION }}"
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
+          git switch --orphan ${BRANCH_NAME}
+
       - name: Get a changelog
         run: |
           BRANCH_CHANGELOG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/CHANGELOG"
           echo "BRANCH_CHANGELOG_URL=${BRANCH_CHANGELOG_URL}"
           wget -nv -O changelog.txt ${BRANCH_CHANGELOG_URL}
-          ls -l
+
+      - name: Add files and push
+        run: |
+          git add .
+          git push --force -u origin ${{ env.BRANCH_NAME }}
