@@ -66,5 +66,4 @@ jobs:
         with:
           branch: ${{ env.BRANCH_NAME }}
           create_branch: true
-          commit_message: "$(date +'%s')"
           push_options: '--force'
