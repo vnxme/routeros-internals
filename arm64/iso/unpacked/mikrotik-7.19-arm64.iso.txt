@@ -1,0 +1,26 @@
+/tmp/iso/:
+total 67868
+dr-xr-xr-x  1 root root     4096 May 22 10:03 .
+drwxrwxrwt 14 root root    12288 May 25 19:35 ..
+-r--r--r--  1 root root   130747 May 22 10:03 LICENSE.txt
+-r--r--r--  1 root root     2048 May 22 10:03 boot.catalog
+-r--r--r--  1 root root    20625 May 22 09:39 calea-7.19-arm64.npk
+-r--r--r--  1 root root   110737 May 22 09:43 container-7.19-arm64.npk
+-r--r--r--  1 root root       48 May 22 10:03 defpacks
+-r--r--r--  1 root root  1253521 May 22 10:01 dude-7.19-arm64.npk
+-r--r--r--  1 root root 35651584 May 22 10:03 efiboot.img
+-r--r--r--  1 root root  2277521 May 22 09:47 extra-nic-7.19-arm64.npk
+-r--r--r--  1 root root    24721 May 22 09:39 gps-7.19-arm64.npk
+-r--r--r--  1 root root   721041 May 22 09:46 iot-7.19-arm64.npk
+-r--r--r--  1 root root   151697 May 22 09:39 iot-bt-extra-7.19-arm64.npk
+-r--r--r--  1 root root     8337 May 22 09:38 lora-7.19-arm64.npk
+-r--r--r--  1 root root       76 May 22 10:03 netinstall.filelist
+-r--r--r--  1 root root  3211409 May 22 09:56 rose-storage-7.19-arm64.npk
+-r--r--r--  1 root root 12962869 May 22 10:03 routeros-7.19-arm64.npk
+-r--r--r--  1 root root     1691 May 22 10:03 setup.modulelist
+-r--r--r--  1 root root   118929 May 22 09:43 tr069-client-7.19-arm64.npk
+-r--r--r--  1 root root    32913 May 22 09:40 ups-7.19-arm64.npk
+-r--r--r--  1 root root   344209 May 22 09:46 user-manager-7.19-arm64.npk
+-r--r--r--  1 root root 10711185 May 22 09:56 wifi-qcom-7.19-arm64.npk
+-r--r--r--  1 root root   880785 May 22 09:59 wireless-7.19-arm64.npk
+-r--r--r--  1 root root   856209 May 22 09:44 zerotier-7.19-arm64.npk

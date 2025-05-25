@@ -1,0 +1,29 @@
+/tmp/iso/:
+total 61393
+dr-xr-xr-x  1 root root     4096 May 22 10:03 .
+drwxrwxrwt 14 root root    12288 May 25 19:35 ..
+-r--r--r--  1 root root   130747 May 22 10:03 LICENSE.txt
+-r--r--r--  1 root root    24721 May 22 09:39 calea-7.19.npk
+-r--r--r--  1 root root   155793 May 22 09:43 container-7.19.npk
+-r--r--r--  1 root root       48 May 22 10:03 defpacks
+-r--r--r--  1 root root  1429649 May 22 10:01 dude-7.19.npk
+-r--r--r--  1 root root 35651584 May 22 10:03 efiboot.img
+-r--r--r--  1 root root    20625 May 22 09:39 gps-7.19.npk
+-r--r--r--  1 root root   557201 May 22 09:46 iot-7.19.npk
+dr-xr-xr-x  1 root root     2048 May 22 10:03 isolinux
+-r--r--r--  1 root root     8337 May 22 09:38 lora-7.19.npk
+-r--r--r--  1 root root  3580049 May 22 09:56 rose-storage-7.19.npk
+-r--r--r--  1 root root 19497813 May 22 10:03 routeros-7.19.npk
+-r--r--r--  1 root root   155793 May 22 09:43 tr069-client-7.19.npk
+-r--r--r--  1 root root    37009 May 22 09:40 ups-7.19.npk
+-r--r--r--  1 root root   417937 May 22 09:46 user-manager-7.19.npk
+-r--r--r--  1 root root  1175697 May 22 09:59 wireless-7.19.npk
+
+/tmp/iso/isolinux:
+total 3601
+dr-xr-xr-x 1 root root    2048 May 22 10:03 .
+dr-xr-xr-x 1 root root    4096 May 22 10:03 ..
+-r--r--r-- 1 root root    2048 May 22 10:03 boot.cat
+-r--r--r-- 1 root root    9652 May 22 08:52 isolinux.bin
+-r-xr-xr-x 1 root root      97 May 22 08:52 isolinux.cfg
+-r--r--r-- 1 root root 3668192 May 22 10:03 linux
