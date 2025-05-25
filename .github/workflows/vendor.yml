@@ -61,9 +61,12 @@ jobs:
 
       - name: Create directories
         run: |
-          mkdir -p {arm64,x86}/img/{packed,unpacked}
-          mkdir -p {arm64,x86}/iso/{packed,unpacked}
-          mkdir -p {arm64,x86}/npk/{packed,unpacked}
+          ARHCS=(arm64 x86)
+          for ARCH in ${ARHCS[@]}; do
+            mkdir -p ${ARCH}/img/{packed,unpacked}
+            mkdir -p ${ARCH}/iso/{packed,unpacked}
+            mkdir -p ${ARCH}/npk/{packed,unpacked}
+          done
 
       - name: Download files
         run: |
