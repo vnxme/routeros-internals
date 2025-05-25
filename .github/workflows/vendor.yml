@@ -61,9 +61,9 @@ jobs:
 
       - name: Create directories
         run: |
-          mkdir {arm64,x86}/npk/{packed,unpacked}
-          mkdir {arm64,x86}/img/{packed,unpacked}
-          mkdir {arm64,x86}/iso/{packed,unpacked}
+          mkdir -p {arm64,x86}/npk/{packed,unpacked}
+          mkdir -p {arm64,x86}/img/{packed,unpacked}
+          mkdir -p {arm64,x86}/iso/{packed,unpacked}
 
       - name: Download files
         run: |
