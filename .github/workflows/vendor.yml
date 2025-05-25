@@ -70,12 +70,22 @@ jobs:
           ARHCS=(arm64 x86)
           PACKAGES=(routeros calea container dude extra-nic gps iot iot-bt-extra lora rose-storage switch-marvell tr069-client ups user-manager wifi-qcom wireless zerotier)
           for ARCH in ${ARHCS[@]}; do
+            if [ "${ARCH}" == 'x86' ]; then
+              SUFFIX=''
+            else
+              SUFFIX="-${ARCH}"
+            fi
+            IMG_FILE="${ARCH}/img/packed/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
+            IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
+            wget -nv -O ${IMG_FILE} ${IMG_URL} || true
+            if [ -f ${IMG_FILE} ]; then
+              unzip ${IMG_FILE}
+              rm ${IMG_FILE}
+            fi
+            ISO_FILE="${ARCH}/iso/packed/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
+            ISO_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
+            wget -nv -O ${ISO_FILE} ${ISO_URL} || true
             for PACKAGE in ${PACKAGES[@]}; do
-              if [ "${ARCH}" == 'x86' ]; then
-                SUFFIX=''
-              else
-                SUFFIX="-${ARCH}"
-              fi
               FILE="${ARCH}/npk/packed/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
               URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
               wget -nv -O ${FILE} ${URL} || true
