@@ -48,10 +48,10 @@ jobs:
             echo "BRANCH_VERSION=${BRANCH_VERSION}"
           fi
           echo "BRANCH_VERSION=${BRANCH_VERSION}" >> $GITHUB_ENV
-          echo "PWD=$(pwd)"
 
       - name: Get a changelog
         run: |
           BRANCH_CHANGELOG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/CHANGELOG"
+          echo "BRANCH_CHANGELOG_URL=${BRANCH_CHANGELOG_URL}"
           wget -nv -O changelog.txt ${BRANCH_CHANGELOG_URL}
-          cat changelog.txt
+          ls -l
