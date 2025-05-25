@@ -78,7 +78,7 @@ jobs:
               fi
               FILE="${ARCH}/npk/packed/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
               URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
-              wget -nv -O ${FILE} ${URL}
+              wget -nv -O ${FILE} ${URL} 2>/dev/null
             done
           done
 
