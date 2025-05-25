@@ -43,8 +43,8 @@ jobs:
         run: |
           if [[ -z "${{ env.BRANCH_VERSION }}" ]]; then
             BRANCH_VERSION_URL="https://${{ env.BRANCH_HOST }}/routeros/NEWESTa7.${{ matrix.channel }}"
-            echo "BRANCH_VERSION_URL=${BRANCH_URL}"
-            BRANCH_VERSION=$(wget -nv -O - ${BRANCH_URL} | cut -d ' ' -f1)
+            echo "BRANCH_VERSION_URL=${BRANCH_VERSION_URL}"
+            BRANCH_VERSION=$(wget -nv -O - ${BRANCH_VERSION_URL} | cut -d ' ' -f1)
             echo "BRANCH_VERSION=${BRANCH_VERSION}"
           fi
           echo "BRANCH_VERSION=${BRANCH_VERSION}" >> $GITHUB_ENV
