@@ -69,8 +69,8 @@ jobs:
         run: |
           ARHCS=(arm64 x86)
           PACKAGES=(routeros calea container dude extra-nic gps iot iot-bt-extra lora rose-storage switch-marvell tr069-client ups user-manager wifi-qcom wireless zerotier)
-          for ARCH in ${ARHCS}; do
-            for PACKAGE in ${PACKAGES}; do
+          for ARCH in ${ARHCS[@]}; do
+            for PACKAGE in ${PACKAGES[@]}; do
               if [ "${ARCH}" == 'x86' ]; then
                 SUFFIX=''
               else
