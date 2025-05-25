@@ -61,8 +61,9 @@ jobs:
           echo "BRANCH_CHANGELOG_URL=${BRANCH_CHANGELOG_URL}"
           wget -nv -O changelog.txt ${BRANCH_CHANGELOG_URL}
 
-      - name: Add files and push
-        run: |
-          git add .
-          git commit --allow-empty -m "$(date +'%s')"
-          git push --force
+      - name: Add files, commit and push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          branch: ${{ env.BRANCH_NAME }}
+          commit_message: "$(date +'%s')"
+          push_options: '--force'
