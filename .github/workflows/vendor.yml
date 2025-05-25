@@ -81,10 +81,10 @@ jobs:
             IMG_FILE="${ARCH}/img/packed/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
             IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
             wget -nv -O ${IMG_FILE} ${IMG_URL} || true
-            if [ -f ${IMG_FILE} ]; then
-              unzip ${IMG_FILE}
-              rm ${IMG_FILE}
-            fi
+            #if [ -f ${IMG_FILE} ]; then
+            #  unzip ${IMG_FILE}
+            #  rm ${IMG_FILE}
+            #fi
             ISO_FILE="${ARCH}/iso/packed/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
             ISO_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
             wget -nv -O ${ISO_FILE} ${ISO_URL} || true
