@@ -104,8 +104,8 @@ jobs:
               ls -alR /tmp/iso/ > ${ARCH}/iso/unpacked/$(basename ${ISO_FILE}).txt
               ISO_NPK_FILES=$(find ${ARCH}/iso/unpacked/$(basename ${ISO_FILE})/*.npk)
               for ISO_NPK_FILE in ${ISO_NPK_FILES}; do
-                echo "${ISO_NPK_FILE}: $(sha256sum ${ISO_NPK_FILE}) vs $(sha256sum ${ARCH}/npk/packed/$(basename ${ISO_NPK_FILE}))"
-                if [ "$(sha256sum ${ISO_NPK_FILE})" == "$(sha256sum ${ARCH}/npk/packed/$(basename ${ISO_NPK_FILE}))" ]; then
+                echo "${ISO_NPK_FILE}: $(sha256sum ${ISO_NPK_FILE} | gawk '{ print $1 }') vs $(sha256sum ${ARCH}/npk/packed/$(basename ${ISO_NPK_FILE}) | gawk '{ print $1 }')"
+                if [ "$(sha256sum ${ISO_NPK_FILE} | gawk '{ print $1 }')" == "$(sha256sum ${ARCH}/npk/packed/$(basename ${ISO_NPK_FILE}) | gawk '{ print $1 }')" ]; then
                   rm ${ISO_NPK_FILE}
                   ln -s ../../../npk/packed/$(basename ${ISO_NPK_FILE}) ${ISO_NPK_FILE}
                 fi
