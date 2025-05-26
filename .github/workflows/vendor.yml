@@ -29,10 +29,10 @@ jobs:
           #sudo apt-get install -y dosfstools extlinux mkisofs rsync qemu-utils xorriso zip zstd > /dev/null
           #sudo modprobe nbd > /dev/null
 
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+      #- name: Install Python
+      #  uses: actions/setup-python@v5
+      #  with:
+      #    python-version: '3.11'
 
       - name: Checkout the repository
         uses: actions/checkout@v4
