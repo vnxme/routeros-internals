@@ -111,7 +111,8 @@ jobs:
                   ln -s ../$(basename ${ISO_NPK_FILE}) ${ISO_NPK_FILE}
                 fi
               done
-              echo -e "### $(basename ${ISO_FILE})\n#### Internals:\n```\n${ISO_FILE_LS}\n```" > "${ISO_FILE_DIR}/README.md"
+              echo -e "### $(basename ${ISO_FILE})\n#### Internals:\n" > "${ISO_FILE_DIR}/README.md"
+              echo -e "\`\`\`\n${ISO_FILE_LS}\n\`\`\`\n" >> "${ISO_FILE_DIR}/README.md"
             done
           done
 
