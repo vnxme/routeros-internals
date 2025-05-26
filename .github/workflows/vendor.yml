@@ -63,9 +63,7 @@ jobs:
         run: |
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
-            mkdir -p ${ARCH}/img/{packed,unpacked}
-            mkdir -p ${ARCH}/iso/{packed,unpacked}
-            mkdir -p ${ARCH}/npk/{packed,unpacked}
+            mkdir -p ${ARCH}
           done
 
       - name: Download files
@@ -78,14 +76,14 @@ jobs:
             else
               SUFFIX="-${ARCH}"
             fi
-            IMG_FILE="${ARCH}/img/packed/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
+            IMG_FILE="${ARCH}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
             IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
             wget -nv -O ${IMG_FILE} ${IMG_URL} || true
-            ISO_FILE="${ARCH}/iso/packed/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
+            ISO_FILE="${ARCH}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
             ISO_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
             wget -nv -O ${ISO_FILE} ${ISO_URL} || true
             for PACKAGE in ${PACKAGES[@]}; do
-              FILE="${ARCH}/npk/packed/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
+              FILE="${ARCH}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
               URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
               wget -nv -O ${FILE} ${URL} || true
             done
@@ -96,21 +94,24 @@ jobs:
           mkdir -p /tmp/iso
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
-            ISO_FILES=$(find ${ARCH}/iso/packed/*.iso)
+            ISO_FILES=$(find ${ARCH}/*.iso)
             for ISO_FILE in ${ISO_FILES}; do
-              sudo mount -o loop,ro ${ISO_FILE} /tmp/iso
-              mkdir -p "${ARCH}/iso/unpacked/$(basename ${ISO_FILE})"
-              rsync -rltgoD /tmp/iso/ "${ARCH}/iso/unpacked/$(basename ${ISO_FILE})/"
-              ls -alR /tmp/iso/ > ${ARCH}/iso/unpacked/$(basename ${ISO_FILE}).txt
-              ISO_NPK_FILES=$(find ${ARCH}/iso/unpacked/$(basename ${ISO_FILE})/*.npk)
+              ISO_FILE_DIR="${ARCH}/$(basename ${ISO_FILE})_unpacked"
+              mkdir -p "${ISO_FILE_DIR}"
+              sudo mount -o loop,ro "${ISO_FILE}" /tmp/iso
+              rsync -rltgoD /tmp/iso/ "${ISO_FILE_DIR}/"
+              ISO_FILE_LS=$(ls -alR /tmp/iso/)
+              sudo umount /tmp/iso
+              ISO_NPK_FILES=$(find ${ISO_FILE_DIR}/*.npk)
               for ISO_NPK_FILE in ${ISO_NPK_FILES}; do
-                echo "${ISO_NPK_FILE}: $(sha256sum ${ISO_NPK_FILE} | gawk '{ print $1 }') vs $(sha256sum ${ARCH}/npk/packed/$(basename ${ISO_NPK_FILE}) | gawk '{ print $1 }')"
-                if [ "$(sha256sum ${ISO_NPK_FILE} | gawk '{ print $1 }')" == "$(sha256sum ${ARCH}/npk/packed/$(basename ${ISO_NPK_FILE}) | gawk '{ print $1 }')" ]; then
+                HASH1="$(sha256sum ${ISO_NPK_FILE} | gawk '{ print $1 }')"
+                HASH2="$(sha256sum ${ARCH}/$(basename ${ISO_NPK_FILE}) | gawk '{ print $1 }')"
+                if [ "${HASH1}" == "${HASH2}" ]; then
                   rm ${ISO_NPK_FILE}
-                  ln -s ../../../npk/packed/$(basename ${ISO_NPK_FILE}) ${ISO_NPK_FILE}
+                  ln -s ../$(basename ${ISO_NPK_FILE}) ${ISO_NPK_FILE}
                 fi
               done
-              sudo umount /tmp/iso
+              echo -e "### $(basename ${ISO_FILE})\n#### Internals:\n```\n${ISO_FILE_LS}\n```" > "${ISO_FILE_DIR}/README.md"
             done
           done
 
