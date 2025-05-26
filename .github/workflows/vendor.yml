@@ -96,7 +96,7 @@ jobs:
           for ARCH in ${ARHCS[@]}; do
             ISO_FILES=$(find ${ARCH}/*.iso)
             for ISO_FILE in ${ISO_FILES}; do
-              ISO_FILE_DIR="${ARCH}/$(basename ${ISO_FILE})_unpacked"
+              ISO_FILE_DIR="${ARCH}/$(basename ${ISO_FILE})_"
               mkdir -p "${ISO_FILE_DIR}"
               sudo mount -o loop,ro "${ISO_FILE}" /tmp/iso
               rsync -rltgoD /tmp/iso/ "${ISO_FILE_DIR}/"
