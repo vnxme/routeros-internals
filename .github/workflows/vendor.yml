@@ -119,7 +119,7 @@ jobs:
               for IMG_FILE in ${IMG_FILES}; do
                 if [ "$(basename ${IMG_FILE})" == "efiboot.img" ]; then
                   IMG_FILE_INFO="$(file ${IMG_FILE} | cut -f 2- -d ' ')"
-                  IMG_FILE_DIR="${ISO_FILE_DIR}/$(basename ${IMG_FILE})_"
+                  IMG_FILE_DIR="$(dirname ${IMG_FILE})/$(basename ${IMG_FILE})_"
                   sudo mount -o loop,ro "${IMG_FILE}" /tmp/img
                   rsync -rltgoD /tmp/img/ "${IMG_FILE_DIR}/"
                   IMG_FILE_LS=$(ls -AlR /tmp/img/)
@@ -127,7 +127,7 @@ jobs:
                   EFI_FILES=$(find ${IMG_FILE_DIR}/EFI/BOOT/*.EFI)
                   for EFI_FILE in ${EFI_FILES}; do
                     EFI_FILE_INFO="$(file ${EFI_FILE} | cut -f 2- -d ' ')"
-                    EFI_FILE_DIR="${IMG_FILE_DIR}/EFI/BOOT/$(basename ${EFI_FILE})_"
+                    EFI_FILE_DIR="$(dirname ${EFI_FILE})/$(basename ${EFI_FILE})_"
                     /tmp/extract-vmlinux "${EFI_FILE}" > "${EFI_FILE_DIR}/vmlinux"
                     EFI_FILE_README="${EFI_FILE_DIR}/README.md"
                     echo -e "### $(basename ${EFI_FILE})\n" > "${EFI_FILE_README}"
