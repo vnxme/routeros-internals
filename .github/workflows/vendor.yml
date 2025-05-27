@@ -100,7 +100,7 @@ jobs:
               mkdir -p "${ISO_FILE_DIR}"
               sudo mount -o loop,ro "${ISO_FILE}" /tmp/iso
               rsync -rltgoD /tmp/iso/ "${ISO_FILE_DIR}/"
-              ISO_FILE_LS=$(ls -alR /tmp/iso/)
+              ISO_FILE_LS=$(ls -AlR /tmp/iso/)
               sudo umount /tmp/iso
               ISO_NPK_FILES=$(find ${ISO_FILE_DIR}/*.npk)
               for ISO_NPK_FILE in ${ISO_NPK_FILES}; do
