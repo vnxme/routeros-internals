@@ -128,6 +128,7 @@ jobs:
                   for EFI_FILE in ${EFI_FILES}; do
                     EFI_FILE_INFO="$(file ${EFI_FILE} | cut -f 2- -d ' ')"
                     EFI_FILE_DIR="$(dirname ${EFI_FILE})/$(basename ${EFI_FILE})_"
+                    mkdir -p "${EFI_FILE_DIR}"
                     /tmp/extract-vmlinux "${EFI_FILE}" > "${EFI_FILE_DIR}/vmlinux"
                     EFI_FILE_README="${EFI_FILE_DIR}/README.md"
                     echo -e "### $(basename ${EFI_FILE})\n" > "${EFI_FILE_README}"
