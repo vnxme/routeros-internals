@@ -100,7 +100,7 @@ jobs:
             ISO_FILES=$(find ${ARCH}/*.iso)
             for ISO_FILE in ${ISO_FILES}; do
               ISO_FILE_INFO="$(file ${ISO_FILE} | cut -f 2- -d ' ')\n\n$(isoinfo -d -i ${ISO_FILE})"
-              ISO_FILE_DIR="${ARCH}/_$(basename ${ISO_FILE})"
+              ISO_FILE_DIR="$(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})"
               mkdir -p "${ISO_FILE_DIR}"
               sudo mount -o loop,ro "${ISO_FILE}" /tmp/iso
               rsync -rltgoD /tmp/iso/ "${ISO_FILE_DIR}/"
