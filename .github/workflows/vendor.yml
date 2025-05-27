@@ -97,7 +97,7 @@ jobs:
           for ARCH in ${ARHCS[@]}; do
             ISO_FILES=$(find ${ARCH}/*.iso)
             for ISO_FILE in ${ISO_FILES}; do
-              ISO_FILE_INFO="$(file ${ISO_FILE})\n\n$(isoinfo -d -i ${ISO_FILE})"
+              ISO_FILE_INFO="$(file ${ISO_FILE} | cut -f 2- -d ' ')\n\n$(isoinfo -d -i ${ISO_FILE})"
               ISO_FILE_DIR="${ARCH}/$(basename ${ISO_FILE})_"
               mkdir -p "${ISO_FILE_DIR}"
               sudo mount -o loop,ro "${ISO_FILE}" /tmp/iso
@@ -113,19 +113,19 @@ jobs:
                   ln -s ../$(basename ${ISO_FILE_NPK_FILE}) ${ISO_FILE_NPK_FILE}
                 fi
               done
-              ISO_FILE_IMG_FILES=$(find ${ISO_FILE_DIR}/*.img)
-              for ISO_FILE_IMG_FILE in ${ISO_FILE_IMG_FILES}; do
-                if [ "$(basename ${ISO_FILE_IMG_FILE})" == "efiboot.img" ]; then
-                  ISO_FILE_IMG_FILE_INFO="$(file ${ISO_FILE_IMG_FILE})"
-                  ISO_FILE_IMG_FILE_DIR="${ISO_FILE_DIR}/$(basename ${ISO_FILE_IMG_FILE})_"
-                  sudo mount -o loop,ro "${ISO_FILE_IMG_FILE}" /tmp/img
-                  rsync -rltgoD /tmp/img/ "${ISO_FILE_IMG_FILE_DIR}/"
-                  ISO_FILE_IMG_FILE_LS=$(ls -AlR /tmp/img/)
+              IMG_FILES=$(find ${ISO_FILE_DIR}/*.img)
+              for IMG_FILE in ${IMG_FILES}; do
+                if [ "$(basename ${IMG_FILE})" == "efiboot.img" ]; then
+                  IMG_FILE_INFO="$(file ${IMG_FILE} | cut -f 2- -d ' ')"
+                  IMG_FILE_DIR="${ISO_FILE_DIR}/$(basename ${IMG_FILE})_"
+                  sudo mount -o loop,ro "${IMG_FILE}" /tmp/img
+                  rsync -rltgoD /tmp/img/ "${IMG_FILE_DIR}/"
+                  IMG_FILE_LS=$(ls -AlR /tmp/img/)
                   sudo umount /tmp/img
-                  ISO_FILE_IMG_FILE_README="${ISO_FILE_IMG_FILE_DIR}/README.md"
-                  echo -e "### $(basename ${ISO_FILE_IMG_FILE})\n" > "${ISO_FILE_IMG_FILE_README}"
-                  echo -e "#### Description:\n\`\`\`\n${ISO_FILE_IMG_FILE_INFO}\n\`\`\`\n" >> "${ISO_FILE_IMG_FILE_README}"
-                  echo -e "#### Internals:\n\`\`\`\n${ISO_FILE_IMG_FILE_LS}\n\`\`\`\n" >> "${ISO_FILE_IMG_FILE_README}"
+                  IMG_FILE_README="${IMG_FILE_DIR}/README.md"
+                  echo -e "### $(basename ${IMG_FILE})\n" > "${IMG_FILE_README}"
+                  echo -e "#### Description:\n\`\`\`\n${IMG_FILE_INFO}\n\`\`\`\n" >> "${IMG_FILE_README}"
+                  echo -e "#### Internals:\n\`\`\`\n${IMG_FILE_LS}\n\`\`\`\n" >> "${IMG_FILE_README}"
                 fi
               done
               ISO_FILE_README="${ISO_FILE_DIR}/README.md"
