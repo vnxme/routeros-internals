@@ -100,26 +100,26 @@ jobs:
             ISO_FILES=$(find ${ARCH}/*.iso)
             for ISO_FILE in ${ISO_FILES}; do
               ISO_FILE_INFO="$(file ${ISO_FILE} | cut -f 2- -d ' ')\n\n$(isoinfo -d -i ${ISO_FILE})"
-              ISO_FILE_DIR="${ARCH}/$(basename ${ISO_FILE})_"
+              ISO_FILE_DIR="${ARCH}/_$(basename ${ISO_FILE})"
               mkdir -p "${ISO_FILE_DIR}"
               sudo mount -o loop,ro "${ISO_FILE}" /tmp/iso
               rsync -rltgoD /tmp/iso/ "${ISO_FILE_DIR}/"
               ISO_FILE_LS=$(ls -AlR /tmp/iso/)
               sudo umount /tmp/iso
-              ISO_FILE_NPK_FILES=$(find ${ISO_FILE_DIR}/*.npk)
-              for ISO_FILE_NPK_FILE in ${ISO_FILE_NPK_FILES}; do
-                HASH1="$(sha256sum ${ISO_FILE_NPK_FILE} | gawk '{ print $1 }')"
-                HASH2="$(sha256sum ${ARCH}/$(basename ${ISO_FILE_NPK_FILE}) | gawk '{ print $1 }')"
+              NPK_FILES=$(find ${ISO_FILE_DIR}/*.npk)
+              for NPK_FILE in ${NPK_FILES}; do
+                HASH1="$(sha256sum ${NPK_FILE} | gawk '{ print $1 }')"
+                HASH2="$(sha256sum ${ARCH}/$(basename ${NPK_FILE}) | gawk '{ print $1 }')"
                 if [ "${HASH1}" == "${HASH2}" ]; then
-                  rm ${ISO_FILE_NPK_FILE}
-                  ln -s ../$(basename ${ISO_FILE_NPK_FILE}) ${ISO_FILE_NPK_FILE}
+                  rm ${NPK_FILE}
+                  ln -s ../$(basename ${NPK_FILE}) ${NPK_FILE}
                 fi
               done
               IMG_FILES=$(find ${ISO_FILE_DIR}/*.img)
               for IMG_FILE in ${IMG_FILES}; do
                 if [ "$(basename ${IMG_FILE})" == "efiboot.img" ]; then
                   IMG_FILE_INFO="$(file ${IMG_FILE} | cut -f 2- -d ' ')"
-                  IMG_FILE_DIR="$(dirname ${IMG_FILE})/$(basename ${IMG_FILE})_"
+                  IMG_FILE_DIR="$(dirname ${IMG_FILE})/_$(basename ${IMG_FILE})"
                   sudo mount -o loop,ro "${IMG_FILE}" /tmp/img
                   rsync -rltgoD /tmp/img/ "${IMG_FILE_DIR}/"
                   IMG_FILE_LS=$(ls -AlR /tmp/img/)
@@ -127,7 +127,7 @@ jobs:
                   EFI_FILES=$(find ${IMG_FILE_DIR}/EFI/BOOT/*.EFI)
                   for EFI_FILE in ${EFI_FILES}; do
                     EFI_FILE_INFO="$(file ${EFI_FILE} | cut -f 2- -d ' ')"
-                    EFI_FILE_DIR="$(dirname ${EFI_FILE})/$(basename ${EFI_FILE})_"
+                    EFI_FILE_DIR="$(dirname ${EFI_FILE})/_$(basename ${EFI_FILE})"
                     mkdir -p "${EFI_FILE_DIR}"
                     /tmp/extract-vmlinux "${EFI_FILE}" > "${EFI_FILE_DIR}/vmlinux"
                     EFI_FILE_README="${EFI_FILE_DIR}/README.md"
