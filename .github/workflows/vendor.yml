@@ -92,12 +92,12 @@ jobs:
 
       - name: Unpack ISO files
         run: |
-          mkdir -p /tmp/iso
+          mkdir -p /tmp/{img,iso}
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
             ISO_FILES=$(find ${ARCH}/*.iso)
             for ISO_FILE in ${ISO_FILES}; do
-              ISO_FILE_INFO="$(isoinfo -d -i ${ISO_FILE})"
+              ISO_FILE_INFO="$(file ${ISO_FILE})\n\n$(isoinfo -d -i ${ISO_FILE})"
               ISO_FILE_DIR="${ARCH}/$(basename ${ISO_FILE})_"
               mkdir -p "${ISO_FILE_DIR}"
               sudo mount -o loop,ro "${ISO_FILE}" /tmp/iso
@@ -113,14 +113,30 @@ jobs:
                   ln -s ../$(basename ${ISO_FILE_NPK_FILE}) ${ISO_FILE_NPK_FILE}
                 fi
               done
+              ISO_FILE_IMG_FILES=$(find ${ISO_FILE_DIR}/*.img)
+              for ISO_FILE_IMG_FILE in ${ISO_FILE_IMG_FILES}; do
+                if [ "$(basename ${ISO_FILE_IMG_FILE})" == "efiboot.img" ]; then
+                  ISO_FILE_IMG_FILE_INFO="$(file ${ISO_FILE_IMG_FILE})"
+                  ISO_FILE_IMG_FILE_DIR="${ISO_FILE_DIR}/$(basename ${ISO_FILE_IMG_FILE})_"
+                  sudo mount -o loop,ro "${ISO_FILE_IMG_FILE}" /tmp/img
+                  rsync -rltgoD /tmp/img/ "${ISO_FILE_IMG_FILE_DIR}/"
+                  ISO_FILE_IMG_FILE_LS=$(ls -AlR /tmp/img/)
+                  sudo umount /tmp/img
+                  ISO_FILE_IMG_FILE_README="${ISO_FILE_IMG_FILE_DIR}/README.md"
+                  echo -e "### $(basename ${ISO_FILE_IMG_FILE})\n" > "${ISO_FILE_IMG_FILE_README}"
+                  echo -e "#### Description:\n\`\`\`\n${ISO_FILE_IMG_FILE_INFO}\n\`\`\`\n" >> "${ISO_FILE_IMG_FILE_README}"
+                  echo -e "#### Internals:\n\`\`\`\n${ISO_FILE_IMG_FILE_LS}\n\`\`\`\n" >> "${ISO_FILE_IMG_FILE_README}"
+                fi
+              done
               ISO_FILE_README="${ISO_FILE_DIR}/README.md"
               echo -e "### $(basename ${ISO_FILE})\n" > "${ISO_FILE_README}"
-              echo -e "#### Internals:\n\`\`\`\n${ISO_FILE_LS}\n\`\`\`\n" >> "${ISO_FILE_README}"
               echo -e "#### Description:\n\`\`\`\n${ISO_FILE_INFO}\n\`\`\`\n" >> "${ISO_FILE_README}"
+              echo -e "#### Internals:\n\`\`\`\n${ISO_FILE_LS}\n\`\`\`\n" >> "${ISO_FILE_README}"
               echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, " >> "${ISO_FILE_README}"
-              echo -e "if their SHA256 hashes match.\n" >> "${ISO_FILE_README}"
+              echo -e "if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "${ISO_FILE_README}"
             done
           done
+          rm -rf /tmp/{img,iso}
 
       - name: Add files, commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
