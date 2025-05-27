@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "$#" -ne 1 ]; then
   echo "extract-efi.sh: Wrong argument count"

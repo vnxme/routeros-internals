@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "$#" -ne 1 ]; then
   echo "extract-iso.sh: Wrong argument count"

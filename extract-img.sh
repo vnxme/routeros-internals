@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "$#" -ne 1 ]; then
   echo "extract-img.sh: Wrong argument count"
