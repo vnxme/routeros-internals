@@ -26,7 +26,7 @@ jobs:
         run: |
           echo $(uname -a)
           sudo apt update > /dev/null
-          sudo apt install -y binwalk bzip2 genisoimage gzip lz4 lzma lzop rsync xz-utils zip zstd
+          sudo apt install -y binutils-common binwalk bzip2 genisoimage gzip lz4 lzma lzop rsync xz-utils zip zstd
           #sudo apt install -y dosfstools extlinux mkisofs qemu-utils xorriso > /dev/null
           #sudo modprobe nbd > /dev/null
 
@@ -37,6 +37,12 @@ jobs:
 
       - name: Checkout the repository
         uses: actions/checkout@v4
+
+      - name: Prepare scripts
+        run: |
+          wget -nv -O /tmp/extract-vmlinux.sh "https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-vmlinux" || true
+          cp ./*.sh /tmp/
+          chmod +x /tmp/*.sh        
 
       - name: Get the latest version
         run: |
@@ -92,62 +98,12 @@ jobs:
 
       - name: Unpack ISO files
         run: |
-          wget -nv -O /tmp/extract-vmlinux "https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-vmlinux" || true
-          chmod +x /tmp/extract-vmlinux
           mkdir -p /tmp/{img,iso}
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
             ISO_FILES=$(find ${ARCH}/*.iso)
             for ISO_FILE in ${ISO_FILES}; do
-              ISO_FILE_INFO="$(file ${ISO_FILE} | cut -f 2- -d ' ')\n\n$(isoinfo -d -i ${ISO_FILE})"
-              ISO_FILE_DIR="$(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})"
-              mkdir -p "${ISO_FILE_DIR}"
-              sudo mount -o loop,ro "${ISO_FILE}" /tmp/iso
-              rsync -rltgoD /tmp/iso/ "${ISO_FILE_DIR}/"
-              ISO_FILE_LS=$(ls -AlR /tmp/iso/)
-              sudo umount /tmp/iso
-              NPK_FILES=$(find ${ISO_FILE_DIR}/*.npk)
-              for NPK_FILE in ${NPK_FILES}; do
-                HASH1="$(sha256sum ${NPK_FILE} | gawk '{ print $1 }')"
-                HASH2="$(sha256sum ${ARCH}/$(basename ${NPK_FILE}) | gawk '{ print $1 }')"
-                if [ "${HASH1}" == "${HASH2}" ]; then
-                  rm ${NPK_FILE}
-                  ln -s ../$(basename ${NPK_FILE}) ${NPK_FILE}
-                fi
-              done
-              IMG_FILES=$(find ${ISO_FILE_DIR}/*.img)
-              for IMG_FILE in ${IMG_FILES}; do
-                if [ "$(basename ${IMG_FILE})" == "efiboot.img" ]; then
-                  IMG_FILE_INFO="$(file ${IMG_FILE} | cut -f 2- -d ' ')"
-                  IMG_FILE_DIR="$(dirname ${IMG_FILE})/_$(basename ${IMG_FILE})"
-                  sudo mount -o loop,ro "${IMG_FILE}" /tmp/img
-                  rsync -rltgoD /tmp/img/ "${IMG_FILE_DIR}/"
-                  IMG_FILE_LS=$(ls -AlR /tmp/img/)
-                  sudo umount /tmp/img
-                  EFI_FILES=$(find ${IMG_FILE_DIR}/EFI/BOOT/*.EFI)
-                  for EFI_FILE in ${EFI_FILES}; do
-                    EFI_FILE_INFO="$(file ${EFI_FILE} | cut -f 2- -d ' ')"
-                    EFI_FILE_DIR="$(dirname ${EFI_FILE})/_$(basename ${EFI_FILE})"
-                    mkdir -p "${EFI_FILE_DIR}"
-                    /tmp/extract-vmlinux "${EFI_FILE}" > "${EFI_FILE_DIR}/vmlinux"
-                    EFI_FILE_README="${EFI_FILE_DIR}/README.md"
-                    echo -e "### $(basename ${EFI_FILE})\n" > "${EFI_FILE_README}"
-                    echo -e "#### Description:\n\`\`\`\n${EFI_FILE_INFO}\n\`\`\`\n" >> "${EFI_FILE_README}"
-                    echo -e "#### Internals:\n\`\`\`\n$(binwalk ${EFI_FILE})\n\`\`\`\n" >> "${EFI_FILE_README}"
-                    echo -e "#### Linux kernel:\n\`\`\`\n$(binwalk ${EFI_FILE_DIR}/vmlinux)\n\`\`\`\n" >> "${EFI_FILE_README}"
-                  done
-                  IMG_FILE_README="${IMG_FILE_DIR}/README.md"
-                  echo -e "### $(basename ${IMG_FILE})\n" > "${IMG_FILE_README}"
-                  echo -e "#### Description:\n\`\`\`\n${IMG_FILE_INFO}\n\`\`\`\n" >> "${IMG_FILE_README}"
-                  echo -e "#### Internals:\n\`\`\`\n${IMG_FILE_LS}\n\`\`\`\n" >> "${IMG_FILE_README}"
-                fi
-              done
-              ISO_FILE_README="${ISO_FILE_DIR}/README.md"
-              echo -e "### $(basename ${ISO_FILE})\n" > "${ISO_FILE_README}"
-              echo -e "#### Description:\n\`\`\`\n${ISO_FILE_INFO}\n\`\`\`\n" >> "${ISO_FILE_README}"
-              echo -e "#### Internals:\n\`\`\`\n${ISO_FILE_LS}\n\`\`\`\n" >> "${ISO_FILE_README}"
-              echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, " >> "${ISO_FILE_README}"
-              echo -e "if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "${ISO_FILE_README}"
+              /tmp/extract-iso.sh "${ISO_FILE}" || true
             done
           done
           rm -rf /tmp/{img,iso}
