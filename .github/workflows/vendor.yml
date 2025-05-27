@@ -92,6 +92,8 @@ jobs:
 
       - name: Unpack ISO files
         run: |
+          wget -nv -O /tmp/extract-vmlinux "https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-vmlinux" || true
+          chmod +x /tmp/extract-vmlinux
           mkdir -p /tmp/{img,iso}
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
@@ -122,6 +124,17 @@ jobs:
                   rsync -rltgoD /tmp/img/ "${IMG_FILE_DIR}/"
                   IMG_FILE_LS=$(ls -AlR /tmp/img/)
                   sudo umount /tmp/img
+                  EFI_FILES=$(find ${IMG_FILE_DIR}/EFI/BOOT/*.EFI)
+                  for EFI_FILE in ${EFI_FILES}; do
+                    EFI_FILE_INFO="$(file ${EFI_FILE} | cut -f 2- -d ' ')"
+                    EFI_FILE_DIR="${IMG_FILE_DIR}/EFI/BOOT/$(basename ${EFI_FILE})_"
+                    /tmp/extract-vmlinux "${EFI_FILE}" > "${EFI_FILE_DIR}/vmlinux"
+                    EFI_FILE_README="${EFI_FILE_DIR}/README.md"
+                    echo -e "### $(basename ${EFI_FILE})\n" > "${EFI_FILE_README}"
+                    echo -e "#### Description:\n\`\`\`\n${EFI_FILE_INFO}\n\`\`\`\n" >> "${EFI_FILE_README}"
+                    echo -e "#### Internals:\n\`\`\`\n$(binwalk ${EFI_FILE})\n\`\`\`\n" >> "${EFI_FILE_README}"
+                    echo -e "#### Linux kernel:\n\`\`\`\n$(binwalk ${EFI_FILE_DIR}/vmlinux)\n\`\`\`\n" >> "${EFI_FILE_README}"
+                  done
                   IMG_FILE_README="${IMG_FILE_DIR}/README.md"
                   echo -e "### $(basename ${IMG_FILE})\n" > "${IMG_FILE_README}"
                   echo -e "#### Description:\n\`\`\`\n${IMG_FILE_INFO}\n\`\`\`\n" >> "${IMG_FILE_README}"
