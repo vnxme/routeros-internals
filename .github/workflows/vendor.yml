@@ -113,9 +113,11 @@ jobs:
                   ln -s ../$(basename ${ISO_FILE_NPK_FILE}) ${ISO_FILE_NPK_FILE}
                 fi
               done
-              echo -e "### $(basename ${ISO_FILE})\n" > "${ISO_FILE_DIR}/README.md"
-              echo -e "#### Internals:\n\`\`\`\n${ISO_FILE_LS}\n\`\`\`\n" >> "${ISO_FILE_DIR}/README.md"
-              echo -e "#### Description:\n\`\`\`\n${ISO_FILE_INFO}\n\`\`\`\n" >> "${ISO_FILE_DIR}/README.md"
+              ISO_FILE_README="${ISO_FILE_DIR}/README.md"
+              echo -e "### $(basename ${ISO_FILE})\n" > "${ISO_FILE_README}"
+              echo -e "#### Internals:\n\`\`\`\n${ISO_FILE_LS}\n\`\`\`\n" >> "${ISO_FILE_README}"
+              echo -e "#### Description:\n\`\`\`\n${ISO_FILE_INFO}\n\`\`\`\n" >> "${ISO_FILE_README}"
+              echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space\n" >> "${ISO_FILE_README}"
             done
           done
 
