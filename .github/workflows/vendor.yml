@@ -117,7 +117,8 @@ jobs:
               echo -e "### $(basename ${ISO_FILE})\n" > "${ISO_FILE_README}"
               echo -e "#### Internals:\n\`\`\`\n${ISO_FILE_LS}\n\`\`\`\n" >> "${ISO_FILE_README}"
               echo -e "#### Description:\n\`\`\`\n${ISO_FILE_INFO}\n\`\`\`\n" >> "${ISO_FILE_README}"
-              echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space\n" >> "${ISO_FILE_README}"
+              echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, " >> "${ISO_FILE_README}"
+              echo -e "if their SHA256 hashes match.\n" >> "${ISO_FILE_README}"
             done
           done
 
