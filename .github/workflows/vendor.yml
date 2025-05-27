@@ -25,9 +25,9 @@ jobs:
       - name: Install requirements
         run: |
           echo $(uname -a)
-          sudo apt-get update > /dev/null
-          sudo apt-get install -y genisoimage > /dev/null
-          #sudo apt-get install -y dosfstools extlinux mkisofs rsync qemu-utils xorriso zip zstd > /dev/null
+          sudo apt update > /dev/null
+          sudo apt install -y binwalk bzip2 genisoimage gzip lz4 lzma lzop rsync xz-utils zip zstd
+          #sudo apt install -y dosfstools extlinux mkisofs qemu-utils xorriso > /dev/null
           #sudo modprobe nbd > /dev/null
 
       #- name: Install Python
