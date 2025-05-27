@@ -25,7 +25,8 @@ jobs:
       - name: Install requirements
         run: |
           echo $(uname -a)
-          #sudo apt-get update > /dev/null
+          sudo apt-get update > /dev/null
+          sudo apt-get install -y genisoimage > /dev/null
           #sudo apt-get install -y dosfstools extlinux mkisofs rsync qemu-utils xorriso zip zstd > /dev/null
           #sudo modprobe nbd > /dev/null
 
@@ -96,23 +97,25 @@ jobs:
           for ARCH in ${ARHCS[@]}; do
             ISO_FILES=$(find ${ARCH}/*.iso)
             for ISO_FILE in ${ISO_FILES}; do
+              ISO_FILE_INFO="$(isoinfo -d -i ${ISO_FILE})"
               ISO_FILE_DIR="${ARCH}/$(basename ${ISO_FILE})_"
               mkdir -p "${ISO_FILE_DIR}"
               sudo mount -o loop,ro "${ISO_FILE}" /tmp/iso
               rsync -rltgoD /tmp/iso/ "${ISO_FILE_DIR}/"
               ISO_FILE_LS=$(ls -AlR /tmp/iso/)
               sudo umount /tmp/iso
-              ISO_NPK_FILES=$(find ${ISO_FILE_DIR}/*.npk)
-              for ISO_NPK_FILE in ${ISO_NPK_FILES}; do
-                HASH1="$(sha256sum ${ISO_NPK_FILE} | gawk '{ print $1 }')"
-                HASH2="$(sha256sum ${ARCH}/$(basename ${ISO_NPK_FILE}) | gawk '{ print $1 }')"
+              ISO_FILE_NPK_FILES=$(find ${ISO_FILE_DIR}/*.npk)
+              for ISO_FILE_NPK_FILE in ${ISO_FILE_NPK_FILES}; do
+                HASH1="$(sha256sum ${ISO_FILE_NPK_FILE} | gawk '{ print $1 }')"
+                HASH2="$(sha256sum ${ARCH}/$(basename ${ISO_FILE_NPK_FILE}) | gawk '{ print $1 }')"
                 if [ "${HASH1}" == "${HASH2}" ]; then
-                  rm ${ISO_NPK_FILE}
-                  ln -s ../$(basename ${ISO_NPK_FILE}) ${ISO_NPK_FILE}
+                  rm ${ISO_FILE_NPK_FILE}
+                  ln -s ../$(basename ${ISO_FILE_NPK_FILE}) ${ISO_FILE_NPK_FILE}
                 fi
               done
-              echo -e "### $(basename ${ISO_FILE})\n#### Internals:\n" > "${ISO_FILE_DIR}/README.md"
-              echo -e "\`\`\`\n${ISO_FILE_LS}\n\`\`\`\n" >> "${ISO_FILE_DIR}/README.md"
+              echo -e "### $(basename ${ISO_FILE})\n" > "${ISO_FILE_DIR}/README.md"
+              echo -e "#### Internals:\n\`\`\`\n${ISO_FILE_LS}\n\`\`\`\n" >> "${ISO_FILE_DIR}/README.md"
+              echo -e "#### Description:\n\`\`\`\n${ISO_FILE_INFO}\n\`\`\`\n" >> "${ISO_FILE_DIR}/README.md"
             done
           done
 
