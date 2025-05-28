@@ -25,10 +25,18 @@ if [ ! -f "/tmp/extract-vmlinux.sh" ]; then
   exit 2
 fi
 
-/tmp/extract-vmlinux.sh "${EFI_FILE}" > "${EFI_FILE_DIR}/vmlinux"
+LINUX_FILE="${EFI_FILE_DIR}/vmlinux"
+/tmp/extract-vmlinux.sh "${EFI_FILE}" > "${LINUX_FILE}"
+
+CPIO_POS="$(binwalk ${LINUX_FILE} | grep 'ASCII cpio archive' | gawk '{print $1}' | head -1)"
+if [ ! -z "${CPIO_POS}" ]; then
+  CPIO_DIR="${EFI_FILE_DIR}/_vmlinux"
+  mkdir -p "${CPIO_DIR}"
+  dd if="${LINUX_FILE}" bs=1 skip="${CPIO_POS}" | cpio -idmv -D "${CPIO_DIR}"
+fi
 
 EFI_FILE_README="${EFI_FILE_DIR}/README.md"
 echo -e "### $(basename ${EFI_FILE})\n" > "${EFI_FILE_README}"
 echo -e "#### Description:\n\`\`\`\n${EFI_FILE_INFO}\n\`\`\`\n" >> "${EFI_FILE_README}"
 echo -e "#### Internals:\n\`\`\`\n$(binwalk ${EFI_FILE})\n\`\`\`\n" >> "${EFI_FILE_README}"
-echo -e "#### Linux kernel:\n\`\`\`\n$(binwalk ${EFI_FILE_DIR}/vmlinux)\n\`\`\`\n" >> "${EFI_FILE_README}"
+echo -e "#### Linux kernel:\n\`\`\`\n$(binwalk ${LINUX_FILE})\n\`\`\`\n" >> "${EFI_FILE_README}"
