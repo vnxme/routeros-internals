@@ -11,7 +11,11 @@ if [ ! -f "${EFI_FILE}" ]; then
   exit 2
 fi
 
-EFI_FILE_INFO="$(file ${EFI_FILE} | cut -f 2- -d ' ')"
+EFI_FILE_INFO="$(file ${EFI_FILE} | cut -f 2- -d ' ' | grep 'Linux kernel')"
+if [ -z "${EFI_FILE_INFO}" ]; then
+  echo "extract-efi.sh: The provided file is not a Linux kernel image"
+  exit 2
+fi
 
 EFI_FILE_DIR="$(dirname ${EFI_FILE})/_$(basename ${EFI_FILE})"
 mkdir -p "${EFI_FILE_DIR}"
