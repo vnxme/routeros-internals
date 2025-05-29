@@ -22,7 +22,7 @@ rsync -rltgoD /tmp/iso/ "${ISO_FILE_DIR}/"
 ISO_FILE_LS=$(ls -AlR /tmp/iso/)
 sudo umount /tmp/iso
 
-NPK_FILES=$(find "${ISO_FILE_DIR}/*" -type f -name '*.npk')
+NPK_FILES=$(find ${ISO_FILE_DIR}/* -type f -name '*.npk')
 for NPK_FILE in ${NPK_FILES}; do
   HASH1="$(sha256sum ${NPK_FILE} | gawk '{ print $1 }')"
   HASH2="$(sha256sum $(dirname ${ISO_FILE})/$(basename ${NPK_FILE}) | gawk '{ print $1 }')"
@@ -32,7 +32,7 @@ for NPK_FILE in ${NPK_FILES}; do
   fi
 done
 
-IMG_FILES=$(find "${ISO_FILE_DIR}/*" -type f -name '*.img')
+IMG_FILES=$(find ${ISO_FILE_DIR}/* -type f -name '*.img')
 for IMG_FILE in ${IMG_FILES}; do
   /tmp/unpack-img.sh "${IMG_FILE}" || true
 done

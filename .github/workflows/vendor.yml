@@ -101,7 +101,7 @@ jobs:
           mkdir -p /tmp/{img,iso}
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
-            ISO_FILES=$(find "${ARCH}/*" -type f -name '*.iso')
+            ISO_FILES=$(find ${ARCH}/* -type f -name '*.iso')
             for ISO_FILE in ${ISO_FILES}; do
               /tmp/unpack-iso.sh "${ISO_FILE}" || true
             done

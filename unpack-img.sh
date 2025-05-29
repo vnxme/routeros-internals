@@ -22,12 +22,12 @@ rsync -rltgoD /tmp/img/ "${IMG_FILE_DIR}/"
 IMG_FILE_LS=$(ls -AlR /tmp/img/)
 sudo umount /tmp/img
 
-EFI_FILES=$(find "${IMG_FILE_DIR}/EFI/BOOT/*" -type f -name '*.EFI')
+EFI_FILES=$(find ${IMG_FILE_DIR}/EFI/BOOT/* -type f -name '*.EFI')
 for EFI_FILE in ${EFI_FILES}; do
   /tmp/unpack-efi.sh "${EFI_FILE}" || true
 done
 
-LINUX_FILES=$(find "${IMG_FILE_DIR}/*" -type f -name 'linux.*')
+LINUX_FILES=$(find ${IMG_FILE_DIR}/* -type f -name 'linux.*')
 for LINUX_FILE in ${LINUX_FILES}; do
   /tmp/unpack-efi.sh "${LINUX_FILE}" || true
 done
