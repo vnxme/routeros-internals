@@ -98,7 +98,7 @@ jobs:
 
       - name: Unpack ISO files
         run: |
-          mkdir -p /tmp/{cpio,img,iso}
+          mkdir -p /tmp/{cpio,img,iso,xz}
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
             ISO_FILES=$(find ${ARCH}/* -type f -name '*.iso')
