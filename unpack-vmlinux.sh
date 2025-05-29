@@ -9,8 +9,8 @@ if [ "$#" -ne 1 -o ! -s "${FILE}" ]; then
 fi
 
 FILE_INFO="$(file ${FILE} | cut -f 2- -d ' ')"
-if [ -z "$(echo "${FILE_INFO}" | grep -E 'Linux kernel (.*) boot executable Image')" ]; then
-  echo "${ME}: File '${FILE}' doesn't seem to contain an uncompressed Linux kernel image; it contains '${FILE_INFO}'" >&2
+if [ -z "$(echo "${FILE_INFO}" | grep -E 'ELF (.*) executable|Linux kernel (.*) boot executable Image')" ]; then
+  echo "${ME}: File '${FILE}' doesn't seem to contain either an ELF or an uncompressed Linux kernel image; it contains '${FILE_INFO}'" >&2
   exit 2
 fi
 
@@ -19,7 +19,9 @@ mkdir -p "${FILE_DIR}"
 
 CPIO_POS="$(binwalk ${FILE} | grep 'cpio archive' | gawk '{print $1}' | head -1)"
 if [ ! -z "${CPIO_POS}" ]; then
-  dd if="${FILE}" bs=1 skip="${CPIO_POS}" | cpio -idmv -D "${FILE_DIR}"
+  CPIO_FILE="${FILE_DIR}/$(printf "%x" "${CPIO_POS}").cpio"
+  dd if="${FILE}" bs=1 skip="${CPIO_POS}" of="${CPIO_FILE}"
+  #cpio -idmv -D "${FILE_DIR}"
 fi
 
 FILE_README="${FILE_DIR}/README.md"
