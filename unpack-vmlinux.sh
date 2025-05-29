@@ -17,11 +17,15 @@ fi
 FILE_DIR="$(dirname ${FILE})/_$(basename ${FILE})"
 mkdir -p "${FILE_DIR}"
 
-CPIO_POS="$(binwalk ${FILE} | grep 'cpio archive' | gawk '{print $1}' | head -1)"
-if [ ! -z "${CPIO_POS}" ]; then
-  CPIO_FILE="${FILE_DIR}/$(printf "%x" "${CPIO_POS}").cpio"
-  dd if="${FILE}" bs=1 skip="${CPIO_POS}" of="${CPIO_FILE}"
-  #cpio -idmv -D "${FILE_DIR}"
+FILE_WALK="$(binwalk ${FILE})"
+
+CPIO_FIRST="$(echo "${FILE_WALK}" | grep 'cpio archive' | gawk '{print $1}' | head -1)"
+CPIO_LAST="$(echo "${FILE_WALK}" | grep -E 'cpio archive(.*)TRAILER!!!' | gawk '{print $1}' | head -1)"
+if [ ! -z "${CPIO_FIRST}" -a ! -z "${CPIO_LAST}" ]; then
+  CPIO_COUNT=$(($CPIO_LAST-$CPIO_FIRST+124)) # 124 is the length of TRAILER!!! magic file
+  CPIO_FILE="${FILE_DIR}/$(printf "%x" "${CPIO_FIRST}").cpio"
+  dd if="${FILE}" bs=1 skip="${CPIO_FIRST}" count="${CPIO_COUNT}" of="${CPIO_FILE}"
+  /tmp/unpack-cpio.sh "${CPIO_FILE}" || true
 fi
 
 FILE_README="${FILE_DIR}/README.md"
@@ -32,6 +36,6 @@ ${FILE_INFO}
 \`\`\`
 #### Analysis (\`binwalk <*>\`):
 \`\`\`
-$(binwalk ${FILE})
+${FILE_WALK}
 \`\`\`
 " > "${FILE_README}"

@@ -98,7 +98,7 @@ jobs:
 
       - name: Unpack ISO files
         run: |
-          mkdir -p /tmp/{img,iso}
+          mkdir -p /tmp/{cpio,img,iso}
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
             ISO_FILES=$(find ${ARCH}/* -type f -name '*.iso')
@@ -106,7 +106,7 @@ jobs:
               /tmp/unpack-iso.sh "${ISO_FILE}" || true
             done
           done
-          rm -rf /tmp/{img,iso}
+          rm -rf /tmp/{cpio,img,iso}
 
       - name: Add files, commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
