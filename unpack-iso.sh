@@ -8,13 +8,11 @@ if [ "$#" -ne 1 -o ! -s "${ISO_FILE}" ]; then
   exit 2
 fi
 
-ISO_FILE_INFO="$(file ${ISO_FILE} | cut -f 2- -d ' ' | grep 'ISO 9660 CD-ROM filesystem data')"
-if [ -z "${ISO_FILE_INFO}" ]; then
-  echo "${ME}: The provided file doesn't seem to contain CD-ROM filesystem data" >&2
+ISO_FILE_INFO="$(file ${ISO_FILE} | cut -f 2- -d ' ')"
+if [ -z "$(echo "${ISO_FILE_INFO}" | grep 'ISO 9660 CD-ROM filesystem data')" ]; then
+  echo "${ME}: File '${ISO_FILE}' doesn't seem to contain CD-ROM filesystem data; it contains ${ISO_FILE_INFO}" >&2
   exit 2
 fi
-
-ISO_FILE_INFO2="$(isoinfo -d -i ${ISO_FILE})"
 
 ISO_FILE_DIR="$(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})"
 mkdir -p "${ISO_FILE_DIR}"
@@ -24,7 +22,7 @@ rsync -rltgoD /tmp/iso/ "${ISO_FILE_DIR}/"
 ISO_FILE_LS=$(ls -AlR /tmp/iso/)
 sudo umount /tmp/iso
 
-NPK_FILES=$(find ${ISO_FILE_DIR}/*.npk)
+NPK_FILES=$(find "${ISO_FILE_DIR}/*" -type f -name '*.npk')
 for NPK_FILE in ${NPK_FILES}; do
   HASH1="$(sha256sum ${NPK_FILE} | gawk '{ print $1 }')"
   HASH2="$(sha256sum $(dirname ${ISO_FILE})/$(basename ${NPK_FILE}) | gawk '{ print $1 }')"
@@ -34,16 +32,25 @@ for NPK_FILE in ${NPK_FILES}; do
   fi
 done
 
-IMG_FILES=$(find ${ISO_FILE_DIR}/*.img)
+IMG_FILES=$(find "${ISO_FILE_DIR}/*" -type f -name '*.img')
 for IMG_FILE in ${IMG_FILES}; do
-  if [ "$(basename ${IMG_FILE})" == "efiboot.img" ]; then
-    /tmp/unpack-img.sh "${IMG_FILE}" || true
-  fi
+  /tmp/unpack-img.sh "${IMG_FILE}" || true
 done
 
 ISO_FILE_README="${ISO_FILE_DIR}/README.md"
-echo -e "### $(basename ${ISO_FILE})\n" > "${ISO_FILE_README}"
-echo -e "#### Description:\n\`\`\`\n${ISO_FILE_INFO}\n\n${ISO_FILE_INFO2}\n\`\`\`\n" >> "${ISO_FILE_README}"
-echo -e "#### Internals:\n\`\`\`\n${ISO_FILE_LS}\n\`\`\`\n" >> "${ISO_FILE_README}"
-echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, " >> "${ISO_FILE_README}"
-echo -e "if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "${ISO_FILE_README}"
+echo -e "### $(basename ${ISO_FILE})
+#### Identification (\`file <*>\`):
+\`\`\`
+${ISO_FILE_INFO}
+\`\`\`
+#### Description (\`isoinfo -d -i <*>\`):
+\`\`\`
+$(isoinfo -d -i ${ISO_FILE})
+\`\`\`
+#### Listing (\`ls -AlR <*>\`):
+\`\`\`
+${ISO_FILE_LS}
+\`\`\`
+#### Notes:
+- Some NPK files are replaced with symlinks to save space, if their SHA256 hashes match those of NPK files downloaded separately.
+" > "${ISO_FILE_README}"
