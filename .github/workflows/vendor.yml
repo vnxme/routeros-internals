@@ -132,6 +132,20 @@ jobs:
             done
           done
 
+      - name: Unpack EFI files
+        run: |
+          ARHCS=(arm64 x86)
+          for ARCH in ${ARHCS[@]}; do
+            EFI_FILES=$(find ${ARCH}/_routeros*.npk/system.files/boot/* -maxdepth 1 -type f -name 'kernel')
+            for EFI_FILE in ${EFI_FILES}; do
+              /tmp/unpack-bzimage.sh "${EFI_FILE}" || true
+            done
+            EFI_FILES=$(find ${ARCH}/_routeros*.npk/_system.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name '*.EFI')
+            for EFI_FILE in ${EFI_FILES}; do
+              /tmp/unpack-bzimage.sh "${EFI_FILE}" || true
+            done
+          done
+
       - name: Add files, commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
