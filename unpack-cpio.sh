@@ -17,7 +17,7 @@ fi
 FILE_DIR="$(dirname ${FILE})/_$(basename ${FILE})"
 mkdir -p "${FILE_DIR}"
 
-sudo cpio -idmv -D "/tmp/cpio" || true
+sudo cpio -idmv -D "/tmp/cpio" < "${FILE}" || true
 rsync -rltgoD /tmp/cpio/ "${FILE_DIR}/"
 FILE_LS=$(ls -AlR /tmp/cpio/)
 rm -rf /tmp/cpio/*
