@@ -34,7 +34,7 @@ if __name__ == '__main__':
                         default=lambda _args: f"{os.path.dirname(_args.filename)}/_{os.path.basename(_args.filename)}"
                         if _args.filename is not None else None)
     parser.add_argument('--skip-files', action='store_true', help='skip files')
-    parser.add_argument('--skip-squashfs', saction='store_true', help='skip squashfs')
+    parser.add_argument('--skip-squashfs', action='store_true', help='skip squashfs')
     args = parser.parse_args()
     if args.filename is not None and args.directory is not None and os.path.exists(args.filename):
         unpack_npk_file(args.filename, args.directory, args.skip_files, args.skip_squashfs)
