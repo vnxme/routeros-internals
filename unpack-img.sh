@@ -24,12 +24,12 @@ sudo umount /tmp/img
 
 EFI_FILES=$(find ${FILE_DIR}/EFI/BOOT/* -type f -name '*.EFI')
 for EFI_FILE in ${EFI_FILES}; do
-  /tmp/unpack-efi.sh "${EFI_FILE}" || true
+  /tmp/unpack-bzimage.sh "${EFI_FILE}" || true
 done
 
 LINUX_FILES=$(find ${FILE_DIR}/* -type f -name 'linux.*')
 for LINUX_FILE in ${LINUX_FILES}; do
-  /tmp/unpack-efi.sh "${LINUX_FILE}" || true
+  /tmp/unpack-bzimage.sh "${LINUX_FILE}" || true
 done
 
 FILE_README="${FILE_DIR}/README.md"
