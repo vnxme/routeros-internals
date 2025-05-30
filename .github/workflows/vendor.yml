@@ -136,11 +136,11 @@ jobs:
         run: |
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
-            EFI_FILES=$(find ${ARCH}/_routeros*.npk/system.files/boot/* -maxdepth 1 -type f -name 'kernel')
+            EFI_FILES=$(find ${ARCH}/_*.npk/*.files/* -maxdepth 2 -type f -path "${ARCH}/_*.npk/*.files/boot/kernel")
             for EFI_FILE in ${EFI_FILES}; do
               /tmp/unpack-bzimage.sh "${EFI_FILE}" || true
             done
-            EFI_FILES=$(find ${ARCH}/_routeros*.npk/_system.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name '*.EFI')
+            EFI_FILES=$(find ${ARCH}/_*.npk/_*.sfs/* -maxdepth 4 -type f -path "${ARCH}/_*.npk/_*.sfs/boot/EFI/BOOT/*.EFI")
             for EFI_FILE in ${EFI_FILES}; do
               /tmp/unpack-bzimage.sh "${EFI_FILE}" || true
             done
