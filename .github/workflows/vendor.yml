@@ -103,7 +103,7 @@ jobs:
           for ARCH in ${ARHCS[@]}; do
             ISO_FILES=$(find ${ARCH}/* -type f -name '*.iso')
             for ISO_FILE in ${ISO_FILES}; do
-              /tmp/unpack-iso.sh "${ISO_FILE}" || true
+              sudo /tmp/unpack-iso.sh "${ISO_FILE}" || true
             done
           done
           rm -rf /tmp/{cpio,img,iso}
