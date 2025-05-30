@@ -41,6 +41,7 @@ jobs:
       - name: Prepare scripts
         run: |
           wget -nv -O /tmp/extract-vmlinux.sh "https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-vmlinux" || true
+          cp ./MikroTikPatch /tmp/
           cp ./*.py /tmp/
           cp ./*.sh /tmp/
           chmod +x /tmp/*.sh        
