@@ -87,14 +87,14 @@ jobs:
             fi
             IMG_FILE="${ARCH}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
             IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
-            wget -nv -O ${IMG_FILE} ${IMG_URL} || true
+            wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
             ISO_FILE="${ARCH}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
             ISO_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
-            wget -nv -O ${ISO_FILE} ${ISO_URL} || true
+            wget -nv -O ${ISO_FILE} ${ISO_URL} || rm -f ${ISO_FILE}
             for PACKAGE in ${PACKAGES[@]}; do
               FILE="${ARCH}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
               URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
-              wget -nv -O ${FILE} ${URL} || true
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
             done
           done
 
