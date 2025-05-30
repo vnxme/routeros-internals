@@ -102,7 +102,7 @@ jobs:
           mkdir -p /tmp/{cpio,img,iso,xz}
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
-            ISO_FILES=$(find ${ARCH}/* -type f -name '*.iso')
+            ISO_FILES=$(find ${ARCH}/* -depth 1 -type f -name '*.iso')
             for ISO_FILE in ${ISO_FILES}; do
               sudo /tmp/unpack-iso.sh "${ISO_FILE}" || true
             done
@@ -113,7 +113,7 @@ jobs:
         run: |
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
-            NPK_FILES=$(find ${ARCH}/* -type f -name '*.npk')
+            NPK_FILES=$(find ${ARCH}/* -depth 1 -type f -name '*.npk')
             for NPK_FILE in ${NPK_FILES}; do
               NPK_FILE_DIR="$(dirname "${NPK_FILE}")/_$(basename "${NPK_FILE}")"
               mkdir -p "${NPK_FILE_DIR}"
