@@ -9,7 +9,7 @@ if [ "$#" -ne 1 -o ! -s "${FILE}" ]; then
 fi
 
 FILE_INFO="$(file ${FILE} | cut -f 2- -d ' ')"
-if [ ! -z "$(echo "${FILE_INFO}" | grep -E 'Linux kernel (.*) boot executable Image')" ]; then
+if [ ! -z "$(echo "${FILE_INFO}" | grep -E 'ELF (.*) executable|Linux kernel (.*) boot executable Image')" ]; then
   /tmp/unpack-vmlinux.sh "${FILE}" || true
   exit 0
 elif [ -z "$(echo "${FILE_INFO}" | grep -E 'Linux kernel (.*) boot executable (bz|z)Image')" ]; then
