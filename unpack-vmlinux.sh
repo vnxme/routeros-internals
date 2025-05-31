@@ -33,20 +33,22 @@ fi
 
 # credits to @elseif for binary patterns
 # ref: https://github.com/elseif/MikroTikPatch/blob/main/patch.py
-XZ_START=$(LC_ALL=C grep -aboP '\xFD7zXZ\x00\x00\x01' "${FILE}" | cut -f 1 -d ':' | head -1)
-XZ_END=$(LC_ALL=C grep -aboP '\x00\x00\x00\x00\x01\x59\x5A' "${FILE}" | cut -f 1 -d ':' | head -1)
-if [ ! -z "${XZ_START}" -a ! -z "${XZ_END}" ]; then
-  XZ_SIZE=$((${XZ_END}-${XZ_START}+7)) # 7 is the end pattern length
-  CPIO_FILE="${FILE_DIR}/initrd.cpio"
-  XZ_FILE="${CPIO_FILE}.xz"
-  dd if="${FILE}" bs=1 skip="${XZ_START}" count="${XZ_SIZE}" of="${XZ_FILE}" > /dev/null 2>&1 || true
-  if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
-    unxz "${XZ_FILE}" || true
+XZ_ENDS=$(LC_ALL=C grep -aboP '\x00\x00\x00\x00\x01\x59\x5A' "${FILE}" | cut -f 1 -d ':')
+for XZ_END in ${XZ_ENDS}; do
+  XZ_START=$(head -c ${XZ_END} "${FILE}" | LC_ALL=C grep -aboP '\xFD7zXZ\x00\x00\x01' - | cut -f 1 -d ':' | tail -1)
+  if [ ! -z "${XZ_START}" ] && [ ! -z "${XZ_END}" ] && [ "${XZ_START}" -lt "${XZ_END}" ]; then
+    XZ_SIZE=$((${XZ_END}-${XZ_START}+7)) # 7 is the end pattern length
+    CPIO_FILE="${FILE_DIR}/$(printf "%x" "${XZ_START}").cpio"
+    XZ_FILE="${CPIO_FILE}.xz"
+    dd if="${FILE}" bs=1 skip="${XZ_START}" count="${XZ_SIZE}" of="${XZ_FILE}" > /dev/null 2>&1 || true
+    if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
+      unxz "${XZ_FILE}" || true
+    fi
+    if [ -s "${CPIO_FILE}" ]; then
+      /tmp/unpack-cpio.sh "${CPIO_FILE}" || true
+    fi
   fi
-  if [ -s "${CPIO_FILE}" ]; then
-    /tmp/unpack-cpio.sh "${CPIO_FILE}" || true
-  fi
-fi
+done
 
 FILE_README="${FILE_DIR}/README.md"
 echo -e "### $(basename ${FILE})
