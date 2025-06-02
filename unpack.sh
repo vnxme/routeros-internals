@@ -121,10 +121,10 @@ function unpack_img {
   local DIR='/tmp/img'
   local RM=false
   [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
-  mount -o loop,ro "$1" "${DIR}"
+  sudo mount -o loop,ro "$1" "${DIR}"
   rsync -rltgoD "${DIR}/" "$2/"
   RESULT=$(ls -AlR --time-style=full-iso "${DIR}/")
-  umount "${DIR}"
+  sudo umount "${DIR}"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -135,10 +135,10 @@ function unpack_iso {
   local DIR='/tmp/iso'
   local RM=false
   [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
-  mount -o loop,ro "$1" "${DIR}"
+  sudo mount -o loop,ro "$1" "${DIR}"
   rsync -rltgoD "${DIR}/" "$2/"
   RESULT=$(ls -AlR --time-style=full-iso "${DIR}/")
-  umount "${DIR}"
+  sudo umount "${DIR}"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
