@@ -142,7 +142,7 @@ jobs:
             ISO_FILES=$(find ${ARCH}/* -maxdepth 1 -type f -name '*.iso')
             for ISO_FILE in ${ISO_FILES}; do
               sudo /tmp/unpack.sh "${ISO_FILE}" || true
-              
+              sudo chown -R root:root "$(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})"
               NPK_FILES=$(find $(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})/* -type f -name '*.npk')
               for NPK_FILE in ${NPK_FILES}; do
                 HASH1="$(sha256sum "${NPK_FILE}" | gawk '{ print $1 }')"
