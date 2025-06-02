@@ -37,6 +37,7 @@ jobs:
         uses: actions/cache@v4
         with:
           key: ${{ env.BRANCH_PREFIX }}-${{ matrix.channel }}-${{ env.BRANCH_VERSION }}
+          lookup-only: true
           path: |
             changelog.txt
             arm64
