@@ -13,6 +13,67 @@ env:
   BRANCH_VERSION: ${{ secrets.VENDOR_BRANCH_VERSION }}
 
 jobs:
+  Download_Files:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        channel: [ stable ]
+        #channel: [ stable, testing ]
+    env:
+      TZ: 'Europe/London'
+    steps:
+      - name: Get the latest version
+        run: |
+          if [[ -z "${{ env.BRANCH_VERSION }}" ]]; then
+            BRANCH_VERSION_URL="https://${{ env.BRANCH_HOST }}/routeros/NEWESTa7.${{ matrix.channel }}"
+            echo "BRANCH_VERSION_URL=${BRANCH_VERSION_URL}"
+            BRANCH_VERSION=$(wget -nv -O - ${BRANCH_VERSION_URL} | cut -d ' ' -f1)
+            echo "BRANCH_VERSION=${BRANCH_VERSION}"
+          fi
+          echo "BRANCH_VERSION=${BRANCH_VERSION}" >> $GITHUB_ENV
+
+      - name: Cache files {{ env.BRANCH_PREFIX }}-{{ matrix.channel }}-{{ env.BRANCH_VERSION }}
+        id: cache-files
+        uses: actions/cache@v4
+        with:
+          key: {{ env.BRANCH_PREFIX }}-{{ matrix.channel }}-{{ env.BRANCH_VERSION }}
+          path: |
+            changelog.txt
+            arm64
+            x86
+
+      - name: Get a changelog
+        if: steps.cache-files.outputs.cache-hit != 'true'
+        run: |
+          BRANCH_CHANGELOG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/CHANGELOG"
+          echo "BRANCH_CHANGELOG_URL=${BRANCH_CHANGELOG_URL}"
+          wget -nv -O changelog.txt ${BRANCH_CHANGELOG_URL}
+
+      - name: Download files
+        if: steps.cache-files.outputs.cache-hit != 'true'
+        run: |
+          ARHCS=(arm64 x86)
+          PACKAGES=(routeros calea container dude extra-nic gps iot iot-bt-extra lora rose-storage switch-marvell tr069-client ups user-manager wifi-qcom wireless zerotier)
+          for ARCH in ${ARHCS[@]}; do
+            mkdir -p ${ARCH}
+            if [ "${ARCH}" == 'x86' ]; then
+              SUFFIX=''
+            else
+              SUFFIX="-${ARCH}"
+            fi
+            IMG_FILE="${ARCH}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
+            IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
+            wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
+            ISO_FILE="${ARCH}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
+            ISO_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
+            wget -nv -O ${ISO_FILE} ${ISO_URL} || rm -f ${ISO_FILE}
+            for PACKAGE in ${PACKAGES[@]}; do
+              FILE="${ARCH}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
+              URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            done
+          done
+
   Obtain_Internals:
     runs-on: ubuntu-24.04
     strategy:
@@ -62,41 +123,15 @@ jobs:
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
           git switch --orphan ${BRANCH_NAME}
 
-      - name: Get a changelog
-        run: |
-          BRANCH_CHANGELOG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/CHANGELOG"
-          echo "BRANCH_CHANGELOG_URL=${BRANCH_CHANGELOG_URL}"
-          wget -nv -O changelog.txt ${BRANCH_CHANGELOG_URL}
-
-      - name: Create directories
-        run: |
-          ARHCS=(arm64 x86)
-          for ARCH in ${ARHCS[@]}; do
-            mkdir -p ${ARCH}
-          done
-
-      - name: Download files
-        run: |
-          ARHCS=(arm64 x86)
-          PACKAGES=(routeros calea container dude extra-nic gps iot iot-bt-extra lora rose-storage switch-marvell tr069-client ups user-manager wifi-qcom wireless zerotier)
-          for ARCH in ${ARHCS[@]}; do
-            if [ "${ARCH}" == 'x86' ]; then
-              SUFFIX=''
-            else
-              SUFFIX="-${ARCH}"
-            fi
-            IMG_FILE="${ARCH}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
-            IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
-            wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
-            ISO_FILE="${ARCH}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
-            ISO_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
-            wget -nv -O ${ISO_FILE} ${ISO_URL} || rm -f ${ISO_FILE}
-            for PACKAGE in ${PACKAGES[@]}; do
-              FILE="${ARCH}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
-              URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            done
-          done
+      - name: Cache files {{ env.BRANCH_PREFIX }}-{{ matrix.channel }}-{{ env.BRANCH_VERSION }}
+        id: cache-files
+        uses: actions/cache@v4
+        with:
+          key: {{ env.BRANCH_PREFIX }}-{{ matrix.channel }}-{{ env.BRANCH_VERSION }}
+          path: |
+            changelog.txt
+            arm64
+            x86
 
       - name: Unpack ISO files
         run: |
