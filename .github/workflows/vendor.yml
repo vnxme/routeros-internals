@@ -141,19 +141,19 @@ jobs:
           for ARCH in ${ARHCS[@]}; do
             ISO_FILES=$(find ${ARCH}/* -maxdepth 1 -type f -name '*.iso')
             for ISO_FILE in ${ISO_FILES}; do
-              sudo /tmp/unpack.sh "${ISO_FILE}" || true
-              sudo chown -R root:root "$(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})"
+              /tmp/unpack.sh "${ISO_FILE}" || true
+              
               NPK_FILES=$(find $(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})/* -type f -name '*.npk')
               for NPK_FILE in ${NPK_FILES}; do
                 HASH1="$(sha256sum "${NPK_FILE}" | gawk '{ print $1 }')"
                 HASH2="$(sha256sum "$(dirname "${ISO_FILE}")/$(basename "${NPK_FILE}")" | gawk '{ print $1 }')"
                 if [ "${HASH1}" == "${HASH2}" ]; then
-                  sudo rm ${NPK_FILE}
-                  sudo ln -s ../$(basename ${NPK_FILE}) ${NPK_FILE}
+                  rm ${NPK_FILE}
+                  ln -s ../$(basename ${NPK_FILE}) ${NPK_FILE}
                 fi
               done
               
-              sudo echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "$(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})/README.md"
+              echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "$(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})/README.md"
             done
           done
 
