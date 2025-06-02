@@ -32,7 +32,7 @@ jobs:
           fi
           echo "BRANCH_VERSION=${BRANCH_VERSION}" >> $GITHUB_ENV
 
-      - name: Cache files ${{ env.BRANCH_PREFIX }}-${{ matrix.channel }}-${{ env.BRANCH_VERSION }}
+      - name: Cache files
         id: cache-files
         uses: actions/cache@v4
         with:
@@ -123,7 +123,7 @@ jobs:
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
           git switch --orphan ${BRANCH_NAME}
 
-      - name: Cache files ${{ env.BRANCH_PREFIX }}-${{ matrix.channel }}-${{ env.BRANCH_VERSION }}
+      - name: Cache files
         id: cache-files
         uses: actions/cache@v4
         with:
