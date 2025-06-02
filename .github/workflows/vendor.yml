@@ -135,15 +135,25 @@ jobs:
 
       - name: Unpack ISO files
         run: |
-          mkdir -p /tmp/{cpio,img,iso,xz}
           ARHCS=(arm64 x86)
           for ARCH in ${ARHCS[@]}; do
             ISO_FILES=$(find ${ARCH}/* -maxdepth 1 -type f -name '*.iso')
             for ISO_FILE in ${ISO_FILES}; do
-              sudo /tmp/unpack-iso.sh "${ISO_FILE}" || true
+              sudo /tmp/unpack.sh "${ISO_FILE}" || true
+              
+              NPK_FILES=$(find $(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})/* -type f -name '*.npk')
+              for NPK_FILE in ${NPK_FILES}; do
+                HASH1="$(sha256sum "${NPK_FILE}" | gawk '{ print $1 }')"
+                HASH2="$(sha256sum "$(dirname "${ISO_FILE}")/$(basename "${NPK_FILE}")" | gawk '{ print $1 }')"
+                if [ "${HASH1}" == "${HASH2}" ]; then
+                  rm ${NPK_FILE}
+                  ln -s ../$(basename ${NPK_FILE}) ${NPK_FILE}
+                fi
+              done
+              
+              echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "$(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})/README.md"
             done
           done
-          rm -rf /tmp/{cpio,img,iso}
 
       - name: Unpack NPK files
         run: |
