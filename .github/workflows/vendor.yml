@@ -146,7 +146,7 @@ jobs:
                 HASH1="$(sha256sum "${NPK_FILE}" | gawk '{ print $1 }')"
                 HASH2="$(sha256sum "$(dirname "${ISO_FILE}")/$(basename "${NPK_FILE}")" | gawk '{ print $1 }')"
                 if [ "${HASH1}" == "${HASH2}" ]; then
-                  rm ${NPK_FILE}
+                  sudo rm ${NPK_FILE}
                   ln -s ../$(basename ${NPK_FILE}) ${NPK_FILE}
                 fi
               done
