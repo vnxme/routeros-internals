@@ -76,6 +76,7 @@ jobs:
           done
 
   Obtain_Internals:
+    needs: Download_Files
     runs-on: ubuntu-24.04
     strategy:
       matrix:
