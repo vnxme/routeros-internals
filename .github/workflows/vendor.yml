@@ -153,7 +153,7 @@ jobs:
                 fi
               done
               
-              echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "$(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})/README.md"
+              sudo echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "$(dirname ${ISO_FILE})/_$(basename ${ISO_FILE})/README.md"
             done
           done
 
