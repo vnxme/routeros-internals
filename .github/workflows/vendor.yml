@@ -182,17 +182,27 @@ jobs:
             unsquashfs -d "$(dirname "${FILE}")/_$(basename "${FILE}")" "${FILE}" || true
           done
 
-      - name: Unpack EFI files
+      - name: Unpack bzImage files
         run: |
-          FILES_1=$(find */_*.iso/_*.img/* -maxdepth 4 -type f -path "*/_*.iso/_*.img/boot/EFI/BOOT/*.EFI") # arm64, x86
-          FILES_2=$(find */_*.iso/_*.img/* -maxdepth 1 -type f -name "linux.*") # x86
-          FILES_3=$(find */_*.npk/*.files/* -maxdepth 2 -type f -path "*/_*.npk/*.files/boot/kernel") # arm64
-          FILES_4=$(find */_*.npk/*.files/* -maxdepth 4 -type f -path "*/_*.npk/*.files/boot/EFI/BOOT/*.EFI") # x86
-          FILES_5=$(find */_*.npk/_*.sfs/* -maxdepth 4 -type f -path "*/_*.npk/_*.sfs/boot/EFI/BOOT/*.EFI") # arm64, x86
-          FILES=("${FILES_1[@]}" "${FILES_2[@]}" "${FILES_3[@]}" "${FILES_4[@]}" "${FILES_5}[@])")
+          FILES_1=$(find x86/_*.iso/_*.img/* -maxdepth 1 -type f -name "linux.*" 2>/dev/null)
+          FILES_2=$(find x86/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null)
+          FILES_3=$(find x86/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null)
+          FILES=("${FILES_1[@]}" "${FILES_2[@]}" "${FILES_3[@]}")
           for FILE in ${FILES}; do
             /tmp/unpack.sh "${FILE}" || true
           done
+
+#      - name: Unpack EFI files
+#        run: |
+#          FILES_1=$(find */_*.iso/_*.img/* -maxdepth 4 -type f -path "*/_*.iso/_*.img/boot/EFI/BOOT/*.EFI") # arm64, x86
+#          FILES_2=$(find */_*.iso/_*.img/* -maxdepth 1 -type f -name "linux.*") # x86
+#          FILES_3=$(find */_*.npk/*.files/* -maxdepth 2 -type f -path "*/_*.npk/*.files/boot/kernel") # arm64
+#          FILES_4=$(find */_*.npk/*.files/* -maxdepth 4 -type f -path "*/_*.npk/*.files/boot/EFI/BOOT/*.EFI") # x86
+#          FILES_5=$(find */_*.npk/_*.sfs/* -maxdepth 4 -type f -path "*/_*.npk/_*.sfs/boot/EFI/BOOT/*.EFI") # arm64, x86
+#          FILES=("${FILES_1[@]}" "${FILES_2[@]}" "${FILES_3[@]}" "${FILES_4[@]}" "${FILES_5}[@])")
+#          for FILE in ${FILES}; do
+#            /tmp/unpack.sh "${FILE}" || true
+#          done
 
       - name: Add files, commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
