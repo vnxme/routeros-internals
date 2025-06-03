@@ -184,10 +184,9 @@ jobs:
 
       - name: Unpack bzImage files
         run: |
-          FILES_1=$(find x86/_*.iso/_*.img/* -maxdepth 1 -type f -name "linux.*" 2>/dev/null)
-          FILES_2=$(find x86/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null)
-          FILES_3=$(find x86/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null)
-          FILES=("${FILES_1[@]}" "${FILES_2[@]}" "${FILES_3[@]}")
+          FILES_1=$(find x86/_*.iso/_*.img/* -maxdepth 1 -type f -name "linux.*" 2>/dev/null || true) # 1 file
+          FILES_2=$(find x86/_*.npk/*/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null || true) # 2 files
+          FILES=("${FILES_1[@]}" "${FILES_2[@]}")
           for FILE in ${FILES}; do
             /tmp/unpack.sh "${FILE}" || true
           done
