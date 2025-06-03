@@ -189,7 +189,8 @@ jobs:
           FILES_3=$(find */_*.npk/*.files/* -maxdepth 2 -type f -path "*/_*.npk/*.files/boot/kernel") # arm64
           FILES_4=$(find */_*.npk/*.files/* -maxdepth 4 -type f -path "*/_*.npk/*.files/boot/EFI/BOOT/*.EFI") # x86
           FILES_5=$(find */_*.npk/_*.sfs/* -maxdepth 4 -type f -path "*/_*.npk/_*.sfs/boot/EFI/BOOT/*.EFI") # arm64, x86
-          for FILE in (${FILES_1} ${FILES_2} ${FILES_3} ${FILES_4} ${FILES_5}); do
+          FILES=("${FILES_1[@]}" "${FILES_2[@]}" "${FILES_3[@]}" "${FILES_4[@]}" "${FILES_5}[@])")
+          for FILE in ${FILES}; do
             /tmp/unpack.sh "${FILE}" || true
           done
 
