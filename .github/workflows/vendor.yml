@@ -184,11 +184,11 @@ jobs:
 
       - name: Unpack EFI files
         run: |
-          FILES_1=$(find */_*.iso/_*.img/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI") # arm64, x86
+          FILES_1=$(find */_*.iso/_*.img/* -maxdepth 4 -type f -path "*/_*.iso/_*.img/boot/EFI/BOOT/*.EFI") # arm64, x86
           FILES_2=$(find */_*.iso/_*.img/* -maxdepth 1 -type f -name "linux.*") # x86
-          FILES_3=$(find */_*.npk/*.files/boot/* -maxdepth 1 -type f -name "kernel") # arm64
-          FILES_4=$(find */_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI") # x86
-          FILES_5=$(find */_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI") # arm64, x86
+          FILES_3=$(find */_*.npk/*.files/* -maxdepth 2 -type f -path "*/_*.npk/*.files/boot/kernel") # arm64
+          FILES_4=$(find */_*.npk/*.files/* -maxdepth 4 -type f -path "*/_*.npk/*.files/boot/EFI/BOOT/*.EFI") # x86
+          FILES_5=$(find */_*.npk/_*.sfs/* -maxdepth 4 -type f -path "*/_*.npk/_*.sfs/boot/EFI/BOOT/*.EFI") # arm64, x86
           for FILE in (${FILES_1} ${FILES_2} ${FILES_3} ${FILES_4} ${FILES_5}); do
             /tmp/unpack.sh "${FILE}" || true
           done
