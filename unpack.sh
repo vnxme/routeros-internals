@@ -73,11 +73,11 @@ function unpack_cpio {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
-  local SUDO=''; [ -n "$(which sudo)" ] && local SUDO='sudo '
+  local SUDO="$(which sudo)"
   local DIR='/tmp/cpio'
   local RM=false
   [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
-  "${SUDO}cpio" --no-preserve-owner -idm -D "${DIR}" < "$1" || true
+  [ -n "${SUDO}" ] && (sudo cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true) || (cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true)
   rsync -rltgoD "${DIR}/" "$2/"
   RESULT=$(ls -AlR --time-style=full-iso "${DIR}/")
   [ "${RM}" = true ] && rm -rf "${DIR}"
@@ -119,14 +119,14 @@ function unpack_img {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
-  local SUDO=''; [ -n "$(which sudo)" ] && local SUDO='sudo '
+  local SUDO="$(which sudo)"
   local DIR='/tmp/img'
   local RM=false
   [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
-  "${SUDO}mount" -o loop,ro "$1" "${DIR}"
+  [ -n "${SUDO}" ] && (sudo mount -o loop,ro "$1" "${DIR}") || (mount -o loop,ro "$1" "${DIR}")
   rsync -rltgoD "${DIR}/" "$2/"
   RESULT=$(ls -AlR --time-style=full-iso "${DIR}/")
-  "${SUDO}umount" "${DIR}"
+  [ -n "${SUDO}" ] && (sudo umount "${DIR}") || (umount "${DIR}")
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -134,14 +134,14 @@ function unpack_iso {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
-  local SUDO=''; [ -n "$(which sudo)" ] && local SUDO='sudo '
+  local SUDO="$(which sudo)"
   local DIR='/tmp/iso'
   local RM=false
   [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
-  "${SUDO}mount" -o loop,ro "$1" "${DIR}"
+  [ -n "${SUDO}" ] && (sudo mount -o loop,ro "$1" "${DIR}") || (mount -o loop,ro "$1" "${DIR}")
   rsync -rltgoD "${DIR}/" "$2/"
   RESULT=$(ls -AlR --time-style=full-iso "${DIR}/")
-  "${SUDO}umount" "${DIR}"
+  [ -n "${SUDO}" ] && (sudo umount "${DIR}") || (umount "${DIR}")
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
