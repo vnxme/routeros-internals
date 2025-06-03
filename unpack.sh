@@ -73,10 +73,11 @@ function unpack_cpio {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
+  local SUDO=''; [ -n "$(which sudo)" ] && local SUDO='sudo '
   local DIR='/tmp/cpio'
   local RM=false
   [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
-  cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true
+  "${SUDO}cpio" --no-preserve-owner -idm -D "${DIR}" < "$1" || true
   rsync -rltgoD "${DIR}/" "$2/"
   RESULT=$(ls -AlR --time-style=full-iso "${DIR}/")
   [ "${RM}" = true ] && rm -rf "${DIR}"
