@@ -118,13 +118,14 @@ function unpack_img {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
+  local SUDO=''; [ -n "$(which sudo)" ] && local SUDO='sudo '
   local DIR='/tmp/img'
   local RM=false
   [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
-  sudo mount -o loop,ro "$1" "${DIR}"
+  "${SUDO}mount" -o loop,ro "$1" "${DIR}"
   rsync -rltgoD "${DIR}/" "$2/"
   RESULT=$(ls -AlR --time-style=full-iso "${DIR}/")
-  sudo umount "${DIR}"
+  "${SUDO}umount" "${DIR}"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -132,13 +133,14 @@ function unpack_iso {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
+  local SUDO=''; [ -n "$(which sudo)" ] && local SUDO='sudo '
   local DIR='/tmp/iso'
   local RM=false
   [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
-  sudo mount -o loop,ro "$1" "${DIR}"
+  "${SUDO}mount" -o loop,ro "$1" "${DIR}"
   rsync -rltgoD "${DIR}/" "$2/"
   RESULT=$(ls -AlR --time-style=full-iso "${DIR}/")
-  sudo umount "${DIR}"
+  "${SUDO}umount" "${DIR}"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
