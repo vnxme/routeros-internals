@@ -164,6 +164,16 @@ jobs:
             done
           done
 
+      - name: Unpack IMG files
+        run: |
+          ARHCS=(arm64 x86)
+          for ARCH in ${ARHCS[@]}; do
+            IMG_FILES=$(find ${ARCH}/_*.iso/* -maxdepth 1 -type f -name '*.img')
+            for IMG_FILE in ${IMG_FILES}; do
+              /tmp/unpack.sh "${IMG_FILE}" || true
+            done
+          done
+
       - name: Unpack NPK files
         run: |
           ARHCS=(arm64 x86)
