@@ -144,7 +144,7 @@ jobs:
 
       - name: Unpack ISO files
         run: |
-          FILES=($(find */* -maxdepth 1 -type f -name '*.iso'))
+          readarray -d '' -t FILES < <(find */* -maxdepth 1 -type f -name '*.iso' -print0 2>/dev/null || true)
           echo -e "${FILES[@]}"
           declare -A HASHES
           for FILE in ${FILES[@]}; do
@@ -163,7 +163,7 @@ jobs:
 
       - name: Unpack IMG files
         run: |
-          FILES=($(find */_*.iso/* -maxdepth 1 -type f -name '*.img'))
+          readarray -d '' -t FILES < <(find */_*.iso/* -maxdepth 1 -type f -name '*.img' -print0 2>/dev/null || true)
           echo -e "${FILES[@]}"
           declare -A HASHES
           for FILE in ${FILES[@]}; do
@@ -179,10 +179,10 @@ jobs:
 
       - name: Unpack NPK files
         run: |
-          FILES=($(
-            find */* -maxdepth 1 -type f -name '*.npk'
-            find */*.iso/* -maxdepth 1 -type f -name '*.npk'
-          ))
+          readarray -d '' -t FILES < <(
+            find */* -maxdepth 1 -type f -name '*.npk' -print0 2>/dev/null || true
+            find */*.iso/* -maxdepth 1 -type f -name '*.npk' -print0 2>/dev/null || true
+          )
           echo -e "${FILES[@]}"
           declare -A HASHES
           for FILE in ${FILES[@]}; do
@@ -198,10 +198,10 @@ jobs:
 
       - name: Unpack SFS files
         run: |
-          FILES=($(
-            find */_*.npk/* -maxdepth 1 -type f -name '*.sfs'
-            find */_*.iso/_*.npk/* -maxdepth 1 -type f -name '*.sfs'
-          ))
+          readarray -d '' -t FILES < <(
+            find */_*.npk/* -maxdepth 1 -type f -name '*.sfs' -print0 2>/dev/null || true
+            find */_*.iso/_*.npk/* -maxdepth 1 -type f -name '*.sfs' -print0 2>/dev/null || true
+          )
           echo -e "${FILES[@]}"
           declare -A HASHES
           for FILE in ${FILES[@]}; do
@@ -217,13 +217,13 @@ jobs:
 
       - name: Unpack bzImage files
         run: |
-          FILES=($(
-            find x86/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null || true
-            find x86/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null || true
-            find x86/_*.iso/_*.img/* -maxdepth 1 -type f -name "linux.*" 2>/dev/null || true
-            find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null || true
-            find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null || true
-          ))
+          readarray -d '' -t FILES < <(
+            find x86/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" -print0 2>/dev/null || true
+            find x86/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" -print0 2>/dev/null || true
+            find x86/_*.iso/_*.img/* -maxdepth 1 -type f -name "linux.*" -print0 2>/dev/null || true
+            find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" -print0 2>/dev/null || true
+            find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" -print0 2>/dev/null || true
+          )
           echo -e "${FILES[@]}"
           declare -A HASHES
           for FILE in ${FILES[@]}; do
