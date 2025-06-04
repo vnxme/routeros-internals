@@ -181,7 +181,7 @@ jobs:
         run: |
           readarray -d '' -t FILES < <(
             find */* -maxdepth 1 -type f -name '*.npk' -print0 2>/dev/null || true
-            find */*.iso/* -maxdepth 1 -type f -name '*.npk' -print0 2>/dev/null || true
+            find */_*.iso/* -maxdepth 1 -type f -name '*.npk' -print0 2>/dev/null || true
           )
           echo -e "${FILES[@]}"
           declare -A HASHES
