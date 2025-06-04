@@ -144,8 +144,9 @@ jobs:
 
       - name: Unpack ISO files
         run: |
-          readarray -d '' -t FILES < <(find */* -maxdepth 1 -type f -name '*.iso' -print0 2>/dev/null || true)
-          echo -e "${FILES[@]}"
+          readarray -d '' -t FILES < <(
+            find */* -maxdepth 1 -type f -name '*.iso' -print0 2>/dev/null || true
+          )
           declare -A HASHES
           for FILE in "${FILES[@]}"; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
@@ -163,8 +164,9 @@ jobs:
 
       - name: Unpack IMG files
         run: |
-          readarray -d '' -t FILES < <(find */_*.iso/* -maxdepth 1 -type f -name '*.img' -print0 2>/dev/null || true)
-          echo -e "${FILES[@]}"
+          readarray -d '' -t FILES < <(
+            find */_*.iso/* -maxdepth 1 -type f -name '*.img' -print0 2>/dev/null || true
+          )
           declare -A HASHES
           for FILE in "${FILES[@]}"; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
@@ -183,7 +185,6 @@ jobs:
             find */* -maxdepth 1 -type f -name '*.npk' -print0 2>/dev/null || true
             find */_*.iso/* -maxdepth 1 -type f -name '*.npk' -print0 2>/dev/null || true
           )
-          echo -e "${FILES[@]}"
           declare -A HASHES
           for FILE in "${FILES[@]}"; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
@@ -202,7 +203,6 @@ jobs:
             find */_*.npk/* -maxdepth 1 -type f -name '*.sfs' -print0 2>/dev/null || true
             find */_*.iso/_*.npk/* -maxdepth 1 -type f -name '*.sfs' -print0 2>/dev/null || true
           )
-          echo -e "${FILES[@]}"
           declare -A HASHES
           for FILE in "${FILES[@]}"; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
@@ -224,7 +224,6 @@ jobs:
             find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" -print0 2>/dev/null || true
             find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" -print0 2>/dev/null || true
           )
-          echo -e "${FILES[@]}"
           declare -A HASHES
           for FILE in "${FILES[@]}"; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
