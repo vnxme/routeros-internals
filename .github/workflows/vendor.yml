@@ -145,8 +145,9 @@ jobs:
       - name: Unpack ISO files
         run: |
           FILES=($(find */* -maxdepth 1 -type f -name '*.iso'))
+          echo -e "${FILES[@]}"
           declare -A HASHES
-          for FILE in ${FILES}; do
+          for FILE in ${FILES[@]}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
@@ -163,8 +164,9 @@ jobs:
       - name: Unpack IMG files
         run: |
           FILES=($(find */_*.iso/* -maxdepth 1 -type f -name '*.img'))
+          echo -e "${FILES[@]}"
           declare -A HASHES
-          for FILE in ${FILES}; do
+          for FILE in ${FILES[@]}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
@@ -181,9 +183,9 @@ jobs:
             find */* -maxdepth 1 -type f -name '*.npk'
             find */*.iso/* -maxdepth 1 -type f -name '*.npk'
           ))
-          echo -e "${FILES}"
+          echo -e "${FILES[@]}"
           declare -A HASHES
-          for FILE in ${FILES}; do
+          for FILE in ${FILES[@]}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
@@ -200,8 +202,9 @@ jobs:
             find */_*.npk/* -maxdepth 1 -type f -name '*.sfs'
             find */_*.iso/_*.npk/* -maxdepth 1 -type f -name '*.sfs'
           ))
+          echo -e "${FILES[@]}"
           declare -A HASHES
-          for FILE in ${FILES}; do
+          for FILE in ${FILES[@]}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
@@ -221,9 +224,9 @@ jobs:
             find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null || true
             find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null || true
           ))
-          echo -e "${FILES}"
+          echo -e "${FILES[@]}"
           declare -A HASHES
-          for FILE in ${FILES}; do
+          for FILE in ${FILES[@]}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
