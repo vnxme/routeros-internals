@@ -183,6 +183,8 @@ jobs:
         run: |
           readarray -d '' -t FILES < <(
             find */* -maxdepth 1 -type f -name '*.npk' -print0 2>/dev/null || true
+          )
+          readarray -d '' -t -O "${#FILES[@]}" FILES < <(
             find */_*.iso/* -maxdepth 1 -type f -name '*.npk' -print0 2>/dev/null || true
           )
           declare -A HASHES
