@@ -145,49 +145,70 @@ jobs:
       - name: Unpack ISO files
         run: |
           FILES=$(find */* -maxdepth 1 -type f -name '*.iso')
+          declare -A HASHES
           for FILE in ${FILES}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-            echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-            /tmp/unpack.sh "${FILE}" || true
+            if [ -n "${HASHES[${HASH}]}" ]; then
+              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
+            else
+              HASHES[${HASH}]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              /tmp/unpack.sh "${FILE}" || true
             
-            NPK_FILES=$(find $(dirname ${FILE})/_$(basename ${FILE})/* -type f -name '*.npk')
-            for NPK_FILE in ${NPK_FILES}; do
-              HASH1="$(sha256sum "${NPK_FILE}" | gawk '{ print $1 }')"
-              HASH2="$(sha256sum "$(dirname "${FILE}")/$(basename "${NPK_FILE}")" | gawk '{ print $1 }')"
-              if [ "${HASH1}" == "${HASH2}" ]; then
-                rm ${NPK_FILE} && ln -s ../$(basename ${NPK_FILE}) ${NPK_FILE}
-              fi
-            done
-            
-            README="$(dirname ${FILE})/_$(basename ${FILE})/README.md"
-            echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "${README}"
+              README="$(dirname ${FILE})/_$(basename ${FILE})/README.md"
+              echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "${README}"
+            fi
           done
 
       - name: Unpack IMG files
         run: |
           FILES=$(find */_*.iso/* -maxdepth 1 -type f -name '*.img')
+          declare -A HASHES
           for FILE in ${FILES}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-            echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-            /tmp/unpack.sh "${FILE}" || true
+            if [ -n "${HASHES[${HASH}]}" ]; then
+              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
+            else
+              HASHES[${HASH}]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              /tmp/unpack.sh "${FILE}" || true
+            fi
           done
 
       - name: Unpack NPK files
         run: |
-          FILES=$(find */* -maxdepth 1 -type f -name '*.npk')
+          FILES=$(
+            find */* -maxdepth 1 -type f -name '*.npk'
+            find */*.iso/* -maxdepth 1 -type f -name '*.npk'
+          )
+          declare -A HASHES
           for FILE in ${FILES}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-            echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-            python /tmp/unpack-npk.py "${FILE}" || true
+            if [ -n "${HASHES[${HASH}]}" ]; then
+              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
+            else
+              HASHES[${HASH}]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              python /tmp/unpack-npk.py "${FILE}" || true
+            fi
           done
 
       - name: Unpack SFS files
         run: |
-          FILES=$(find */_*.npk/* -maxdepth 1 -type f -name '*.sfs')
+          FILES=$(
+            find */_*.npk/* -maxdepth 1 -type f -name '*.sfs'
+            find */_*.iso/_*.npk/* -maxdepth 1 -type f -name '*.sfs'
+          )
+          declare -A HASHES
           for FILE in ${FILES}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-            echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-            unsquashfs -d "$(dirname "${FILE}")/_$(basename "${FILE}")" "${FILE}" || true
+            if [ -n "${HASHES[${HASH}]}" ]; then
+              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
+            else
+              HASHES[${HASH}]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              unsquashfs -d "$(dirname "${FILE}")/_$(basename "${FILE}")" "${FILE}" || true
+            fi
           done
 
       - name: Unpack bzImage files
