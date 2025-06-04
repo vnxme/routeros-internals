@@ -147,7 +147,7 @@ jobs:
           FILES=$(find */* -maxdepth 1 -type f -name '*.iso')
           for FILE in ${FILES}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-            echo -e "${HASH}\t${FILE}\n" >> 'hashes.txt'
+            echo -e "${HASH} ${FILE}" >> 'hashes.txt'
             /tmp/unpack.sh "${FILE}" || true
             
             NPK_FILES=$(find $(dirname ${FILE})/_$(basename ${FILE})/* -type f -name '*.npk')
@@ -168,7 +168,7 @@ jobs:
           FILES=$(find */_*.iso/* -maxdepth 1 -type f -name '*.img')
           for FILE in ${FILES}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-            echo -e "${HASH}\t${FILE}\n" >> 'hashes.txt'
+            echo -e "${HASH} ${FILE}" >> 'hashes.txt'
             /tmp/unpack.sh "${FILE}" || true
           done
 
@@ -177,7 +177,7 @@ jobs:
           FILES=$(find */* -maxdepth 1 -type f -name '*.npk')
           for FILE in ${FILES}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-            echo -e "${HASH}\t${FILE}\n" >> 'hashes.txt'
+            echo -e "${HASH} ${FILE}" >> 'hashes.txt'
             python /tmp/unpack-npk.py "${FILE}" || true
           done
 
@@ -186,7 +186,7 @@ jobs:
           FILES=$(find */_*.npk/* -maxdepth 1 -type f -name '*.sfs')
           for FILE in ${FILES}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-            echo -e "${HASH}\t${FILE}\n" >> 'hashes.txt'
+            echo -e "${HASH} ${FILE}" >> 'hashes.txt'
             unsquashfs -d "$(dirname "${FILE}")/_$(basename "${FILE}")" "${FILE}" || true
           done
 
@@ -196,10 +196,16 @@ jobs:
             find x86/_*.iso/_*.img/* -maxdepth 1 -type f -name "linux.*" 2>/dev/null || true # 1 file
             find x86/_*.npk/*/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null || true # 2 files
           )
+          declare -A HASHES
           for FILE in ${FILES}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-            echo -e "${HASH}\t${FILE}\n" >> 'hashes.txt'
-            /tmp/unpack.sh "${FILE}" || true
+            if [ -n "${HASHES["${HASH}"]" ]; then
+              ln -sfr "${HASHES["${HASH}"]" "${FILE}"
+            else
+              HASHES["${HASH}"]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              /tmp/unpack.sh "${FILE}" || true
+            fi
           done
 
 #      - name: Unpack EFI files
