@@ -147,7 +147,7 @@ jobs:
           readarray -d '' -t FILES < <(find */* -maxdepth 1 -type f -name '*.iso' -print0 2>/dev/null || true)
           echo -e "${FILES[@]}"
           declare -A HASHES
-          for FILE in ${FILES[@]}; do
+          for FILE in "${FILES[@]}"; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
@@ -166,7 +166,7 @@ jobs:
           readarray -d '' -t FILES < <(find */_*.iso/* -maxdepth 1 -type f -name '*.img' -print0 2>/dev/null || true)
           echo -e "${FILES[@]}"
           declare -A HASHES
-          for FILE in ${FILES[@]}; do
+          for FILE in "${FILES[@]}"; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
@@ -185,7 +185,7 @@ jobs:
           )
           echo -e "${FILES[@]}"
           declare -A HASHES
-          for FILE in ${FILES[@]}; do
+          for FILE in "${FILES[@]}"; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
@@ -204,7 +204,7 @@ jobs:
           )
           echo -e "${FILES[@]}"
           declare -A HASHES
-          for FILE in ${FILES[@]}; do
+          for FILE in "${FILES[@]}"; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
@@ -226,7 +226,7 @@ jobs:
           )
           echo -e "${FILES[@]}"
           declare -A HASHES
-          for FILE in ${FILES[@]}; do
+          for FILE in "${FILES[@]}"; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
