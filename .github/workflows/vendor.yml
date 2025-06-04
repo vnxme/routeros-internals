@@ -181,6 +181,7 @@ jobs:
             find */* -maxdepth 1 -type f -name '*.npk'
             find */*.iso/* -maxdepth 1 -type f -name '*.npk'
           )
+          echo -e "${FILES}"
           declare -A HASHES
           for FILE in ${FILES}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
@@ -217,7 +218,10 @@ jobs:
             find x86/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null || true
             find x86/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null || true
             find x86/_*.iso/_*.img/* -maxdepth 1 -type f -name "linux.*" 2>/dev/null || true
+            find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null || true
+            find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 1 -type f -name "*.EFI" 2>/dev/null || true
           )
+          echo -e "${FILES}"
           declare -A HASHES
           for FILE in ${FILES}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
