@@ -199,10 +199,10 @@ jobs:
           declare -A HASHES
           for FILE in ${FILES}; do
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-            if [ -n "${HASHES["${HASH}"]" ]; then
-              ln -sfr "${HASHES["${HASH}"]" "${FILE}"
+            if [ -n "${HASHES[${HASH}]" ]; then
+              ln -sfr "${HASHES[${HASH}]" "${FILE}"
             else
-              HASHES["${HASH}"]="$(realpath "${FILE}")"
+              HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               /tmp/unpack.sh "${FILE}" || true
             fi
