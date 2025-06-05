@@ -101,7 +101,7 @@ function unpack_elf {
   # $2 - destination directory, string
   # $3 - binwalk output, string
 
-  local CPIO_ENDS=$(echo "$3" | grep -E 'cpio archive(.*)TRAILER!!!' | gawk '{print $1}')
+  local CPIO_ENDS=$(echo "$3" | grep -E 'cpio archive(.*)TRAILER!!!' | gawk '{print $1}' | head -1)
   local CPIO_END; for CPIO_END in ${CPIO_ENDS}; do
     local CPIO_START="$(echo "$3" | grep 'cpio archive' | gawk '{print $1}' | tail -1)"
     if [ -n "${CPIO_START}" ] && [ -n "${CPIO_END}" ] && [ "${CPIO_START}" -lt "${CPIO_END}" ]; then
