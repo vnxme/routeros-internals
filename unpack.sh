@@ -178,8 +178,10 @@ elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable bz
   unpack_bzimage "${FILE}" "${DIR}"; OUT_LS="${RESULT}"
   compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "$(binwalk "${FILE}")" "" "${OUT_LS}"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
-  # unpack a valid Linux Image (could be named as *.efi)
-  echo "TODO: Image"
+  # unpack a valid Linux Image (could be named as *.efi, but resembles a Linux executable)
+  OUT_BINWALK="$(binwalk "${FILE}")"
+  unpack_elf "${FILE}" "${DIR}" "${OUT_BINWALK}"; OUT_LS="${RESULT}"
+  compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "${OUT_BINWALK}" "" "${OUT_LS}"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^ELF (.*) executable.*$')" ]; then
   # unpack a valid Linux executable (could be named as kernel)
   OUT_BINWALK="$(binwalk "${FILE}")"
