@@ -49,7 +49,7 @@ function unpack_bzimage {
       if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
         unxz -q "${XZ_FILE}" || true
         if [ -s "${UNK_FILE}" ]; then
-          local OUT_FILE="$(file "${FILE}" | cut -f 2- -d ' ')"
+          local OUT_FILE="$(file "${UNK_FILE}" | cut -f 2- -d ' ')"
           if [ -n "$(echo "${OUT_FILE}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
             mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").cpio"
           elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
@@ -122,7 +122,7 @@ function unpack_elf {
       if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
         unxz "${XZ_FILE}" || true
         if [ -s "${UNK_FILE}" ]; then
-          local OUT_FILE="$(file "${FILE}" | cut -f 2- -d ' ')"
+          local OUT_FILE="$(file "${UNK_FILE}" | cut -f 2- -d ' ')"
           if [ -n "$(echo "${OUT_FILE}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
             mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").cpio"
           elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
