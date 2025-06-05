@@ -320,6 +320,18 @@ jobs:
             fi
           done
 
+      - name: Process LINKS.md
+        run: |
+          readarray -d '' -t FILES < <(
+            find . -type f -name 'LINKS.md' -print0 2>/dev/null || true
+          )
+          for FILE in "${FILES[@]}"; do
+            CONTENTS=$(cat "${FILE}")
+            TEXT="#### Replacements (\`ln -sfr <*> <*>\`):\n\`\`\`\n${CONTENTS}\n\`\`\`\n"
+            echo -e "${TEXT}" >> "$(dirname "${FILE}")/README.md"
+            rm "${FILE}"
+          done
+
       - name: Add files, commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
