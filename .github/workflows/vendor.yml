@@ -272,6 +272,32 @@ jobs:
             fi
           done
 
+      - name: Unpack CPIO files
+        run: |
+          readarray -d '' -t FILES < <(
+            find arm64/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find arm64/_*.iso/_*.img/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find arm64/_*.iso/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find x86/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/_vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find x86/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/_vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find x86/_*.iso/_*.img/_linux.*/_vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/_vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/_vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+          )
+          declare -A HASHES
+          for FILE in "${FILES[@]}"; do
+            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
+            if [ -n "${HASHES[${HASH}]}" ]; then
+              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
+              echo -e "${FILE} ${HASHES[${HASH}]}" >> 'links.txt'
+              echo -e "${FILE} ${HASHES[${HASH}]}" >> "$(dirname "${FILE}")/LINKS.md"
+            else
+              HASHES[${HASH}]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              /tmp/unpack.sh "${FILE}" || true
+            fi
+          done
+
       - name: Add files, commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
