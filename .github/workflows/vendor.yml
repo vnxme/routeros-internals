@@ -152,8 +152,8 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> 'links.txt'
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> 'links.txt'
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -174,8 +174,8 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> 'links.txt'
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> 'links.txt'
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -194,8 +194,8 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> 'links.txt'
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> 'links.txt'
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -214,8 +214,8 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> 'links.txt'
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> 'links.txt'
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -237,8 +237,8 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> 'links.txt'
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> 'links.txt'
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -263,8 +263,8 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> 'links.txt'
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> 'links.txt'
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -283,8 +283,8 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> 'links.txt'
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> 'links.txt'
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -311,8 +311,8 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> 'links.txt'
-              echo -e "${FILE} ${HASHES[${HASH}]}" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> 'links.txt'
+              echo -e "${FILE} $(relpath "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
