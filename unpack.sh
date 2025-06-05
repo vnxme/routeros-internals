@@ -86,7 +86,7 @@ function unpack_cpio {
   # $2 - destination directory, string
 
   local SUDO="$(which sudo)"
-  local DIR='/tmp/cpio'
+  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).cpio"
   local RM=false
   [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
   [ -n "${SUDO}" ] && (sudo cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true) || (cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true)
