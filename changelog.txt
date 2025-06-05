@@ -1,0 +1,14 @@
+What's new in 7.19.1 (2025-May-23 17:27):
+
+*) certificate - fixed support for certificates imported or added in RouterOS v7.4 or earlier (introduced in v7.19);
+*) console - improved stability when a running script is removed;
+*) container - stability improvements;
+*) disk - fixed RAID component size to match the value in the superblock;
+*) disk - improved handling of RAID spare disks;
+*) disk - improved stability when using RAID;
+*) ethernet - fixed flow-control for RB5009;
+*) iot - fixed incorrectly shown LoRa payload RSSI values;
+*) poe-out - fixed PoE-out reset when inserting specific SFP modules on RB5009;
+*) poe-out - upgraded firmware for 802.3at PSE controlled boards (the update will cause brief power interruption to PoE-out interfaces);
+*) routing-filter - use zero as default as-path length (allows matching empty as path);
+*) sfp - correctly classify 100Mbps modules as "100M-baseFX";

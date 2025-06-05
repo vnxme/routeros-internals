@@ -1,0 +1,5 @@
+#### Replacements (`ln -sfr <*> <*>`):
+```
+x86/_tr069-client-7.19.1.npk/_tr069-client.sfs/home/web/webfig/tr069-5d450fa99219.jg.gz arm64/_tr069-client-7.19.1-arm64.npk/_tr069-client.sfs/home/web/webfig/tr069-5d450fa99219.jg.gz
+```
+

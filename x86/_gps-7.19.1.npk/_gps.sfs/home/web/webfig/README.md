@@ -1,0 +1,5 @@
+#### Replacements (`ln -sfr <*> <*>`):
+```
+x86/_gps-7.19.1.npk/_gps.sfs/home/web/webfig/gps-9d0f7d1217bc.jg.gz arm64/_gps-7.19.1-arm64.npk/_gps.sfs/home/web/webfig/gps-9d0f7d1217bc.jg.gz
+```
+
