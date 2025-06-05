@@ -246,17 +246,26 @@ jobs:
             fi
           done
 
-#      - name: Unpack EFI files
-#        run: |
-#          FILES_1=$(find */_*.iso/_*.img/* -maxdepth 4 -type f -path "*/_*.iso/_*.img/boot/EFI/BOOT/*.EFI") # arm64, x86
-#          FILES_2=$(find */_*.iso/_*.img/* -maxdepth 1 -type f -name "linux.*") # x86
-#          FILES_3=$(find */_*.npk/*.files/* -maxdepth 2 -type f -path "*/_*.npk/*.files/boot/kernel") # arm64
-#          FILES_4=$(find */_*.npk/*.files/* -maxdepth 4 -type f -path "*/_*.npk/*.files/boot/EFI/BOOT/*.EFI") # x86
-#          FILES_5=$(find */_*.npk/_*.sfs/* -maxdepth 4 -type f -path "*/_*.npk/_*.sfs/boot/EFI/BOOT/*.EFI") # arm64, x86
-#          FILES=("${FILES_1[@]}" "${FILES_2[@]}" "${FILES_3[@]}" "${FILES_4[@]}" "${FILES_5}[@])")
-#          for FILE in ${FILES}; do
-#            /tmp/unpack.sh "${FILE}" || true
-#          done
+      - name: Unpack Image and ELF files
+        run: |
+          readarray -d '' -t FILES < <(
+            find arm64/_*.npk/*.files/boot/* -maxdepth 0 -type f -name "kernel" -print0 2>/dev/null || true
+            find arm64/_*.iso/_*.img/EFI/BOOT/* -maxdepth 0 -type f -name "*.EFI" -print0 2>/dev/null || true
+            find arm64/_*.iso/_*.npk/*.files/boot/* -maxdepth 0 -type f -name "kernel" -print0 2>/dev/null || true
+          )
+          declare -A HASHES
+          for FILE in "${FILES[@]}"; do
+            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
+            if [ -n "${HASHES[${HASH}]}" ]; then
+              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
+              echo -e "${FILE} ${HASHES[${HASH}]}" >> 'links.txt'
+              echo -e "${FILE} ${HASHES[${HASH}]}" >> "$(dirname "${FILE}")/LINKS.md"
+            else
+              HASHES[${HASH}]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              /tmp/unpack.sh "${FILE}" || true
+            fi
+          done
 
       - name: Add files, commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
