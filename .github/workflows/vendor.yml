@@ -223,6 +223,27 @@ jobs:
             fi
           done
 
+      - name: Unpack JG.GZ files
+        run: |
+          readarray -d '' -t FILES < <(
+            find */_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
+            find */_*.iso/_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
+          )
+          declare -A HASHES
+          for FILE in "${FILES[@]}"; do
+            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
+            if [ -n "${HASHES[${HASH}]}" ]; then
+              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
+            else
+              HASHES[${HASH}]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              mkdir -p "$(dirname "${FILE}")/_$(basename "${FILE}")"
+              gzip -cdk < "${FILE}" > "$(dirname "${FILE}")/_$(basename "${FILE}")/$(basename "${FILE%%.gz}")" || true
+            fi
+          done
+
       - name: Unpack bzImage files
         run: |
           readarray -d '' -t FILES < <(
