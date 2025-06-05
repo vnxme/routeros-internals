@@ -54,6 +54,8 @@ function unpack_bzimage {
             mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").cpio"
           elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
             mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").vmlinux"
+          elif [ -n "$(echo "${OUT_FILE}" | grep -E '^ELF (.*) executable.*$')" ]; then
+            mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").vmlinux"
           fi
         fi
       fi
@@ -126,6 +128,8 @@ function unpack_elf {
           if [ -n "$(echo "${OUT_FILE}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
             mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").cpio"
           elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
+            mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").vmlinux"
+          elif [ -n "$(echo "${OUT_FILE}" | grep -E '^ELF (.*) executable.*$')" ]; then
             mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").vmlinux"
           fi
         fi
