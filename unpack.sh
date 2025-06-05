@@ -36,26 +36,29 @@ function unpack_bzimage {
   # $1 - source filepath, string
   # $2 - destination directory, string
 
+  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).efi"
+  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+
   # credits to @elseif for binary patterns
   # ref: https://github.com/elseif/MikroTikPatch/blob/main/patch.py
   local XZ_ENDS=$(LC_ALL=C grep -aboP '\x00\x00\x00\x00\x01\x59\x5A' "$1" | cut -f 1 -d ':' | head -1)
   local XZ_END; for XZ_END in ${XZ_ENDS}; do
-    local XZ_START=$(head -c ${XZ_END} "${FILE}" | LC_ALL=C grep -aboP '\xFD7zXZ\x00\x00\x01' - | cut -f 1 -d ':' | tail -1)
+    local XZ_START=$(head -c ${XZ_END} "$1" | LC_ALL=C grep -aboP '\xFD7zXZ\x00\x00\x01' - | cut -f 1 -d ':' | tail -1)
     if [ -n "${XZ_START}" ] && [ -n "${XZ_END}" ] && [ "${XZ_START}" -lt "${XZ_END}" ]; then
       local XZ_SIZE=$((${XZ_END}-${XZ_START}+7)) # 7 is the end pattern length
-      local UNK_FILE="$2/$(printf "%x" "${XZ_START}").unknown"
+      local UNK_FILE="${DIR}/$(printf "%x" "${XZ_START}").unknown"
       local XZ_FILE="${UNK_FILE}.xz"
-      dd if="${FILE}" bs=1 skip="${XZ_START}" count="${XZ_SIZE}" of="${XZ_FILE}" > /dev/null 2>&1 || true
+      dd if="$1}" bs=1 skip="${XZ_START}" count="${XZ_SIZE}" of="${XZ_FILE}" > /dev/null 2>&1 || true
       if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
         unxz -q "${XZ_FILE}" || true
         if [ -s "${UNK_FILE}" ]; then
           local OUT_FILE="$(file "${UNK_FILE}" | cut -f 2- -d ' ')"
           if [ -n "$(echo "${OUT_FILE}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
-            mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").cpio"
+            mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").cpio"
           elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
-            mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").vmlinux"
+            mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").vmlinux"
           elif [ -n "$(echo "${OUT_FILE}" | grep -E '^ELF (.*) executable.*$')" ]; then
-            mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").vmlinux"
+            mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").vmlinux"
           fi
         fi
       fi
@@ -63,13 +66,13 @@ function unpack_bzimage {
   done
 
   # unless bzImage has an XZ-compressed vmlinux inside, use a universal script
-  if [ -z "$(find $2/* -maxdepth 0 -type f -name '*.vmlinux')" ]; then
+  if [ -z "$(find ${DIR}/* -maxdepth 0 -type f -name '*.vmlinux')" ]; then
     local SCRIPT="/tmp/extract-vmlinux.sh"
     if [ ! -s "${SCRIPT}" ]; then
       clean_and_exit 2 "${ME}: Script '${SCRIPT}' is missing"
     fi
 
-    local VMLINUX="$2/0.vmlinux"
+    local VMLINUX="${DIR}/0.vmlinux"
     "${SCRIPT}" "${FILE}" > "${VMLINUX}" || true
 
     if [ ! -s "${VMLINUX}" ]; then
@@ -77,7 +80,9 @@ function unpack_bzimage {
     fi
   fi
 
-  RESULT=$(ls -AlR --time-style=full-iso "$2/")
+  rsync -rltgoD "${DIR}/" "$2/"
+  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
+  [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
 function unpack_cpio {
@@ -85,13 +90,14 @@ function unpack_cpio {
   # $1 - source filepath, string
   # $2 - destination directory, string
 
-  local SUDO="$(which sudo)"
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).cpio"
-  local RM=false
-  [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+
+  local SUDO="$(which sudo)"
   [ -n "${SUDO}" ] && (sudo cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true) || (cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true)
+
   rsync -rltgoD --exclude={'dev','floppy','mnt','proc','tmp'} "${DIR}/" "$2/"
-  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/")
+  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -101,12 +107,15 @@ function unpack_elf {
   # $2 - destination directory, string
   # $3 - binwalk output, string
 
+  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).elf"
+  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+
   local CPIO_ENDS=$(echo "$3" | grep -E 'cpio archive(.*)TRAILER!!!' | gawk '{print $1}' | tail -1)
   local CPIO_END; for CPIO_END in ${CPIO_ENDS}; do
     local CPIO_START="$(echo "$3" | grep 'cpio archive' | gawk '{print $1}' | head -1)"
     if [ -n "${CPIO_START}" ] && [ -n "${CPIO_END}" ] && [ "${CPIO_START}" -lt "${CPIO_END}" ]; then
       local CPIO_SIZE=$((${CPIO_END}-${CPIO_START}+136)) # 136 is the end pattern length
-      local CPIO_FILE="$2/$(printf "%x" "${CPIO_START}").cpio"
+      local CPIO_FILE="${DIR}/$(printf "%x" "${CPIO_START}").cpio"
       dd if="$1" bs=1 skip="${CPIO_START}" count="${CPIO_SIZE}" of="${CPIO_FILE}" > /dev/null 2>&1 || true
     fi
   done
@@ -118,7 +127,7 @@ function unpack_elf {
     local XZ_START=$(head -c ${XZ_END} "$1" | LC_ALL=C grep -aboP '\xFD7zXZ\x00\x00\x01' - | cut -f 1 -d ':' | tail -1)
     if [ -n "${XZ_START}" ] && [ -n "${XZ_END}" ] && [ "${XZ_START}" -lt "${XZ_END}" ]; then
       local XZ_SIZE=$((${XZ_END}-${XZ_START}+7)) # 7 is the end pattern length
-      local UNK_FILE="$2/$(printf "%x" "${XZ_START}").unknown"
+      local UNK_FILE="${DIR}/$(printf "%x" "${XZ_START}").unknown"
       local XZ_FILE="${UNK_FILE}.xz"
       dd if="$1" bs=1 skip="${XZ_START}" count="${XZ_SIZE}" of="${XZ_FILE}" > /dev/null 2>&1 || true
       if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
@@ -126,31 +135,35 @@ function unpack_elf {
         if [ -s "${UNK_FILE}" ]; then
           local OUT_FILE="$(file "${UNK_FILE}" | cut -f 2- -d ' ')"
           if [ -n "$(echo "${OUT_FILE}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
-            mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").cpio"
+            mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").cpio"
           elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
-            mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").vmlinux"
+            mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").vmlinux"
           elif [ -n "$(echo "${OUT_FILE}" | grep -E '^ELF (.*) executable.*$')" ]; then
-            mv "${UNK_FILE}" "$2/$(printf "%x" "${XZ_START}").vmlinux"
+            mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").vmlinux"
           fi
         fi
       fi
     fi
   done
 
-  RESULT=$(ls -AlR --time-style=full-iso "$2/")
+  rsync -rltgoD "${DIR}/" "$2/"
+  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
+  [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
 function unpack_img {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
+
+  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).img"
+  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+
   local SUDO="$(which sudo)"
-  local DIR='/tmp/img'
-  local RM=false
-  [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
   [ -n "${SUDO}" ] && (sudo mount -o loop,ro "$1" "${DIR}") || (mount -o loop,ro "$1" "${DIR}")
+
   rsync -rltgoD "${DIR}/" "$2/"
-  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/")
+  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
   [ -n "${SUDO}" ] && (sudo umount "${DIR}") || (umount "${DIR}")
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
@@ -159,13 +172,15 @@ function unpack_iso {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
+
+  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).iso"
+  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+
   local SUDO="$(which sudo)"
-  local DIR='/tmp/iso'
-  local RM=false
-  [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
   [ -n "${SUDO}" ] && (sudo mount -o loop,ro "$1" "${DIR}") || (mount -o loop,ro "$1" "${DIR}")
+
   rsync -rltgoD "${DIR}/" "$2/"
-  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/")
+  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
   [ -n "${SUDO}" ] && (sudo umount "${DIR}") || (umount "${DIR}")
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
