@@ -63,7 +63,7 @@ function unpack_bzimage {
   done
 
   # unless bzImage has an XZ-compressed vmlinux inside, use a universal script
-  if [ -z "$(find $2/* -maxdepth 0 -type f - name '*.vmlinux')" ]; then
+  if [ -z "$(find $2/* -maxdepth 0 -type f -name '*.vmlinux')" ]; then
     local SCRIPT="/tmp/extract-vmlinux.sh"
     if [ ! -s "${SCRIPT}" ]; then
       clean_and_exit 2 "${ME}: Script '${SCRIPT}' is missing"
