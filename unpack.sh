@@ -69,7 +69,7 @@ function unpack_bzimage {
       clean_and_exit 2 "${ME}: Script '${SCRIPT}' is missing"
     fi
 
-    local VMLINUX="$2/vmlinux"
+    local VMLINUX="$2/0.vmlinux"
     "${SCRIPT}" "${FILE}" > "${VMLINUX}" || true
 
     if [ ! -s "${VMLINUX}" ]; then
