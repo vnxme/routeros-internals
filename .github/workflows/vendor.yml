@@ -152,8 +152,7 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -174,8 +173,7 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -194,8 +192,7 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -214,8 +211,7 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -234,8 +230,7 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -258,8 +253,7 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -284,8 +278,7 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -304,8 +297,7 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
@@ -332,25 +324,12 @@ jobs:
             HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
             if [ -n "${HASHES[${HASH}]}" ]; then
               ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> "$(dirname "${FILE}")/LINKS.md"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               /tmp/unpack.sh "${FILE}" || true
             fi
-          done
-
-      - name: Process LINKS.md
-        run: |
-          readarray -d '' -t FILES < <(
-            find . -type f -name 'LINKS.md' -print0 2>/dev/null || true
-          )
-          for FILE in "${FILES[@]}"; do
-            CONTENTS=$(cat "${FILE}")
-            TEXT="#### Replacements (\`ln -sfr <*> <*>\`):\n\`\`\`\n${CONTENTS}\n\`\`\`\n"
-            echo -e "${TEXT}" >> "$(dirname "${FILE}")/README.md"
-            rm "${FILE}"
           done
 
       - name: Add files, commit and push
