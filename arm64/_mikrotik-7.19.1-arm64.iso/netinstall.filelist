@@ -1,0 +1,12 @@
+TYPE
+etc
+init
+lib
+lib/libc.so
+mnt
+proc
+rw
+sbin
+sbin/nandfix
+sbin/mke2fs
+tmp
