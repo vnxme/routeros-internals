@@ -112,6 +112,7 @@ jobs:
         run: |
           wget -nv -O /tmp/extract-vmlinux.sh "https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-vmlinux" || true
           cp -r ./MikroTikPatch /tmp/
+          cp -r ./tools /tmp/
           cp ./*.py /tmp/
           cp ./*.sh /tmp/
           chmod +x /tmp/*.sh        
@@ -236,6 +237,27 @@ jobs:
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               mkdir -p "$(dirname "${FILE}")/_$(basename "${FILE}")"
               gzip -cdk < "${FILE}" > "$(dirname "${FILE}")/_$(basename "${FILE}")/$(basename "${FILE%%.gz}")" || true
+            fi
+          done
+
+      - name: Unpack X3 files
+        run: |
+          readarray -d '' -t FILES < <(
+            find */_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+            find */_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+            find */_*.iso/_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+            find */_*.iso/_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+          )
+          declare -A HASHES
+          for FILE in "${FILES[@]}"; do
+            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
+            if [ -n "${HASHES[${HASH}]}" ]; then
+              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
+            else
+              HASHES[${HASH}]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              python /tmp/unpack-x3.py "${FILE}" || true
             fi
           done
 
