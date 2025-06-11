@@ -18,7 +18,7 @@ import tools.routeros_x3 as x3
 
 
 def unpack_x3_file(filename: str, directory: str) -> None:
-    target_filename = f"{directory}/{os.path.basename(filename[:-3])}.xml"
+    target_filename = f"{directory}/{os.path.splitext(os.path.basename(filename))[0]}.xml"
     os.makedirs(os.path.dirname(target_filename), exist_ok=True)
     with open(target_filename, 'w') as file:
         file.write(x3.Document().from_file(filename).to_xml_string(indent=4))
