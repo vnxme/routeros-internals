@@ -54,7 +54,7 @@ jobs:
         if: steps.cache-files.outputs.cache-hit != 'true'
         run: |
           ARHCS=(arm64 x86)
-          PACKAGES=(routeros calea container dude extra-nic gps iot iot-bt-extra lora rose-storage switch-marvell tr069-client ups user-manager wifi-qcom wireless zerotier)
+          PACKAGES=(routeros calea container dude extra-nic gps iot iot-bt-extra lora rose-storage switch-marvell tr069-client ups user-manager wifi-qcom wifi-qcom-ac wireless zerotier)
           for ARCH in ${ARHCS[@]}; do
             mkdir -p ${ARCH}
             if [ "${ARCH}" == 'x86' ]; then
