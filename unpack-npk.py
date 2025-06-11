@@ -1,4 +1,19 @@
+# Copyright 2025 VNXME
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
+
 from MikroTikPatch import NovaPackage, NpkFileContainer, NpkPartID
 
 
@@ -12,7 +27,7 @@ def unpack_npk_package(package: NovaPackage, directory: str, skip_files: bool = 
     if (not skip_files) and (len(package[NpkPartID.FILE_CONTAINER].data) > 0):
         container = NpkFileContainer.unserialize_from(package[NpkPartID.FILE_CONTAINER].data)
         for item in container:
-            if item.type != 65: # if this is not a directory
+            if item.type != 65:  # if this is not a directory
                 filename = f"{directory}/{package_name}.files/{item.name.decode('utf-8')}"
                 print(filename)
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -30,9 +45,10 @@ def unpack_npk_file(filename: str, directory: str, skip_files: bool = False, ski
 
 if __name__ == '__main__':
     import argparse
+
     parser = argparse.ArgumentParser(description='unpack NPK package')
     parser.add_argument('filename', type=str, help='NPK package filename')
-    parser.add_argument('--directory', type=str, help='directory to unpack NPK package')
+    parser.add_argument('--directory', type=str, help='directory to unpack NPK package into')
     parser.add_argument('--skip-files', action='store_true', help='skip files')
     parser.add_argument('--skip-squashfs', action='store_true', help='skip squashfs')
     args = parser.parse_args()
