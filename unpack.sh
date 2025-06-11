@@ -185,6 +185,24 @@ function unpack_iso {
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
+function unpack_xz {
+  # arguments:
+  # $1 - source filepath, string
+  # $2 - destination directory, string
+
+  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).xz"
+  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+
+  local XZ_FILE="${DIR}/$(basename "$1")"
+  if [ -s "$1" -a -z "$(xz -t "$1")" ]; then
+    (cp "$1" "${XZ_FILE}" && unxz -q "${XZ_FILE}") || true
+  fi
+
+  rsync -rltgoD "${DIR}/" "$2/"
+  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
+  [ "${RM}" = true ] && rm -rf "${DIR}"
+}
+
 FILE="$1"
 if [ "$#" -ne 1 -o ! -s "${FILE}" ]; then
   clean_and_exit 2 "${ME}: The only argument must be a path to a non-empty file"
@@ -229,7 +247,8 @@ elif [ -n "$(echo "${OUT_FILE}" | grep -E '^ELF (.*) executable.*$')" ]; then
   compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "${OUT_BINWALK}" "" "${OUT_LS}"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^XZ compressed data.*$')" ]; then
   # unpack a valid *.xz file
-  echo "TODO: XZ"
+  unpack_xz "${FILE}" "${DIR}"; OUT_LS="${RESULT}"
+  compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "$(binwalk "${FILE}")" "" "${OUT_LS}"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
   # unpack a valid *.cpio file
   unpack_cpio "${FILE}" "${DIR}"; OUT_LS="${RESULT}"
