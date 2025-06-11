@@ -1,4 +1,4 @@
-"""MikroTikPatch - set of tools to analyse MikroTik RouterOS files
+"""routeros_npk - set of tools to analyse MikroTik RouterOS NPK files
 
 credits to @elseif
 

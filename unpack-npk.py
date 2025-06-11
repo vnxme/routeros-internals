@@ -14,7 +14,7 @@
 
 import os
 
-from MikroTikPatch import NovaPackage, NpkFileContainer, NpkPartID
+from tools.routeros_npk import NovaPackage, NpkFileContainer, NpkPartID
 
 
 def unpack_npk_package(package: NovaPackage, directory: str, skip_files: bool = False, skip_squashfs: bool = False):
