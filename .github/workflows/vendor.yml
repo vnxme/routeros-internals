@@ -215,7 +215,7 @@ jobs:
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-              unsquashfs -d "$(dirname "${FILE}")/_$(basename "${FILE}")" "${FILE}" || true
+              /tmp/unpack.sh "${FILE}" || true
             fi
           done
 

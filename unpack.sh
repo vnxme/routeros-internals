@@ -185,6 +185,23 @@ function unpack_iso {
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
+function unpack_sfs {
+  # arguments:
+  # $1 - source filepath, string
+  # $2 - destination directory, string
+
+  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).sfs"
+  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+
+  if [ -n "$(unsquashfs -ll "$1")" ]; then
+    unsquashfs -d "$2" "$1" || true
+  fi
+
+  rsync -rltgoD "${DIR}/" "$2/"
+  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
+  [ "${RM}" = true ] && rm -rf "${DIR}"
+}
+
 function unpack_xz {
   # arguments:
   # $1 - source filepath, string
@@ -252,6 +269,10 @@ elif [ -n "$(echo "${OUT_FILE}" | grep -E '^XZ compressed data.*$')" ]; then
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
   # unpack a valid *.cpio file
   unpack_cpio "${FILE}" "${DIR}"; OUT_LS="${RESULT}"
+  compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "$(binwalk "${FILE}")" "" "${OUT_LS}"
+elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Squashfs filesystem.*$')" ]; then
+  # unpack a valid *.sfs file
+  unpack_sfs "${FILE}" "${DIR}"; OUT_LS="${RESULT}"
   compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "$(binwalk "${FILE}")" "" "${OUT_LS}"
 else
   # reject an unknown file
