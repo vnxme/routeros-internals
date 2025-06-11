@@ -194,7 +194,7 @@ function unpack_xz {
   local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
 
   local XZ_FILE="${DIR}/$(basename "$1")"
-  if [ -s "$1" -a -z "$(xz -t "$1")" ]; then
+  if [ -z "$(xz -t "$1")" ]; then
     (cp "$1" "${XZ_FILE}" && unxz -q "${XZ_FILE}") || true
   fi
 
