@@ -166,6 +166,7 @@ function unpack_img {
     local NBD="/dev/$(lsblk | grep -e "nbd.*0B.*disk" | head -1 | cut -d ' ' -f1)"
     if [ -b "${NBD}" ]; then
       [ -n "${SUDO}" ] && (sudo qemu-nbd -c "${NBD}" -f raw "$1") || (qemu-nbd -c "${NBD}" -f raw "$1")
+      sleep 0.5
 
       [ -n "${SUDO}" ] && (local FDISK="$(sudo fdisk -l "${NBD}")") || (local FDISK="$(fdisk -l "${NBD}")")
       local SSIZE="$(echo "${FDISK}" | grep 'Sector size (logical/physical):' | cut -d ' ' -f4)"
