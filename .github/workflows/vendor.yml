@@ -208,7 +208,7 @@ jobs:
           for FILE in "${FILES[@]}"; do
             if [ -s "${FILE%%.zip}" ]; then
               rm "${FILE%%.zip}"
-              if [ -d "$(dirname "${FILE}")/_$(basename "${FILE%%.zip}")"]; then
+              if [ -d "$(dirname "${FILE}")/_$(basename "${FILE%%.zip}")" ]; then
                 mv "$(dirname "${FILE}")/_$(basename "${FILE%%.zip}")" "$(dirname "${FILE}")/_$(basename "${FILE}")"
               fi
             fi
