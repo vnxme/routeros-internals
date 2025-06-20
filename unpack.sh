@@ -167,15 +167,17 @@ function unpack_img {
     if [ -b "${NBD}" ]; then
       [ -n "${SUDO}" ] && (sudo qemu-nbd -c "${NBD}" -f raw "$1") || (qemu-nbd -c "${NBD}" -f raw "$1")
 
-      local SSIZE="$(fdisk -l "${NBD}" | grep 'Sector size (logical/physical):' | cut -d ' ' -f4)"
-      dd if="${NBD}" of="${DIR}/mbr.bin" bs=${SSIZE} count=1 || true
+      [ -n "${SUDO}" ] && (local FDISK="$(sudo fdisk -l "${NBD}")") || (local FDISK="$(fdisk -l "${NBD}")")
+      local SSIZE="$(echo "${FDISK}" | grep 'Sector size (logical/physical):' | cut -d ' ' -f4)"
+      [ -n "${SSIZE}" ] && (dd if="${NBD}" of="${DIR}/mbr.bin" bs=${SSIZE} count=1 || true)
 
-      if [ -n "$(parted "${NBD}" print | grep 'Partition Table: loop')" ]; then
+      [ -n "${SUDO}" ] && (local PARTED="$(sudo parted "${NBD}" print)") || (local PARTED="$(parted "${NBD}" print)")
+      if [ -n "$(echo "${PARTED}" | grep 'Partition Table: loop')" ]; then
         local PDIR="${DIR}/loop"
         mkdir -p "${PDIR}"
         [ -n "${SUDO}" ] && (sudo mount -o loop,ro "$1" "${PDIR}") || (mount -o loop,ro "$1" "${PDIR}")
       else
-        local PARTS="$(fdisk -l "${NBD}" | grep "${NBD}p" | cut -d ' ' -f1)"
+        local PARTS="$(echo "${FDISK}" | grep "${NBD}p" | cut -d ' ' -f1)"
         local PART; for PART in ${PARTS}; do
           local PNUM="$(echo "${PART}" | sed -e "s,${NBD}p,,g")"
           local PDIR="${DIR}/part${PNUM}"
