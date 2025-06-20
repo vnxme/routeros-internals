@@ -48,7 +48,7 @@ function unpack_bzimage {
       local XZ_SIZE=$((${XZ_END}-${XZ_START}+7)) # 7 is the end pattern length
       local UNK_FILE="${DIR}/$(printf "%x" "${XZ_START}").unknown"
       local XZ_FILE="${UNK_FILE}.xz"
-      dd if="$1}" bs=1 skip="${XZ_START}" count="${XZ_SIZE}" of="${XZ_FILE}" > /dev/null 2>&1 || true
+      dd if="$1" bs=1 skip="${XZ_START}" count="${XZ_SIZE}" of="${XZ_FILE}" > /dev/null 2>&1 || true
       if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
         unxz -q "${XZ_FILE}" || true
         if [ -s "${UNK_FILE}" ]; then
@@ -66,13 +66,13 @@ function unpack_bzimage {
   done
 
   # unless bzImage has an XZ-compressed vmlinux inside, use a universal script
-  if [ -z "$(find ${DIR}/* -maxdepth 0 -type f -name '*.vmlinux')" ]; then
+  if [ -z "$(find ${DIR}/* -maxdepth 0 -type f -name '*.vmlinux' 2>/dev/null)" ]; then
     local SCRIPT="/tmp/extract-vmlinux.sh"
     if [ ! -s "${SCRIPT}" ]; then
       clean_and_exit 2 "${ME}: Script '${SCRIPT}' is missing"
     fi
 
-    local VMLINUX="${DIR}/0.vmlinux"
+    local VMLINUX="${DIR}/fallback.vmlinux"
     "${SCRIPT}" "${FILE}" > "${VMLINUX}" || true
 
     if [ ! -s "${VMLINUX}" ]; then
