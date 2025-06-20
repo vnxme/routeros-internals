@@ -160,11 +160,39 @@ function unpack_img {
   local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
 
   local SUDO="$(which sudo)"
-  [ -n "${SUDO}" ] && (sudo mount -o loop,ro "$1" "${DIR}") || (mount -o loop,ro "$1" "${DIR}")
+  [ -z "$(lsmod | grep nbd)" ] && ([ -n "${SUDO}" ] && (sudo modprobe nbd) || (modprobe nbd))
 
-  rsync -rltgoD "${DIR}/" "$2/"
-  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
-  [ -n "${SUDO}" ] && (sudo umount "${DIR}") || (umount "${DIR}")
+  local NBD="/dev/$(lsblk | grep -e "nbd.*0B.*disk" | head -1 | cut -d ' ' -f1)"
+  if [ -b "${NBD}" ]; then
+    [ -n "${SUDO}" ] && (sudo qemu-nbd -c "${NBD}" -f raw "$1") || (qemu-nbd -c "${NBD}" -f raw "$1")
+
+    local SSIZE="$(fdisk -l "${NBD}" | grep 'Sector size (logical/physical):' | cut -d ' ' -f4)"
+    dd if="${NBD}" of="${DIR}/mbr.bin" bs=${SSIZE} count=1 || true
+
+    if [ -n "$(parted "${NBD}" print | grep 'Partition Table: loop')" ]; then
+      local PDIR="${DIR}/loop"
+      mkdir -p "${PDIR}"
+      [ -n "${SUDO}" ] && (sudo mount -o loop,ro "$1" "${PDIR}") || (mount -o loop,ro "$1" "${PDIR}")
+    else
+      local PARTS="$(fdisk -l "${NBD}" | grep "${NBD}p" | cut -d ' ' -f1)"
+      local PART; for PART in ${PARTS}; do
+        local PNUM="$(echo "${PART}" | sed -e "s,${NBD}p,,g")"
+        local PDIR="${DIR}/part${PNUM}"
+        mkdir -p "${PDIR}"
+        [ -n "${SUDO}" ] && (sudo mount -o ro "${PART}" "${PDIR}") || (mount -o ro "${PART}" "${PDIR}")
+      done
+    fi
+
+    rsync -rltgoD "${DIR}/" "$2/"
+    RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
+
+    local MOUNTS="$(mount | grep "${NBD}" | cut -d ' ' -f3)"
+    local MOUNT; for MOUNT in ${MOUNTS}; do
+      [ -n "${SUDO}" ] && (sudo umount "${MOUNT}") || (umount "${MOUNT}")
+    done
+
+    [ -n "${SUDO}" ] && (sudo qemu-nbd -d "${NBD}") || (qemu-nbd -d "${NBD}")
+  fi
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 

@@ -163,9 +163,28 @@ jobs:
             fi
           done
 
+      - name: Unpack IMG.ZIP files (1/2)
+        run: |
+          readarray -d '' -t FILES < <(
+            find */* -maxdepth 0 -type f -name '*.img.zip' -print0 2>/dev/null || true
+          )
+          declare -A HASHES
+          for FILE in "${FILES[@]}"; do
+            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
+            if [ -n "${HASHES[${HASH}]}" ]; then
+              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
+            else
+              HASHES[${HASH}]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              unzip "${FILE}" || true
+            fi
+          done
+
       - name: Unpack IMG files
         run: |
           readarray -d '' -t FILES < <(
+            find */* -maxdepth 0 -type f -name '*.img' -print0 2>/dev/null || true
             find */_*.iso/* -maxdepth 0 -type f -name '*.img' -print0 2>/dev/null || true
           )
           declare -A HASHES
@@ -178,6 +197,18 @@ jobs:
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               /tmp/unpack.sh "${FILE}" || true
+            fi
+          done
+
+      - name: Unpack IMG.ZIP files (2/2)
+        run: |
+          readarray -d '' -t FILES < <(
+            find */* -maxdepth 0 -type f -name '*.img.zip' -print0 2>/dev/null || true
+          )
+          for FILE in "${FILES[@]}"; do
+            if [ -s "${FILE%%.zip}" -a -d "$(dirname "${FILE}")/_$(basename "${FILE%%.zip}")" ]; then
+              mv "$(dirname "${FILE}")/_$(basename "${FILE%%.zip}")" "$(dirname "${FILE}")/_$(basename "${FILE}")"
+              rm "${FILE%%.zip}"
             fi
           done
 
