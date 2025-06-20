@@ -89,7 +89,7 @@ jobs:
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           execute_install_scripts: true
-          packages: binutils-common binwalk bzip2 genisoimage gzip lz4 lzma lzop rsync xz-utils zip zstd
+          packages: binutils-common binwalk bzip2 genisoimage gzip lz4 lzma lzop qemu-nbd rsync xz-utils zip zstd
           version: 1.0
 
       #- name: Install requirements
@@ -206,9 +206,11 @@ jobs:
             find */* -maxdepth 0 -type f -name '*.img.zip' -print0 2>/dev/null || true
           )
           for FILE in "${FILES[@]}"; do
-            if [ -s "${FILE%%.zip}" -a -d "$(dirname "${FILE}")/_$(basename "${FILE%%.zip}")" ]; then
-              mv "$(dirname "${FILE}")/_$(basename "${FILE%%.zip}")" "$(dirname "${FILE}")/_$(basename "${FILE}")"
+            if [ -s "${FILE%%.zip}" ]; then
               rm "${FILE%%.zip}"
+              if [ -d "$(dirname "${FILE}")/_$(basename "${FILE%%.zip}")"]; then
+                mv "$(dirname "${FILE}")/_$(basename "${FILE%%.zip}")" "$(dirname "${FILE}")/_$(basename "${FILE}")"
+              fi
             fi
           done
 
