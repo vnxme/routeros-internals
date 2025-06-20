@@ -89,7 +89,7 @@ jobs:
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           execute_install_scripts: true
-          packages: binutils-common binwalk bzip2 genisoimage gzip lz4 lzma lzop qemu-nbd rsync xz-utils zip zstd
+          packages: binutils-common binwalk bzip2 genisoimage gzip lz4 lzma lzop qemu-utils rsync xz-utils zip zstd
           version: 1.0
 
       #- name: Install requirements
@@ -177,7 +177,7 @@ jobs:
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-              unzip "${FILE}" || true
+              unzip -d "$(dirname "${FILE}")/" "${FILE}" || true
             fi
           done
 
