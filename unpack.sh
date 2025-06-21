@@ -94,7 +94,7 @@ function unpack_cpio {
   local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
 
   cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true
-  rsync -rltgoD --exclude={'dev','floppy','mnt','proc','tmp'} "${DIR}/" "$2/"
+  rsync -rltgoD "${DIR}/" "$2/"
   RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
@@ -182,7 +182,7 @@ function unpack_img {
       done
     fi
 
-    rsync -rltgoD --exclude={'part1/lost+found','part2/dev','part2/lost+found'} "${DIR}/" "$2/"
+    rsync -rltgoD "${DIR}/" "$2/"
     RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
 
     local MOUNTS="$(mount | grep "${NBD}" | cut -d ' ' -f3)"
