@@ -187,7 +187,7 @@ function unpack_img {
         done
       fi
 
-      rsync -rltgoD --exclude={'lost+found'} "${DIR}/" "$2/"
+      rsync -rltgoD --exclude={'part1/lost+found','part2/dev','part2/lost+found'} "${DIR}/" "$2/"
       RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
 
       local MOUNTS="$(mount | grep "${NBD}" | cut -d ' ' -f3)"
@@ -252,6 +252,23 @@ function unpack_xz {
   RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
+
+if [ "${EUID:-$(id -u)}" -ne 0 ]; then
+  echo "${ME}: Root permissions are required"
+  if [ -n "$(which sudo)" ]; then
+    echo "${ME}: Using sudo to run as root"
+    sudo bash "$0" "$@"
+    exit $?
+  else
+    echo "${ME}: Using su -c to run as root"
+    su - root -c "bash $0 $@"
+    exit $?
+  fi
+fi
+
+[[ ":${PATH}:" != *":/sbin:"* ]] && export PATH="${PATH}:/sbin"
+[[ ":${PATH}:" != *":/usr/sbin:"* ]] && export PATH="${PATH}:/usr/sbin"
+[[ ":${PATH}:" != *":/usr/local/sbin:"* ]] && export PATH="${PATH}:/usr/local/sbin"
 
 FILE="$1"
 if [ "$#" -ne 1 -o ! -s "${FILE}" ]; then
