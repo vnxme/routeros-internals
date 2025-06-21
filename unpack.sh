@@ -187,7 +187,7 @@ function unpack_img {
         done
       fi
 
-      rsync -rltgoD "${DIR}/" "$2/"
+      rsync -rltgoD --exclude={'lost+found'} "${DIR}/" "$2/"
       RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
 
       local MOUNTS="$(mount | grep "${NBD}" | cut -d ' ' -f3)"
