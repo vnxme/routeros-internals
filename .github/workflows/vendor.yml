@@ -157,6 +157,8 @@ jobs:
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               /tmp/unpack.sh "${FILE}" || true
+          
+              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
             
               README="$(dirname ${FILE})/_$(basename ${FILE})/README.md"
               echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "${README}"
@@ -197,6 +199,8 @@ jobs:
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               /tmp/unpack.sh "${FILE}" || true
+          
+              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
             fi
           done
 
@@ -251,6 +255,8 @@ jobs:
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               /tmp/unpack.sh "${FILE}" || true
+          
+              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
             fi
           done
 
@@ -320,6 +326,8 @@ jobs:
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               /tmp/unpack.sh "${FILE}" || true
+          
+              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
             fi
           done
 
@@ -350,6 +358,8 @@ jobs:
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               /tmp/unpack.sh "${FILE}" || true
+          
+              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
             fi
           done
 
@@ -370,6 +380,8 @@ jobs:
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               /tmp/unpack.sh "${FILE}" || true
+          
+              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
             fi
           done
 
@@ -403,6 +415,8 @@ jobs:
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               /tmp/unpack.sh "${FILE}" || true
+          
+              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
             fi
           done
 
