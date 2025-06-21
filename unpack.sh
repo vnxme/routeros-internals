@@ -170,7 +170,7 @@ function unpack_img {
 
       [ -n "${SUDO}" ] && local FDISK="$(sudo sfdisk -d "${NBD}")" || local FDISK="$(sfdisk -d "${NBD}")"
       local SSIZE="$(echo "${FDISK}" | grep 'sector-size:' | cut -d ' ' -f2)"
-      [ -n "${SSIZE}" ] && (dd if="${NBD}" of="${DIR}/mbr.bin" bs=${SSIZE} count=1 || true)
+      [ -n "${SSIZE}" ] && (dd if="${1}" of="${DIR}/mbr.bin" bs=${SSIZE} count=1 || true)
 
       [ -n "${SUDO}" ] && local PARTED="$(sudo parted "${NBD}" print)" || local PARTED="$(parted "${NBD}" print)"
       if [ -n "$(echo "${PARTED}" | grep 'Partition Table: loop')" ]; then
