@@ -93,9 +93,7 @@ function unpack_cpio {
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).cpio"
   local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
 
-  local SUDO="$(which sudo)"
-  [ -n "${SUDO}" ] && (sudo cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true) || (cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true)
-
+  cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true
   rsync -rltgoD --exclude={'dev','floppy','mnt','proc','tmp'} "${DIR}/" "$2/"
   RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
   [ "${RM}" = true ] && rm -rf "${DIR}"
@@ -159,44 +157,40 @@ function unpack_img {
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).img"
   local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
 
-  local SUDO="$(which sudo)"
-  if [ -n "$(which qemu-nbd)" ]; then
-    [ -z "$(lsmod | grep 'nbd')" ] && ([ -n "${SUDO}" ] && sudo modprobe nbd || modprobe nbd)
+  [ -z "$(lsmod | grep 'nbd')" ] && modprobe nbd && sleep 0.5
 
-    local NBD="/dev/$(lsblk | grep -e "nbd.*0B.*disk" | head -1 | cut -d ' ' -f1)"
-    if [ -b "${NBD}" ]; then
-      [ -n "${SUDO}" ] && (sudo qemu-nbd -c "${NBD}" -f raw "$1") || (qemu-nbd -c "${NBD}" -f raw "$1")
-      sleep 0.5
+  local NBD="/dev/$(lsblk | grep -e "nbd.*0B.*disk" | head -1 | cut -d ' ' -f1)"
+  if [ -b "${NBD}" ]; then
+    qemu-nbd -c "${NBD}" -f raw "$1" && sleep 0.5
 
-      [ -n "${SUDO}" ] && local FDISK="$(sudo sfdisk -d "${NBD}")" || local FDISK="$(sfdisk -d "${NBD}")"
-      local SSIZE="$(echo "${FDISK}" | grep 'sector-size:' | cut -d ' ' -f2)"
-      [ -n "${SSIZE}" ] && (dd if="${1}" of="${DIR}/mbr.bin" bs=${SSIZE} count=1 || true)
+    local FDISK="$(sfdisk -d "${NBD}")"
+    local SSIZE="$(echo "${FDISK}" | grep 'sector-size:' | cut -d ' ' -f2)"
+    [ -n "${SSIZE}" ] && dd if="${NBD}" of="${DIR}/mbr.bin" bs=${SSIZE} count=1
 
-      [ -n "${SUDO}" ] && local PARTED="$(sudo parted "${NBD}" print)" || local PARTED="$(parted "${NBD}" print)"
-      if [ -n "$(echo "${PARTED}" | grep 'Partition Table: loop')" ]; then
-        local PDIR="${DIR}/loop"
+    local PARTED="$(parted "${NBD}" print)"
+    if [ -n "$(echo "${PARTED}" | grep 'Partition Table: loop')" ]; then
+      local PDIR="${DIR}/loop"
+      mkdir -p "${PDIR}"
+      mount -o loop,ro "$1" "${PDIR}"
+    else
+      local PARTS="$(echo "${FDISK}" | grep "${NBD}p" | cut -d ' ' -f1)"
+      local PART; for PART in ${PARTS}; do
+        local PNUM="$(echo "${PART}" | sed -e "s,${NBD}p,,g")"
+        local PDIR="${DIR}/part${PNUM}"
         mkdir -p "${PDIR}"
-        [ -n "${SUDO}" ] && (sudo mount -o loop,ro "$1" "${PDIR}") || (mount -o loop,ro "$1" "${PDIR}")
-      else
-        local PARTS="$(echo "${FDISK}" | grep "${NBD}p" | cut -d ' ' -f1)"
-        local PART; for PART in ${PARTS}; do
-          local PNUM="$(echo "${PART}" | sed -e "s,${NBD}p,,g")"
-          local PDIR="${DIR}/part${PNUM}"
-          mkdir -p "${PDIR}"
-          [ -n "${SUDO}" ] && (sudo mount -o ro "${PART}" "${PDIR}") || (mount -o ro "${PART}" "${PDIR}")
-        done
-      fi
-
-      rsync -rltgoD --exclude={'part1/lost+found','part2/dev','part2/lost+found'} "${DIR}/" "$2/"
-      RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
-
-      local MOUNTS="$(mount | grep "${NBD}" | cut -d ' ' -f3)"
-      local MOUNT; for MOUNT in ${MOUNTS}; do
-        [ -n "${SUDO}" ] && (sudo umount "${MOUNT}") || (umount "${MOUNT}")
+        mount -o ro "${PART}" "${PDIR}"
       done
-
-      [ -n "${SUDO}" ] && (sudo qemu-nbd -d "${NBD}") || (qemu-nbd -d "${NBD}")
     fi
+
+    rsync -rltgoD --exclude={'part1/lost+found','part2/dev','part2/lost+found'} "${DIR}/" "$2/"
+    RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
+
+    local MOUNTS="$(mount | grep "${NBD}" | cut -d ' ' -f3)"
+    local MOUNT; for MOUNT in ${MOUNTS}; do
+      umount "${MOUNT}"
+    done
+
+    qemu-nbd -d "${NBD}"
   fi
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
@@ -209,12 +203,10 @@ function unpack_iso {
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).iso"
   local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
 
-  local SUDO="$(which sudo)"
-  [ -n "${SUDO}" ] && (sudo mount -o loop,ro "$1" "${DIR}") || (mount -o loop,ro "$1" "${DIR}")
-
+  mount -o loop,ro "$1" "${DIR}"
   rsync -rltgoD "${DIR}/" "$2/"
   RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
-  [ -n "${SUDO}" ] && (sudo umount "${DIR}") || (umount "${DIR}")
+  umount "${DIR}"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
