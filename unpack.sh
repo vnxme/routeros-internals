@@ -161,18 +161,18 @@ function unpack_img {
 
   local SUDO="$(which sudo)"
   if [ -n "$(which qemu-nbd)" ]; then
-    [ -z "$(lsmod | grep nbd)" ] && ([ -n "${SUDO}" ] && (sudo modprobe nbd) || (modprobe nbd))
+    [ -z "$(lsmod | grep 'nbd')" ] && ([ -n "${SUDO}" ] && sudo modprobe nbd || modprobe nbd)
 
     local NBD="/dev/$(lsblk | grep -e "nbd.*0B.*disk" | head -1 | cut -d ' ' -f1)"
     if [ -b "${NBD}" ]; then
       [ -n "${SUDO}" ] && (sudo qemu-nbd -c "${NBD}" -f raw "$1") || (qemu-nbd -c "${NBD}" -f raw "$1")
       sleep 0.5
 
-      [ -n "${SUDO}" ] && (local FDISK="$(sudo fdisk -l "${NBD}")") || (local FDISK="$(fdisk -l "${NBD}")")
-      local SSIZE="$(echo "${FDISK}" | grep 'Sector size (logical/physical):' | cut -d ' ' -f4)"
+      [ -n "${SUDO}" ] && local FDISK="$(sudo sfdisk -d "${NBD}")" || local FDISK="$(sfdisk -d "${NBD}")"
+      local SSIZE="$(echo "${FDISK}" | grep 'sector-size:' | cut -d ' ' -f2)"
       [ -n "${SSIZE}" ] && (dd if="${NBD}" of="${DIR}/mbr.bin" bs=${SSIZE} count=1 || true)
 
-      [ -n "${SUDO}" ] && (local PARTED="$(sudo parted "${NBD}" print)") || (local PARTED="$(parted "${NBD}" print)")
+      [ -n "${SUDO}" ] && local PARTED="$(sudo parted "${NBD}" print)" || local PARTED="$(parted "${NBD}" print)"
       if [ -n "$(echo "${PARTED}" | grep 'Partition Table: loop')" ]; then
         local PDIR="${DIR}/loop"
         mkdir -p "${PDIR}"
