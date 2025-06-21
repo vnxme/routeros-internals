@@ -270,12 +270,14 @@ fi
 [[ ":${PATH}:" != *":/usr/sbin:"* ]] && export PATH="${PATH}:/usr/sbin"
 [[ ":${PATH}:" != *":/usr/local/sbin:"* ]] && export PATH="${PATH}:/usr/local/sbin"
 
+echo "${ME}: Processing arguments $@"
+
 FILE="$1"
 if [ "$#" -ne 1 -o ! -s "${FILE}" ]; then
   clean_and_exit 2 "${ME}: The only argument must be a path to a non-empty file"
 fi
 
-DEPS=(file binwalk)
+DEPS=(binwalk cpio file qemu-nbd parted rsync unsquashfs unxz)
 for DEP in ${DEPS[@]}; do
   if [ -z "$(which "${DEP}")" ]; then
     clean_and_exit 2 "${ME}: Dependency '${DEP}' can't be satisfied"
