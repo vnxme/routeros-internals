@@ -227,7 +227,7 @@ function unpack_img {
     if [ -n "$(echo "${PA}" | grep 'Partition Table: loop')" ]; then
       local PDIR="${DIR}/loop"
       mkdir -p "${PDIR}"
-      mount -o loop,ro "$1" "${PDIR}" && sleep 0.25
+      mount -o loop,ro "${NBD}" "${PDIR}" && sleep 0.25
     else
       local PARTS="$(echo "${BI}" | cut -d ':' -f1)"
       local PART; for PART in ${PARTS}; do
