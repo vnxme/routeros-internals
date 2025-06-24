@@ -420,6 +420,24 @@ jobs:
             fi
           done
 
+      - name: Remove block devices before commit
+        run: |
+          readarray -d '' -t BLOCKS < <(
+            find . -type b -print0 2>/dev/null || true
+          )
+          for BLOCK in "${BLOCKS[@]}"; do
+            rm -f "${BLOCK}"
+          done
+
+      - name: Fix directory permissions
+        run: |
+          readarray -d '' -t DIRS < <(
+            find . -type d -not -perm 755 -print0 2>/dev/null || true
+          )
+          for DIR in "${DIRS[@]}"; do
+            chmod 755 "${DIR}"
+          done
+
       - name: Put .gitignore into empty directories
         run: |
           readarray -d '' -t DIRS < <(
