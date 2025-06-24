@@ -426,7 +426,7 @@ jobs:
             find . -type b -print0 2>/dev/null || true
           )
           for BLOCK in "${BLOCKS[@]}"; do
-            rm -f "${BLOCK}"
+            sudo rm -f "${BLOCK}"
           done
 
       - name: Fix directory permissions
