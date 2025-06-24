@@ -126,7 +126,7 @@ function unpack_cpio {
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).cpio"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true
+  cpio --quiet --no-preserve-owner -idm -D "${DIR}" < "$1" || true
   rsync -rltgoD "${DIR}/" "$2/"
   HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
   [ "${RM}" = true ] && rm -rf "${DIR}"
