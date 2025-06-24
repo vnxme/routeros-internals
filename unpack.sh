@@ -16,18 +16,33 @@ function compose_readme {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
-  # $3 - identification text, string
-  # $4 - analysis text, string
-  # $5 - description text, string
-  # $6 - listing text, string
-  # $7 - notes, string
+  # $3 - helpers array name, string
+
+  local -n HREF="$3"
   local TEXT="### $(basename "$1")\n"
   local README="$2/README.md"
-  [ -n "$3" ] && local TEXT="${TEXT}#### Identification (\`file <*>\`):\n\`\`\`\n$3\n\`\`\`\n"
-  [ -n "$4" ] && local TEXT="${TEXT}#### Analysis (\`binwalk <*>\`):\n\`\`\`\n$4\n\`\`\`\n"
-  [ -n "$5" ] && local TEXT="${TEXT}#### Description (\`isoinfo -d -i <*>\`):\n\`\`\`\n$5\n\`\`\`\n"
-  [ -n "$6" ] && local TEXT="${TEXT}#### Listing (\`ls -AlR <*>\`):\n\`\`\`\n$6\n\`\`\`\n"
-  [ -n "$7" ] && local TEXT="${TEXT}#### Notes:\n$7\n"
+
+  local BD="${HREF['blockdev']}"
+  local BI="${HREF['blkid']}"
+  local BW="${HREF['binwalk']}"
+  local FD="${HREF['fdisk']}"
+  local FI="${HREF['file']}"
+  local GD="${HREF['gdisk']}"
+  local II="${HREF['isoinfo']}"
+  local LS="${HREF['ls']}"
+  local NO="${HREF['notes']}"
+  local PA="${HREF['parted']}"
+
+  [ -n "${FI}" ] && TEXT="${TEXT}#### Identification (\`file <*>\`):\n\`\`\`\n${FI}\n\`\`\`\n"
+  [ -n "${BW}" ] && TEXT="${TEXT}#### Analysis (\`binwalk <*>\`):\n\`\`\`\n${BW}\n\`\`\`\n"
+  [ -n "${II}" ] && TEXT="${TEXT}#### Description (\`isoinfo -d -i <*>\`):\n\`\`\`\n${II}\n\`\`\`\n"
+  [ -n "${BD}" ] && TEXT="${TEXT}#### Block device info (\`blockdev --report <*>\`):\n\`\`\`\n${BD}\n\`\`\`\n"
+  [ -n "${FD}" ] && TEXT="${TEXT}#### MBR info (\`fdisk -l <*>\`):\n\`\`\`\n${FD}\n\`\`\`\n"
+  [ -n "${GD}" ] && TEXT="${TEXT}#### GPT info (\`gdisk -l <*>\`):\n\`\`\`\n${GD}\n\`\`\`\n"
+  [ -n "${BI}" ] && TEXT="${TEXT}#### Partition info (\`parted <*> print\`):\n\`\`\`\n${BI}\n\`\`\`\n"
+  [ -n "${PA}" ] && TEXT="${TEXT}#### Partition IDs (\`blkid\`):\n\`\`\`\n${PA}\n\`\`\`\n"
+  [ -n "${LS}" ] && TEXT="${TEXT}#### Listing (\`ls -AlR --time-style=full-iso <*>\`):\n\`\`\`\n${LS}\n\`\`\`\n"
+  [ -n "${NO}" ] && TEXT="${TEXT}#### Notes:\n${NO}\n"
   echo -e "${TEXT}" > "${README}"
 }
 
@@ -35,9 +50,11 @@ function unpack_bzimage {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
+  # $3 - helpers array name, string
 
+  local -n HREF="$3"
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).efi"
-  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+  local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   # credits to @elseif for binary patterns
   # ref: https://github.com/elseif/MikroTikPatch/blob/main/patch.py
@@ -81,7 +98,7 @@ function unpack_bzimage {
   fi
 
   rsync -rltgoD "${DIR}/" "$2/"
-  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
+  HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -89,13 +106,15 @@ function unpack_cpio {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
+  # $3 - helpers array name, string
 
+  local -n HREF="$3"
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).cpio"
-  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+  local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   cpio --no-preserve-owner -idm -D "${DIR}" < "$1" || true
   rsync -rltgoD "${DIR}/" "$2/"
-  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
+  HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -103,14 +122,16 @@ function unpack_elf {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
-  # $3 - binwalk output, string
+  # $3 - helpers array name, string
 
+  local -n HREF="$3"
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).elf"
-  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+  local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  local CPIO_ENDS=$(echo "$3" | grep -E 'cpio archive(.*)TRAILER!!!' | gawk '{print $1}' | tail -1)
+  local BW="${HREF['binwalk']}"
+  local CPIO_ENDS=$(echo "${BW}" | grep -E 'cpio archive(.*)TRAILER!!!' | gawk '{print $1}' | tail -1)
   local CPIO_END; for CPIO_END in ${CPIO_ENDS}; do
-    local CPIO_START="$(echo "$3" | grep 'cpio archive' | gawk '{print $1}' | head -1)"
+    local CPIO_START="$(echo "${BW}" | grep 'cpio archive' | gawk '{print $1}' | head -1)"
     if [ -n "${CPIO_START}" ] && [ -n "${CPIO_END}" ] && [ "${CPIO_START}" -lt "${CPIO_END}" ]; then
       local CPIO_SIZE=$((${CPIO_END}-${CPIO_START}+136)) # 136 is the end pattern length
       local CPIO_FILE="${DIR}/$(printf "%x" "${CPIO_START}").cpio"
@@ -145,7 +166,7 @@ function unpack_elf {
   done
 
   rsync -rltgoD "${DIR}/" "$2/"
-  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
+  HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -153,44 +174,65 @@ function unpack_img {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
+  # $3 - helpers array name, string
 
+  local -n HREF="$3"
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).img"
-  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+  local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  [ -z "$(lsmod | grep 'nbd')" ] && modprobe nbd && sleep 0.5
+  [ -z "$(lsmod | grep 'nbd')" ] && modprobe nbd && sleep 0.25
 
   local NBD="/dev/$(lsblk | grep -e "nbd.*0B.*disk" | head -1 | cut -d ' ' -f1)"
   if [ -b "${NBD}" ]; then
-    qemu-nbd -c "${NBD}" -f raw "$1" && sleep 0.5
+    qemu-nbd -c "${NBD}" -f raw "$1" && sleep 0.25
 
-    local FDISK="$(sfdisk -d "${NBD}")"
-    local SSIZE="$(echo "${FDISK}" | grep 'sector-size:' | cut -d ' ' -f2)"
-    [ -n "${SSIZE}" ] && dd if="${NBD}" of="${DIR}/mbr.bin" bs=${SSIZE} count=1
+    local BI="$(blkid | grep "${NBD}")"
+    local GD="$(echo 2 | gdisk -l "${NBD}")"
+    local PA="$(parted "${NBD}" print)"
 
-    local PARTED="$(parted "${NBD}" print)"
-    if [ -n "$(echo "${PARTED}" | grep 'Partition Table: loop')" ]; then
+    HREF['blockdev']="$(blockdev --report "${NBD}")"
+    HREF['blkid']="${BI}"
+    HREF['fdisk']="$(fdisk -l "${NBD}")"
+    HREF['gdisk']="${GD}"
+    HREF['parted']="${PA}"
+
+    local SS="$(blockdev --getss "${NBD}")"
+    dd if="${NBD}" of="${DIR}/mbr.bin" bs="${SS}" count=1
+    if [ -n "$(echo "${GD}" | grep 'GPT: present')" ]; then
+      local SZ="$(blockdev --getsz "${NBD}")"
+      dd if="${DIR}/mbr.bin" of="${DIR}/gpt.bin" bs="${SS}" count=1 seek=0
+      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count=1 skip=1 seek=1
+      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count=1 skip="$((${SZ} - 1))" seek=2
+
+      local PT="$(echo "${GD}" | grep 'Main partition table')"
+      local PB="$(echo "${PT}" | cut -d ' ' -f7)"
+      local PE="$(echo "${PT}" | cut -d ' ' -f12)"
+      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count="$((${PE} - ${PB} + 1))" skip="${PB}" seek=3
+    fi
+
+    if [ -n "$(echo "${PA}" | grep 'Partition Table: loop')" ]; then
       local PDIR="${DIR}/loop"
       mkdir -p "${PDIR}"
-      mount -o loop,ro "$1" "${PDIR}"
+      mount -o loop,ro "$1" "${PDIR}" && sleep 0.25
     else
-      local PARTS="$(echo "${FDISK}" | grep "${NBD}p" | cut -d ' ' -f1)"
+      local PARTS="$(echo "${BI}" | cut -d ':' -f1)"
       local PART; for PART in ${PARTS}; do
         local PNUM="$(echo "${PART}" | sed -e "s,${NBD}p,,g")"
         local PDIR="${DIR}/part${PNUM}"
         mkdir -p "${PDIR}"
-        mount -o ro "${PART}" "${PDIR}"
+        mount -o ro "${PART}" "${PDIR}" && sleep 0.25
       done
     fi
 
     rsync -rltgoD "${DIR}/" "$2/"
-    RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
+    HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
 
     local MOUNTS="$(mount | grep "${NBD}" | cut -d ' ' -f3)"
     local MOUNT; for MOUNT in ${MOUNTS}; do
-      umount "${MOUNT}"
+      umount "${MOUNT}" && sleep 0.25
     done
 
-    qemu-nbd -d "${NBD}"
+    qemu-nbd -d "${NBD}" && sleep 0.25
   fi
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
@@ -199,14 +241,16 @@ function unpack_iso {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
+  # $3 - helpers array name, string
 
+  local -n HREF="$3"
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).iso"
-  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+  local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  mount -o loop,ro "$1" "${DIR}"
+  mount -o loop,ro "$1" "${DIR}" && sleep 0.25
   rsync -rltgoD "${DIR}/" "$2/"
-  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
-  umount "${DIR}"
+  HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
+  umount "${DIR}" && sleep 0.25
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -214,16 +258,18 @@ function unpack_sfs {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
+  # $3 - helpers array name, string
 
+  local -n HREF="$3"
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).sfs"
-  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+  local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   if [ -n "$(unsquashfs -ll "$1")" ]; then
     unsquashfs -d "$2" "$1" || true
   fi
 
   rsync -rltgoD "${DIR}/" "$2/"
-  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
+  HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -231,9 +277,11 @@ function unpack_xz {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
+  # $3 - helpers array name, string
 
+  local -n HREF="$3"
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).xz"
-  local RM=false; [ ! -d "${DIR}" ] && (mkdir -p "${DIR}" && local RM=true)
+  local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   local XZ_FILE="${DIR}/$(basename "$1")"
   if [ -z "$(xz -t "$1")" ]; then
@@ -241,7 +289,7 @@ function unpack_xz {
   fi
 
   rsync -rltgoD "${DIR}/" "$2/"
-  RESULT=$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")
+  HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -262,7 +310,7 @@ fi
 [[ ":${PATH}:" != *":/usr/sbin:"* ]] && export PATH="${PATH}:/usr/sbin"
 [[ ":${PATH}:" != *":/usr/local/sbin:"* ]] && export PATH="${PATH}:/usr/local/sbin"
 
-DEPS=(binwalk cpio file qemu-nbd parted rsync unsquashfs unxz)
+DEPS=(binwalk blockdev blkid cpio fdisk file gdisk qemu-nbd parted rsync unsquashfs unxz)
 for DEP in ${DEPS[@]}; do
   if [ -z "$(which "${DEP}")" ]; then
     clean_and_exit 2 "${ME}: Dependency '${DEP}' can't be satisfied"
@@ -283,41 +331,47 @@ elif [ -n "$(ls -A "${DIR}")" ]; then
   clean_and_exit 2 "${ME}: Directory '${DIR}' isn't empty"
 fi
 
-OUT_FILE="$(file "${FILE}" | cut -f 2- -d ' ')"
+declare -A HELPERS
+OUT_FILE="$(file "${FILE}" | cut -f 2- -d ' ')"; HELPERS['file']="${OUT_FILE}"
 if [ -n "$(echo "${OUT_FILE}" | grep -E '^ISO 9660 CD-ROM filesystem data.*$')" ]; then
   # unpack a valid *.iso file
-  unpack_iso "${FILE}" "${DIR}"; OUT_LS="${RESULT}"
-  compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "" "$(isoinfo -d -i "${FILE}")" "${OUT_LS}"
+  HELPERS['isoinfo']="$(isoinfo -d -i "${FILE}")"
+  unpack_iso "${FILE}" "${DIR}" "HELPERS"
+  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^DOS/MBR boot sector.*$')" ]; then
   # unpack a valid *.img file
-  unpack_img "${FILE}" "${DIR}"; OUT_LS="${RESULT}"
-  compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "" "" "${OUT_LS}"
+  unpack_img "${FILE}" "${DIR}" "HELPERS"
+  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable bzImage.*$')" ]; then
   # unpack a valid Linux bzImage (could be named as *.efi or linux.*)
-  unpack_bzimage "${FILE}" "${DIR}"; OUT_LS="${RESULT}"
-  compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "$(binwalk "${FILE}")" "" "${OUT_LS}"
+  HELPERS['binwalk']="$(binwalk "${FILE}")"
+  unpack_bzimage "${FILE}" "${DIR}" "HELPERS"
+  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
   # unpack a valid Linux Image (could be named as *.efi, but resembles a Linux executable)
-  OUT_BINWALK="$(binwalk "${FILE}")"
-  unpack_elf "${FILE}" "${DIR}" "${OUT_BINWALK}"; OUT_LS="${RESULT}"
-  compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "${OUT_BINWALK}" "" "${OUT_LS}"
+  HELPERS['binwalk']="$(binwalk "${FILE}")"
+  unpack_elf "${FILE}" "${DIR}" "HELPERS"
+  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^ELF (.*) executable.*$')" ]; then
   # unpack a valid Linux executable (could be named as kernel)
-  OUT_BINWALK="$(binwalk "${FILE}")"
-  unpack_elf "${FILE}" "${DIR}" "${OUT_BINWALK}"; OUT_LS="${RESULT}"
-  compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "${OUT_BINWALK}" "" "${OUT_LS}"
+  HELPERS['binwalk']="$(binwalk "${FILE}")"
+  unpack_elf "${FILE}" "${DIR}" "HELPERS"
+  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^XZ compressed data.*$')" ]; then
   # unpack a valid *.xz file
-  unpack_xz "${FILE}" "${DIR}"; OUT_LS="${RESULT}"
-  compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "$(binwalk "${FILE}")" "" "${OUT_LS}"
+  HELPERS['binwalk']="$(binwalk "${FILE}")"
+  unpack_xz "${FILE}" "${DIR}" "HELPERS"
+  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
   # unpack a valid *.cpio file
-  unpack_cpio "${FILE}" "${DIR}"; OUT_LS="${RESULT}"
-  compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "$(binwalk "${FILE}")" "" "${OUT_LS}"
+  HELPERS['binwalk']="$(binwalk "${FILE}")"
+  unpack_cpio "${FILE}" "${DIR}" "HELPERS"
+  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Squashfs filesystem.*$')" ]; then
   # unpack a valid *.sfs file
-  unpack_sfs "${FILE}" "${DIR}"; OUT_LS="${RESULT}"
-  compose_readme "${FILE}" "${DIR}" "${OUT_FILE}" "$(binwalk "${FILE}")" "" "${OUT_LS}"
+  HELPERS['binwalk']="$(binwalk "${FILE}")"
+  unpack_sfs "${FILE}" "${DIR}" "HELPERS"
+  compose_readme "${FILE}" "${DIR}" "HELPERS"
 else
   # reject an unknown file
   clean_and_exit 2 "${ME}: File '${FILE}' containing '${OUT_FILE}' can't be unpacked"
