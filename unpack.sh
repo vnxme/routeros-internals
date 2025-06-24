@@ -279,7 +279,7 @@ function unpack_sfs {
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   if [ -n "$(unsquashfs -ll "$1")" ]; then
-    unsquashfs -q -d "$2" "$1" || true
+    unsquashfs -q -d "$2" "$1" 2>/dev/null || true
   fi
 
   rsync -rltgoD "${DIR}/" "$2/"
