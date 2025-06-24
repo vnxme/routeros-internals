@@ -211,17 +211,17 @@ function unpack_img {
     HREF['parted']="${PA}"
 
     local SS="$(blockdev --getss "${NBD}")"
-    dd if="${NBD}" of="${DIR}/mbr.bin" bs="${SS}" count=1
+    dd if="${NBD}" of="${DIR}/mbr.bin" bs="${SS}" count=1 2>/dev/null
     if [ -n "$(echo "${GD}" | grep 'GPT: present')" ]; then
       local SZ="$(blockdev --getsz "${NBD}")"
-      dd if="${DIR}/mbr.bin" of="${DIR}/gpt.bin" bs="${SS}" count=1 seek=0
-      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count=1 skip=1 seek=1
-      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count=1 skip="$((${SZ} - 1))" seek=2
+      dd if="${DIR}/mbr.bin" of="${DIR}/gpt.bin" bs="${SS}" count=1 seek=0 2>/dev/null
+      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count=1 skip=1 seek=1 2>/dev/null
+      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count=1 skip="$((${SZ} - 1))" seek=2 2>/dev/null
 
       local PT="$(echo "${GD}" | grep 'Main partition table')"
       local PB="$(echo "${PT}" | cut -d ' ' -f7)"
       local PE="$(echo "${PT}" | cut -d ' ' -f12)"
-      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count="$((${PE} - ${PB} + 1))" skip="${PB}" seek=3
+      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count="$((${PE} - ${PB} + 1))" skip="${PB}" seek=3 2>/dev/null
     fi
 
     if [ -n "$(echo "${PA}" | grep 'Partition Table: loop')" ]; then
@@ -246,7 +246,7 @@ function unpack_img {
       umount "${MOUNT}" && sleep 0.25
     done
 
-    qemu-nbd -d "${NBD}" && sleep 0.25
+    qemu-nbd -d "${NBD}" >/dev/null && sleep 0.25
   fi
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
