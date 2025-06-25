@@ -68,6 +68,12 @@ function compose_readme {
   echo -e "${TEXT}" > "${README}"
 }
 
+function render_binwalk {
+  # arguments:
+  # $1 - source filepath, string
+  binwalk "$1" 2>/dev/null
+}
+
 function render_file {
   # arguments:
   # $1 - source filepath, string
@@ -370,32 +376,32 @@ elif [ -n "$(echo "${OUT_FILE}" | grep -E '^DOS/MBR boot sector.*$')" ]; then
   compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable bzImage.*$')" ]; then
   # unpack a valid Linux bzImage (could be named as *.efi or linux.*)
-  HELPERS['binwalk']="$(binwalk "${FILE}" 2>/dev/null)"
+  HELPERS['binwalk']="$(render_binwalk "${FILE}")"
   unpack_bzimage "${FILE}" "${DIR}" "HELPERS"
   compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
   # unpack a valid Linux Image (could be named as *.efi, but resembles a Linux executable)
-  HELPERS['binwalk']="$(binwalk "${FILE}" 2>/dev/null)"
+  HELPERS['binwalk']="$(render_binwalk "${FILE}")"
   unpack_elf "${FILE}" "${DIR}" "HELPERS"
   compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^ELF (.*) executable.*$')" ]; then
   # unpack a valid Linux executable (could be named as kernel)
-  HELPERS['binwalk']="$(binwalk "${FILE}" 2>/dev/null)"
+  HELPERS['binwalk']="$(render_binwalk "${FILE}")"
   unpack_elf "${FILE}" "${DIR}" "HELPERS"
   compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^XZ compressed data.*$')" ]; then
   # unpack a valid *.xz file
-  HELPERS['binwalk']="$(binwalk "${FILE}" 2>/dev/null)"
+  HELPERS['binwalk']="$(render_binwalk "${FILE}")"
   unpack_xz "${FILE}" "${DIR}" "HELPERS"
   compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
   # unpack a valid *.cpio file
-  HELPERS['binwalk']="$(binwalk "${FILE}" 2>/dev/null)"
+  HELPERS['binwalk']="$(render_binwalk "${FILE}")"
   unpack_cpio "${FILE}" "${DIR}" "HELPERS"
   compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Squashfs filesystem.*$')" ]; then
   # unpack a valid *.sfs file
-  HELPERS['binwalk']="$(binwalk "${FILE}" 2>/dev/null)"
+  HELPERS['binwalk']="$(render_binwalk "${FILE}")"
   unpack_sfs "${FILE}" "${DIR}" "HELPERS"
   compose_readme "${FILE}" "${DIR}" "HELPERS"
 else
