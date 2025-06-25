@@ -68,6 +68,32 @@ function compose_readme {
   echo -e "${TEXT}" > "${README}"
 }
 
+function detect_filetype {
+  # arguments:
+  # $1 - file output, string
+  if [ -z "$1" ]; then
+    echo "unknown"
+  elif [ -n "$(echo "$1" | grep -E '^ISO 9660 CD-ROM filesystem data.*$')" ]; then
+    echo "iso"
+  elif [ -n "$(echo "$1" | grep -E '^DOS/MBR boot sector.*$')" ]; then
+    echo "img"
+  elif [ -n "$(echo "$1" | grep -E '^Linux kernel (.*) boot executable bzImage.*$')" ]; then
+    echo "bzimage" # Linux bzImage (could be named as *.efi or linux.*)
+  elif [ -n "$(echo "$1" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
+    echo "image" # Linux Image (could be named as *.efi, but resembles a Linux executable)
+  elif [ -n "$(echo "$1" | grep -E '^ELF (.*) executable.*$')" ]; then
+    echo "elf" # Linux executable (could be named as kernel)
+  elif [ -n "$(echo "$1" | grep -E '^XZ compressed data.*$')" ]; then
+    echo "xz"
+  elif [ -n "$(echo "$1" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
+    echo "cpio"
+  elif [ -n "$(echo "$1" | grep -E '^Squashfs filesystem.*$')" ]; then
+    echo "sfs"
+  else
+    echo "unknown"
+  fi
+}
+
 function render_binwalk {
   # arguments:
   # $1 - source filepath, string
@@ -115,14 +141,14 @@ function unpack_bzimage {
       if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
         unxz -q "${XZ_FILE}" || true
         if [ -s "${UNK_FILE}" ]; then
-          local FL="$(render_file "${UNK_FILE}")"
-          if [ -n "$(echo "${FL}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
-            mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").cpio"
-          elif [ -n "$(echo "${FL}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
-            mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").vmlinux"
-          elif [ -n "$(echo "${FL}" | grep -E '^ELF (.*) executable.*$')" ]; then
-            mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").vmlinux"
-          fi
+          case "$(detect_filetype "$(render_file "${UNK_FILE}")")" in
+            "cpio")
+              mv "${UNK_FILE}" "${UNK_FILE%%.unknown}.cpio"
+              ;;
+            "elf" | "image")
+              mv "${UNK_FILE}" "${UNK_FILE%%.unknown}.vmlinux"
+              ;;
+          esac
         fi
       fi
     fi
@@ -198,14 +224,14 @@ function unpack_elf {
       if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
         unxz "${XZ_FILE}" || true
         if [ -s "${UNK_FILE}" ]; then
-          local FL="$(render_file "${UNK_FILE}")"
-          if [ -n "$(echo "${FL}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
-            mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").cpio"
-          elif [ -n "$(echo "${FL}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
-            mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").vmlinux"
-          elif [ -n "$(echo "${FL}" | grep -E '^ELF (.*) executable.*$')" ]; then
-            mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").vmlinux"
-          fi
+          case "$(detect_filetype "$(render_file "${UNK_FILE}")")" in
+            "cpio")
+              mv "${UNK_FILE}" "${UNK_FILE%%.unknown}.cpio"
+              ;;
+            "elf" | "image")
+              mv "${UNK_FILE}" "${UNK_FILE%%.unknown}.vmlinux"
+              ;;
+          esac
         fi
       fi
     fi
@@ -376,42 +402,45 @@ elif [ -n "$(ls -A "${DIR}")" ]; then
 fi
 
 declare -A HELPERS
-FL="$(render_file "${FILE}")"; HELPERS['file']="${FL}"
-if [ -n "$(echo "${FL}" | grep -E '^ISO 9660 CD-ROM filesystem data.*$')" ]; then
-  # unpack a valid *.iso file
-  HELPERS['isoinfo']="$(render_isoinfo "${FILE}")"
-  unpack_iso "${FILE}" "${DIR}" "HELPERS"
-elif [ -n "$(echo "${FL}" | grep -E '^DOS/MBR boot sector.*$')" ]; then
-  # unpack a valid *.img file
-  unpack_img "${FILE}" "${DIR}" "HELPERS"
-elif [ -n "$(echo "${FL}" | grep -E '^Linux kernel (.*) boot executable bzImage.*$')" ]; then
-  # unpack a valid Linux bzImage (could be named as *.efi or linux.*)
-  HELPERS['binwalk']="$(render_binwalk "${FILE}")"
-  unpack_bzimage "${FILE}" "${DIR}" "HELPERS"
-elif [ -n "$(echo "${FL}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
-  # unpack a valid Linux Image (could be named as *.efi, but resembles a Linux executable)
-  HELPERS['binwalk']="$(render_binwalk "${FILE}")"
-  unpack_elf "${FILE}" "${DIR}" "HELPERS"
-elif [ -n "$(echo "${FL}" | grep -E '^ELF (.*) executable.*$')" ]; then
-  # unpack a valid Linux executable (could be named as kernel)
-  HELPERS['binwalk']="$(render_binwalk "${FILE}")"
-  unpack_elf "${FILE}" "${DIR}" "HELPERS"
-elif [ -n "$(echo "${FL}" | grep -E '^XZ compressed data.*$')" ]; then
-  # unpack a valid *.xz file
-  HELPERS['binwalk']="$(render_binwalk "${FILE}")"
-  unpack_xz "${FILE}" "${DIR}" "HELPERS"
-elif [ -n "$(echo "${FL}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
-  # unpack a valid *.cpio file
-  HELPERS['binwalk']="$(render_binwalk "${FILE}")"
-  unpack_cpio "${FILE}" "${DIR}" "HELPERS"
-elif [ -n "$(echo "${FL}" | grep -E '^Squashfs filesystem.*$')" ]; then
-  # unpack a valid *.sfs file
-  HELPERS['binwalk']="$(render_binwalk "${FILE}")"
-  unpack_sfs "${FILE}" "${DIR}" "HELPERS"
-else
-  # reject an unknown file
-  clean_and_exit 2 "${ME}: File '${FILE}' containing '${FL}' can't be unpacked"
-fi
+FI="$(render_file "${FILE}")"; HELPERS['file']="${FI}"
+case "$(detect_filetype "${FI}")" in
+
+  "bzimage")
+    HELPERS['binwalk']="$(render_binwalk "${FILE}")"
+    unpack_bzimage "${FILE}" "${DIR}" "HELPERS"
+    ;;
+
+  "cpio")
+    unpack_cpio "${FILE}" "${DIR}" "HELPERS"
+    ;;
+
+  "elf" | "image")
+    HELPERS['binwalk']="$(render_binwalk "${FILE}")"
+    unpack_elf "${FILE}" "${DIR}" "HELPERS"
+    ;;
+
+  "img")
+    unpack_img "${FILE}" "${DIR}" "HELPERS"
+    ;;
+
+  "iso")
+    HELPERS['isoinfo']="$(render_isoinfo "${FILE}")"
+    unpack_iso "${FILE}" "${DIR}" "HELPERS"
+    ;;
+
+  "sfs")
+    unpack_sfs "${FILE}" "${DIR}" "HELPERS"
+    ;;
+
+  "xz")
+    unpack_xz "${FILE}" "${DIR}" "HELPERS"
+    ;;
+
+  *)
+    clean_and_exit 2 "${ME}: File '${FILE}' containing '${FI}' can't be unpacked"
+    ;;
+
+esac
 
 compose_readme "${FILE}" "${DIR}" "HELPERS"
 [ -n "$(ls -A "${DIR}")" ] && RM=false
