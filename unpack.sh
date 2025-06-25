@@ -369,45 +369,38 @@ if [ -n "$(echo "${OUT_FILE}" | grep -E '^ISO 9660 CD-ROM filesystem data.*$')" 
   # unpack a valid *.iso file
   HELPERS['isoinfo']="$(isoinfo -d -i "${FILE}")"
   unpack_iso "${FILE}" "${DIR}" "HELPERS"
-  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^DOS/MBR boot sector.*$')" ]; then
   # unpack a valid *.img file
   unpack_img "${FILE}" "${DIR}" "HELPERS"
-  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable bzImage.*$')" ]; then
   # unpack a valid Linux bzImage (could be named as *.efi or linux.*)
   HELPERS['binwalk']="$(render_binwalk "${FILE}")"
   unpack_bzimage "${FILE}" "${DIR}" "HELPERS"
-  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
   # unpack a valid Linux Image (could be named as *.efi, but resembles a Linux executable)
   HELPERS['binwalk']="$(render_binwalk "${FILE}")"
   unpack_elf "${FILE}" "${DIR}" "HELPERS"
-  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^ELF (.*) executable.*$')" ]; then
   # unpack a valid Linux executable (could be named as kernel)
   HELPERS['binwalk']="$(render_binwalk "${FILE}")"
   unpack_elf "${FILE}" "${DIR}" "HELPERS"
-  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^XZ compressed data.*$')" ]; then
   # unpack a valid *.xz file
   HELPERS['binwalk']="$(render_binwalk "${FILE}")"
   unpack_xz "${FILE}" "${DIR}" "HELPERS"
-  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
   # unpack a valid *.cpio file
   HELPERS['binwalk']="$(render_binwalk "${FILE}")"
   unpack_cpio "${FILE}" "${DIR}" "HELPERS"
-  compose_readme "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Squashfs filesystem.*$')" ]; then
   # unpack a valid *.sfs file
   HELPERS['binwalk']="$(render_binwalk "${FILE}")"
   unpack_sfs "${FILE}" "${DIR}" "HELPERS"
-  compose_readme "${FILE}" "${DIR}" "HELPERS"
 else
   # reject an unknown file
   clean_and_exit 2 "${ME}: File '${FILE}' containing '${OUT_FILE}' can't be unpacked"
 fi
 
+compose_readme "${FILE}" "${DIR}" "HELPERS"
 [ -n "$(ls -A "${DIR}")" ] && RM=false
 clean_and_exit 0 ""
