@@ -80,6 +80,12 @@ function render_file {
   file "$1" | cut -d ' ' -f 2-
 }
 
+function render_isoinfo {
+  # arguments:
+  # $1 - source filepath, string
+  isoinfo -d -i "$1"
+}
+
 function unpack_bzimage {
   # arguments:
   # $1 - source filepath, string
@@ -367,7 +373,7 @@ declare -A HELPERS
 OUT_FILE="$(render_file "${FILE}")"; HELPERS['file']="${OUT_FILE}"
 if [ -n "$(echo "${OUT_FILE}" | grep -E '^ISO 9660 CD-ROM filesystem data.*$')" ]; then
   # unpack a valid *.iso file
-  HELPERS['isoinfo']="$(isoinfo -d -i "${FILE}")"
+  HELPERS['isoinfo']="$(render_isoinfo "${FILE}")"
   unpack_iso "${FILE}" "${DIR}" "HELPERS"
 elif [ -n "$(echo "${OUT_FILE}" | grep -E '^DOS/MBR boot sector.*$')" ]; then
   # unpack a valid *.img file
