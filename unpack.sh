@@ -202,7 +202,7 @@ function unpack_img {
 
     local BI="$(blkid | grep "${NBD}")"
     local GD="$(echo 2 | gdisk -l "${NBD}")"
-    local PA="$(parted "${NBD}" print)"
+    local PA="$(parted "${NBD}" print | sort)"
 
     HREF['blockdev']="$(blockdev --report "${NBD}")"
     HREF['blkid']="${BI}"
