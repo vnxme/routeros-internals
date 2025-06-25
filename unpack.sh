@@ -68,6 +68,12 @@ function compose_readme {
   echo -e "${TEXT}" > "${README}"
 }
 
+function render_file {
+  # arguments:
+  # $1 - source filepath, string
+  file "$1" | cut -d ' ' -f 2-
+}
+
 function unpack_bzimage {
   # arguments:
   # $1 - source filepath, string
@@ -91,7 +97,7 @@ function unpack_bzimage {
       if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
         unxz -q "${XZ_FILE}" || true
         if [ -s "${UNK_FILE}" ]; then
-          local OUT_FILE="$(file "${UNK_FILE}" | cut -f 2- -d ' ')"
+          local OUT_FILE="$(render_file "${UNK_FILE}")"
           if [ -n "$(echo "${OUT_FILE}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
             mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").cpio"
           elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
@@ -174,7 +180,7 @@ function unpack_elf {
       if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
         unxz "${XZ_FILE}" || true
         if [ -s "${UNK_FILE}" ]; then
-          local OUT_FILE="$(file "${UNK_FILE}" | cut -f 2- -d ' ')"
+          local OUT_FILE="$(render_file "${UNK_FILE}")"
           if [ -n "$(echo "${OUT_FILE}" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
             mv "${UNK_FILE}" "${DIR}/$(printf "%x" "${XZ_START}").cpio"
           elif [ -n "$(echo "${OUT_FILE}" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
@@ -352,7 +358,7 @@ elif [ -n "$(ls -A "${DIR}")" ]; then
 fi
 
 declare -A HELPERS
-OUT_FILE="$(file "${FILE}" | cut -f 2- -d ' ')"; HELPERS['file']="${OUT_FILE}"
+OUT_FILE="$(render_file "${FILE}")"; HELPERS['file']="${OUT_FILE}"
 if [ -n "$(echo "${OUT_FILE}" | grep -E '^ISO 9660 CD-ROM filesystem data.*$')" ]; then
   # unpack a valid *.iso file
   HELPERS['isoinfo']="$(isoinfo -d -i "${FILE}")"
