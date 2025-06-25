@@ -17,6 +17,14 @@
 ME="$(basename $0)"
 RM=false
 
+function check_path {
+  # arguments:
+  # $N - directory, string
+  for ARG in "$@"; do
+    [ -d "${ARG%%/}" ] && [[ ":${PATH}:" != *":${ARG%%/}:"* ]] && export PATH="${PATH}:${ARG%%/}"
+  done
+}
+
 function clean_and_exit {
   # arguments:
   # $1 - exit code, integer
@@ -320,9 +328,7 @@ if [ "${EUID:-$(id -u)}" -ne 0 ]; then
   fi
 fi
 
-[[ ":${PATH}:" != *":/sbin:"* ]] && export PATH="${PATH}:/sbin"
-[[ ":${PATH}:" != *":/usr/sbin:"* ]] && export PATH="${PATH}:/usr/sbin"
-[[ ":${PATH}:" != *":/usr/local/sbin:"* ]] && export PATH="${PATH}:/usr/local/sbin"
+check_path "/sbin" "/usr/sbin" "/usr/local/sbin"
 
 DEPS=(binwalk blockdev blkid cpio fdisk file gdisk qemu-nbd parted rsync unsquashfs unxz)
 for DEP in ${DEPS[@]}; do
