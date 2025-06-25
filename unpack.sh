@@ -298,7 +298,7 @@ function unpack_sfs {
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   if [ -n "$(unsquashfs -ll "$1")" ]; then
-    unsquashfs -q -n -d "$2" "$1" || true
+    unsquashfs -q -n -d "${DIR}" "$1" || true
   fi
 
   rsync -rltgoD "${DIR}/" "$2/"
@@ -318,7 +318,8 @@ function unpack_xz {
 
   local XZ_FILE="${DIR}/$(basename "$1")"
   if [ -z "$(xz -t "$1")" ]; then
-    (cp "$1" "${XZ_FILE}" && unxz -q "${XZ_FILE}") || true
+    cp "$1" "${XZ_FILE}"
+    unxz -q "${XZ_FILE}" || true
   fi
 
   rsync -rltgoD "${DIR}/" "$2/"
