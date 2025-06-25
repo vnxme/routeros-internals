@@ -128,31 +128,7 @@ function unpack_bzimage {
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).efi"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  # credits to @elseif for binary patterns
-  # ref: https://github.com/elseif/MikroTikPatch/blob/main/patch.py
-  local XZ_ENDS=$(LC_ALL=C grep -aboP '\x00\x00\x00\x00\x01\x59\x5A' "$1" | cut -f 1 -d ':' | head -1)
-  local XZ_END; for XZ_END in ${XZ_ENDS}; do
-    local XZ_START=$(head -c ${XZ_END} "$1" | LC_ALL=C grep -aboP '\xFD7zXZ\x00\x00\x01' - | cut -f 1 -d ':' | tail -1)
-    if [ -n "${XZ_START}" ] && [ -n "${XZ_END}" ] && [ "${XZ_START}" -lt "${XZ_END}" ]; then
-      local XZ_SIZE=$((${XZ_END}-${XZ_START}+7)) # 7 is the end pattern length
-      local UNK_FILE="${DIR}/$(printf "%x" "${XZ_START}").unknown"
-      local XZ_FILE="${UNK_FILE}.xz"
-      dd if="$1" bs=1 skip="${XZ_START}" count="${XZ_SIZE}" of="${XZ_FILE}" > /dev/null 2>&1 || true
-      if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
-        unxz -q "${XZ_FILE}" || true
-        if [ -s "${UNK_FILE}" ]; then
-          case "$(detect_filetype "$(render_file "${UNK_FILE}")")" in
-            "cpio")
-              mv "${UNK_FILE}" "${UNK_FILE%%.unknown}.cpio"
-              ;;
-            "elf" | "image")
-              mv "${UNK_FILE}" "${UNK_FILE%%.unknown}.vmlinux"
-              ;;
-          esac
-        fi
-      fi
-    fi
-  done
+  unpack_xz_elements "$1" "${DIR}"
 
   # unless bzImage has an XZ-compressed vmlinux inside, use a universal script
   if [ -z "$(find ${DIR}/* -maxdepth 0 -type f -name '*.vmlinux' 2>/dev/null)" ]; then
@@ -190,6 +166,25 @@ function unpack_cpio {
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
+function unpack_cpio_elements {
+  # arguments:
+  # $1 - source filepath, string
+  # $2 - destination directory, string
+  # $3 - helpers array name, string
+
+  local -n HREF="$3"
+  local BW="${HREF['binwalk']}"
+  local CPIO_ENDS=$(echo "${BW}" | grep -E 'cpio archive(.*)TRAILER!!!' | gawk '{print $1}' | tail -1)
+  local CPIO_END; for CPIO_END in ${CPIO_ENDS}; do
+    local CPIO_START="$(echo "${BW}" | grep 'cpio archive' | gawk '{print $1}' | head -1)"
+    if [ -n "${CPIO_START}" ] && [ -n "${CPIO_END}" ] && [ "${CPIO_START}" -lt "${CPIO_END}" ]; then
+      local CPIO_SIZE=$((${CPIO_END}-${CPIO_START}+136)) # 136 is the end pattern length
+      local CPIO_FILE="$2/$(printf "%x" "${CPIO_START}").cpio"
+      dd if="$1" bs=1 skip="${CPIO_START}" count="${CPIO_SIZE}" of="${CPIO_FILE}" > /dev/null 2>&1 || true
+    fi
+  done
+}
+
 function unpack_elf {
   # arguments:
   # $1 - source filepath, string
@@ -200,42 +195,8 @@ function unpack_elf {
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).elf"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  local BW="${HREF['binwalk']}"
-  local CPIO_ENDS=$(echo "${BW}" | grep -E 'cpio archive(.*)TRAILER!!!' | gawk '{print $1}' | tail -1)
-  local CPIO_END; for CPIO_END in ${CPIO_ENDS}; do
-    local CPIO_START="$(echo "${BW}" | grep 'cpio archive' | gawk '{print $1}' | head -1)"
-    if [ -n "${CPIO_START}" ] && [ -n "${CPIO_END}" ] && [ "${CPIO_START}" -lt "${CPIO_END}" ]; then
-      local CPIO_SIZE=$((${CPIO_END}-${CPIO_START}+136)) # 136 is the end pattern length
-      local CPIO_FILE="${DIR}/$(printf "%x" "${CPIO_START}").cpio"
-      dd if="$1" bs=1 skip="${CPIO_START}" count="${CPIO_SIZE}" of="${CPIO_FILE}" > /dev/null 2>&1 || true
-    fi
-  done
-
-  # credits to @elseif for binary patterns
-  # ref: https://github.com/elseif/MikroTikPatch/blob/main/patch.py
-  local XZ_ENDS=$(LC_ALL=C grep -aboP '\x00\x00\x00\x00\x01\x59\x5A' "$1" | cut -f 1 -d ':')
-  local XZ_END; for XZ_END in ${XZ_ENDS}; do
-    local XZ_START=$(head -c ${XZ_END} "$1" | LC_ALL=C grep -aboP '\xFD7zXZ\x00\x00\x01' - | cut -f 1 -d ':' | tail -1)
-    if [ -n "${XZ_START}" ] && [ -n "${XZ_END}" ] && [ "${XZ_START}" -lt "${XZ_END}" ]; then
-      local XZ_SIZE=$((${XZ_END}-${XZ_START}+7)) # 7 is the end pattern length
-      local UNK_FILE="${DIR}/$(printf "%x" "${XZ_START}").unknown"
-      local XZ_FILE="${UNK_FILE}.xz"
-      dd if="$1" bs=1 skip="${XZ_START}" count="${XZ_SIZE}" of="${XZ_FILE}" > /dev/null 2>&1 || true
-      if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
-        unxz "${XZ_FILE}" || true
-        if [ -s "${UNK_FILE}" ]; then
-          case "$(detect_filetype "$(render_file "${UNK_FILE}")")" in
-            "cpio")
-              mv "${UNK_FILE}" "${UNK_FILE%%.unknown}.cpio"
-              ;;
-            "elf" | "image")
-              mv "${UNK_FILE}" "${UNK_FILE%%.unknown}.vmlinux"
-              ;;
-          esac
-        fi
-      fi
-    fi
-  done
+  unpack_cpio_elements "$1" "${DIR}" "$3"
+  unpack_xz_elements "$1" "${DIR}"
 
   rsync -rltgoD "${DIR}/" "$2/"
   HREF['ls']="$(render_ls "${DIR}")"
@@ -363,6 +324,38 @@ function unpack_xz {
   rsync -rltgoD "${DIR}/" "$2/"
   HREF['ls']="$(render_ls "${DIR}")"
   [ "${RM}" = true ] && rm -rf "${DIR}"
+}
+
+function unpack_xz_elements {
+  # arguments
+  # $1 - source filepath, string
+  # $2 - destination directory, string
+
+  # credits to @elseif for binary patterns
+  # ref: https://github.com/elseif/MikroTikPatch/blob/main/patch.py
+  local XZ_ENDS=$(LC_ALL=C grep -aboP '\x00\x00\x00\x00\x01\x59\x5A' "$1" | cut -f 1 -d ':' | head -1)
+  local XZ_END; for XZ_END in ${XZ_ENDS}; do
+    local XZ_START=$(head -c ${XZ_END} "$1" | LC_ALL=C grep -aboP '\xFD7zXZ\x00\x00\x01' - | cut -f 1 -d ':' | tail -1)
+    if [ -n "${XZ_START}" ] && [ -n "${XZ_END}" ] && [ "${XZ_START}" -lt "${XZ_END}" ]; then
+      local XZ_SIZE=$((${XZ_END}-${XZ_START}+7)) # 7 is the end pattern length
+      local UNK_FILE="$2/$(printf "%x" "${XZ_START}").unknown"
+      local XZ_FILE="${UNK_FILE}.xz"
+      dd if="$1" bs=1 skip="${XZ_START}" count="${XZ_SIZE}" of="${XZ_FILE}" > /dev/null 2>&1 || true
+      if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
+        unxz -q "${XZ_FILE}" || true
+        if [ -s "${UNK_FILE}" ]; then
+          case "$(detect_filetype "$(render_file "${UNK_FILE}")")" in
+            "cpio")
+              mv "${UNK_FILE}" "${UNK_FILE%%.unknown}.cpio"
+              ;;
+            "elf" | "image")
+              mv "${UNK_FILE}" "${UNK_FILE%%.unknown}.vmlinux"
+              ;;
+          esac
+        fi
+      fi
+    fi
+  done
 }
 
 if [ "${EUID:-$(id -u)}" -ne 0 ]; then
