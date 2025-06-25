@@ -86,6 +86,12 @@ function render_isoinfo {
   isoinfo -d -i "$1"
 }
 
+function render_ls {
+  # arguments:
+  # $1 - directory, string
+  ls -AlR --time-style=full-iso "${1%%/}/" | sed -e "s,${1%%/},,g"
+}
+
 function unpack_bzimage {
   # arguments:
   # $1 - source filepath, string
@@ -138,7 +144,7 @@ function unpack_bzimage {
   fi
 
   rsync -rltgoD "${DIR}/" "$2/"
-  HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
+  HREF['ls']="$(render_ls "${DIR}")"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -154,7 +160,7 @@ function unpack_cpio {
 
   cpio --quiet --no-preserve-owner -idm -D "${DIR}" < "$1" || true
   rsync -rltgoD "${DIR}/" "$2/"
-  HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
+  HREF['ls']="$(render_ls "${DIR}")"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -206,7 +212,7 @@ function unpack_elf {
   done
 
   rsync -rltgoD "${DIR}/" "$2/"
-  HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
+  HREF['ls']="$(render_ls "${DIR}")"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -265,7 +271,7 @@ function unpack_img {
     fi
 
     rsync -rltgoD "${DIR}/" "$2/"
-    HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
+    HREF['ls']="$(render_ls "${DIR}")"
 
     local MOUNTS="$(mount | grep "${NBD}" | cut -d ' ' -f3)"
     local MOUNT; for MOUNT in ${MOUNTS}; do
@@ -289,7 +295,7 @@ function unpack_iso {
 
   mount -o loop,ro "$1" "${DIR}" && sleep 0.25
   rsync -rltgoD "${DIR}/" "$2/"
-  HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
+  HREF['ls']="$(render_ls "${DIR}")"
   umount "${DIR}" && sleep 0.25
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
@@ -309,7 +315,7 @@ function unpack_sfs {
   fi
 
   rsync -rltgoD "${DIR}/" "$2/"
-  HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
+  HREF['ls']="$(render_ls "${DIR}")"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
@@ -329,7 +335,7 @@ function unpack_xz {
   fi
 
   rsync -rltgoD "${DIR}/" "$2/"
-  HREF['ls']="$(ls -AlR --time-style=full-iso "${DIR}/" | sed -e "s,${DIR},,g")"
+  HREF['ls']="$(render_ls "${DIR}")"
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
