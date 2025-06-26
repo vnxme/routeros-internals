@@ -225,6 +225,7 @@ jobs:
         run: |
           readarray -d '' -t FILES < <(
             find */* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
+            find */_*.img.zip/loop/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
             find */_*.img.zip/part2/var/pdb/*/image -maxdepth 0 -type f -print0 2>/dev/null || true
             find */_*.iso/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
           )
@@ -245,6 +246,7 @@ jobs:
         run: |
           readarray -d '' -t FILES < <(
             find */_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
+            find */_*.img.zip/loop/_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
             find */_*.img.zip/part2/var/pdb/*/_image/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
             find */_*.iso/_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
           )
@@ -267,6 +269,7 @@ jobs:
         run: |
           readarray -d '' -t FILES < <(
             find */_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
+            find */_*.img.zip/loop/_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
             find */_*.img.zip/part2/var/pdb/*/_image/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
             find */_*.iso/_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
           )
@@ -289,6 +292,8 @@ jobs:
           readarray -d '' -t FILES < <(
             find */_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
             find */_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+            find */_*.img.zip/loop/_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+            find */_*.img.zip/loop/_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
             find */_*.img.zip/part2/var/pdb/*/_image/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
             find */_*.img.zip/part2/var/pdb/*/_image/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
             find */_*.iso/_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
