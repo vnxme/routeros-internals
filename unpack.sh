@@ -61,8 +61,8 @@ function compose_readme {
   [ -n "${BD}" ] && TEXT="${TEXT}#### Block device info (\`blockdev --report <*>\`):\n\`\`\`\n${BD}\n\`\`\`\n"
   [ -n "${FD}" ] && TEXT="${TEXT}#### MBR info (\`fdisk -l <*>\`):\n\`\`\`\n${FD}\n\`\`\`\n"
   [ -n "${GD}" ] && TEXT="${TEXT}#### GPT info (\`gdisk -l <*>\`):\n\`\`\`\n${GD}\n\`\`\`\n"
-  [ -n "${BI}" ] && TEXT="${TEXT}#### Partition info (\`parted <*> print\`):\n\`\`\`\n${BI}\n\`\`\`\n"
-  [ -n "${PA}" ] && TEXT="${TEXT}#### Partition IDs (\`blkid\`):\n\`\`\`\n${PA}\n\`\`\`\n"
+  [ -n "${PA}" ] && TEXT="${TEXT}#### Partition info (\`parted <*> print\`):\n\`\`\`\n${PA}\n\`\`\`\n"
+  [ -n "${BI}" ] && TEXT="${TEXT}#### Partition IDs (\`blkid\`):\n\`\`\`\n${BI}\n\`\`\`\n"
   [ -n "${LS}" ] && TEXT="${TEXT}#### Listing (\`ls -AlR --time-style=full-iso <*>\`):\n\`\`\`\n${LS}\n\`\`\`\n"
   [ -n "${NO}" ] && TEXT="${TEXT}#### Notes:\n${NO}\n"
   echo -e "${TEXT}" > "${README}"
@@ -246,7 +246,7 @@ function unpack_img {
     if [ -n "$(echo "${PA}" | grep 'Partition Table: loop')" ]; then
       local PDIR="${DIR}/loop"
       mkdir -p "${PDIR}"
-      mount -o loop,ro "${NBD}" "${PDIR}" && sleep 0.25
+      mount -o loop,ro "${NBD}" "${PDIR}" && sleep 0.25 && unset HREF['fdisk'] && unset HREF['gdisk']
     else
       local PARTS="$(echo "${BI}" | cut -d ':' -f1)"
       local PART; for PART in ${PARTS}; do
