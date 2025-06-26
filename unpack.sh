@@ -103,7 +103,7 @@ function render_binwalk {
 function render_file {
   # arguments:
   # $1 - source filepath, string
-  file "$1" | cut -d ' ' -f 2-
+  file -b "$1"
 }
 
 function render_isoinfo {
