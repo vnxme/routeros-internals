@@ -54,10 +54,12 @@ function compose_readme {
   local LS="${HREF['ls']}"
   local NO="${HREF['notes']}"
   local PA="${HREF['parted']}"
+  local ZI="${HREF['zipinfo']}"
 
   [ -n "${FI}" ] && TEXT="${TEXT}#### Identification (\`file <*>\`):\n\`\`\`\n${FI}\n\`\`\`\n"
   [ -n "${BW}" ] && TEXT="${TEXT}#### Analysis (\`binwalk <*>\`):\n\`\`\`\n${BW}\n\`\`\`\n"
   [ -n "${II}" ] && TEXT="${TEXT}#### Description (\`isoinfo -d -i <*>\`):\n\`\`\`\n${II}\n\`\`\`\n"
+  [ -n "${ZI}" ] && TEXT="${TEXT}#### Description (\`zipinfo <*>\`):\n\`\`\`\n${ZI}\n\`\`\`\n"
   [ -n "${BD}" ] && TEXT="${TEXT}#### Block device info (\`blockdev --report <*>\`):\n\`\`\`\n${BD}\n\`\`\`\n"
   [ -n "${PA}" ] && TEXT="${TEXT}#### Partition info (\`parted <*> print\`):\n\`\`\`\n${PA}\n\`\`\`\n"
   [ -n "${BI}" ] && TEXT="${TEXT}#### Partition IDs (\`blkid\`):\n\`\`\`\n${BI}\n\`\`\`\n"
@@ -89,6 +91,8 @@ function detect_filetype {
     echo "cpio"
   elif [ -n "$(echo "$1" | grep -E '^Squashfs filesystem.*$')" ]; then
     echo "sfs"
+  elif [ -n "$(echo "$1" | grep -E '^Zip archive data.*$')" ]; then
+    echo "zip"
   else
     echo "unknown"
   fi
@@ -359,6 +363,26 @@ function unpack_xz_elements {
   done
 }
 
+function unpack_zip {
+  # arguments:
+  # $1 - source filepath, string
+  # $2 - destination directory, string
+  # $3 - helpers array name, string
+
+  local -n HREF="$3"
+  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).zip"
+  local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
+
+  if [ -z "$(zip -T -q "$1")" ]; then
+    HREF['zipinfo']="$(zipinfo "$1")"
+    unzip -d "${DIR}/" -q "$1" || true
+  fi
+
+  rsync -rltgoD "${DIR}/" "$2/"
+  HREF['ls']="$(render_ls "${DIR}")"
+  [ "${RM}" = true ] && rm -rf "${DIR}"
+}
+
 if [ "${EUID:-$(id -u)}" -ne 0 ]; then
   echo "${ME}: Root permissions are required"
   if [ -n "$(which sudo)" ]; then
@@ -428,6 +452,10 @@ case "$(detect_filetype "${FI}")" in
 
   "xz")
     unpack_xz "${FILE}" "${DIR}" "HELPERS"
+    ;;
+
+  "zip")
+    unpack_zip "${FILE}" "${DIR}" "HELPERS"
     ;;
 
   *)
