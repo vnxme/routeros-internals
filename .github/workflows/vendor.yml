@@ -57,20 +57,20 @@ jobs:
           PACKAGES=(routeros calea container dude extra-nic gps iot iot-bt-extra lora rose-storage switch-marvell tr069-client ups user-manager wifi-qcom wifi-qcom-ac wireless zerotier)
           for ARCH in ${ARHCS[@]}; do
             mkdir -p ${ARCH}
-            if [ "${ARCH}" == 'x86' ]; then
-              SUFFIX=''
-            else
-              SUFFIX="-${ARCH}"
+            [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
+            if [ "${ARCH}" == 'x86' ] || [ "${ARCH}" == 'arm64' ]; then
+              IMG_FILE="${ARCH}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
+              IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
+              wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
+              ISO_FILE="${ARCH}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
+              ISO_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
+              wget -nv -O ${ISO_FILE} ${ISO_URL} || rm -f ${ISO_FILE}
+              if [ "${ARCH}" == 'x86' ]; then
+                IMG_FILE="${ARCH}/install-image-${BRANCH_VERSION}${SUFFIX}.img.zip"
+                IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/install-image-${BRANCH_VERSION}${SUFFIX}.zip"
+                wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
+              fi
             fi
-            IMG_FILE="${ARCH}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
-            IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
-            wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
-            IMG_FILE="${ARCH}/install-image-${BRANCH_VERSION}${SUFFIX}.img.zip"
-            IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/install-image-${BRANCH_VERSION}${SUFFIX}.zip"
-            wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
-            ISO_FILE="${ARCH}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
-            ISO_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
-            wget -nv -O ${ISO_FILE} ${ISO_URL} || rm -f ${ISO_FILE}
             for PACKAGE in ${PACKAGES[@]}; do
               FILE="${ARCH}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
               URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
