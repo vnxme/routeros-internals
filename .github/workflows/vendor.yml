@@ -69,13 +69,13 @@ jobs:
                 IMG_FILE="${ARCH}/install-image-${BRANCH_VERSION}${SUFFIX}.img.zip"
                 IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/install-image-${BRANCH_VERSION}${SUFFIX}.zip"
                 wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
-                TGZ_FILE="${ARCH}/netinstall-${BRANCH_VERSION}${SUFFIX}.tar.gz"
+                TGZ_FILE="${ARCH}/netinstall-cli-${BRANCH_VERSION}${SUFFIX}.tar.gz"
                 TGZ_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/netinstall-${BRANCH_VERSION}${SUFFIX}.tar.gz"
                 wget -nv -O ${TGZ_FILE} ${TGZ_URL} || rm -f ${TGZ_FILE}
-                W32_FILE="${ARCH}/netinstall-${BRANCH_VERSION}${SUFFIX}.exe.zip"
+                W32_FILE="${ARCH}/netinstall-w32-${BRANCH_VERSION}${SUFFIX}.exe.zip"
                 W32_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/netinstall-${BRANCH_VERSION}${SUFFIX}.zip"
                 wget -nv -O ${W32_FILE} ${W32_URL} || rm -f ${W32_FILE}
-                W64_FILE="${ARCH}/netinstall64-${BRANCH_VERSION}${SUFFIX}.exe.zip"
+                W64_FILE="${ARCH}/netinstall-w64-${BRANCH_VERSION}${SUFFIX}.exe.zip"
                 W64_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/netinstall64-${BRANCH_VERSION}${SUFFIX}.zip"
                 wget -nv -O ${W64_FILE} ${W64_URL} || rm -f ${W64_FILE}
               fi
