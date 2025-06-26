@@ -219,9 +219,9 @@ function unpack_img {
   if [ -b "${NBD}" ]; then
     qemu-nbd -c "${NBD}" -f raw "$1" && sleep 0.25
 
-    local BI="$(blkid | grep "${NBD}")"
+    local BI="$(blkid | grep "${NBD}" | sort)"
     local GD="$(echo 2 | gdisk -l "${NBD}")"
-    local PA="$(parted "${NBD}" print | sort)"
+    local PA="$(parted "${NBD}" print)"
 
     HREF['blockdev']="$(blockdev --report "${NBD}")"
     HREF['blkid']="${BI}"
