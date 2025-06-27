@@ -170,7 +170,9 @@ jobs:
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               sudo /tmp/unpack.sh "${FILE}" || true
           
-              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
+                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              fi
             fi
           done
 
@@ -190,7 +192,9 @@ jobs:
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               sudo /tmp/unpack.sh "${FILE}" || true
           
-              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
+                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              fi
             fi
           done
 
@@ -225,7 +229,9 @@ jobs:
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               sudo /tmp/unpack.sh "${FILE}" || true
           
-              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
+                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              fi
             
               README="$(dirname ${FILE})/_$(basename ${FILE})/README.md"
               echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "${README}"
@@ -267,7 +273,9 @@ jobs:
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               sudo /tmp/unpack.sh "${FILE}" || true
           
-              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
+                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              fi
             fi
           done
 
@@ -325,7 +333,9 @@ jobs:
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               sudo /tmp/unpack.sh "${FILE}" || true
           
-              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
+                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              fi
             fi
           done
 
@@ -400,7 +410,9 @@ jobs:
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               sudo /tmp/unpack.sh "${FILE}" || true
           
-              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
+                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              fi
             fi
           done
 
@@ -433,7 +445,9 @@ jobs:
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               sudo /tmp/unpack.sh "${FILE}" || true
           
-              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
+                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              fi
             fi
           done
 
@@ -455,7 +469,9 @@ jobs:
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               sudo /tmp/unpack.sh "${FILE}" || true
           
-              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
+                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              fi
             fi
           done
 
@@ -491,7 +507,9 @@ jobs:
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
               sudo /tmp/unpack.sh "${FILE}" || true
           
-              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
+                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              fi
             fi
           done
 
