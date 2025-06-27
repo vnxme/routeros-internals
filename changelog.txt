@@ -1,0 +1,32 @@
+What's new in 7.19.2 (2025-Jun-20 10:55):
+
+*) bfd - fixed socket leak;
+*) bgp - fixed withdraw when input.accept-nlri is non-existent;
+*) btest - properly close unsuccessful TCP test sockets;
+*) console - added prompt to /disk/format command;
+*) disk - do not allow to start Btrfs replace command when a Btrfs replace process is already running;
+*) disk - improve disk file system detection;
+*) hotspot - allow only "http:" and "https:" schemas in dst field;
+*) iot - added LoRa interface recovery mechanism;
+*) iot - LoRa stability improvement;
+*) iot - LR8G/9G firmware update;
+*) ip-service - fixed "print count-only interval" when dynamic entries are added (introduced in v7.19);
+*) ip-service - fixed setting services by name (introduced in v7.19);
+*) ipsec - fixed responder on key exchange compute failure (introduced in v7.19);
+*) ipv6 - do not show IPv6 FastPath as active when connection tracking or IPsec is used;
+*) l2tp-ether - fixed interface creation/removal process;
+*) lte - added support for R11e-LTE6 v039 firmware release;
+*) lte - do not dial further if modem detects eSIM without profiles;
+*) lte - fixed eSIM management function for mmips and mipsbe architecture CPUs;
+*) lte - fixed eSIM provisioning for servers that do not send content-length in the HTTP response;
+*) route - fixed destination ordering for SNMP;
+*) route - fixed SNMP probing of IPv6 routes;
+*) route - make routing table print faster with hw-offload, gateway and blackhole queries;
+*) switch - fixed ACL rules when ports are not specified (fixes dynamic rules for RoMON);
+*) switch - fixed advertise and speed settings for ether1 on RB5009 (introduced in v7.19.1);
+*) webfig - improved screen reader support for WiFi fields in Quickset;
+*) webfig - make combobox accessible to screen readers;
+*) webfig - more space to branding logo;
+*) wifi-qcom - fixed beacon loss issues and improved stability for IPQ-6018;
+*) wifi-qcom - improved regulatory compliance;
+*) winbox - fixed "Last Topology Change" for bridge port monitor;

@@ -1,0 +1,10 @@
+ppp_async:	crc-ccitt ppp_generic
+ppp_genericpacket_hook
+pppoe:	ppp_generic pppox
+pppoefp:	packet_hook ppp_generic pppoe
+packet_hookppp_generic
+pppox:	ppp_generic
+ppp_mppe:	ppp_generic
+ppp_deflate:	ppp_generic zlib_deflate zlib_inflate
+sstp:	ppp_generic
+ppp_synctty:	ppp_generic
