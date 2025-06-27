@@ -154,6 +154,61 @@ jobs:
             arm64
             x86
 
+      - name: Unpack NETINSTALL*.EXE.ZIP files (1/2)
+        run: |
+          readarray -d '' -t FILES < <(
+            find */* -maxdepth 0 -type f -name 'netinstall*.exe.zip' -print0 2>/dev/null || true
+          )
+          declare -A HASHES
+          for FILE in "${FILES[@]}"; do
+            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
+            if [ -n "${HASHES[${HASH}]}" ]; then
+              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
+            else
+              HASHES[${HASH}]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              sudo /tmp/unpack.sh "${FILE}" || true
+          
+              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+            fi
+          done
+
+      - name: Unpack NETINSTALL*.EXE files
+        run: |
+          readarray -d '' -t FILES < <(
+            find */_netinstall*.exe.zip/* -maxdepth 0 -type f -name '*.exe' -print0 2>/dev/null || true
+          )
+          declare -A HASHES
+          for FILE in "${FILES[@]}"; do
+            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
+            if [ -n "${HASHES[${HASH}]}" ]; then
+              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
+            else
+              HASHES[${HASH}]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              sudo /tmp/unpack.sh "${FILE}" || true
+          
+              sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+            fi
+          done
+
+      - name: Unpack NETINSTALL*.EXE.ZIP files (2/2)
+        run: |
+          readarray -d '' -t FILES < <(
+            find */_netinstall*.exe.zip/* -maxdepth 0 -type f -name '*.exe' -print0 2>/dev/null || true
+          )
+          for FILE in "${FILES[@]}"; do
+            rm "${FILE}"
+            #if [ -d "$(dirname "${FILE}")/_$(basename "${FILE}")" ]; then
+            #  mv "$(dirname "${FILE}")/_$(basename "${FILE}")" "/tmp/_$(basename "${FILE}")"
+            #  rm -rf "$(dirname "${FILE}")/*"
+            #  mv "/tmp/_$(basename "${FILE}")/*" "$(dirname "${FILE}")/"
+            #  rm -rf "/tmp/_$(basename "${FILE}")"
+            #fi
+          done
+
       - name: Unpack ISO files
         run: |
           readarray -d '' -t FILES < <(
