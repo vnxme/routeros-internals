@@ -93,6 +93,9 @@ function detect_filetype {
     echo "sfs"
   elif [ -n "$(echo "$1" | grep -E '^Zip archive data.*$')" ]; then
     echo "zip"
+  elif [ -n "$(echo "$1" | grep -E '^data$')" ]; then
+    # TODO: implement additional checks
+    echo "data"
   else
     echo "unknown"
   fi
@@ -432,7 +435,7 @@ case "$(detect_filetype "${FI}")" in
     unpack_cpio "${FILE}" "${DIR}" "HELPERS"
     ;;
 
-  "elf" | "image")
+  "elf" | "image" | "data")
     HELPERS['binwalk']="$(render_binwalk "${FILE}")"
     unpack_elf "${FILE}" "${DIR}" "HELPERS"
     ;;
