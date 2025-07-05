@@ -192,6 +192,28 @@ function unpack_cpio_elements {
   done
 }
 
+function unpack_dtb_elements {
+  # arguments
+  # $1 - source filepath, string
+  # $2 - destination directory, string
+
+  local DTB_STARTS=$(LC_ALL=C grep -aboP '\xd0\x0d\xfe\xed' "$1" | cut -f 1 -d ':')
+  local DTB_START; for DTB_START in ${DTB_STARTS}; do
+    local DTB_SIZE=$(($(dd if="$1" bs=1 skip="${DTB_START}" count=4 2>/dev/null | od -t d4 --endian=big | awk '{print $2}')+8))
+    if [ -n "${DTB_START}" ] && [ -n "${DTB_SIZE}" ]; then
+      local DTB_FILE="$2/$(printf "%x" "${DTB_START}").dtb"
+      dd if="$1" bs=1 skip="${DTB_START}" count="${DTB_SIZE}" of="${DTB_FILE}" > /dev/null 2>&1 || true
+      if [ -s "${DTB_FILE}" ]; then
+        local DTS_FILE="$2/$(printf "%x" "${DTB_START}").dts"
+        dtc -q -I dtb -O dts -o "${DTS_FILE}" "${DTB_FILE}" || true
+        if [ -s "${DTS_FILE}" ]; then
+          rm "${DTB_FILE}"
+        fi
+      fi
+    fi
+  done
+}
+
 function unpack_elf {
   # arguments:
   # $1 - source filepath, string
@@ -203,6 +225,7 @@ function unpack_elf {
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   unpack_cpio_elements "$1" "${DIR}" "$3"
+  unpack_dtb_elements "$1" "${DIR}"
   unpack_xz_elements "$1" "${DIR}"
 
   rsync -rltgoD "${DIR}/" "$2/"
@@ -401,7 +424,7 @@ fi
 
 check_path "/sbin" "/usr/sbin" "/usr/local/sbin"
 
-DEPS=(binwalk blockdev blkid cpio fdisk file gdisk qemu-nbd parted rsync unsquashfs unxz)
+DEPS=(binwalk blockdev blkid cpio dtc fdisk file gdisk qemu-nbd parted rsync unsquashfs unxz)
 for DEP in ${DEPS[@]}; do
   if [ -z "$(which "${DEP}")" ]; then
     clean_and_exit 2 "${ME}: Dependency '${DEP}' can't be satisfied"

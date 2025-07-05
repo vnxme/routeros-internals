@@ -107,7 +107,7 @@ jobs:
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           execute_install_scripts: true
-          packages: binutils-common binwalk bzip2 genisoimage gzip lz4 lzma lzop qemu-utils rsync xz-utils zip zstd
+          packages: binutils-common binwalk bzip2 device-tree-compiler genisoimage gzip lz4 lzma lzop qemu-utils rsync xz-utils zip zstd
           version: 1.0
 
       #- name: Install requirements
