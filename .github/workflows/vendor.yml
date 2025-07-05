@@ -472,15 +472,15 @@ jobs:
       - name: Unpack Image and ELF files (2/2)
         run: |
           readarray -d '' -t FILES < <(
-            find arm/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
+            find arm/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.unknown" -print0 2>/dev/null || true
             find arm64/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
             find arm64/_*.img.zip/part2/var/pdb/*/_image/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
             find arm64/_*.iso/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-            find mipsbe/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-            find mmips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-            find ppc/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-            find smips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-            find tile/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
+            find mipsbe/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.unknown" -print0 2>/dev/null || true
+            find mmips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.unknown" -print0 2>/dev/null || true
+            find ppc/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.unknown" -print0 2>/dev/null || true
+            find smips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.unknown" -print0 2>/dev/null || true
+            find tile/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.unknown" -print0 2>/dev/null || true
           )
           declare -A HASHES
           for FILE in "${FILES[@]}"; do
@@ -503,7 +503,7 @@ jobs:
         run: |
           readarray -d '' -t FILES < <(
             find arm/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-            find arm/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find arm/_*.npk/*.files/boot/_kernel/_*.unknown/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
             find arm64/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
             find arm64/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
             find arm64/_*.img.zip/part1/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
@@ -513,15 +513,15 @@ jobs:
             find arm64/_*.iso/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
             find arm64/_*.iso/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
             find mipsbe/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-            find mipsbe/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find mipsbe/_*.npk/*.files/boot/_kernel/_*.unknown/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
             find mmips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-            find mmips/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find mmips/_*.npk/*.files/boot/_kernel/_*.unknown/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
             find ppc/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-            find ppc/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find ppc/_*.npk/*.files/boot/_kernel/_*.unknown/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
             find smips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-            find smips/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find smips/_*.npk/*.files/boot/_kernel/_*.unknown/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
             find tile/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-            find tile/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
+            find tile/_*.npk/*.files/boot/_kernel/_*.unknown/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
             find x86/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
             find x86/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
             find x86/_*.img.zip/loop/_linux/_*.vmlinux/ -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
