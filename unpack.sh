@@ -200,7 +200,8 @@ function unpack_dtb_elements {
   local DTB_STARTS=$(LC_ALL=C grep -aboP '\xd0\x0d\xfe\xed' "$1" | cut -f 1 -d ':')
   local DTB_START; for DTB_START in ${DTB_STARTS}; do
     local DTB_SIZE=$(($(dd if="$1" bs=1 skip="$((${DTB_START}+4))" count=4 2>/dev/null | od -t d4 --endian=big | awk '{print $2}')+8))
-    if [ -n "${DTB_START}" ] && [ -n "${DTB_SIZE}" ]; then
+    local DTB_VERSION=$(($(dd if="$1" bs=1 skip="$((${DTB_START}+20))" count=4 2>/dev/null | od -t d4 --endian=big | awk '{print $2}')+8))
+    if [ -n "${DTB_START}" ] && [ -n "${DTB_SIZE}" ] && [ "${DTB_SIZE}" -gt 0 ] && [ "${DTB_VERSION}" = "17" ]; then
       local DTB_FILE="$2/$(printf "%x" "${DTB_START}").dtb"
       dd if="$1" bs=1 skip="${DTB_START}" count="${DTB_SIZE}" of="${DTB_FILE}" > /dev/null 2>&1 || true
       if [ -s "${DTB_FILE}" ]; then
