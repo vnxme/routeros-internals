@@ -93,6 +93,8 @@ function detect_filetype {
     echo "sfs"
   elif [ -n "$(echo "$1" | grep -E '^Zip archive data.*$')" ]; then
     echo "zip"
+  elif [ -n "$(echo "$1" | grep -E '^Applesoft BASIC program data.*$')" ]; then
+    echo "data"
   elif [ -n "$(echo "$1" | grep -E '^data$')" ]; then
     # TODO: implement additional checks
     echo "data"
