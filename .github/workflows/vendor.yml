@@ -549,6 +549,29 @@ jobs:
             fi
           done
 
+      - name: Unpack RGZ files
+        run: |
+          readarray -d '' -t FILES < <(
+            find tile/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'initrd.rgz' -print0 2>/dev/null || true
+            find tile/_*.npk/_*.sfs/boot/* -maxdepth 0 -type f -name 'initrd.rgz' -print0 2>/dev/null || true
+          )
+          declare -A HASHES
+          for FILE in "${FILES[@]}"; do
+            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
+            if [ -n "${HASHES[${HASH}]}" ]; then
+              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
+              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'replacements.txt'
+            else
+              HASHES[${HASH}]="$(realpath "${FILE}")"
+              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              sudo /tmp/unpack.sh "${FILE}" || true
+          
+              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
+                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
+              fi
+            fi
+          done
+
       - name: Remove block and character devices before commit
         run: |
           readarray -d '' -t BLOCKS < <(
