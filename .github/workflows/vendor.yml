@@ -394,6 +394,7 @@ jobs:
             else
               HASHES[${HASH}]="$(realpath "${FILE}")"
               echo -e "${HASH} ${FILE}" >> 'hashes.txt'
+              echo "DEBUG: unpacking ${FILE}"
               python /tmp/unpack-x3.py "${FILE}" || true
             fi
           done
