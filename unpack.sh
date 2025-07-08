@@ -93,6 +93,8 @@ function detect_filetype {
     echo "sfs"
   elif [ -n "$(echo "$1" | grep -E '^Zip archive data.*$')" ]; then
     echo "zip"
+  elif [ -n "$(echo "$1" | grep -E '^Device Tree Blob.*$')" ]; then
+    echo "dtb"
   elif [ -n "$(echo "$1" | grep -E '^Applesoft BASIC program data.*$')" ]; then
     echo "data"
   elif [ -n "$(echo "$1" | grep -E '^data$')" ]; then
@@ -194,6 +196,34 @@ function unpack_cpio_elements {
   done
 }
 
+function unpack_dtb {
+  # arguments
+  # $1 - source filepath, string
+  # $2 - destination directory, string
+  # $3 - helpers array name, string
+
+  local -n HREF="$3"
+  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).dtb"
+  local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
+
+  local BASE="$(basename "$1")"
+  local TMP="${DIR}/${BASE%.*}.dts"
+  dtc -q -I dtb -O dts -o "${TMP}" "$1" || true
+
+  if [ -s "${TMP}" ]; then
+    local MODEL="$(sed -n -E 's,.*model = "(.*)";,\1,p' "${TMP}")"
+    if [ -n "${MODEL}" ]; then
+      mv "${TMP}" "${DIR}/${MODEL}.dts"
+    else
+      mv "${TMP}" "${DIR}/unknown.dts"
+    fi
+  fi
+
+  rsync -rltgoD "${DIR}/" "$2/"
+  HREF['ls']="$(render_ls "${DIR}")"
+  [ "${RM}" = true ] && rm -rf "${DIR}"
+}
+
 function unpack_dtb_elements {
   # arguments
   # $1 - source filepath, string
@@ -206,17 +236,6 @@ function unpack_dtb_elements {
     if [ -n "${DTB_START}" ] && [ -n "${DTB_SIZE}" ] && [ "${DTB_SIZE}" -gt 0 ] && [ "${DTB_VERSION}" = "17" ]; then
       local DTB_FILE="$2/$(printf "%x" "${DTB_START}").dtb"
       dd if="$1" bs=1 skip="${DTB_START}" count="${DTB_SIZE}" of="${DTB_FILE}" > /dev/null 2>&1 || true
-      if [ -s "${DTB_FILE}" ]; then
-        local DTS_FILE="$2/$(printf "%x" "${DTB_START}").dts"
-        dtc -q -I dtb -O dts -o "${DTS_FILE}" "${DTB_FILE}" || true
-        if [ -s "${DTS_FILE}" ]; then
-          local DTS_MODEL="$(sed -n -E 's,.*model = "(.*)";,\1,p' "${DTS_FILE}")"
-          if [ -n "${DTS_MODEL}" ]; then
-            mv "${DTS_FILE}" "$2/$(printf "%x" "${DTB_START}").${DTS_MODEL}.dts"
-          fi
-          rm "${DTB_FILE}"
-        fi
-      fi
     fi
   done
 }
@@ -468,6 +487,10 @@ case "$(detect_filetype "${FI}")" in
   "data" | "elf" | "image")
     HELPERS['binwalk']="$(render_binwalk "${FILE}")"
     unpack_elf "${FILE}" "${DIR}" "HELPERS"
+    ;;
+
+  "dtb")
+    unpack_dtb "${FILE}" "${DIR}" "HELPERS"
     ;;
 
   "img")
