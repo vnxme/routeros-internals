@@ -386,7 +386,7 @@ function unpack_xz_elements {
             "cpio")
               mv "${UNK_FILE}" "${UNK_FILE%%.unknown}.cpio"
               ;;
-            "elf" | "image")
+            "data" | "elf" | "image")
               mv "${UNK_FILE}" "${UNK_FILE%%.unknown}.vmlinux"
               ;;
           esac
@@ -465,7 +465,7 @@ case "$(detect_filetype "${FI}")" in
     unpack_cpio "${FILE}" "${DIR}" "HELPERS"
     ;;
 
-  "elf" | "image" | "data")
+  "data" | "elf" | "image")
     HELPERS['binwalk']="$(render_binwalk "${FILE}")"
     unpack_elf "${FILE}" "${DIR}" "HELPERS"
     ;;
