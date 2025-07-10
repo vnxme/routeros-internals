@@ -50,15 +50,19 @@ function compose_readme {
   local FD="${HREF['fdisk']}"
   local FI="${HREF['file']}"
   local GD="${HREF['gdisk']}"
+  local GZ="${HREF['gzinfo']}"
   local II="${HREF['isoinfo']}"
   local LS="${HREF['ls']}"
   local NO="${HREF['notes']}"
   local PA="${HREF['parted']}"
+  local TI="${HREF['tarinfo']}"
   local ZI="${HREF['zipinfo']}"
 
   [ -n "${FI}" ] && TEXT="${TEXT}#### Identification (\`file <*>\`):\n\`\`\`\n${FI}\n\`\`\`\n"
   [ -n "${BW}" ] && TEXT="${TEXT}#### Analysis (\`binwalk <*>\`):\n\`\`\`\n${BW}\n\`\`\`\n"
   [ -n "${II}" ] && TEXT="${TEXT}#### Description (\`isoinfo -d -i <*>\`):\n\`\`\`\n${II}\n\`\`\`\n"
+  [ -n "${GZ}" ] && TEXT="${TEXT}#### Description (\`gzip -lv <*>\`):\n\`\`\`\n${GZ}\n\`\`\`\n"
+  [ -n "${TI}" ] && TEXT="${TEXT}#### Description (\`tar -tvf <*>\`):\n\`\`\`\n${TI}\n\`\`\`\n"
   [ -n "${ZI}" ] && TEXT="${TEXT}#### Description (\`zipinfo <*>\`):\n\`\`\`\n${ZI}\n\`\`\`\n"
   [ -n "${BD}" ] && TEXT="${TEXT}#### Block device info (\`blockdev --report <*>\`):\n\`\`\`\n${BD}\n\`\`\`\n"
   [ -n "${PA}" ] && TEXT="${TEXT}#### Partition info (\`parted <*> print\`):\n\`\`\`\n${PA}\n\`\`\`\n"
@@ -271,10 +275,14 @@ function unpack_gz {
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).gz"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  if [ -z "$(tar -tf "$1" > /dev/null)" ]; then
-    tar -zxf "$1" -C "${DIR}" || true
-  elif [ -z "$(gunzip -t "$1")"]; then
-    gunzip -cq "$1" > "${DIR}/$(basename "$1" .gz)" || true
+  local TMP="${DIR}/$(basename "$1" .gz)"
+  if [ -z "$(gunzip -t "$1")"]; then
+    HREF['gzinfo']="$(gzip -lv "$1")"
+    gunzip -cq "$1" > "${TMP}" || rm "${TMP}"
+    if [ -z "$(tar -tf "${TMP}" > /dev/null)" ]; then
+      HREF['tarinfo']="$(tar -tvf "${TMP}")"
+      tar -xf "${TMP}" -C "${DIR}" && rm "${TMP}" || true
+    fi
   fi
 
   rsync -rltgoD "${DIR}/" "$2/"
