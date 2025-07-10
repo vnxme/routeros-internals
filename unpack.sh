@@ -395,10 +395,10 @@ function unpack_xz {
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).xz"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  local XZ_FILE="${DIR}/$(basename "$1")"
-  if [ -z "$(xz -t "$1")" ]; then
-    cp "$1" "${XZ_FILE}"
-    unxz -q "${XZ_FILE}" || true
+  if [ -z "$(tar -tf "$1" > /dev/null)" ]; then
+    tar -Jxf "$1" -C "${DIR}" || true
+  elif [ -z "$(xz -t "$1")" ]; then
+    unxz -cq "$1" > "${DIR}/$(basename "$1" .xz)" || true
   fi
 
   rsync -rltgoD "${DIR}/" "$2/"
@@ -473,7 +473,7 @@ fi
 
 check_path "/sbin" "/usr/sbin" "/usr/local/sbin"
 
-DEPS=(binwalk blockdev blkid cpio dtc fdisk file gdisk qemu-nbd parted rsync unsquashfs unxz)
+DEPS=(binwalk blockdev blkid cpio dtc fdisk file gdisk gunzip qemu-nbd parted rsync tar unsquashfs unxz)
 for DEP in ${DEPS[@]}; do
   if [ -z "$(which "${DEP}")" ]; then
     clean_and_exit 2 "${ME}: Dependency '${DEP}' can't be satisfied"
