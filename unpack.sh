@@ -91,6 +91,8 @@ function detect_filetype {
     echo "cpio"
   elif [ -n "$(echo "$1" | grep -E '^Squashfs filesystem.*$')" ]; then
     echo "sfs"
+  elif [ -n "$(echo "$1" | grep -E '^gzip compressed data.*$')" ]; then
+    echo "gz"
   elif [ -n "$(echo "$1" | grep -E '^Zip archive data.*$')" ]; then
     echo "zip"
   elif [ -n "$(echo "$1" | grep -E '^Device Tree Blob.*$')" ]; then
@@ -253,6 +255,27 @@ function unpack_elf {
   unpack_cpio_elements "$1" "${DIR}" "$3"
   unpack_dtb_elements "$1" "${DIR}"
   unpack_xz_elements "$1" "${DIR}"
+
+  rsync -rltgoD "${DIR}/" "$2/"
+  HREF['ls']="$(render_ls "${DIR}")"
+  [ "${RM}" = true ] && rm -rf "${DIR}"
+}
+
+function unpack_gz {
+  # arguments:
+  # $1 - source filepath, string
+  # $2 - destination directory, string
+  # $3 - helpers array name, string
+
+  local -n HREF="$3"
+  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).gz"
+  local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
+
+  if [ -z "$(tar -tf "$1" > /dev/null)" ]; then
+    tar -zxf "$1" -C "${DIR}" || true
+  elif [ -z "$(gunzip -t "$1")"]; then
+    gunzip -cq "$1" > "${DIR}/$(basename "$1" .gz)" || true
+  fi
 
   rsync -rltgoD "${DIR}/" "$2/"
   HREF['ls']="$(render_ls "${DIR}")"
@@ -491,6 +514,10 @@ case "$(detect_filetype "${FI}")" in
 
   "dtb")
     unpack_dtb "${FILE}" "${DIR}" "HELPERS"
+    ;;
+
+  "gz")
+    unpack_gz "${FILE}" "${DIR}" "HELPERS"
     ;;
 
   "img")
