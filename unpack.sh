@@ -313,7 +313,7 @@ function unpack_gz {
   if [ -z "$(gunzip -t "$1")"]; then
     HREF['gzinfo']="$(gzip -lv "$1")"
     gunzip -cq "$1" > "${TMP}" || rm "${TMP}"
-    if [ -z "$(tar -tf "${TMP}" > /dev/null)" ]; then
+    if [ -z "$((tar -tf "${TMP}" 3>&2 2>&1 1>&3-) 2> /dev/null)" ]; then
       HREF['tarinfo']="$(tar -tvf "${TMP}")"
       tar -xf "${TMP}" -C "${DIR}" && rm "${TMP}" || true
     fi
@@ -441,7 +441,7 @@ function unpack_xz {
   if [ -z "$(xz -t "$1")"]; then
     HREF['xzinfo']="$(xz -lv "$1")"
     unxz -cq "$1" > "${TMP}" || rm "${TMP}"
-    if [ -z "$(tar -tf "${TMP}" > /dev/null)" ]; then
+    if [ -z "$((tar -tf "${TMP}" 3>&2 2>&1 1>&3-) 2> /dev/null)" ]; then
       HREF['tarinfo']="$(tar -tvf "${TMP}")"
       tar -xf "${TMP}" -C "${DIR}" && rm "${TMP}" || true
     fi
