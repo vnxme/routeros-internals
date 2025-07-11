@@ -56,6 +56,7 @@ function compose_readme {
   local NO="${HREF['notes']}"
   local PA="${HREF['parted']}"
   local TI="${HREF['tarinfo']}"
+  local XZ="${HREF['xzinfo']}"
   local ZI="${HREF['zipinfo']}"
 
   [ -n "${FI}" ] && TEXT="${TEXT}#### Identification (\`file <*>\`):\n\`\`\`\n${FI}\n\`\`\`\n"
@@ -63,6 +64,7 @@ function compose_readme {
   [ -n "${II}" ] && TEXT="${TEXT}#### Description (\`isoinfo -d -i <*>\`):\n\`\`\`\n${II}\n\`\`\`\n"
   [ -n "${GZ}" ] && TEXT="${TEXT}#### Description (\`gzip -lv <*>\`):\n\`\`\`\n${GZ}\n\`\`\`\n"
   [ -n "${TI}" ] && TEXT="${TEXT}#### Description (\`tar -tvf <*>\`):\n\`\`\`\n${TI}\n\`\`\`\n"
+  [ -n "${XZ}" ] && TEXT="${TEXT}#### Description (\`xz -lv <*>\`):\n\`\`\`\n${XZ}\n\`\`\`\n"
   [ -n "${ZI}" ] && TEXT="${TEXT}#### Description (\`zipinfo <*>\`):\n\`\`\`\n${ZI}\n\`\`\`\n"
   [ -n "${BD}" ] && TEXT="${TEXT}#### Block device info (\`blockdev --report <*>\`):\n\`\`\`\n${BD}\n\`\`\`\n"
   [ -n "${PA}" ] && TEXT="${TEXT}#### Partition info (\`parted <*> print\`):\n\`\`\`\n${PA}\n\`\`\`\n"
@@ -403,10 +405,14 @@ function unpack_xz {
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).xz"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  if [ -z "$(tar -tf "$1" > /dev/null)" ]; then
-    tar -Jxf "$1" -C "${DIR}" || true
-  elif [ -z "$(xz -t "$1")" ]; then
-    unxz -cq "$1" > "${DIR}/$(basename "$1" .xz)" || true
+  local TMP="${DIR}/$(echo "$(basename "$1")" | sed -r 's,\.(rgz|xz)$,,g')"
+  if [ -z "$(xz -t "$1")"]; then
+    HREF['xzinfo']="$(xz -lv "$1")"
+    unxz -cq "$1" > "${TMP}" || rm "${TMP}"
+    if [ -z "$(tar -tf "${TMP}" > /dev/null)" ]; then
+      HREF['tarinfo']="$(tar -tvf "${TMP}")"
+      tar -xf "${TMP}" -C "${DIR}" && rm "${TMP}" || true
+    fi
   fi
 
   rsync -rltgoD "${DIR}/" "$2/"
