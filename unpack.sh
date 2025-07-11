@@ -147,7 +147,7 @@ function unpack_bzimage {
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).efi"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  unpack_xz_elements "$1" "${DIR}"
+  extract_xz_elements "$1" "${DIR}"
 
   # unless bzImage has an XZ-compressed vmlinux inside, use a universal script
   if [ -z "$(find ${DIR}/* -maxdepth 0 -type f -name '*.vmlinux' 2>/dev/null)" ]; then
@@ -185,7 +185,7 @@ function unpack_cpio {
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
-function unpack_cpio_elements {
+function extract_cpio_elements {
   # arguments:
   # $1 - source filepath, string
   # $2 - destination directory, string
@@ -232,7 +232,7 @@ function unpack_dtb {
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
-function unpack_dtb_elements {
+function extract_dtb_elements {
   # arguments
   # $1 - source filepath, string
   # $2 - destination directory, string
@@ -258,9 +258,9 @@ function unpack_elf {
   local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).elf"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  unpack_cpio_elements "$1" "${DIR}" "$3"
-  unpack_dtb_elements "$1" "${DIR}"
-  unpack_xz_elements "$1" "${DIR}"
+  extract_cpio_elements "$1" "${DIR}" "$3"
+  extract_dtb_elements "$1" "${DIR}"
+  extract_xz_elements "$1" "${DIR}"
 
   rsync -rltgoD "${DIR}/" "$2/"
   HREF['ls']="$(render_ls "${DIR}")"
@@ -420,7 +420,7 @@ function unpack_xz {
   [ "${RM}" = true ] && rm -rf "${DIR}"
 }
 
-function unpack_xz_elements {
+function extract_xz_elements {
   # arguments
   # $1 - source filepath, string
   # $2 - destination directory, string
