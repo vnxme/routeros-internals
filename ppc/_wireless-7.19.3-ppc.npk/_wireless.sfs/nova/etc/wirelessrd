@@ -1,0 +1,1979 @@
+# everything on line after '#' is ignored
+# file consists of sections
+# there are 2 types of sections:
+# - group (G) - groups channel ranges and assigns name to them,
+#   can include other (previously defined) groups by name
+# - country (C) - specifies channel ranges supported for country,
+#   can include groups by name
+#
+# group section format:
+# G <group name>
+#   R <frequency range> <options>
+#   G <group name to include>
+#   ...
+#
+# country section format:
+# C <country id> <2 letter country code> <DFS domain>
+#   R <frequency range> <options>
+#   G <group name to include>
+#   ...
+#
+# frequency range options:
+# - P=<txpower>, default 30
+#
+# - C=<class>, default 0
+#
+# - G=<gain>, default 0
+#
+# - S=<step>, scanlist center frequency step, default - as in old code
+#
+# - W=<width in mhz range>, if need to limit for some channel widths,
+#   for example to exclude small channels, default - full range (0-max)
+#
+# - flags:
+#   DFS - do dfs
+#   PSCAN - do passive scan
+#   IND - indoor range
+#   OUTD - outdoor range
+#
+# - supported phy mode values:
+#   A, A-TURBO, A-HT20, A-HT40, A-VHT20, A-VHT40, A-VHT80, A-VHT160
+#   B, G, G-TURBO, G-HT20, G-HT40
+#
+# - special phy modes values for specifying multiple phymodes at once:
+#   5-ALL - all 5GHz phymodes (A, A-TURBO, A-HT20...)
+#   2-ALL - all 2GHz phymodes (B, G, G-TURBO, G-HT20...)
+#   5-ALL-NOTURBO - all 5GHz phymodes except A-TURBO
+#   2-ALL-NOTURBO - all 2GHz phymodes except G-TURBO
+# - every phymode option can be excluded by prepending '!',
+#   e.g. "2-ALL !B" means - all 2ghz modes except 11b
+# 
+# Info from LSDK-WLAN-10.1.357
+
+G 900_1
+  # G-TURBO is not excluded because it is impossible to use it anyway - range smaller than 40MHz
+  R 902-927      2-ALL            P=30
+
+G APL1_5
+  R 5735-5835    5-ALL-NOTURBO    P=30 OUTD
+  R 5740-5820    A-TURBO          P=30 S=40 OUTD # Step for turbo channel needed?
+  R 5745-5825    A-TURBO          P=30 S=40 OUTD # parklaajas
+  
+G APL2_5
+  R 5735-5815    5-ALL-NOTURBO    P=23 C=3 OUTD
+  R 5740-5820    A-TURBO          P=23 S=40 OUTD
+  
+G APL3_5
+  R 5270-5330    5-ALL-NOTURBO    P=17 C=2 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  R 5270-5310    A-TURBO          P=17 S=40 PSCAN
+  R 5740-5820    A-TURBO          P=23 S=40 OUTD
+  R 5745-5825    A-TURBO          P=30 S=40 OUTD # parklaajas
+  
+G APL4_5
+  R 5170-5250    5-ALL-NOTURBO    P=20 C=1 IND
+  R 5735-5835    5-ALL-NOTURBO    P=20 OUTD
+  R 5190-5230    A-TURBO          P=20 G=6 S=40 IND
+  R 5740-5820    A-TURBO          P=20 S=40 OUTD
+  R 5180-5220    A-TURBO          P=20 S=40 IND  # parklaajas
+  R 5745-5825    A-TURBO          P=20 S=40 OUTD # parklaajas
+  
+  
+# APL5_5 is used for CHILE in ATHEROS, currently CHILE uses APL6_5
+# G APL5_5
+#  R 5735-5835    5-ALL-NOTURBO    P=17 C=5 OUTD
+#  R 5740-5820    A-TURBO          P=17 S=40 OUTD
+#  R 5745-5825    A-TURBO          P=17 S=40 OUTD # parklaajas
+  
+G APL6_5
+  R 5170-5250    5-ALL-NOTURBO    P=20 C=1 PSCAN IND
+  R 5250-5330    5-ALL-NOTURBO    P=20 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=20 OUTD
+  R 5190-5230    A-TURBO          P=20 S=40 DFS IND
+  R 5230-5310    A-TURBO          P=20 S=40 DFS PSCAN
+  R 5740-5820    A-TURBO          P=23 S=40 OUTD
+  R 5180-5300    A-TURBO          P=20 S=40 DFS # parklaajas
+  R 5745-5825    A-TURBO          P=20 S=40 DFS OUTD # parklaajas
+  
+G APL7_5
+  R 5270-5330    5-ALL-NOTURBO    P=17 C=2 G=6 DFS
+  R 5490-5590    5-ALL-NOTURBO    P=30 C=4 G=6 DFS PSCAN
+  R 5650-5730    5-ALL-NOTURBO    P=30 C=4 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=30 G=6 PSCAN OUTD
+  R 5270-5310    A-TURBO          P=20 S=40 DFS PSCAN
+  R 5740-5820    A-TURBO          P=30 S=40 DFS OUTD
+  R 5520-5680    A-TURBO          P=30 S=40 DFS PSCAN
+  R 5745-5825    A-TURBO          P=30 S=40 DFS OUTD # parklaajas
+
+# G APL8_5
+#   R 5250-5330    5-ALL-NOTURBO    P=30 C=2
+#   R 5735-5835    5-ALL-NOTURBO    P=30 OUTD
+#   R 5270-5310    A-TURBO          P=30 S=40 PSCAN
+#   R 5740-5820    A-TURBO          P=30 S=40 OUTD
+#   R 5260-5300    A-TURBO          P=30 S=40 PSCAN# parklaajas
+#   R 5745-5825    A-TURBO          P=30 S=40 OUTD # parklaajas
+
+G APL9_5
+  R 5170-5250    5-ALL-NOTURBO    P=20 G=6 PSCAN IND
+  R 5250-5330    5-ALL-NOTURBO    P=20 DFS PSCAN
+  R 5490-5630    5-ALL-NOTURBO    P=30 C=2 G=6 DFS PSCAN
+  R 5735-5815    5-ALL-NOTURBO    P=30 G=6 PSCAN OUTD
+  R 5270-5310    A-TURBO          P=20 S=40 DFS PSCAN
+  R 5740-5820    A-TURBO          P=30 S=40 DFS OUTD
+  R 5520-5680    A-TURBO          P=30 S=40 DFS PSCAN
+  R 5745-5825    A-TURBO          P=30 S=40 DFS OUTD # parklaajas 
+ 
+G APL10_5
+  R 5170-5250    5-ALL-NOTURBO    P=20 G=6 PSCAN IND
+  R 5250-5330    5-ALL-NOTURBO    P=20 DFS PSCAN
+  R 5490-5710    5-ALL-NOTURBO    P=30 G=6 DFS PSCAN
+  R 5735-5815    5-ALL-NOTURBO    P=30 G=6 PSCAN OUTD
+  R 5270-5310    A-TURBO          P=20 S=40 DFS PSCAN
+  R 5740-5820    A-TURBO          P=30 S=40 DFS OUTD
+  R 5520-5680    A-TURBO          P=30 S=40 DFS PSCAN
+  R 5745-5825    A-TURBO          P=30 S=40 DFS OUTD # parklaajas 
+ 
+G APL12_5
+  R 5170-5250    5-ALL-NOTURBO    P=23 C=1 PSCAN IND
+  R 5490-5570    5-ALL-NOTURBO    P=30 C=4 DFS PSCAN
+  R 5735-5875    5-ALL-NOTURBO    P=23 C=3 OUTD
+  R 5740-5820    A-TURBO          P=30 S=40 OUTD
+  R 5745-5825    A-TURBO          P=30 S=40 OUTD # parklaajas
+  
+G ETSI1_5
+  R 5170-5250    5-ALL-NOTURBO    P=23 C=1 PSCAN IND
+  R 5170-5330    5-ALL-NOTURBO    P=20 C=1 DFS PSCAN IND
+  R 5250-5330    5-ALL-NOTURBO    P=20 DFS PSCAN IND
+  R 5490-5710    5-ALL-NOTURBO    P=27 C=3 DFS PSCAN
+  R 5190-5310    A-TURBO          P=20 S=40 DFS 
+  R 5180-5300    A-TURBO          P=20 S=40 DFS # parklaajas
+  R 5520-5680    A-TURBO          P=27 S=40 DFS PSCAN
+  R 5510-5670    A-TURBO          P=27 S=40 DFS PSCAN # paarklaajas
+  
+G ETSI3_5
+  R 5170-5250    5-ALL-NOTURBO    P=20 C=1 PSCAN IND
+  R 5250-5330    5-ALL-NOTURBO    P=20 DFS PSCAN
+  R 5190-5310    A-TURBO          P=20 S=40 DFS 
+  R 5180-5300    A-TURBO          P=20 S=40 DFS # parklaajas
+  
+G ETSI4_5
+  R 5170-5250    5-ALL-NOTURBO    P=18 C=1 PSCAN IND
+  R 5250-5330    5-ALL-NOTURBO    P=18 C=2 DFS PSCAN
+  R 5190-5310    A-TURBO          P=18 DFS 
+  R 5180-5300    A-TURBO          P=18 DFS # parklaajas
+  
+G ETSI6_5
+  R 5170-5250    5-ALL-NOTURBO    P=23 C=1 PSCAN IND
+  R 5250-5290    5-ALL-NOTURBO    P=23 C=2 DFS PSCAN
+  R 5490-5710    5-ALL-NOTURBO    P=30 C=3 PSCAN
+  R 5190-5270    A-TURBO          P=23 S=40 DFS 
+  R 5180-5300    A-TURBO          P=23 S=40 DFS # parklaajas
+  
+G ETSI8_5
+  R 5170-5250    5-ALL-NOTURBO    P=20 C=1 PSCAN IND  
+  R 5250-5330    5-ALL-NOTURBO    P=20 DFS PSCAN
+  R 5650-5710    5-ALL-NOTURBO    P=20 C=4 G=6 DFS PSCAN
+  R 5755-5815    5-ALL-NOTURBO    P=20 OUTD
+  R 5190-5310    A-TURBO          P=20 S=40 DFS
+  R 5180-5300    A-TURBO          P=20 S=40 DFS # parklaajas 
+  R 5520-5680    A-TURBO          P=27 S=40 DFS PSCAN
+  R 5510-5670    A-TURBO          P=27 S=40 DFS PSCAN # paarklaajas  
+
+G ETSI9_5
+  R 5170-5250    5-ALL-NOTURBO    P=20 C=1 PSCAN IND  
+  R 5250-5330    5-ALL-NOTURBO    P=20 DFS PSCAN
+  R 5490-5670    5-ALL-NOTURBO    P=20 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=20 G=6 PSCAN OUTD
+  R 5190-5310    A-TURBO          P=20 S=40 DFS
+  R 5180-5300    A-TURBO          P=20 S=40 DFS # parklaajas 
+  R 5520-5680    A-TURBO          P=27 S=40 DFS PSCAN
+  R 5510-5670    A-TURBO          P=27 S=40 DFS PSCAN # paarklaajas  
+  
+G FCC1_5
+  R 5170-5250    5-ALL-NOTURBO    P=17 C=1 G=6 IND
+  R 5250-5330    5-ALL-NOTURBO    P=23 C=2 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  R 5190-5230    A-TURBO          P=17 G=6 S=40 DFS IND
+  R 5230-5310    A-TURBO          P=23 G=6 S=40 DFS PSCAN
+  R 5740-5820    A-TURBO          P=30 G=6 S=40 DFS OUTD
+  R 5180-5260    A-TURBO          P=17 G=6 S=40 # parklaajas
+  R 5260-5300    A-TURBO          P=23 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          P=30 G=6 S=40 # parklaajas
+  
+G FCC2_5
+  R 5170-5250    5-ALL-NOTURBO    P=23 C=1 G=6 PSCAN IND
+  R 5250-5330    5-ALL-NOTURBO    P=23 C=2 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  R 5190-5230    A-TURBO          P=23 G=6 S=40 IND
+  R 5230-5310    A-TURBO          P=23 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          P=23 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          P=23 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          P=23 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          P=30 S=40 OUTD # parklaajas
+  
+G FCC3_5
+  R 5170-5250    5-ALL-NOTURBO    P=17 C=1 G=6 IND
+  R 5250-5330    5-ALL-NOTURBO    P=24 C=2 G=6 DFS PSCAN
+  R 5490-5730    5-ALL-NOTURBO    P=24 C=4 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  R 5190-5230    A-TURBO          P=17 G=6 S=40 DFS IND
+  R 5740-5820    A-TURBO          P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          P=17 G=6 S=40 DFS IND # parklaajas
+  R 5745-5825    A-TURBO          P=30 G=6 S=40 DFS OUTD # parklaajas
+  R 5230-5310    A-TURBO          P=24 G=6 S=40 DFS PSCAN
+  R 5520-5680    A-TURBO          P=24 G=6 S=40 DFS PSCAN
+  
+G FCC4_5
+# Bug Fix: EV 98583 Public Safety channel
+# Exclude the following channel in FCC Public safety domain
+# Uni-1: 5180, 5200, 5220, 5240 
+# Uni-2: 5260, 5280, 5300, 5320 
+# Uni-3: 5745, 5765, 5785, 5805, 5825
+  R 4939.5-4989.5 A A-HT20 A-VHT20 P=27 W=5 S=5 G=6 PSCAN
+  R 4940-4990     A A-HT20 A-VHT20 P=30 W=10 S=5 G=6 PSCAN 
+  R 4940-4990     A A-HT20 A-VHT20 P=33 W=20 S=5 G=6 PSCAN
+  R 5190-5230     A-TURBO          P=27 G=6 S=40 DFS
+  R 5230-5310     A-TURBO          P=27 G=6 S=40 DFS PSCAN
+  R 5740-5820     A-TURBO          P=27 G=6 S=40 DFS
+  R 5180-5220     A-TURBO          P=23 G=6 S=40 # parklaajas
+  R 5260-5300     A-TURBO          P=30 S=40 # parklaajas
+  R 5745-5825     A-TURBO          P=27 G=6 S=40 DFS # parklaajas
+ 
+G FCC5_5
+  R 5170-5250    5-ALL-NOTURBO    P=17 C=1 G=6 IND
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  R 5190-5230    A-TURBO          P=17 G=6 S=40 DFS IND
+  R 5740-5820    A-TURBO          P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          P=17 G=6 S=40 IND # parklaajas
+  R 5745-5825    A-TURBO          P=30 G=6 S=40 # parklaajas
+  
+G FCC6_5
+  R 5170-5250    5-ALL-NOTURBO    P=17 C=1 G=6 IND
+  R 5250-5330    5-ALL-NOTURBO    P=23 C=2 G=6 DFS PSCAN
+  R 5490-5590    5-ALL-NOTURBO    P=23 C=4 G=6 DFS PSCAN
+  R 5650-5730    5-ALL-NOTURBO    P=23 C=4 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  R 5190-5230    A-TURBO          P=23 G=6 S=40 IND
+  R 5230-5310    A-TURBO          P=23 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          P=23 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          P=23 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          P=23 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          P=30 S=40 OUTD # parklaajas
+  
+G MKK1_5
+  R 5170-5250    5-ALL-NOTURBO    P=23 C=1 PSCAN
+  R 5250-5330    5-ALL-NOTURBO    P=23 DFS PSCAN
+  R 5490-5710    5-ALL-NOTURBO    P=23 DFS PSCAN
+  R 5190-5230    A-TURBO          P=23 G=6 S=40 IND
+  R 5180-5220    A-TURBO          P=23 S=40 IND # parklaajas
+  
+G MKK2_5
+  R 4910-4930    A A-HT20 A-VHT20 P=23 C=16 W=10 S=5 PSCAN
+  R 4930-4950    A A-HT20 A-VHT20 P=23 C=16 W=10 S=5 PSCAN
+  R 4910-4990    5-ALL-NOTURBO    P=23 C=7 PSCAN
+  R 5030-5045    A A-HT20 A-VHT20 P=23 C=12 W=10 S=5 PSCAN
+  R 5050-5060    A A-HT20 A-VHT20 P=23 C=12 W=10 S=5 PSCAN
+  R 5030-5090    5-ALL-NOTURBO    P=23 C=2 PSCAN
+  R 5160-5240    5-ALL-NOTURBO    P=23 C=1 PSCAN
+  R 5170-5250    5-ALL-NOTURBO    P=23 C=1 PSCAN
+  R 5190-5230    A-TURBO          P=23 G=6 S=40 IND
+  R 5180-5220    A-TURBO          P=23 S=40 IND # parklaajas  
+  
+G APLD_2
+  R 2302-2382    2-ALL-NOTURBO    P=20  
+  R 2402-2482    2-ALL-NOTURBO    P=20 PSCAN
+  
+G ETSIA_2
+  R 2447-2482    2-ALL-NOTURBO    P=20 # France?
+  R 2417-2457    G-TURBO          P=20 G=6 S=40
+
+G ETSIB_2
+  R 2422-2452    2-ALL-NOTURBO    P=20 C=4 # Israel?
+  R 2417-2457    G-TURBO          P=20 G=6 S=40
+ 
+G ETSIC_2
+  R 2402-2482    2-ALL-NOTURBO    P=30 C=4
+  R 2417-2457    G-TURBO          P=20 G=6 S=40
+  
+G FCCA_2
+  R 2402-2472    2-ALL-NOTURBO    P=30 C=12 G=6
+  R 2417-2457    G-TURBO          P=20 G=6 S=40  
+  
+G MKKA_2
+  R 2402-2472    2-ALL-NOTURBO    P=20 C=30 PSCAN
+  R 2457-2482    2-ALL-NOTURBO    P=20 C=30 PSCAN
+  R 2474-2494    B                P=20 C=31 PSCAN
+  R 2417-2457    G-TURBO          P=20 G=6 S=40
+  
+G MKKC_2
+  R 2402-2482    2-ALL-NOTURBO    P=20 C=30 PSCAN
+  R 2417-2457    G-TURBO          P=20 G=6 S=40
+  
+G WORLD_2
+  R 2402-2482    2-ALL-NOTURBO    P=20
+  R 2417-2457    G-TURBO          P=20 G=6 S=40  
+  
+G cAPac_CA
+  R 2402-2472    2-ALL-NOTURBO    T=1 P=30 C=12 G=6                         
+  R 2417-2457    G-TURBO          T=1 P=20 G=6 S=40                        
+  R 5170-5250    5-ALL-NOTURBO    T=1 P=30 C=1 G=6 PSCAN IND               
+  R 5170-5250    5-ALL-NOTURBO    T=1 P=23 C=1 G=6 PSCAN OUTD                
+  R 5250-5330    5-ALL-NOTURBO    T=1 P=18 C=2 G=6 DFS PSCAN               
+  R 5490-5590    5-ALL-NOTURBO    T=1 P=19 C=2 G=6 DFS PSCAN                
+  R 5650-5730    5-ALL-NOTURBO    T=1 P=19 C=2 G=6 DFS PSCAN                
+  R 5735-5835    5-ALL-NOTURBO    T=1 P=30 C=5 G=6 OUTD                     
+  R 5190-5230    A-TURBO          T=1 P=23 G=6 S=40 IND                     
+  R 5230-5310    A-TURBO          T=1 P=23 G=6 S=40 PSCAN                   
+  R 5740-5820    A-TURBO          T=1 P=30 S=40 OUTD                        
+  R 5180-5220    A-TURBO          T=1 P=23 G=6 S=40 IND # parklaajas        
+  R 5220-5260    A-TURBO          T=1 P=23 G=6 S=40 PSCAN IND # parklaajas   
+  R 5260-5300    A-TURBO          T=1 P=23 G=6 S=40 DFS PSCAN # parklaajas  
+  R 5745-5825    A-TURBO          T=1 P=30 S=40 OUTD # parklaajas           
+  R 902-927      2-ALL            T=1 P=30                                  
+
+G cAPac_US
+  R 2402-2472    2-ALL-NOTURBO    T=1 P=30 C=12 G=6         
+  R 2417-2457    G-TURBO          T=1 P=20 G=6 S=40          
+  R 902-927      2-ALL            T=1 P=30                  
+  R 5170-5250    5-ALL-NOTURBO    T=1 P=30 C=1 G=6 
+  R 5170-5330    5-ALL-NOTURBO    T=1 P=27 C=2 G=6 DFS PSCAN  
+  R 5250-5330    5-ALL-NOTURBO    T=1 P=18 C=2 G=6 DFS PSCAN 
+  R 5490-5730    5-ALL-NOTURBO    T=1 P=19 C=4 G=6 DFS PSCAN 
+  R 5735-5835    5-ALL-NOTURBO    T=1 P=30 C=5 G=6 
+  R 5190-5230    A-TURBO          T=1 P=23 G=6 S=40 IND  
+  R 5230-5310    A-TURBO          T=1 P=23 G=6 S=40 PSCAN 
+  R 5740-5820    A-TURBO          T=1 P=30 S=40 OUTD 
+  R 5180-5220    A-TURBO          T=1 P=23 G=6 S=40 IND # parklaajas 
+  R 5220-5260    A-TURBO          T=1 P=23 G=6 S=40 PSCAN IND # parklaajas 
+  R 5260-5300    A-TURBO          T=1 P=23 G=6 S=40 DFS PSCAN # parklaajas 
+  R 5745-5825    A-TURBO          T=1 P=30 S=40 OUTD # parklaajas 
+
+G NetMetal_ac2_CA
+  R 2402-2472    2-ALL-NOTURBO    T=2 P=28 C=12 G=6                        
+  R 2417-2457    G-TURBO          T=2 P=20 G=6 S=40                           
+  R 5170-5250    5-ALL-NOTURBO    T=2 P=30 C=1 G=6 PSCAN IND                  
+  R 5170-5250    5-ALL-NOTURBO    T=2 P=23 C=1 G=6 PSCAN OUTD                
+  R 5250-5330    A-VHT80          T=2 P=22 C=2 G=6 DFS PSCAN                     
+  R 5250-5330    5-ALL-NOTURBO    T=2 P=27 C=2 G=6 DFS PSCAN               
+  R 5490-5590    A-VHT20          T=2 P=26 C=2 G=6 DFS PSCAN                   
+  R 5650-5730    A-VHT20          T=2 P=26 C=2 G=6 DFS PSCAN                
+  R 5490-5590    A-VHT40          T=2 P=24 C=2 G=6 DFS PSCAN                   
+  R 5650-5730    A-VHT40          T=2 P=24 C=2 G=6 DFS PSCAN                  
+  R 5490-5590    A-VHT80          T=2 P=15 C=2 G=6 DFS PSCAN                  
+  R 5650-5730    A-VHT80          T=2 P=15 C=2 G=6 DFS PSCAN                    
+  R 5735-5835    5-ALL-NOTURBO    T=2 P=30 C=5 G=6 OUTD                     
+  R 5190-5230    A-TURBO          T=2 P=23 G=6 S=40 IND                       
+  R 5230-5310    A-TURBO          T=2 P=23 G=6 S=40 PSCAN                      
+  R 5740-5820    A-TURBO          T=2 P=30 S=40 OUTD                           
+  R 5180-5220    A-TURBO          T=2 P=23 G=6 S=40 IND # parklaajas          
+  R 5220-5260    A-TURBO          T=2 P=23 G=6 S=40 PSCAN IND # parklaajas    
+  R 5260-5300    A-TURBO          T=2 P=23 G=6 S=40 DFS PSCAN # parklaajas    
+  R 5745-5825    A-TURBO          T=2 P=30 S=40 OUTD # parklaajas            
+  R 902-927      2-ALL            T=2 P=30                                  
+
+G NetMetal_ac2_US
+  R 2402-2472    2-ALL-NOTURBO    T=2 P=28 C=12 G=6         
+  R 2417-2457    G-TURBO          T=2 P=20 G=6 S=40         
+  R 902-927      2-ALL            T=2 P=30                   
+  R 5170-5250    5-ALL-NOTURBO    T=2 P=30 C=1 G=6 
+  R 5170-5330    5-ALL-NOTURBO    T=2 P=27 C=2 G=6 DFS PSCAN 
+  R 5250-5330    A-VHT80          T=2 P=22 C=2 G=6 DFS PSCAN  
+  R 5250-5330    5-ALL-NOTURBO    T=2 P=18 C=2 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT20          T=2 P=26 C=4 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT40          T=2 P=24 C=4 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT80          T=2 P=15 C=4 G=6 DFS PSCAN 
+  R 5735-5835    5-ALL-NOTURBO    T=2 P=30 C=5 G=6  
+  R 5190-5230    A-TURBO          T=2 P=23 G=6 S=40 IND  
+  R 5230-5310    A-TURBO          T=2 P=23 G=6 S=40 PSCAN  
+  R 5740-5820    A-TURBO          T=2 P=30 S=40 OUTD 
+  R 5180-5220    A-TURBO          T=2 P=23 G=6 S=40 IND # parklaajas 
+  R 5220-5260    A-TURBO          T=2 P=23 G=6 S=40 PSCAN IND # parklaajas 
+  R 5260-5300    A-TURBO          T=2 P=23 G=6 S=40 DFS PSCAN # parklaajas  
+  R 5745-5825    A-TURBO          T=2 P=30 S=40 OUTD # parklaajas 
+
+G RB921UAGS_5SHPacD_CA
+  R 2402-2472    2-ALL-NOTURBO    T=3 P=30 C=12 G=6                         
+  R 2417-2457    G-TURBO          T=3 P=20 G=6 S=40                         
+  R 5170-5250    5-ALL-NOTURBO    T=3 P=30 C=1 G=6 PSCAN IND                
+  R 5170-5250    5-ALL-NOTURBO    T=3 P=27 C=1 G=6 PSCAN OUTD                
+  R 5250-5330    5-ALL-NOTURBO    T=3 P=27 C=2 G=6 DFS PSCAN                
+  R 5490-5590    A-VHT20          T=3 P=26 C=2 G=6 DFS PSCAN                
+  R 5650-5730    A-VHT20          T=3 P=26 C=2 G=6 DFS PSCAN               
+  R 5490-5590    A-VHT40          T=3 P=26 C=2 G=6 DFS PSCAN                 
+  R 5650-5730    A-VHT40          T=3 P=26 C=2 G=6 DFS PSCAN                  
+  R 5490-5590    A-VHT80          T=3 P=25 C=2 G=6 DFS PSCAN                 
+  R 5650-5730    A-VHT80          T=3 P=25 C=2 G=6 DFS PSCAN                    
+  R 5735-5835    5-ALL-NOTURBO    T=3 P=30 C=5 G=6 OUTD                      
+  R 5190-5230    A-TURBO          T=3 P=23 G=6 S=40 IND                    
+  R 5230-5310    A-TURBO          T=3 P=23 G=6 S=40 PSCAN                     
+  R 5740-5820    A-TURBO          T=3 P=30 S=40 OUTD                         
+  R 5180-5220    A-TURBO          T=3 P=23 G=6 S=40 IND # parklaajas          
+  R 5220-5260    A-TURBO          T=3 P=23 G=6 S=40 PSCAN IND # parklaajas    
+  R 5260-5300    A-TURBO          T=3 P=23 G=6 S=40 DFS PSCAN # parklaajas  
+  R 5745-5825    A-TURBO          T=3 P=30 S=40 OUTD # parklaajas           
+  R 902-927      2-ALL            T=3 P=30
+
+G RB921UAGS_5SHPacD_US
+  R 2402-2472    2-ALL-NOTURBO    T=3 P=30 C=12 G=6         
+  R 2417-2457    G-TURBO          T=3 P=20 G=6 S=40         
+  R 902-927      2-ALL            T=3 P=30                   
+  R 5170-5250    5-ALL-NOTURBO    T=3 P=30 C=1 G=6 
+  R 5170-5330    5-ALL-NOTURBO    T=3 P=27 C=2 G=6 DFS PSCAN 
+  R 5250-5330    5-ALL-NOTURBO    T=3 P=27 C=2 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT20          T=3 P=26 C=4 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT40          T=3 P=26 C=4 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT80          T=3 P=25 C=4 G=6 DFS PSCAN 
+  R 5735-5835    5-ALL-NOTURBO    T=3 P=30 C=5 G=6  
+  R 5190-5230    A-TURBO          T=3 P=23 G=6 S=40 IND  
+  R 5230-5310    A-TURBO          T=3 P=23 G=6 S=40 PSCAN  
+  R 5740-5820    A-TURBO          T=3 P=30 S=40 OUTD 
+  R 5180-5220    A-TURBO          T=3 P=23 G=6 S=40 IND # parklaajas 
+  R 5220-5260    A-TURBO          T=3 P=23 G=6 S=40 PSCAN IND # parklaajas 
+  R 5260-5300    A-TURBO          T=3 P=23 G=6 S=40 DFS PSCAN # parklaajas  
+  R 5745-5825    A-TURBO          T=3 P=30 S=40 OUTD # parklaajas                                   
+
+G RB921UAGS_5SHPacT_CA
+  R 2402-2472    2-ALL-NOTURBO    T=4 P=30 C=12 G=6                       
+  R 2417-2457    G-TURBO          T=4 P=20 G=6 S=40                          
+  R 5170-5250    5-ALL-NOTURBO    T=4 P=30 C=1 G=6 PSCAN IND                
+  R 5170-5250    5-ALL-NOTURBO    T=4 P=23 C=1 G=6 PSCAN OUTD               
+  R 5250-5330    5-ALL-NOTURBO    T=4 P=27 C=2 G=6 DFS PSCAN              
+  R 5490-5590    A-VHT20          T=4 P=26 C=2 G=6 DFS PSCAN                
+  R 5650-5730    A-VHT20          T=4 P=26 C=2 G=6 DFS PSCAN               
+  R 5490-5590    A-VHT40          T=4 P=26 C=2 G=6 DFS PSCAN                   
+  R 5650-5730    A-VHT40          T=4 P=26 C=2 G=6 DFS PSCAN                  
+  R 5490-5590    A-VHT80          T=4 P=25 C=2 G=6 DFS PSCAN                   
+  R 5650-5730    A-VHT80          T=4 P=25 C=2 G=6 DFS PSCAN                  
+  R 5735-5835    5-ALL-NOTURBO    T=4 P=30 C=5 G=6 OUTD                       
+  R 5190-5230    A-TURBO          T=4 P=23 G=6 S=40 IND                      
+  R 5230-5310    A-TURBO          T=4 P=23 G=6 S=40 PSCAN                     
+  R 5740-5820    A-TURBO          T=4 P=30 S=40 OUTD                          
+  R 5180-5220    A-TURBO          T=4 P=23 G=6 S=40 IND # parklaajas           
+  R 5220-5260    A-TURBO          T=4 P=23 G=6 S=40 PSCAN IND # parklaajas     
+  R 5260-5300    A-TURBO          T=4 P=23 G=6 S=40 DFS PSCAN # parklaajas    
+  R 5745-5825    A-TURBO          T=4 P=30 S=40 OUTD # parklaajas             
+  R 902-927      2-ALL            T=4 P=30
+
+G RB921UAGS_5SHPacT_US
+  R 2402-2472    2-ALL-NOTURBO    T=4 P=30 C=12 G=6         
+  R 2417-2457    G-TURBO          T=4 P=20 G=6 S=40         
+  R 902-927      2-ALL            T=4 P=30                   
+  R 5170-5250    5-ALL-NOTURBO    T=4 P=30 C=1 G=6 
+  R 5170-5330    5-ALL-NOTURBO    T=4 P=27 C=2 G=6 DFS PSCAN 
+  R 5250-5330    5-ALL-NOTURBO    T=4 P=27 C=2 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT20          T=4 P=26 C=4 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT40          T=4 P=26 C=4 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT80          T=4 P=25 C=4 G=6 DFS PSCAN 
+  R 5735-5835    5-ALL-NOTURBO    T=4 P=30 C=5 G=6  
+  R 5190-5230    A-TURBO          T=4 P=23 G=6 S=40 IND  
+  R 5230-5310    A-TURBO          T=4 P=23 G=6 S=40 PSCAN  
+  R 5740-5820    A-TURBO          T=4 P=30 S=40 OUTD 
+  R 5180-5220    A-TURBO          T=4 P=23 G=6 S=40 IND # parklaajas 
+  R 5220-5260    A-TURBO          T=4 P=23 G=6 S=40 PSCAN IND # parklaajas 
+  R 5260-5300    A-TURBO          T=4 P=23 G=6 S=40 DFS PSCAN # parklaajas  
+  R 5745-5825    A-TURBO          T=4 P=30 S=40 OUTD # parklaajas 
+
+G RB922UAGS_5HPacD_CA
+  R 2402-2472    2-ALL-NOTURBO    T=5 P=30 C=12 G=6                          
+  R 2417-2457    G-TURBO          T=5 P=20 G=6 S=40                          
+  R 5170-5250    5-ALL-NOTURBO    T=5 P=30 C=1 G=6 PSCAN IND                 
+  R 5170-5250    5-ALL-NOTURBO    T=5 P=23 C=1 G=6 PSCAN OUTD
+  R 5250-5330    A-VHT80          T=5 P=22 C=2 G=6 DFS PSCAN               
+  R 5250-5330    5-ALL-NOTURBO    T=5 P=27 C=2 G=6 DFS PSCAN                
+  R 5490-5590    A-VHT20          T=5 P=26 C=2 G=6 DFS PSCAN                  
+  R 5650-5730    A-VHT20          T=5 P=26 C=2 G=6 DFS PSCAN                
+  R 5490-5590    A-VHT40          T=5 P=26 C=2 G=6 DFS PSCAN                 
+  R 5650-5730    A-VHT40          T=5 P=26 C=2 G=6 DFS PSCAN                
+  R 5490-5590    A-VHT80          T=5 P=23 C=2 G=6 DFS PSCAN                   
+  R 5650-5730    A-VHT80          T=5 P=23 C=2 G=6 DFS PSCAN                    
+  R 5735-5835    5-ALL-NOTURBO    T=5 P=30 C=5 G=6 OUTD                      
+  R 5190-5230    A-TURBO          T=5 P=23 G=6 S=40 IND                      
+  R 5230-5310    A-TURBO          T=5 P=23 G=6 S=40 PSCAN                   
+  R 5740-5820    A-TURBO          T=5 P=30 S=40 OUTD                       
+  R 5180-5220    A-TURBO          T=5 P=23 G=6 S=40 IND # parklaajas          
+  R 5220-5260    A-TURBO          T=5 P=23 G=6 S=40 PSCAN IND # parklaajas     
+  R 5260-5300    A-TURBO          T=5 P=23 G=6 S=40 DFS PSCAN # parklaajas   
+  R 5745-5825    A-TURBO          T=5 P=30 S=40 OUTD # parklaajas           
+  R 902-927      2-ALL            T=5 P=30
+
+G RB922UAGS_5HPacD_US
+  R 2402-2472    2-ALL-NOTURBO    T=5 P=30 C=12 G=6         
+  R 2417-2457    G-TURBO          T=5 P=20 G=6 S=40         
+  R 902-927      2-ALL            T=5 P=30                   
+  R 5170-5250    5-ALL-NOTURBO    T=5 P=30 C=1 G=6 
+  R 5170-5330    5-ALL-NOTURBO    T=5 P=27 C=2 G=6 DFS PSCAN 
+  R 5250-5330    A-VHT80          T=5 P=22 C=2 G=6 DFS PSCAN  
+  R 5250-5330    5-ALL-NOTURBO    T=5 P=27 C=2 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT20          T=5 P=26 C=4 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT40          T=5 P=26 C=4 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT80          T=5 P=23 C=4 G=6 DFS PSCAN 
+  R 5735-5835    5-ALL-NOTURBO    T=5 P=30 C=5 G=6  
+  R 5190-5230    A-TURBO          T=5 P=23 G=6 S=40 IND  
+  R 5230-5310    A-TURBO          T=5 P=23 G=6 S=40 PSCAN  
+  R 5740-5820    A-TURBO          T=5 P=30 S=40 OUTD 
+  R 5180-5220    A-TURBO          T=5 P=23 G=6 S=40 IND # parklaajas 
+  R 5220-5260    A-TURBO          T=5 P=23 G=6 S=40 PSCAN IND # parklaajas 
+  R 5260-5300    A-TURBO          T=5 P=23 G=6 S=40 DFS PSCAN # parklaajas  
+  R 5745-5825    A-TURBO          T=5 P=30 S=40 OUTD # parklaajas 
+
+G RB922UAGS_5HPacT_CA
+  R 2402-2472    2-ALL-NOTURBO    T=6 P=30 C=12 G=6                          
+  R 2417-2457    G-TURBO          T=6 P=20 G=6 S=40                          
+  R 5170-5250    5-ALL-NOTURBO    T=6 P=30 C=1 G=6 PSCAN IND               
+  R 5170-5250    5-ALL-NOTURBO    T=6 P=23 C=1 G=6 PSCAN OUTD              
+  R 5250-5330    A-VHT80          T=6 P=22 C=2 G=6 DFS PSCAN                 
+  R 5250-5330    5-ALL-NOTURBO    T=6 P=27 C=2 G=6 DFS PSCAN                
+  R 5490-5590    A-VHT20          T=6 P=26 C=2 G=6 DFS PSCAN                 
+  R 5650-5730    A-VHT20          T=6 P=26 C=2 G=6 DFS PSCAN                
+  R 5490-5590    A-VHT40          T=6 P=26 C=2 G=6 DFS PSCAN                 
+  R 5650-5730    A-VHT40          T=6 P=26 C=2 G=6 DFS PSCAN                
+  R 5490-5590    A-VHT80          T=6 P=22 C=2 G=6 DFS PSCAN                 
+  R 5650-5730    A-VHT80          T=6 P=22 C=2 G=6 DFS PSCAN                  
+  R 5735-5835    5-ALL-NOTURBO    T=6 P=30 C=5 G=6 OUTD                      
+  R 5190-5230    A-TURBO          T=6 P=23 G=6 S=40 IND                    
+  R 5230-5310    A-TURBO          T=6 P=23 G=6 S=40 PSCAN                   
+  R 5740-5820    A-TURBO          T=6 P=30 S=40 OUTD                          
+  R 5180-5220    A-TURBO          T=6 P=23 G=6 S=40 IND # parklaajas          
+  R 5220-5260    A-TURBO          T=6 P=23 G=6 S=40 PSCAN IND # parklaajas     
+  R 5260-5300    A-TURBO          T=6 P=23 G=6 S=40 DFS PSCAN # parklaajas  
+  R 5745-5825    A-TURBO          T=6 P=30 S=40 OUTD # parklaajas            
+  R 902-927      2-ALL            T=6 P=30
+
+G RB922UAGS_5HPacT_US
+  R 2402-2472    2-ALL-NOTURBO    T=6 P=30 C=12 G=6         
+  R 2417-2457    G-TURBO          T=6 P=20 G=6 S=40         
+  R 902-927      2-ALL            T=6 P=30                   
+  R 5170-5250    5-ALL-NOTURBO    T=6 P=30 C=1 G=6 
+  R 5170-5330    5-ALL-NOTURBO    T=6 P=27 C=2 G=6 DFS PSCAN 
+  R 5250-5330    A-VHT80          T=6 P=22 C=2 G=6 DFS PSCAN  
+  R 5250-5330    5-ALL-NOTURBO    T=6 P=27 C=2 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT20          T=6 P=26 C=4 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT40          T=6 P=26 C=4 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT80          T=6 P=23 C=4 G=6 DFS PSCAN 
+  R 5735-5835    5-ALL-NOTURBO    T=6 P=30 C=5 G=6  
+  R 5190-5230    A-TURBO          T=6 P=23 G=6 S=40 IND  
+  R 5230-5310    A-TURBO          T=6 P=23 G=6 S=40 PSCAN  
+  R 5740-5820    A-TURBO          T=6 P=30 S=40 OUTD 
+  R 5180-5220    A-TURBO          T=6 P=23 G=6 S=40 IND # parklaajas 
+  R 5220-5260    A-TURBO          T=6 P=23 G=6 S=40 PSCAN IND # parklaajas 
+  R 5260-5300    A-TURBO          T=6 P=23 G=6 S=40 DFS PSCAN # parklaajas  
+  R 5745-5825    A-TURBO          T=6 P=30 S=40 OUTD # parklaajas         
+
+G RBD22UGS-5HPacD2HnD-15S_CA
+  R 2402-2417    2-ALL-NOTURBO    T=7 P=9 C=12 G=6
+  R 2417-2462    2-ALL-NOTURBO    T=7 P=28 C=12 G=6
+  R 2462-2472    2-ALL-NOTURBO    T=7 P=9 C=12 G=6
+  R 5170-5250    A-VHT40          T=7 P=9 C=1 G=6 PSCAN OUTD                   
+  R 5170-5250    A-VHT80          T=7 P=9 C=1 G=6 PSCAN OUTD                           
+  R 5170-5250    5-ALL-NOTURBO    T=7 P=30 C=1 G=6 PSCAN IND                  
+  R 5170-5250    5-ALL-NOTURBO    T=7 P=23 C=1 G=6 PSCAN OUTD
+  R 5250-5330    A-VHT80          T=7 P=22 C=2 G=6 DFS PSCAN                     
+  R 5250-5330    5-ALL-NOTURBO    T=7 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT80          T=7 P=16 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT20          T=7 P=20 C=2 G=6 DFS PSCAN                   
+  R 5650-5730    A-VHT20          T=7 P=20 C=2 G=6 DFS PSCAN                
+  R 5490-5590    A-VHT40          T=7 P=18 C=2 G=6 DFS PSCAN                   
+  R 5650-5730    A-VHT40          T=7 P=18 C=2 G=6 DFS PSCAN                  
+  R 5490-5590    A-VHT80          T=7 P=9 C=2 G=6 DFS PSCAN                  
+  R 5650-5730    A-VHT80          T=7 P=9 C=2 G=6 DFS PSCAN                    
+  R 5735-5835    5-ALL-NOTURBO    T=7 P=30 C=5 G=6 OUTD                     
+  R 5190-5230    A-TURBO          T=7 P=23 G=6 S=40 IND                       
+  R 5230-5310    A-TURBO          T=7 P=23 G=6 S=40 PSCAN                      
+  R 5740-5820    A-TURBO          T=7 P=30 S=40 OUTD                           
+  R 5180-5220    A-TURBO          T=7 P=23 G=6 S=40 IND # parklaajas          
+  R 5220-5260    A-TURBO          T=7 P=23 G=6 S=40 PSCAN IND # parklaajas    
+  R 5260-5300    A-TURBO          T=7 P=23 G=6 S=40 DFS PSCAN # parklaajas    
+  R 5745-5825    A-TURBO          T=7 P=30 S=40 OUTD # parklaajas            
+  R 902-927      2-ALL            T=7 P=30                                  
+
+G RBD22UGS-5HPacD2HnD-15S_US
+  R 2402-2417   2-ALL-NOTURBO     T=7 P=9 C=12 G=6
+  R 2417-2462   2-ALL-NOTURBO     T=7 P=28 C=12 G=6
+  R 2462-2472   2-ALL-NOTURBO     T=7 P=9 C=12 G=6
+  R 902-927      2-ALL            T=7 P=30
+  R 5170-5250    A-VHT40          T=7 P=9 C=1 G=6
+  R 5170-5250    A-VHT80          T=7 P=9 C=1 G=6                   
+  R 5170-5250    5-ALL-NOTURBO    T=7 P=30 C=1 G=6
+  R 5250-5330    A-VHT80          T=7 P=22 C=2 G=6 DFS PSCAN  
+  R 5250-5330    5-ALL-NOTURBO    T=7 P=18 C=2 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT20          T=7 P=20 C=4 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT40          T=7 P=18 C=4 G=6 DFS PSCAN 
+  R 5490-5730    A-VHT80          T=7 P=9 C=4 G=6 DFS PSCAN 
+  R 5735-5835    5-ALL-NOTURBO    T=7 P=30 C=5 G=6  
+  R 5190-5230    A-TURBO          T=7 P=23 G=6 S=40 IND  
+  R 5230-5310    A-TURBO          T=7 P=23 G=6 S=40 PSCAN  
+  R 5740-5820    A-TURBO          T=7 P=30 S=40 OUTD 
+  R 5180-5220    A-TURBO          T=7 P=23 G=6 S=40 IND # parklaajas 
+  R 5220-5260    A-TURBO          T=7 P=23 G=6 S=40 PSCAN IND # parklaajas 
+  R 5260-5300    A-TURBO          T=7 P=23 G=6 S=40 DFS PSCAN # parklaajas  
+  R 5745-5825    A-TURBO          T=7 P=30 S=40 OUTD # parklaajas
+
+G D53_CA
+  R 2402-2472    2-ALL-NOTURBO    T=8 P=30 C=12 G=6
+  R 2417-2457    G-TURBO          T=8 P=20 G=6 S=40
+  R 5170-5250    A-VHT20          T=8 P=30 C=1 G=6 PSCAN IND
+  R 5170-5250    A-VHT40          T=8 P=30 C=1 G=6 PSCAN IND
+  R 5170-5250    A-VHT80          T=8 P=25 C=1 G=6 PSCAN IND
+  R 5170-5250    5-ALL-NOTURBO    T=8 P=23 C=1 G=6 PSCAN OUTD
+  R 5250-5330    A-VHT20          T=8 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT40          T=8 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT80          T=8 P=25 C=2 G=6 DFS PSCAN
+  R 5250-5330    5-ALL-NOTURBO    T=8 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT20          T=8 P=27 C=2 G=6 DFS PSCAN
+  R 5650-5730    A-VHT20          T=8 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT40          T=8 P=27 C=2 G=6 DFS PSCAN
+  R 5650-5730    A-VHT40          T=8 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT80          T=8 P=25 C=2 G=6 DFS PSCAN
+  R 5650-5730    A-VHT80          T=8 P=25 C=2 G=6 DFS PSCAN
+  R 5490-5590    5-ALL-NOTURBO    T=8 P=27 C=2 G=6 DFS PSCAN
+  R 5650-5730    5-ALL-NOTURBO    T=8 P=27 C=2 G=6 DFS PSCAN
+  R 5735-5835    A-VHT20          T=8 P=30 C=5 G=6 OUTD
+  R 5735-5835    A-VHT40          T=8 P=30 C=5 G=6 OUTD
+  R 5735-5835    A-VHT80          T=8 P=25 C=5 G=6 OUTD
+  R 5735-5835    5-ALL-NOTURBO    T=8 P=30 C=5 G=6 OUTD
+  R 5190-5230    A-TURBO          T=8 P=25 G=6 S=40 IND
+  R 5230-5310    A-TURBO          T=8 P=25 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          T=8 P=25 S=40 OUTD
+  R 5180-5220    A-TURBO          T=8 P=25 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          T=8 P=25 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          T=8 P=25 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          T=8 P=25 S=40 OUTD # parklaajas
+  R 902-927      2-ALL            T=8 P=30
+
+G D53_US
+  R 2402-2472    2-ALL-NOTURBO    T=8 P=30 C=12 G=6
+  R 2417-2457    G-TURBO          T=8 P=20 G=6 S=40
+  R 902-927      2-ALL            T=8 P=30
+  R 5170-5250    A-VHT20          T=8 P=30 C=1 G=6
+  R 5170-5250    A-VHT40          T=8 P=30 C=1 G=6
+  R 5170-5250    A-VHT80          T=8 P=25 C=1 G=6
+  R 5170-5250    5-ALL-NOTURBO    T=8 P=25 C=1 G=6
+  R 5250-5330    A-VHT20          T=8 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT40          T=8 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT80          T=8 P=25 C=2 G=6 DFS PSCAN
+  R 5250-5330    5-ALL-NOTURBO    T=8 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5730    A-VHT20          T=8 P=27 C=4 G=6 DFS PSCAN
+  R 5490-5730    A-VHT40          T=8 P=27 C=4 G=6 DFS PSCAN
+  R 5490-5730    A-VHT80          T=8 P=25 C=4 G=6 DFS PSCAN
+  R 5490-5730    5-ALL-NOTURBO    T=8 P=27 C=4 G=6 DFS PSCAN
+  R 5735-5835    A-VHT20          T=8 P=30 C=5 G=6
+  R 5735-5835    A-VHT40          T=8 P=30 C=5 G=6
+  R 5735-5835    A-VHT80          T=8 P=25 C=5 G=6
+  R 5735-5835    5-ALL-NOTURBO    T=8 P=25 C=5 G=6
+  R 5190-5230    A-TURBO          T=8 P=25 G=6 S=40 IND
+  R 5230-5310    A-TURBO          T=8 P=25 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          T=8 P=25 S=40 OUTD
+  R 5180-5220    A-TURBO          T=8 P=25 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          T=8 P=25 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          T=8 P=25 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          T=8 P=25 S=40 OUTD # parklaajas
+
+G 962_US
+  R 2402-2472    2-ALL-NOTURBO    T=9 P=30 C=12 G=6
+  R 2417-2457    G-TURBO          T=9 P=20 G=6 S=40
+  R 902-927      2-ALL            T=9 P=30
+  R 5170-5250    A-VHT20          T=9 P=30 C=1 G=6
+  R 5170-5250    A-VHT40          T=9 P=30 C=1 G=6
+  R 5170-5250    A-VHT80          T=9 P=30 C=1 G=6
+  R 5170-5250    5-ALL-NOTURBO    T=9 P=30 C=1 G=6
+  R 5250-5330    A-VHT20          T=9 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT40          T=9 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT80          T=9 P=26 C=2 G=6 DFS PSCAN
+  R 5250-5330    5-ALL-NOTURBO    T=9 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5730    A-VHT20          T=9 P=24 C=4 G=6 DFS PSCAN
+  R 5490-5730    A-VHT40          T=9 P=23 C=4 G=6 DFS PSCAN
+  R 5490-5730    A-VHT80          T=9 P=23 C=4 G=6 DFS PSCAN
+  R 5490-5730    5-ALL-NOTURBO    T=9 P=23 C=4 G=6 DFS PSCAN
+  R 5735-5835    A-VHT20          T=9 P=30 C=5 G=6
+  R 5735-5835    A-VHT40          T=9 P=30 C=5 G=6
+  R 5735-5835    A-VHT80          T=9 P=30 C=5 G=6
+  R 5735-5835    5-ALL-NOTURBO    T=9 P=30 C=5 G=6
+  R 5190-5230    A-TURBO          T=9 P=23 G=6 S=40 IND
+  R 5230-5310    A-TURBO          T=9 P=23 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          T=9 P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          T=9 P=23 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          T=9 P=23 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          T=9 P=23 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          T=9 P=30 S=40 OUTD # parklaajas
+
+G 962_CA
+  R 2402-2472    2-ALL-NOTURBO    T=9 P=30 C=12 G=6
+  R 2417-2457    G-TURBO          T=9 P=20 G=6 S=40
+  R 5170-5250    A-VHT20          T=9 P=30 C=1 G=6 PSCAN IND
+  R 5170-5250    A-VHT40          T=9 P=30 C=1 G=6 PSCAN IND
+  R 5170-5250    A-VHT80          T=9 P=30 C=1 G=6 PSCAN IND
+  R 5170-5250    5-ALL-NOTURBO    T=9 P=23 C=1 G=6 PSCAN OUTD
+  R 5250-5330    A-VHT20          T=9 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT40          T=9 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT80          T=9 P=26 C=2 G=6 DFS PSCAN
+  R 5250-5330    5-ALL-NOTURBO    T=9 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT20          T=9 P=24 C=2 G=6 DFS PSCAN
+  R 5650-5730    A-VHT20          T=9 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT40          T=9 P=24 C=2 G=6 DFS PSCAN
+  R 5650-5730    A-VHT40          T=9 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT80          T=9 P=25 C=2 G=6 DFS PSCAN
+  R 5650-5730    A-VHT80          T=9 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    5-ALL-NOTURBO    T=9 P=24 C=2 G=6 DFS PSCAN
+  R 5650-5730    5-ALL-NOTURBO    T=9 P=27 C=2 G=6 DFS PSCAN
+  R 5735-5835    A-VHT20          T=9 P=30 C=5 G=6 OUTD
+  R 5735-5835    A-VHT40          T=9 P=30 C=5 G=6 OUTD
+  R 5735-5835    A-VHT80          T=9 P=30 C=5 G=6 OUTD
+  R 5735-5835    5-ALL-NOTURBO    T=9 P=30 C=5 G=6 OUTD
+  R 5190-5230    A-TURBO          T=9 P=23 G=6 S=40 IND
+  R 5230-5310    A-TURBO          T=9 P=23 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          T=9 P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          T=9 P=23 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          T=9 P=23 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          T=9 P=23 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          T=9 P=30 S=40 OUTD # parklaajas
+  R 902-927      2-ALL            T=9 P=30
+
+
+G D53_CAT6_CA
+  R 2402-2472    2-ALL-NOTURBO    T=10 P=30 C=12 G=6
+  R 2417-2457    G-TURBO          T=10 P=20 G=6 S=40
+  R 5170-5250    A-VHT20          T=10 P=30 C=1 G=6 PSCAN IND
+  R 5170-5250    A-VHT40          T=10 P=30 C=1 G=6 PSCAN IND
+  R 5170-5250    A-VHT80          T=10 P=30 C=1 G=6 PSCAN IND
+  R 5170-5250    5-ALL-NOTURBO    T=10 P=23 C=1 G=6 PSCAN OUTD
+  R 5250-5330    A-VHT20          T=10 P=24 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT40          T=10 P=24 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT80          T=10 P=13 C=2 G=6 DFS PSCAN
+  R 5250-5330    5-ALL-NOTURBO    T=10 P=24 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT20          T=10 P=24 C=2 G=6 DFS PSCAN
+  R 5650-5730    A-VHT20          T=10 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT40          T=10 P=24 C=2 G=6 DFS PSCAN
+  R 5650-5730    A-VHT40          T=10 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT80          T=10 P=13 C=2 G=6 DFS PSCAN
+  R 5650-5730    A-VHT80          T=10 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    5-ALL-NOTURBO    T=10 P=24 C=2 G=6 DFS PSCAN
+  R 5650-5730    5-ALL-NOTURBO    T=10 P=27 C=2 G=6 DFS PSCAN
+  R 5735-5835    A-VHT20          T=10 P=30 C=5 G=6 OUTD
+  R 5735-5835    A-VHT40          T=10 P=30 C=5 G=6 OUTD
+  R 5735-5835    A-VHT80          T=10 P=30 C=5 G=6 OUTD
+  R 5735-5835    5-ALL-NOTURBO    T=10 P=30 C=5 G=6 OUTD
+  R 5190-5230    A-TURBO          T=10 P=23 G=6 S=40 IND
+  R 5230-5310    A-TURBO          T=10 P=23 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          T=10 P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          T=10 P=23 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          T=10 P=23 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          T=10 P=23 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          T=10 P=30 S=40 OUTD # parklaajas
+  R 902-927      2-ALL            T=10 P=30
+
+G D53_CAT6_US
+  R 2402-2472    2-ALL-NOTURBO    T=10 P=30 C=12 G=6
+  R 2417-2457    G-TURBO          T=10 P=20 G=6 S=40
+  R 902-927      2-ALL            T=10 P=30
+  R 5170-5250    A-VHT20          T=10 P=30 C=1 G=6
+  R 5170-5250    A-VHT40          T=10 P=30 C=1 G=6
+  R 5170-5250    A-VHT80          T=10 P=30 C=1 G=6
+  R 5170-5250    5-ALL-NOTURBO    T=10 P=30 C=1 G=6
+  R 5250-5330    A-VHT20          T=10 P=24 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT40          T=10 P=24 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT80          T=10 P=13 C=2 G=6 DFS PSCAN
+  R 5250-5330    5-ALL-NOTURBO    T=10 P=24 C=2 G=6 DFS PSCAN
+  R 5490-5730    A-VHT20          T=10 P=24 C=4 G=6 DFS PSCAN
+  R 5490-5730    A-VHT40          T=10 P=23 C=4 G=6 DFS PSCAN
+  R 5490-5570    A-VHT80          T=10 P=13 C=4 G=6 DFS PSCAN
+  R 5570-5730    A-VHT80          T=10 P=24 C=4 G=6 DFS PSCAN
+  R 5490-5730    5-ALL-NOTURBO    T=10 P=24 C=4 G=6 DFS PSCAN
+  R 5735-5835    A-VHT20          T=10 P=30 C=5 G=6
+  R 5735-5835    A-VHT40          T=10 P=30 C=5 G=6
+  R 5735-5835    A-VHT80          T=10 P=30 C=5 G=6
+  R 5735-5835    5-ALL-NOTURBO    T=10 P=30 C=5 G=6
+  R 5190-5230    A-TURBO          T=10 P=23 G=6 S=40 IND
+  R 5230-5310    A-TURBO          T=10 P=23 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          T=10 P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          T=10 P=23 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          T=10 P=23 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          T=10 P=23 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          T=10 P=30 S=40 OUTD # parklaajas
+
+G D25_CA
+  R 2402-2472    2-ALL-NOTURBO    T=11 P=30 C=12 G=6
+  R 2417-2457    G-TURBO          T=11 P=20 G=6 S=40
+  R 5170-5250    A-VHT20          T=11 P=30 C=1 G=6 PSCAN IND
+  R 5170-5250    A-VHT40          T=11 P=30 C=1 G=6 PSCAN IND
+  R 5170-5250    A-VHT80          T=11 P=30 C=1 G=6 PSCAN IND
+  R 5170-5250    5-ALL-NOTURBO    T=11 P=23 C=1 G=6 PSCAN OUTD
+  R 5250-5330    A-VHT20          T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT40          T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT80          T=11 P=25 C=2 G=6 DFS PSCAN
+  R 5250-5330    5-ALL-NOTURBO    T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT20          T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5650-5730    A-VHT20          T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT40          T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5650-5730    A-VHT40          T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    A-VHT80          T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5650-5730    A-VHT80          T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5590    5-ALL-NOTURBO    T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5650-5730    5-ALL-NOTURBO    T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5735-5835    A-VHT20          T=11 P=30 C=5 G=6 OUTD
+  R 5735-5835    A-VHT40          T=11 P=30 C=5 G=6 OUTD
+  R 5735-5835    A-VHT80          T=11 P=30 C=5 G=6 OUTD
+  R 5735-5835    5-ALL-NOTURBO    T=11 P=30 C=5 G=6 OUTD
+  R 5190-5230    A-TURBO          T=11 P=23 G=6 S=40 IND
+  R 5230-5310    A-TURBO          T=11 P=23 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          T=11 P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          T=11 P=23 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          T=11 P=23 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          T=11 P=23 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          T=11 P=30 S=40 OUTD # parklaajas
+  R 902-927      2-ALL            T=11 P=30
+
+G D25_US
+  R 2402-2472    2-ALL-NOTURBO    T=11 P=30 C=12 G=6
+  R 2417-2457    G-TURBO          T=11 P=20 G=6 S=40
+  R 902-927      2-ALL            T=11 P=30
+  R 5170-5250    A-VHT20          T=11 P=30 C=1 G=6
+  R 5170-5250    A-VHT40          T=11 P=30 C=1 G=6
+  R 5170-5250    A-VHT80          T=11 P=30 C=1 G=6
+  R 5170-5250    5-ALL-NOTURBO    T=11 P=30 C=1 G=6
+  R 5250-5330    A-VHT20          T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT40          T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    A-VHT80          T=11 P=25 C=2 G=6 DFS PSCAN
+  R 5250-5330    5-ALL-NOTURBO    T=11 P=27 C=2 G=6 DFS PSCAN
+  R 5490-5730    A-VHT20          T=11 P=27 C=4 G=6 DFS PSCAN
+  R 5490-5730    A-VHT40          T=11 P=27 C=4 G=6 DFS PSCAN
+  R 5490-5570    A-VHT80          T=11 P=27 C=4 G=6 DFS PSCAN
+  R 5570-5730    A-VHT80          T=11 P=27 C=4 G=6 DFS PSCAN
+  R 5490-5730    5-ALL-NOTURBO    T=11 P=27 C=4 G=6 DFS PSCAN
+  R 5735-5835    A-VHT20          T=11 P=30 C=5 G=6
+  R 5735-5835    A-VHT40          T=11 P=30 C=5 G=6
+  R 5735-5835    A-VHT80          T=11 P=30 C=5 G=6
+  R 5735-5835    5-ALL-NOTURBO    T=11 P=30 C=5 G=6
+  R 5190-5230    A-TURBO          T=11 P=23 G=6 S=40 IND
+  R 5230-5310    A-TURBO          T=11 P=23 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          T=11 P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          T=11 P=23 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          T=11 P=23 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          T=11 P=23 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          T=11 P=30 S=40 OUTD # parklaajas
+
+G CANADA_RDTAG
+  R 2402-2472   2-ALL-NOTURBO    P=30 C=12 G=6
+  R 5170-5250   5-ALL-NOTURBO    P=30 C=1 G=6 IND
+  R 5170-5250   5-ALL-NOTURBO    P=23 C=1 G=6 OUTD
+  R 5735-5835   5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+
+G UNITED_STATES_RDTAG  
+  R 2402-2472   2-ALL-NOTURBO    P=30 C=12 G=6
+  R 5170-5250   5-ALL-NOTURBO    P=30 C=1 G=6 IND 
+  R 5735-5835   5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+
+G CANADA_RDTAG_RBD22
+  R 2402-2417   2-ALL-NOTURBO    T=7 P=9 C=12 G=6
+  R 2417-2462   2-ALL-NOTURBO    T=7 P=28 C=12 G=6
+  R 2462-2472   2-ALL-NOTURBO    T=7 P=9 C=12 G=6
+  R 5170-5250   A-VHT40          T=7 P=9 C=1 G=6 PSCAN OUTD                   
+  R 5170-5250   A-VHT80          T=7 P=9 C=1 G=6 PSCAN OUTD                           
+  R 5170-5250   5-ALL-NOTURBO    T=7 P=30 C=1 G=6 IND
+  R 5170-5250   5-ALL-NOTURBO    T=7 P=23 C=1 G=6 OUTD
+  R 5735-5835   5-ALL-NOTURBO    T=7 P=30 C=5 G=6 OUTD
+
+G UNITED_STATES_RDTAG_RBD22
+  R 2402-2417   2-ALL-NOTURBO    T=7 P=9 C=12 G=6
+  R 2417-2462   2-ALL-NOTURBO    T=7 P=28 C=12 G=6
+  R 2462-2472   2-ALL-NOTURBO    T=7 P=9 C=12 G=6
+  R 5170-5250   A-VHT40          T=7 P=9 C=1 G=6
+  R 5170-5250   A-VHT80          T=7 P=9 C=1 G=6          
+  R 5170-5250   5-ALL-NOTURBO    T=7 P=30 C=1 G=6 IND 
+  R 5735-5835   5-ALL-NOTURBO    T=7 P=30 C=5 G=6 OUTD
+
+G UNITED_STATES_RDTAG_D53
+  R 2402-2472   2-ALL-NOTURBO    T=8 P=30 C=12 G=6
+  R 5170-5250   A-VHT20          T=8 P=30 C=1 G=6 IND
+  R 5170-5250   A-VHT40          T=8 P=30 C=1 G=6 IND
+  R 5170-5250   A-VHT80          T=8 P=25 C=1 G=6 IND
+  R 5170-5250   5-ALL-NOTURBO    T=8 P=25 C=1 G=6 IND
+  R 5735-5835   A-VHT20          T=8 P=30 C=5 G=6 OUTD
+  R 5735-5835   A-VHT40          T=8 P=30 C=5 G=6 OUTD
+  R 5735-5835   A-VHT80          T=8 P=25 C=5 G=6 OUTD
+  R 5735-5835   5-ALL-NOTURBO    T=8 P=25 C=5 G=6 OUTD
+
+G CANADA_RDTAG_D53
+  R 2402-2472   2-ALL-NOTURBO    T=8 P=30 C=12 G=6
+  R 5170-5250   A-VHT20          T=8 P=30 C=1 G=6 IND
+  R 5170-5250   A-VHT40          T=8 P=30 C=1 G=6 IND
+  R 5170-5250   A-VHT80          T=8 P=25 C=1 G=6 IND
+  R 5170-5250   5-ALL-NOTURBO    T=8 P=23 C=1 G=6 OUTD
+  R 5735-5835   A-VHT20          T=8 P=30 C=5 G=6 OUTD
+  R 5735-5835   A-VHT40          T=8 P=30 C=5 G=6 OUTD
+  R 5735-5835   A-VHT80          T=8 P=25 C=5 G=6 OUTD
+  R 5735-5835   5-ALL-NOTURBO    T=8 P=25 C=5 G=6 OUTD
+
+C 0x0 NA FCC NO_COUNTRY_SET
+  R 5490-5710 5-ALL-NOTURBO P=27 C=3 DFS PSCAN
+  G FCCA_2
+  G FCC1_5
+  G 900_1
+
+C 0x8 AL ETSI ALBANIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0xc DZ ETSI ALGERIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+C 0x20 AR FCC ARGENTINA
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+  
+C 0x33 AM ETSI ARMENIA
+  G WORLD_2
+  G ETSI4_5
+  G 900_1
+  
+C 533 AW ETSI ARUBA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x24 AU FCC AUSTRALIA # Atheros has 2.4ghz output to 20db and uses FCC6
+  R 2402-2482    2-ALL-NOTURBO    P=36 PSCAN  
+  R 2417-2457    G-TURBO          P=36 S=40
+  R 5170-5250    5-ALL-NOTURBO    P=20 C=1 G=6 IND
+  R 5250-5330    5-ALL-NOTURBO    P=20 C=2 G=6 DFS PSCAN
+  R 5490-5590    5-ALL-NOTURBO    P=27 C=4 G=6 DFS PSCAN
+  R 5650-5730    5-ALL-NOTURBO    P=27 C=4 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=36 C=5 G=6 OUTD
+  R 5190-5230    A-TURBO          P=20 G=6 S=40 IND
+  R 5230-5310    A-TURBO          P=20 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          P=36 S=40 OUTD
+  R 5180-5220    A-TURBO          P=20 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          P=20 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          P=20 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          P=36 S=40 OUTD # parklaajas
+  R 5510-5600    A-TURBO          P=27 G=16 S=40 DFS PSCAN
+  R 917-928      2-ALL            P=30 W=10
+ 
+C 0x28 AT ETSIEU AUSTRIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x1f AZ ETSI AZERBAIJAN
+  G WORLD_2
+  G ETSI4_5
+  G 900_1
+  
+C 44 BS FCC BAHAMAS
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+  
+C 0x30 BH ETSI BAHRAIN
+  G WORLD_2
+  G APL6_5
+  G 900_1
+  
+C 50 BD ETSI BANGLADESH
+  G WORLD_2
+  G 900_1
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+
+C 52 BB FCC BARBADOS
+  G WORLD_2
+  G FCC2_5
+  G 900_1
+
+C 0x70 BY ETSI BELARUS
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x38 BE ETSIEU BELGIUM
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+
+C 0x54 BZ FCC BELIZE
+  G ETSIC_2
+  G APL1_5
+  G 900_1
+  
+C 60 BM FCC BERMUDA
+  G FCCA_2
+  G FCC3_5
+  G 900_1
+  
+C 0x44 BO FCC BOLIVIA
+  G ETSIC_2
+  G APL1_5
+  G 900_1
+
+C 70 BA ETSI BOSNIA\ AND\ HERZEGOVINA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+
+C 0x4c BR FCC BRAZIL
+  R 5170-5250    5-ALL-NOTURBO    P=20 C=1 G=6 PSCAN IND
+  R 5250-5330    5-ALL-NOTURBO    P=20 C=2 G=6 DFS PSCAN
+  R 5490-5710    5-ALL-NOTURBO    P=30 C=4 G=6 DFS PSCAN
+  R 5190-5230    A-TURBO          P=20 G=6 S=40 DFS IND
+  R 5740-5820    A-TURBO          P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          P=20 G=6 S=40 DFS IND # parklaajas
+  R 5745-5825    A-TURBO          P=30 G=6 S=40 DFS OUTD # parklaajas
+  R 2402-2482    2-ALL-NOTURBO    P=30 PSCAN
+  R 2417-2457    G-TURBO          P=30 G=6 S=40
+  R 5730-5845    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  R 907-932      2-ALL            P=30
+  
+C 0x60 BN ETSI BRUNEI\ DARUSSALAM
+  G WORLD_2
+  G APL6_5
+  G 900_1
+
+C 0x64 BG ETSIEU BULGARIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 116 KH ETSI CAMBODIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x7c CA FCC CANADA
+  R 2402-2472    2-ALL-NOTURBO    P=30 C=12 G=6                         # G FCCA_2 
+  R 2417-2457    G-TURBO          P=20 G=6 S=40                         # G FCCA_2
+  R 5170-5250    5-ALL-NOTURBO    P=30 C=1 G=6 PSCAN IND                # G FCC2_5
+  R 5170-5250    5-ALL-NOTURBO    P=23 C=1 G=6 PSCAN OUTD                # G FCC2_5
+  R 5250-5330    5-ALL-NOTURBO    P=27 C=2 G=6 DFS PSCAN                # G FCC2_5
+  R 5490-5590    5-ALL-NOTURBO    P=27 C=2 G=6 DFS PSCAN
+  R 5650-5730    5-ALL-NOTURBO    P=27 C=2 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD                     # G FCC2_5
+  R 5190-5230    A-TURBO          P=23 G=6 S=40 IND                     # G FCC2_5
+  R 5230-5310    A-TURBO          P=23 G=6 S=40 PSCAN                   # G FCC2_5
+  R 5740-5820    A-TURBO          P=30 S=40 OUTD                        # G FCC2_5
+  R 5180-5220    A-TURBO          P=23 G=6 S=40 IND # parklaajas        # G FCC2_5
+  R 5220-5260    A-TURBO          P=23 G=6 S=40 PSCAN IND # parklaajas  # G FCC2_5
+  R 5260-5300    A-TURBO          P=23 G=6 S=40 DFS PSCAN # parklaajas  # G FCC2_5
+  R 5745-5825    A-TURBO          P=30 S=40 OUTD # parklaajas           # G FCC2_5
+  R 902-927      2-ALL            P=30                                  # G 900_1
+  G cAPac_CA                      T=1
+  G NetMetal_ac2_CA               T=2
+  G RB921UAGS_5SHPacD_CA          T=3
+  G RB921UAGS_5SHPacT_CA          T=4
+  G RB922UAGS_5HPacD_CA           T=5
+  G RB922UAGS_5HPacT_CA           T=6
+  G RBD22UGS-5HPacD2HnD-15S_CA    T=7
+  G D53_CA                        T=8
+  G 962_CA                        T=9
+  G D53_CAT6_CA                   T=10
+  G D25_CA                        T=11
+
+C 0x98 CL ETSI CHILE
+  G WORLD_2
+  G APL6_5
+  G 900_1
+
+C 0x9c CN ETSI CHINA
+  G WORLD_2
+  G APL1_5
+  R 5170-5250 	 5-ALL-NOTURBO    P=23 C=1 G=6 IND
+  R 5250-5330 	 5-ALL-NOTURBO    P=20 C=2 G=6 DFS PSCAN
+  G 900_1
+
+C 0xaa CO FCC COLOMBIA
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+
+C 0xbc CR FCC COSTA\ RICA
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+
+C 0xbf HR ETSIEU CROATIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+
+C 0xc4 CY ETSIEU CYPRUS
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0xcb CZ ETSIEU CZECH\ REPUBLIC
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0xd0 DK ETSIEU DENMARK
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0xd6 DO FCC DOMINICAN\ REPUBLIC
+  G FCCA_2
+  G FCC1_5
+  G 900_1
+  
+C 0xda EC FCC ECUADOR
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+
+C 0x332 EG ETSI EGYPT
+  G WORLD_2
+  R 5170-5250    5-ALL-NOTURBO    P=23 C=1 PSCAN IND
+  R 5250-5330    5-ALL-NOTURBO    P=20 DFS PSCAN
+  R 5190-5310    A-TURBO          P=20 S=40 DFS 
+  R 5180-5300    A-TURBO          P=20 S=40 DFS # parklaajas
+  
+C 0xde SV FCC EL\ SALVADOR
+  G WORLD_2
+  G FCC1_5
+  G 900_1
+
+C 0xe9 EE ETSIEU ESTONIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0xf6 FI ETSIEU FINLAND
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0xfa FR ETSIEU France
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+
+C 0xff FR ETSI France\ RES 
+  G WORLD_2
+  G ETSI3_5
+  G 900_1
+  
+C 254 GF ETSI FRENCH\ GUIANA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+
+C 258 PF ETSI FRENCH\ POLYNESIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+
+C 0x10c GE ETSI GEORGIA
+  G WORLD_2
+  G ETSI4_5
+  G 900_1
+  
+C 0x114 DE ETSIEU GERMANY
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x12c GR ETSIEU GREECE
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 304 GL ETSI GREENLAND
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 308 GD FCC GRENADA
+  G FCCA_2
+  G FCC3_5
+  G 900_1
+  
+C 312 GP ETSI GUADELOUPE
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+
+C 316 GU FCC GUAM
+  G FCCA_2
+  G FCC3_5
+  G 900_1
+  
+C 0x140 GT FCC GUATEMALA
+  G FCCA_2
+  G FCC1_5
+  G 900_1
+  
+C 332 HT ETSI HAITI
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 340 HN FCC HONDURAS
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+  
+C 0x158 HK FCC HONG\ KONG
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+  
+C 0x15c HU ETSIEU HUNGARY
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x160 IS ETSIEU ICELAND
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x164 IN ETSI INDIA
+  R 2402-2482    2-ALL-NOTURBO    P=30
+  R 5170-5250    5-ALL-NOTURBO    P=21 C=1 PSCAN IND
+  R 5170-5250    5-ALL-NOTURBO    P=30 C=1 PSCAN OUTD
+  R 5250-5330    5-ALL-NOTURBO    P=24 DFS PSCAN
+  R 5490-5710    5-ALL-NOTURBO    P=24 DFS PSCAN
+  R 5735-5875    5-ALL-NOTURBO    P=30 OUTD
+  G 900_1
+  
+C 0x168 ID FCC INDONESIA
+  G WORLD_2
+  G APL1_5
+  G 900_1
+  
+C 0x16c IR FCC IRAN
+  G WORLD_2
+  G APL1_5
+  G 900_1
+  
+C 0x174 IE ETSIEU IRELAND
+  G WORLD_2
+  G ETSI1_5
+  R 5735-5875    5-ALL-NOTURBO    P=33 OUTD 
+  G 900_1
+ 
+C 0x178 IL ETSI ISRAEL
+  G WORLD_2
+  G ETSI3_5
+  
+C 0x17c IT ETSIEU ITALY
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x188 JP MKK JAPAN
+  G MKKA_2
+  G MKK1_5
+  G 900_1
+  
+C 0x189 JP MKK JAPAN1
+  G MKKA_2
+  G MKK1_5
+  G 900_1
+  
+C 0x18a JP MKK JAPAN2
+  G FCCA_2
+  G MKK1_5
+  G 900_1
+  
+C 0x18b JP MKK JAPAN3
+  G MKKA_2
+  G MKK2_5
+  G 900_1
+  
+C 0x18c JP MKK JAPAN4
+  G MKKA_2
+  G MKK1_5
+  G 900_1
+  
+C 0x18d JP MKK JAPAN5
+  G MKKA_2
+  G MKK1_5
+  G 900_1
+  
+C 0x18f JP MKK JAPAN6
+  G MKKC_2
+  G MKK1_5
+  G 900_1
+  
+C 0x190 JO FCC JORDAN
+  G WORLD_2
+  G APL4_5
+  G 900_1
+  
+C 0x18e KZ NONE KAZAKHSTAN
+  G WORLD_2
+  G 900_1
+  R 5170-5250    5-ALL-NOTURBO    P=20 C=1 G=6 IND
+  R 5250-5330    5-ALL-NOTURBO    P=20 C=2 G=6 DFS PSCAN IND
+  R 5490-5710    5-ALL-NOTURBO    P=20 C=3 DFS PSCAN IND
+  
+C 404 KE ETSI KENYA
+  G WORLD_2
+  G APL12_5
+  G 900_1
+  
+C 0x198 KP ETSI NORTH\ KOREA
+  G WORLD_2
+  G APL9_5
+  G 900_1
+  
+C 0x19a KR ETSI KOREA\ REPUBLIC
+  G WORLD_2
+  G APL10_5
+  G 900_1
+  
+C 0x19b KR ETSI KOREA\ REPUBLIC2 # not used in ATHEROS any more
+  G APLD_2
+  G APL10_5
+  G 900_1
+  
+C 412 KR ETSI KOREA\ REPUBLIC3
+  G WORLD_2
+  G APL9_5
+  G 900_1
+
+C 0x19e KW ETSI KUWAIT
+  G WORLD_2
+  G ETSI3_5
+  G 900_1
+  
+C 0x1ac LV ETSIEU LATVIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x1a6 LB FCC LEBANON
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+
+C 0x1b6 LI ETSIEU LIECHTENSTEIN
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x1b8 LT ETSIEU LITHUANIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x1ba LU ETSIEU LUXEMBOURG
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x1be MO FCC MACAU
+  G WORLD_2
+  G FCC2_5
+  G 900_1
+
+C 0x327 MK ETSI NORTH\ MACEDONIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+ 
+C 454 MW ETSI MALAWI
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x1ca MY FCC MALAYSIA
+  R 2402-2482    2-ALL-NOTURBO    P=27 PSCAN
+  R 5170-5250    5-ALL-NOTURBO    P=17 C=1 G=6 IND # was not in the ROS source, added from ATHEROS source
+  R 5250-5330    5-ALL-NOTURBO    P=30 C=2 G=6 DFS PSCAN
+  R 5735-5875    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  G 900_1
+  
+C 0x1d6 MT ETSIEU MALTA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 474 MQ ETSI MARTINIQUE
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+
+C 175 YT ETSI MAYOTTE
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x1e4 MX FCC MEXICO
+  G FCCA_2
+  G FCC1_5
+  G 900_1
+
+C 0x1ec MC ETSI MONACO
+  G WORLD_2
+  G ETSI4_5
+  G 900_1
+  
+C 0x1f8 MA FCC MOROCCO
+  G WORLD_2
+  G APL4_5
+  G 900_1
+  
+C 524 NP ETSI NEPAL
+  G WORLD_2
+  G APL6_5
+  G 900_1
+  
+C 0x210 NL ETSIEU NETHERLANDS
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 530 AN ETSI NETHERLANDS\ ANTILLES
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x22a NZ FCC NEW\ ZEALAND
+  G ETSIC_2
+  R 5170-5250    5-ALL-NOTURBO    P=23 C=1 G=6 IND
+  R 5250-5330    5-ALL-NOTURBO    P=27 C=2 G=6 DFS PSCAN
+  R 5490-5730    5-ALL-NOTURBO    P=27 C=4 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  G 900_1
+  
+C 558 NI FCC NICARAGUA
+  G FCCA_2
+  G FCC3_5
+  G 900_1
+  
+C 0x242 NO ETSIEU NORWAY
+  G WORLD_2
+  G ETSI1_5
+  R 5735-5795   5-ALL-NOTURBO    P=33 OUTD
+  R 5815-5850   5-ALL-NOTURBO    P=33 OUTD
+  R 5730-5790   A-TURBO          P=33 OUTD
+  G 900_1
+
+C 0x200 OM FCC OMAN
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+   
+C 0x24a PK FCC PAKISTAN
+  G WORLD_2
+  R 5735-5835   5-ALL-NOTURBO    P=20 OUTD
+  R 5740-5820   A-TURBO          P=20 OUTD
+  G 900_1
+   
+C 0x23f PA FCC PANAMA
+  G FCCA_2
+  G FCC1_5
+  G 900_1
+   
+C 598 PG FCC PAPUA\ NEW\ GUINEA
+  G WORLD_2
+  G FCC1_5
+  G 900_1
+
+C 600 PY FCC PARAGUAY
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+   
+C 0x25c PE FCC PERU
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+  
+C 0x260 PH FCC PHILIPPINES 
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+  
+C 0x268 PL ETSIEU POLAND
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x26c PT ETSIEU PORTUGAL
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x276 PR FCC PUERTO\ RICO
+  G FCCA_2
+  G FCC3_5
+  G 900_1
+  
+C 0x27a QA FCC QATAR
+  G WORLD_2
+  G APL1_5
+  G 900_1
+
+C 638 RE ETSI REUNION
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x282 RO ETSIEU ROMANIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x283 RU ETSI RUSSIA
+  G WORLD_2
+  G ETSI8_5
+  G 900_1
+  
+C 646 RW FCC RWANDA
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+  
+C 0x2aa SA FCC SAUDI\ ARABIA
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+  
+C 688 RS ETSI SERBIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 499 ME ETSI MONTENEGRO
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x2be SG FCC SINGAPORE
+  R 2402-2482    2-ALL-NOTURBO    P=23 PSCAN
+  R 2417-2457    G-TURBO          P=23
+  G FCC3_5
+  G 900_1
+  
+C 0x2bf SK ETSIEU SLOVAKIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x2c1 SI ETSIEU SLOVENIA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x2c6 ZA FCC SOUTH\ AFRICA
+  G WORLD_2
+  G 900_1
+  R 5170-5250    5-ALL-NOTURBO    P=17 C=1 G=6 IND
+  R 5250-5330    5-ALL-NOTURBO    P=24 C=2 G=6 DFS PSCAN
+  R 5490-5730    5-ALL-NOTURBO    P=24 C=4 G=6
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  R 5190-5230    A-TURBO          P=17 G=6 S=40 DFS IND
+  R 5740-5820    A-TURBO          P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          P=17 G=6 S=40 DFS IND # parklaajas
+  R 5745-5825    A-TURBO          P=30 G=6 S=40 DFS OUTD # parklaajas
+  R 5230-5310    A-TURBO          P=24 G=6 S=40 DFS PSCAN
+  R 5520-5680    A-TURBO          P=24 G=6 S=40 DFS PSCAN
+  
+C 0x2d4 ES ETSIEU SPAIN
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 144 LK FCC SRI\ LANKA
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+  
+C 0x2f0 SE ETSIEU SWEDEN
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x2f4 CH ETSIEU SWITZERLAND
+  G WORLD_2
+  G ETSI1_5
+  R 5730-5790   5-ALL-NOTURBO    P=23 OUTD
+  R 5820-5870   5-ALL-NOTURBO    P=23 OUTD
+  G 900_1
+  
+C 0x2f8 SY NONE SYRIA
+  G WORLD_2
+  G 900_1
+  
+C 0x9e TW ETSI TAIWAN
+  G FCCA_2
+  G APL7_5
+  G 900_1
+  
+C 834 TZ FCC TANZANIA
+  G WORLD_2
+  G APL1_5
+  G 900_1
+  
+C 0x2fc TH FCC THAILAND
+  G WORLD_2
+  R 5170-5250    5-ALL-NOTURBO    P=23 C=1 G=6 IND
+  R 5250-5330    5-ALL-NOTURBO    P=23 C=2 G=6 DFS PSCAN
+  R 5490-5730    5-ALL-NOTURBO    P=30 C=4 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  R 5190-5230    A-TURBO          P=23 G=6 S=40 DFS IND
+  R 5740-5820    A-TURBO          P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          P=23 G=6 S=40 DFS IND # parklaajas
+  R 5745-5825    A-TURBO          P=30 G=6 S=40 DFS OUTD # parklaajas
+  R 5230-5310    A-TURBO          P=23 G=6 S=40 DFS PSCAN
+  R 5520-5680    A-TURBO          P=30 G=6 S=40 DFS PSCAN
+  G 900_1
+  
+C 0x30c TT FCC TRINIDAD\ AND\ TOBAGO
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+
+C 0x314 TN ETSI TUNISIA
+  G WORLD_2
+  G ETSI3_5
+  G 900_1
+  
+C 0x318 TR ETSI TURKEY
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 800 UG ETSI UGANDA
+  G WORLD_2
+  G APL10_5
+  G 900_1
+  
+C 0x324 UA ETSI UKRAINE
+  G WORLD_2
+  R 5170-5250    5-ALL-NOTURBO    P=20 C=1 PSCAN IND  
+  R 5250-5330    5-ALL-NOTURBO    P=20 DFS PSCAN
+  R 5490-5710    5-ALL-NOTURBO    P=20 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=20 G=6 PSCAN OUTD
+  R 5190-5310    A-TURBO          P=20 S=40 DFS
+  R 5180-5300    A-TURBO          P=20 S=40 DFS # parklaajas 
+  R 5520-5680    A-TURBO          P=27 S=40 DFS PSCAN
+  R 5510-5670    A-TURBO          P=27 S=40 DFS PSCAN # paarklaajas
+  G 900_1
+  
+C 0x310 AE FCC UNITED\ ARAB\ EMIRATES
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+  
+C 0x33a GB ETSIEU UNITED\ KINGDOM
+  G WORLD_2
+  G 900_1
+  R 5170-5250 5-ALL-NOTURBO P=20 C=1 PSCAN IND
+  R 5250-5330 5-ALL-NOTURBO P=23 DFS PSCAN
+  R 5490-5730 5-ALL-NOTURBO P=27 C=3 DFS PSCAN
+  R 5735-5835 5-ALL-NOTURBO P=20 G=6 DFS PSCAN OUTD
+  R 5735-5835 5-ALL-NOTURBO P=20 G=6 PSCAN IND
+  R 5190-5310 A-TURBO P=20 S=40 DFS
+  R 5180-5300 A-TURBO P=20 S=40 DFS # parklaajas
+  R 5520-5680 A-TURBO P=27 S=40 DFS PSCAN
+  R 5510-5670 A-TURBO P=27 S=40 DFS PSCAN # paarklaajas
+
+C 0x348 US FCC UNITED\ STATES
+  R 2402-2472    2-ALL-NOTURBO    P=30 C=12 G=6         # G FCCA_2
+  R 2417-2457    G-TURBO          P=20 G=6 S=40         # G FCCA_2
+  R 902-927      2-ALL            P=30                  # G 900_1
+  R 5170-5250    5-ALL-NOTURBO    P=30 C=1 G=6
+  R 5170-5330    5-ALL-NOTURBO    P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    5-ALL-NOTURBO    P=27 C=2 G=6 DFS PSCAN
+  R 5490-5730    5-ALL-NOTURBO    P=27 C=4 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6
+  R 5190-5230    A-TURBO          P=23 G=6 S=40 IND
+  R 5230-5310    A-TURBO          P=23 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          P=23 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          P=23 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          P=23 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          P=30 S=40 OUTD # parklaajas
+  G cAPac_US                      T=1
+  G NetMetal_ac2_US               T=2
+  G RB921UAGS_5SHPacD_US          T=3
+  G RB921UAGS_5SHPacT_US          T=4
+  G RB922UAGS_5HPacD_US           T=5
+  G RB922UAGS_5HPacT_US           T=6
+  G RBD22UGS-5HPacD2HnD-15S_US    T=7
+  G D53_US                        T=8
+  G 962_US                        T=9
+  G D53_CAT6_US                   T=10
+  G D25_US                        T=11
+   
+C 841 US FCC UNITED\ STATES2
+  G FCCA_2
+  G FCC6_5
+  G 900_1
+  
+C 842 US FCC UNITED\ STATES\ (PUBLIC\ SAFETY)
+  G FCCA_2
+  G FCC4_5
+  G 900_1
+  
+C 0x35a UY FCC URUGUAY
+  G WORLD_2
+  G FCC3_5
+  G 900_1
+  
+C 0x35c UZ FCC UZBEKISTAN
+  G FCCA_2
+  G FCC3_5
+  G 900_1
+  
+C 0x35e VE FCC VENEZUELA
+  G FCCA_2
+  G FCC1_5
+  G 900_1
+  
+C 0x2c0 VN FCC VIET\ NAM
+  G WORLD_2
+  G FCC1_5
+  G 900_1
+  
+C 0x377 YE NONE YEMEN
+  G WORLD_2
+  G 900_1
+  
+C 0x2cc ZW ETSI ZIMBABWE
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0x1FF 00 ETSI DEBUG
+  R 902-927      2-ALL            P=5
+  R 2302-2382    2-ALL-NOTURBO    P=5
+  R 2402-2482    2-ALL-NOTURBO    P=5
+  R 2474-2494    2-ALL-NOTURBO    P=5
+  R 2502-2742    2-ALL-NOTURBO    P=5
+  R 2292-2392    G-TURBO          P=5
+  R 2417-2457    G-TURBO          P=5
+  R 2492-2752    G-TURBO          P=5
+  R 5110-5710    5-ALL-NOTURBO    P=5
+  R 5735-5835    5-ALL-NOTURBO    P=5
+  R 5110-5690    A-TURBO          P=5
+  R 5130-5670    A-TURBO          P=5
+
+C 0xf001 US FCC US\ 5.8\ DIRECT
+  R 5735-5835   5-ALL-NOTURBO    P=30 OUTD
+  R 5740-5820   A-TURBO          P=30 OUTD
+  
+C 0xf002 GB ETSI UK\ 5.8\ FIXED
+  R 5725-5850   5-ALL-NOTURBO    P=36 OUTD
+  
+C 0xf003 DE ETSI GERMANY\ 5.8\ FIXED\ P-P
+  R 5755-5875   5-ALL-NOTURBO    P=24 OUTD
+  
+C 0xf004 DE ETSI GERMANY\ 5.8\ AP
+  R 5755-5875   5-ALL-NOTURBO    P=21 OUTD
+  
+C 0xf005 US FCC US\ 2.4\ CROSSROADS
+  R 2402-2427   2-ALL-NOTURBO    P=24 C=12
+  R 2412-2467   2-ALL-NOTURBO    P=26 C=12
+  R 2452-2472   2-ALL-NOTURBO    P=24 C=12
+  R 2402-2447   G-TURBO          P=24 
+  R 2412-2467   G-TURBO          P=26
+  R 2432-2472   G-TURBO          P=24
+  
+C 0xf006 NO ETSI NORWAY\ 5.8\ P-P
+  R 5730-5790   5-ALL-NOTURBO    P=30 OUTD
+  R 5820-5850   5-ALL-NOTURBO    P=30 OUTD
+  R 5730-5790   A-TURBO          P=30 OUTD
+  
+C 0xf007 BR FCC BRAZIL-922
+  R 912-932     2-ALL-NOTURBO    P=30
+
+C 0xf008 LV ETSI ETSI\ 2.4\ RB411UAHR\ RB411AR
+  R 2402-2422   B                P=18 PSCAN
+  R 2402-2422   2-ALL-NOTURBO !B P=16 PSCAN
+  R 2412-2477   2-ALL-NOTURBO    P=20 PSCAN
+  R 2462-2482   B                P=18 PSCAN
+  R 2462-2482   2-ALL-NOTURBO !B P=16 PSCAN
+
+C 0xf009 BR FCC BRAZIL\ DIRECT
+  R 2402-2472   2-ALL-NOTURBO    P=36 PSCAN
+  R 2417-2457   G-TURBO          P=36 
+  R 5730-5845   5-ALL-NOTURBO    P=20 OUTD
+  R 5740-5820   A-TURBO          P=20 OUTD
+  
+C 0xf00a ID FCC INDONESIA\ 5.7-5.8
+  R 5735-5815   5-ALL-NOTURBO    P=30 C=3 OUTD
+  
+C 0xf00b MD ETSI MOLDOVA
+  G WORLD_2
+  G ETSI1_5
+  G 900_1
+  
+C 0xf00c US FCC US\ 2.4\ RB951G
+  R 2402-2472   B G              P=30 C=12 G=6
+  R 2402-2462   G-HT20 G-HT40    P=29 C=12 G=6
+  R 2447-2472   G-HT20 G-HT40    P=16 C=12 G=6
+
+C 0xf00d LV ETSI ETSI\ 5.5-5.7\ OUTDOOR
+  R 5490-5710   5-ALL-NOTURBO    P=27 C=3 DFS PSCAN
+  
+C 0xf00e LV ETSI ETSI\ 2.4\ 5.5-5.7
+  G WORLD_2
+  R 5490-5710   5-ALL-NOTURBO    P=27 C=3 DFS PSCAN
+  
+C 0xf00f US FCC US\ 2.4\ 5.8
+  G FCCA_2
+  R 5735-5835   5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+
+C 0xf010 BR FCC BRAZIL-ANATEL
+  R 2402-2482   2-ALL-NOTURBO    P=20 PSCAN
+  R 5490-5710   5-ALL-NOTURBO    P=15 C=4 G=6 DFS PSCAN
+  R 5730-5845   5-ALL-NOTURBO    P=15 C=5 G=6 OUTD
+  R 900-910     2-ALL            P=30 W=5
+  R 913-928     2-ALL            P=30 W=5
+  R 915-928     2-ALL            P=30 W=10
+
+C 0xf011 RU ETSI RUSSIA2
+  G WORLD_2
+  G ETSI8_5
+  R 5815-6425   5-ALL-NOTURBO    P=20 OUTD
+  G 900_1
+
+C 0xf012 ID FCC INDONESIA2
+  R 2402-2472    2-ALL-NOTURBO    P=20
+  G APL1_5
+
+C 0xf013 US FCC UNITED\ STATES3
+  R 2402-2472   2-ALL-NOTURBO    P=30 C=12 G=6
+  R 5170-5250   5-ALL-NOTURBO    P=30 C=1 G=6 IND
+  R 5735-5835   5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  G UNITED_STATES_RDTAG          T=1  #cAP ac
+  G UNITED_STATES_RDTAG          T=2  #NetMetal ac^2
+  G UNITED_STATES_RDTAG          T=3  #RB921UAGS_5SHPacD
+  G UNITED_STATES_RDTAG          T=4  #RB921UAGS_5SHPacT
+  G UNITED_STATES_RDTAG          T=5  #RB922UAGS_5HPacD
+  G UNITED_STATES_RDTAG          T=6  #RB922UAGS_5HPacT
+  G UNITED_STATES_RDTAG_RBD22    T=7  #RBD22UGS-5HPacD2HnD-15S
+  G UNITED_STATES_RDTAG_D53      T=8  #RBD53GR-5HacD2HnD
+  G UNITED_STATES_RDTAG          T=9  #RB962UiGS-5HacT2HnT
+  G UNITED_STATES_RDTAG          T=10 #RBD53GR-5HacD2HnD
+  G UNITED_STATES_RDTAG          T=11 #RBD25G-5HPacQD2HPnD
+
+
+C 0xf014 LV ETSI ETSI\ 5.7-5.8\ SRD
+  R 5725-5875   5-ALL-NOTURBO    P=14 OUTD
+
+C 0xf015 EG ETSI EGYPT\ 5.8
+  R 5735-5835    5-ALL-NOTURBO    P=36 C=5 G=6 OUTD
+
+C 0xf016 RU ETSI RUSSIA3
+  R 2402-2482    2-ALL-NOTURBO    P=20
+  R 2417-2457    G-TURBO          P=20 G=6 S=40
+  R 5170-5250    5-ALL-NOTURBO    P=20 C=1 PSCAN IND  
+  R 5250-5330    5-ALL-NOTURBO    P=20 DFS PSCAN
+  R 5650-5710    5-ALL-NOTURBO    P=20 C=4 G=6 DFS PSCAN
+  R 5755-5815    5-ALL-NOTURBO    P=20 OUTD
+  R 5190-5310    A-TURBO          P=20 S=40 DFS
+  R 5180-5300    A-TURBO          P=20 S=40 DFS # parklaajas
+
+C 0xf017 NZ FCC NEW\ ZEALAND\ 5.8\ FIXED\ P-P
+  R 5735-5835   5-ALL-NOTURBO    P=53 OUTD
+
+C 0xf018 EU ETSI ETSI1
+  G WORLD_2
+  R 5270-5330    5-ALL-NOTURBO    P=17 C=2 G=6 DFS
+  R 5490-5590    5-ALL-NOTURBO    P=30 C=4 G=6 DFS PSCAN
+  R 5650-5730    5-ALL-NOTURBO    P=30 C=4 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=30 G=6 DFS PSCAN OUTD
+
+C 0xf019 ID FCC INDONESIA3
+  R 2402-2472    2-ALL-NOTURBO    P=27
+  R 5735-5835    5-ALL-NOTURBO    P=27 OUTD
+  R 5740-5820    A-TURBO          P=27 S=40 OUTD # Step for turbo channel needed?
+  R 5745-5825    A-TURBO          P=27 S=40 OUTD # parklaajas
+
+C 0xf01b EU ETSI ETSI2
+  R 5735-5835   5-ALL-NOTURBO    P=30 OUTD
+  R 2402-2482   2-ALL-NOTURBO    P=20 PSCAN
+  R 2417-2457   G-TURBO          P=20 G=6 S=40
+
+C 0xf01c US FCC CANADA2
+  R 2402-2472   2-ALL-NOTURBO    P=30 C=12 G=6
+  R 5170-5250   5-ALL-NOTURBO    P=30 C=1 G=6 IND
+  R 5170-5250   5-ALL-NOTURBO    P=23 C=1 G=6 OUTD
+  R 5735-5835   5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+  G CANADA_RDTAG                 T=1  #cAP ac
+  G CANADA_RDTAG                 T=2  #NetMetal ac^2
+  G CANADA_RDTAG                 T=3  #RB921UAGS_5SHPacD
+  G CANADA_RDTAG                 T=4  #RB921UAGS_5SHPacT
+  G CANADA_RDTAG                 T=5  #RB922UAGS_5HPacD
+  G CANADA_RDTAG                 T=6  #RB922UAGS_5HPacT
+  G CANADA_RDTAG_RBD22           T=7  #RBD22UGS-5HPacD2HnD-15S
+  G CANADA_RDTAG_D53             T=8  #RBD53GR-5HacD2HnD
+  G CANADA_RDTAG                 T=9  #RB962UiGS-5HacT2HnT
+  G CANADA_RDTAG                 T=10 #RBD53GR-5HacD2HnD
+  G CANADA_RDTAG                 T=11 #RBD25G-5HPacQD2HPnD
+
+C 0xf01d ID FCC INDONESIA4
+  R 2402-2472   2-ALL-NOTURBO    P=20 
+  R 5170-5320   5-ALL-NOTURBO    P=20 
+  R 5735-5815   5-ALL-NOTURBO    P=20
+
+C 0xf01e EU ETSIEU ETSI
+  R 2402-2482    2-ALL-NOTURBO    P=20
+  R 5170-5250    5-ALL-NOTURBO    P=23 C=1 PSCAN IND
+  R 5170-5330    5-ALL-NOTURBO    P=20 C=1 DFS PSCAN IND
+  R 5250-5330    5-ALL-NOTURBO    P=20 DFS PSCAN IND
+  R 5490-5710    5-ALL-NOTURBO    P=27 C=3 DFS PSCAN
+  R 5190-5310    A-TURBO          P=20 S=40 DFS 
+  R 5180-5300    A-TURBO          P=20 S=40 DFS # parklaajas
+  R 5520-5680    A-TURBO          P=27 S=40 DFS PSCAN
+  R 5510-5670    A-TURBO          P=27 S=40 DFS PSCAN # paarklaajas
+  R 902-927      2-ALL            P=30
+
+C 0xf01f US FCC UNITED\ STATES\ RBD23
+  R 2402-2472   2-ALL-NOTURBO    P=28 C=12 G=6
+  R 5170-5250   5-ALL-NOTURBO    P=30 C=1 G=6 IND
+  R 5735-5835   5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+
+C 0xf020 RU ETSI RUSSIA4
+  R 2402-2482    2-ALL-NOTURBO    P=20
+  R 2417-2457    G-TURBO          P=20 G=6 S=40
+  R 5150-5250    5-ALL-NOTURBO    P=20 C=1 PSCAN  
+  R 5250-5350    5-ALL-NOTURBO    P=20 PSCAN
+  R 5650-6100    5-ALL-NOTURBO    P=30 OUTD
+  R 5190-5310    A-TURBO          P=20 S=40 
+  R 5180-5300    A-TURBO          P=20 S=40 # parklaajas
+
+C 0xf021 RU ETSI RUSSIA\ 6GHz
+  R 5900-6425    5-ALL-NOTURBO    P=30 OUTD
+
+C 0xf022 US FCC UNITED\ STATES\ cAPac
+  R 2402-2472    2-ALL-NOTURBO    P=30 C=12 G=6         # G FCCA_2
+  R 2417-2457    G-TURBO          P=20 G=6 S=40         # G FCCA_2
+  R 902-927      2-ALL            P=30                  # G 900_1
+  R 5170-5250    5-ALL-NOTURBO    P=30 C=1 G=6
+  R 5170-5330    5-ALL-NOTURBO    P=27 C=2 G=6 DFS PSCAN
+  R 5250-5330    5-ALL-NOTURBO    P=18 C=2 G=6 DFS PSCAN
+  R 5490-5730    5-ALL-NOTURBO    P=19 C=4 G=6 DFS PSCAN
+  R 5735-5835    5-ALL-NOTURBO    P=30 C=5 G=6
+  R 5190-5230    A-TURBO          P=23 G=6 S=40 IND
+  R 5230-5310    A-TURBO          P=23 G=6 S=40 PSCAN
+  R 5740-5820    A-TURBO          P=30 S=40 OUTD
+  R 5180-5220    A-TURBO          P=23 G=6 S=40 IND # parklaajas
+  R 5220-5260    A-TURBO          P=23 G=6 S=40 PSCAN IND # parklaajas
+  R 5260-5300    A-TURBO          P=23 G=6 S=40 DFS PSCAN # parklaajas
+  R 5745-5825    A-TURBO          P=30 S=40 OUTD # parklaajas
+
+C 0xf023 US FCC UNITED\ STATES\ RBD22
+  R 2402-2427   B                P=8 C=12 G=6
+  R 2402-2427   2-ALL-NOTURBO !B P=8 C=12 G=6
+  R 2412-2462   2-ALL-NOTURBO !G-HT40  P=28 C=12 G=6
+  R 2412-2462   G-HT40           P=8 C=12 G=6
+  R 2447-2472   B                P=8 C=12 G=6
+  R 2447-2472   2-ALL-NOTURBO !B P=8 C=12 G=6
+  R 5170-5250   5-ALL-NOTURBO    P=12 C=1 G=6 IND
+  R 5735-5835   5-ALL-NOTURBO    P=30 C=5 G=6 OUTD
+
+C 0xf024 ID FCC INDONESIA5
+  R 2402-2472   2-ALL-NOTURBO    P=20  
+  R 5735-5815   5-ALL-NOTURBO    P=30
+
+
+
