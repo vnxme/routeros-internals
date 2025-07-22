@@ -21,7 +21,8 @@ def unpack_fwf_file(filename: str, directory: str) -> None:
     os.makedirs(directory, exist_ok=True)
     document = fwf.Document().from_file(filename)
     for k, v in document.items():
-        target_filename = f"{directory}/{hex(k)[2:]}.routerboot.{'be' if v.properties['be'] else 'le'}.bin"
+        platform = f".{v.properties['platform']}" if 'platform' in v.properties else '.unknown'
+        target_filename = f"{directory}/{hex(k)[2:]}{platform}.routerboot.bin"
 
         with open(target_filename, 'wb') as file:
             file.write(v.payload)
