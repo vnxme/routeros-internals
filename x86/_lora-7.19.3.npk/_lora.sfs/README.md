@@ -1,0 +1,11 @@
+### lora.sfs
+#### Identification (`file <*>`):
+```
+Squashfs filesystem, little endian, version 4.0, xz compressed, 162 bytes, 1 inodes, blocksize: 262144 bytes, created: Thu Jul  3 12:08:28 2025
+```
+#### Listing (`ls -AlR --time-style=full-iso <*>`):
+```
+/:
+total 0
+```
+

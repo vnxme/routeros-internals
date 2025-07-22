@@ -1,0 +1,18 @@
+What's new in 7.19.3 (2025-Jul-03 14:23):
+
+*) bridge - allow IPv6 FastPath when dhcp-snooping is enabled;
+*) iot - LoRa LNS stability improvement;
+*) lte - AT modems, fixed typos in commands sent to modem when APN with authentication is used (AT+CGAUTH; AT$QCPDPP);
+*) lte - R11e-LTE and R11e-LTE6, fixed possible crash on device unexpected removal or during RouterOS shutdown;
+*) mpls - improved stability when handling VPLS packets;
+*) radius - fixed RADIUS client section becoming unresponsive when RadSec is configured, but server is not responding;
+*) radius - fixed wrong RadSec port number in logs;
+*) radius - properly verify certificate when RadSec is used;
+*) sfp - added sfp-power-class and sfp-max-power monitor values for QSFP;
+*) supout - added IPv6 NAT section;
+*) switch - fixed ACL rules with "redirect-to-cpu" (introduced in v7.19.2);
+*) switch - fixed bonding issues after switch reset (introduced in v7.18);
+*) switch - fixed port blocking with spanning tree on EN7523 switch (introduced in v7.19);
+*) swos - changed firmware file location (URL) for software update checks;
+*) system - reduced RouterOS ARM package size;
+*) winbox - show/hide corresponding fields when switching RADIUS client mode between RadSec and UDP;
