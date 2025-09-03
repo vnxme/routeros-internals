@@ -1,0 +1,113 @@
+x_tables
+x_tables
+vrf:	ipv6
+x_tables
+nf_natnf_conntracknf_conntrack_irc
+x_tables
+packet_hookx_tables
+ulogx_tables
+nf_conntrack
+ipv6ip6_tablesx_tables
+nf_conntrack
+nf_conntrackx_tables
+nf_conntrack
+nf_conntrackx_tables
+vxlan2:	packet_hook udp_tunnel ip6_udp_tunnel
+nf_conntrack
+x_tables
+bridge2ipv6
+x_tables
+nf_conntrack
+nf_conntracknf_natx_tables
+nf_conntracknf_natx_tables
+aths16:	flash switch phy_helper
+nf_conntrack
+x_tables
+x_tables
+nf_natnf_conntracknf_conntrack_pptp
+x_tables
+x_tables
+x_tables
+ipv6xfrm_algo
+nf_conntrack
+ipv6xfrm_algo
+x_tables
+packet_hook:	nf_conntrack ipv6 tunnel6
+nf_conntracknf_natnf_conntrack_tftp
+x_tables
+rb:	flash
+ip6_tablesx_tables
+nf_natnf_conntracknf_conntrack_rtsp
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+des_generic:	libdes
+x_tables
+ulogx_tables
+x_tables
+ipv6
+nf_conntrackx_tables
+x_tables
+nf_natnf_conntrack_sipnf_conntrack
+nf_reject_ipv4x_tables
+libblake2s:	libblake2s-generic
+x_tables
+x_tables
+arc4:	libarc4
+imq:	cls_fw cls_linear
+x_tables
+ip_tablesx_tables
+ag7240:	switch packet_hook phy_helper sram
+ath8327:	flash phy_helper switch
+nf_natnf_conntracknf_conntrack_ftp
+nf_conntrack
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+snifx_tables
+ebtables
+ebtables
+nf_defrag_ipv6
+x_tables
+ip6_tablesnf_nat
+packet_hookipv6switch
+snifx_tables
+panics:	flash
+nf_defrag_ipv6
+nf_conntracknf_natx_tables
+libchacha20poly1305:	chacha-mips poly1305-mips
+nf_reject_ipv6x_tables
+nf_conntrackx_tables
+switch:	packet_hook phy_helper
+nf_natx_tables
+wireguard:	libblake2s libchacha20poly1305 libcurve25519-generic ipv6 udp_tunnel ip6_udp_tunnel
+x_tables
+x_tables
+ip6_tablesx_tables
+x_tables
+x_tables
+romon:	packet_hook
+nf_conntracknf_natx_tables
+x_tables
+ip_tablesnf_nat
+x_tables
+ip_tablesx_tables
+nf_conntracknf_natx_tables
+nf_conntracknfnetlink
+x_tables
+nf_conntrack
+mesh:	packet_hook
+packet_hooknf_conntrackx_tables
+traffic_gen:	packet_hook
+x_tables
+nf_conntrackx_tables
+nf_natnf_conntrack_h323nf_conntrack
+x_tables
+ip_tablesx_tables
+x_tables
+nf_conntrack

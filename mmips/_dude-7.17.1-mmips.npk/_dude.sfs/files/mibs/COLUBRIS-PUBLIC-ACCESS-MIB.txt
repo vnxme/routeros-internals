@@ -1,0 +1,595 @@
+-- *****************************************************************
+-- COLUBRIS-PUBLIC-ACCESS-MIB.my:  Colubris Networks Public Access 
+-- MIB file
+-- 
+-- November 2001
+--
+-- Copyright (c) 2001, 2002  by Colubris Networks, Inc.
+-- All rights reserved.
+-- *****************************************************************
+
+COLUBRIS-PUBLIC-ACCESS-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	MODULE-IDENTITY,
+	OBJECT-TYPE,
+	NOTIFICATION-TYPE,
+	IpAddress,
+	Counter32,
+	Gauge32
+		FROM SNMPv2-SMI
+	TEXTUAL-CONVENTION, 
+	MacAddress,
+	DateAndTime
+		FROM SNMPv2-TC
+	MODULE-COMPLIANCE,
+	OBJECT-GROUP
+		FROM SNMPv2-CONF
+	colubrisMgmt
+		FROM COLUBRIS-SMI;
+
+colubrisPublicAccessMIB  MODULE-IDENTITY
+	LAST-UPDATED "200306030000Z"
+	ORGANIZATION "Colubris Networks, Inc."
+	CONTACT-INFO
+		"	Colubris Networks
+			Customer Service
+
+		Postal: 420 Armand-Frappier, Suite 200
+			Laval, QC  H7V 4B4
+			CANADA
+
+		   Tel: +1 450 680-1661
+
+		E-mail: cn-snmp@colubris.com"
+	DESCRIPTION
+		"Initial version of PUBLIC ACCESS MIB module."
+	::= { colubrisMgmt 1 }
+
+-- colubrisPublicAccessMIB definition
+
+colubrisPublicAccessMIBObjects OBJECT IDENTIFIER ::= { colubrisPublicAccessMIB 1 }
+
+-- MIB defines the following groupings
+
+publicAccessGroup OBJECT IDENTIFIER ::= { colubrisPublicAccessMIBObjects 1 }
+publicAccessDeviceGroup OBJECT IDENTIFIER ::= { colubrisPublicAccessMIBObjects 2 }
+publicAccessUsersGroup OBJECT IDENTIFIER ::= { colubrisPublicAccessMIBObjects 3 }
+
+------------------------------------------------------------------
+--				Public Access Status Group
+--	A collection of objects providing basic instrumentation
+--	 and control of the HTML authentication system entity.
+------------------------------------------------------------------
+
+publicAccessStatus OBJECT-TYPE
+	SYNTAX INTEGER
+	{
+		up (1),
+		down (2)
+	}
+	MAX-ACCESS	read-only
+	STATUS	current
+	DESCRIPTION "The current status of the HTML authentication system."
+	::= { publicAccessGroup  1 }
+
+publicAccessStatusChangedCause OBJECT-TYPE
+	SYNTAX OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Mostly used by the publicAccessStatusChanged trap.  Describe the
+		last cause of the status changed."
+	::= { publicAccessGroup 2 }
+
+------------------------------------------------------------------
+--				Public Access Device Group
+--	A collection of objects providing basic instrumentation and
+--  control of the account used for device authentication.
+------------------------------------------------------------------
+
+publicAccessDeviceUserName OBJECT-TYPE
+	SYNTAX OCTET STRING
+	MAX-ACCESS	read-write
+	STATUS	current
+	DESCRIPTION
+		"Specifies the username used by the device to authenticate itself."
+    ::= {  publicAccessDeviceGroup 1 }
+
+publicAccessDeviceUserPassword OBJECT-TYPE
+	SYNTAX OCTET STRING
+	MAX-ACCESS	write-only
+	STATUS	current
+	DESCRIPTION
+		"Specifies the password used by the device to authenticate itself.
+		 This should be set only if SNMP traffic is sent through a VPN
+		 tunnel."
+    ::= {  publicAccessDeviceGroup 2 }
+
+publicAccessDeviceAuthInterval OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS	read-write
+	STATUS	current
+	DESCRIPTION
+		"Specifies the interval of time between two consecutive authentication
+		 attempts."
+    ::= {  publicAccessDeviceGroup 3 }
+
+------------------------------------------------------------------
+--				Public Access Users Group
+--		A collection of objects providing information on
+--		the users on the system.
+------------------------------------------------------------------
+
+publicAccessUsersMaxCount OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the maximum number of concurrent users."
+	::= { publicAccessUsersGroup 1 }
+
+publicAccessUsersCount OBJECT-TYPE
+	SYNTAX Gauge32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the number of currently active users."
+	::= { publicAccessUsersGroup 2 }
+
+publicAccessUsersThreshold OBJECT-TYPE
+	SYNTAX Gauge32
+	MAX-ACCESS read-write
+	STATUS current
+	DESCRIPTION
+		"Specifies the concurrent user threshold.  When the
+		 the number of active users exceeds this setting,
+		 a publicAccessUsersThresholdTrap is sent.  This
+		 value cannot exceed publicAccessUsersMaxCount."
+	::= { publicAccessUsersGroup 3 }
+
+publicAccessUsersSessionTrapEnabled OBJECT-TYPE
+	SYNTAX INTEGER {
+		true(1),
+		false(2)
+	}
+	MAX-ACCESS read-write
+	STATUS current
+	DESCRIPTION
+		"When set to True a publicAccessUsersSessionStart and publicAccessUsersSessionStop traps will
+		be generated when such events."
+	::= { publicAccessUsersGroup 4 }
+
+publicAccessUserTable OBJECT-TYPE
+ 	SYNTAX SEQUENCE OF PublicAccessUserEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"A table containing specific information for users
+		 authenticated by the HTML authentication system."
+    ::= {  publicAccessUsersGroup 5 }
+
+publicAccessUserEntry OBJECT-TYPE
+	SYNTAX PublicAccessUserEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Information about a particular user that has been authenticated
+		 by the HTML authentication system."
+	INDEX {
+		publicAccessUserIndex
+	      }
+	::= { publicAccessUserTable 1 }
+
+PublicAccessUserEntry ::= SEQUENCE
+{
+	publicAccessUserIndex INTEGER,
+	publicAccessUserState INTEGER,
+	publicAccessAuthMode INTEGER,
+	publicAccessUserIpAddress IpAddress,
+	publicAccessUserName OCTET STRING,
+	publicAccessUserSessionStartTime DateAndTime,
+	publicAccessUserSessionDuration Counter32,
+	publicAccessUserIdleTime Counter32,
+	publicAccessUserBytesSent Counter32,
+	publicAccessUserPacketsSent Counter32,
+	publicAccessUserBytesReceived Counter32,
+	publicAccessUserPacketsReceived Counter32,
+	publicAccessUserForceDisconnection INTEGER,
+	publicAccessUserMacAddress MacAddress,
+	publicAccessUserCalledStationId OCTET STRING,
+	publicAccessUserGroupName OCTET STRING,
+	publicAccessUserSSID OCTET STRING,
+	publicAccessUserConnectedInterface OCTET STRING
+}
+
+publicAccessUserIndex OBJECT-TYPE
+	SYNTAX		INTEGER
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Index of a user in the publicAccessUserTable."
+	::= { publicAccessUserEntry 1 }
+
+publicAccessUserState OBJECT-TYPE
+	SYNTAX INTEGER
+		{
+		  unassigned(0),
+		  connecting(1),
+		  connected(2),
+		  reconnecting(3),
+		  disconnecting(4),
+		  disconnected(5),
+		  disconnectingAdministrative(6),
+		  disconnectedAdministrative(7)
+		}
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the state of the user."
+	::= { publicAccessUserEntry 2 }
+
+publicAccessAuthMode OBJECT-TYPE
+	SYNTAX	INTEGER
+		{
+			mac(1),
+			ieee802dot1x (2),
+			html(3)
+		}
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the mecanism used to authenticate the user."
+	::= { publicAccessUserEntry 3 }
+
+publicAccessUserIpAddress OBJECT-TYPE
+	SYNTAX IpAddress
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the user's IP address."
+	::= { publicAccessUserEntry 4 }
+
+publicAccessUserName OBJECT-TYPE
+	SYNTAX OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the user's name."
+	::= { publicAccessUserEntry 5 }
+
+publicAccessUserSessionStartTime OBJECT-TYPE
+	SYNTAX DateAndTime
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the time user's session was started."
+	::= { publicAccessUserEntry 6 }
+			     
+publicAccessUserSessionDuration OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the how long the user's session has 
+		 been active (in seconds)."
+	::= { publicAccessUserEntry 7 }
+			     
+publicAccessUserIdleTime OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates how long the user's session has been 
+		 idle (in seconds)."
+	::= { publicAccessUserEntry 8 }
+			     
+publicAccessUserBytesSent OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the total number of bytes sent by user."
+	::= { publicAccessUserEntry 9 }
+			     
+publicAccessUserBytesReceived OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the total number of bytes received by user."
+	::= { publicAccessUserEntry 10 }
+			     
+publicAccessUserPacketsSent OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the total number of IP packets sent by user."
+	::= { publicAccessUserEntry 11 }
+			     
+publicAccessUserPacketsReceived OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the total number of IP packets received by user."
+	::= { publicAccessUserEntry 12 }
+	
+publicAccessUserForceDisconnection OBJECT-TYPE
+	SYNTAX INTEGER
+		{
+		  adminDisconnect(1)
+		}
+	MAX-ACCESS read-write
+	STATUS current
+	DESCRIPTION
+		"Setting this to adminDisconnect will disconnect the user
+		with a cause of ADMIN_RESET. NOTE: Reading this variable
+		will always return 0."
+	::= { publicAccessUserEntry 13 }
+
+publicAccessUserMacAddress OBJECT-TYPE
+	SYNTAX MacAddress
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the user's station MAC Address."
+	::= { publicAccessUserEntry 14 }
+
+publicAccessUserCalledStationId OBJECT-TYPE
+	SYNTAX OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the user's Access Point MAC Address (ONLY when the Location-aware is enabled and properly configured)."
+	::= { publicAccessUserEntry 15 }
+
+publicAccessUserGroupName OBJECT-TYPE
+	SYNTAX OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the user's Access Point Group Name (ONLY when the Location-aware is enabled and properly configured)."
+	::= { publicAccessUserEntry 16 }
+
+publicAccessUserSSID OBJECT-TYPE
+	SYNTAX OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the user's Access Point SSID (ONLY when the Location-aware is enabled and properly configured)."
+	::= { publicAccessUserEntry 17 }
+
+publicAccessUserConnectedInterface OBJECT-TYPE
+	SYNTAX OCTET STRING
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Indicates the device's interface to which the user is connected."
+	::= { publicAccessUserEntry 18 }
+
+publicAccessUsersLoggedInTrapEnabled OBJECT-TYPE
+	SYNTAX INTEGER {
+		true(1),
+		false(2)
+	}
+	MAX-ACCESS read-write
+	STATUS current
+	DESCRIPTION
+		"When set to true publicAccessUsersLoggedInTrap will be generated."
+	::= { publicAccessUsersGroup 6 }
+	
+publicAccessUsersLoggedInTrapInterval OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS read-write
+	STATUS current
+	DESCRIPTION
+	"Interval in minutes between publicAccessUsersLoggedInTrap traps.
+	 Setting this to 0 will disable periodic sending of these traps."
+    ::= {  publicAccessUsersGroup 7 }
+
+--
+			
+publicAccessAAAServerTable OBJECT-TYPE
+ 	SYNTAX SEQUENCE OF PublicAccessAAAServerEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"A table containing the list of AAA servers used to
+		 authenticate this device as well as its users."
+    ::= {  colubrisPublicAccessMIBObjects 4 }
+
+publicAccessAAAServerEntry OBJECT-TYPE
+	SYNTAX		PublicAccessAAAServerEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+		"An AAA server entry used for authenticating
+		this device as well as its users."
+	INDEX {	publicAccessAAAServerIndex }
+	::= { publicAccessAAAServerTable 1 }
+	
+PublicAccessAAAServerEntry ::= SEQUENCE {
+	publicAccessAAAServerIndex INTEGER,
+	publicAccessAAAServerPriorityNumber INTEGER
+}
+
+publicAccessAAAServerIndex OBJECT-TYPE
+	SYNTAX		INTEGER
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"An index of the colubrisAAAServerTable defined inside the
+		colubrisAAAClientMIB."
+	::= { publicAccessAAAServerEntry 1 }
+	
+publicAccessAAAServerPriorityNumber OBJECT-TYPE
+	SYNTAX		INTEGER
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Indicates the priority of the AAA server. Where 1 is the highest
+		priority 1 and 65535 is the lowest priority."
+	::= { publicAccessAAAServerEntry 2 }
+	
+-- notifications
+
+publicAccessMIBNotificationPrefix OBJECT IDENTIFIER ::= { colubrisPublicAccessMIB 2 }
+publicAccessMIBNotifications OBJECT IDENTIFIER ::= { publicAccessMIBNotificationPrefix 0 }
+
+publicAccessStatusChangedTrap NOTIFICATION-TYPE
+    OBJECTS {
+    		publicAccessStatus,
+    		publicAccessStatusChangedCause
+	      }
+	STATUS current
+    DESCRIPTION
+        "This notification is sent whenever the authentication system
+         status changes (up or down)."
+    --#SUMMARY "Authentication system status changed: new status (1=up, 2=down):%d cause:%s"
+    --#ARGUMENTS { 0, 1 }
+    --#SEVERITY MAJOR
+    --#CATEGORY "Colubris Networks Alarms"
+    ::= { publicAccessMIBNotifications 1 }
+
+publicAccessUsersThresholdTrap NOTIFICATION-TYPE
+    OBJECTS
+    {
+    		publicAccessUsersCount
+	}
+	STATUS current
+    DESCRIPTION
+        "This notification is sent whenever publicAccessUsersThreshold is exceeded."
+    --#SUMMARY "Public access users threshold reached: %d user are logged in."
+    --#ARGUMENTS { 0 }
+    --#SEVERITY INFORMATIONNAL
+    --#CATEGORY "Colubris Networks Alarms"
+    ::= { publicAccessMIBNotifications 2 }
+
+publicAccessUsersSessionStartTrap NOTIFICATION-TYPE
+	OBJECTS {
+			publicAccessUserName
+	}
+	STATUS current
+	DESCRIPTION
+		"When a user successfully authenticate itself a trap is generated
+		if the publicAccessUsersSessionTrapEnabled is set to True."
+    --#SUMMARY "Session start for public access user %s"
+    --#ARGUMENTS { 0 }
+    --#SEVERITY INFORMATIONNAL
+    --#CATEGORY "Colubris Networks Alarms"
+	::= { publicAccessMIBNotifications 3 }
+	
+publicAccessUsersSessionStopTrap NOTIFICATION-TYPE
+	OBJECTS 
+	{
+			publicAccessUserName
+	}
+	STATUS current
+	DESCRIPTION
+		"When a user terminate his session a trap is generated
+		if the publicAccessUsersSessionTrapEnabled is set to True."
+    --#SUMMARY "Session terminated for public access user %s"
+    --#ARGUMENTS { 0 }
+    --#SEVERITY INFORMATIONNAL
+    --#CATEGORY "Colubris Networks Alarms"
+	::= { publicAccessMIBNotifications 4 }
+
+publicAccessUsersSessionFailTrap NOTIFICATION-TYPE
+	OBJECTS 
+	{
+			publicAccessUserName
+	}
+	STATUS current
+	DESCRIPTION
+		"When a user authentication fail a trap is generated
+		if the publicAccessUsersSessionTrapEnabled is set to True."
+    --#SUMMARY "Authentication failed for public access user %s"
+    --#ARGUMENTS { 0 }
+    --#SEVERITY INFORMATIONNAL
+    --#CATEGORY "Colubris Networks Alarms"
+	::= { publicAccessMIBNotifications 5 }
+
+publicAccessUsersLoggedInTrap NOTIFICATION-TYPE
+	OBJECTS
+	{
+			publicAccessUsersCount,
+			publicAccessUserIndex,
+			publicAccessUserName,
+			publicAccessUserIpAddress,
+			publicAccessUserMacAddress,
+			publicAccessUserConnectedInterface,
+			publicAccessUserSessionDuration,
+			publicAccessUserBytesReceived,
+			publicAccessUserBytesSent
+	}
+	STATUS current
+	DESCRIPTION
+		"This is sent when a user is authenticated or periodically 
+		(see publicAccessUSersLoggedInTrapInterval)
+		if the publicAccessUsersLoggedInTrapEnabled is set to True."
+    --#SUMMARY "User %s MAC:%s is logged in"
+    --#ARGUMENTS { 2, 4 }
+    --#SEVERITY INFORMATIONNAL
+	::= { publicAccessMIBNotifications 6 }
+
+-- conformance information
+
+colubrisPublicAccessMIBConformance OBJECT IDENTIFIER ::= { colubrisPublicAccessMIB 3 }
+colubrisPublicAccessMIBCompliances OBJECT IDENTIFIER ::= { colubrisPublicAccessMIBConformance 1 }
+colubrisPublicAccessMIBGroups      OBJECT IDENTIFIER ::= { colubrisPublicAccessMIBConformance 2 }
+
+-- compliance statements     
+
+colubrisPublicAccessMIBCompliance MODULE-COMPLIANCE
+	STATUS current
+	DESCRIPTION
+		"The compliance statement for entities which implement
+		 the Colubris Public Access MIB."
+	MODULE
+		MANDATORY-GROUPS
+		{
+			colubrisPublicAccessMIBGroup
+		}
+	::= { colubrisPublicAccessMIBCompliances 1 }
+
+-- units of conformance
+
+colubrisPublicAccessMIBGroup OBJECT-GROUP
+	OBJECTS
+	{
+		publicAccessStatus,
+		publicAccessStatusChangedCause,
+		publicAccessDeviceUserName,
+		publicAccessDeviceUserPassword,
+		publicAccessDeviceAuthInterval,
+		publicAccessUsersCount,
+		publicAccessUsersThreshold,	
+		publicAccessUsersSessionTrapEnabled,
+		publicAccessUserState,
+        publicAccessAuthMode,
+        publicAccessUserIpAddress,
+        publicAccessUserName,
+        publicAccessUserSessionStartTime,
+		publicAccessUserSessionDuration,
+        publicAccessUserIdleTime,
+        publicAccessUserBytesSent,
+        publicAccessUserPacketsSent,
+        publicAccessUserBytesReceived,
+        publicAccessUserPacketsReceived,
+        publicAccessUserForceDisconnection,
+		publicAccessUserMacAddress,
+		publicAccessUserCalledStationId,
+		publicAccessUserGroupName,
+		publicAccessUserSSID,
+		publicAccessUserConnectedInterface,
+		publicAccessAAAServerIndex,
+		publicAccessAAAServerPriorityNumber
+	}
+	STATUS current
+	DESCRIPTION
+		"A collection of objects providing the Public Access MIB capability."
+	::= { colubrisPublicAccessMIBGroups 1 }
+
+END
