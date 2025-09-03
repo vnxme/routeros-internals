@@ -61,31 +61,31 @@ jobs:
       - name: Validate prefix value
         run: |
           if [[ ! "${{ inputs.prefix }}" =~ ^[0-9a-zA-Z]+$ ]]; then
-            echo "ERROR: Invalid prefix value"
+            echo "::error input=prefix,value=${{ inputs.prefix }}::Invalid prefix value"
             exit 1
           fi
       - name: Validate host value
         run: |
           if [[ ! "${{ inputs.host }}" =~ ^(?=.{1,255}$)(?:(?:.{1,63}\.){1,127}(?![0-9]*$)[a-z0-9-]+)$ ]]; then
-            echo "ERROR: Invalid host value"
+            echo "::error input=host,value=${{ inputs.host }}::Invalid host value"
             exit 1
           fi
       - name: Validate version value
         run: |
           if [[ -n "${{ inputs.version }}" ]]; then
             if [[ "${{ inputs.channel }}" == *","* ]]; then
-              echo "ERROR: Same version value can't apply to the stable and testing channels"
+              echo "::error input=version,value=${{ inputs.version }}::Same version value can't apply to multiple channels"
               exit 1
             fi
             if [[ "${{ inputs.channel }}" == "stable" ]]; then
               if [[ ! "${{ inputs.version }}" =~ ^7\.\d+(?:\.\d+)?$ ]]; then
-                echo "ERROR: Invalid version value for the stable channel"
+                echo "::error input=version,value=${{ inputs.version }}::Invalid version value for the stable channel"
                 exit 1
               fi
             fi
             if [[ "${{ inputs.channel }}" == "testing" ]]; then
               if [[ ! "${{ inputs.version }}" =~ ^7\.\d+(?:\.\d+)?(?:alpha|beta|rc)\d+$ ]]; then
-                echo "ERROR: Invalid version value for the testing channel"
+                echo "::error input=version,value=${{ inputs.version }}::Invalid version value for the testing channel"
                 exit 1
               fi
             fi
