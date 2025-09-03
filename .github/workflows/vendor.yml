@@ -7,12 +7,12 @@ on:
     inputs:
       prefix:
         description: "Prefix (e.g., vendor)"
-        required: false
+        required: true
         default: 'vendor'
         type: string
       host:
         description: "Host (e.g., dl.example.com)"
-        required: false
+        required: true
         default: 'download.mikrotik.com'
         type: string
       channel:
@@ -47,26 +47,39 @@ env:
   BRANCH_HOST: ${{ inputs.host }}
   BRANCH_PREFIX: ${{ inputs.prefix }}
   BRANCH_VERSION: ${{ inputs.version }}
+  TZ: 'Europe/London'
 
 jobs:
-  validate_inputs:
+  validate:
     runs-on: ubuntu-24.04
     outputs:
-      channel: ${{ steps.convert_channel.outputs.json }}
+      channel: ${{ steps.convert_channel.outputs.JSON }}
     steps:
+      - name: Validate version value
+        run: |
+          if [[ -n "${{ inputs.version }}" ]]; then
+            # Same version value can't apply to the stable and testing channels
+            [[ "${{ inputs.channel }}" == *","* ]] && exit 1
+            # Version value containing alpha, beta or rc is invalid for the stable channel
+            if [[ "${{ inputs.channel }}" == "stable" ]]; then
+              [[ ! "${{ inputs.version }}" =~ ^7\.\d+(?:\.\d+)?$ ]] && exit 1
+            fi
+            # Version value missing alpha, beta or rc is invalid for the testing channel
+            if [[ "${{ inputs.channel }}" == "testing" ]]; then
+              [[ ! "${{ inputs.version }}" =~ ^7\.\d+(?:\.\d+)?(?:alpha|beta|rc)\d+$ ]] && exit 1
+            fi
+          fi
       - name: Convert channel value into JSON
         id: convert_channel
         run: |
-          list=${{ inputs.channel }}
-          echo "json=[\"${list//,/\",\"}\"]" >> $GITHUB_OUTPUT
-  download_files:
-    needs: validate_inputs
+          LIST="${{ inputs.channel }}"
+          echo "JSON=[\"${LIST//,/\",\"}\"]" >> $GITHUB_OUTPUT
+  download:
+    needs: validate
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        channel: ${{ fromJSON(needs.validate_inputs.outputs.channel) }}
-    env:
-      TZ: 'Europe/London'
+        channel: ${{ fromJSON(needs.validate.outputs.channel) }}
     steps:
       - name: Get the latest version
         run: |
@@ -141,14 +154,12 @@ jobs:
 
   obtain_internals:
     needs:
-      - validate_inputs
-      - download_files
+      - validate
+      - download
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        channel: ${{ fromJSON(needs.validate_inputs.outputs.channel) }}
-    env:
-      TZ: 'Europe/London'
+        channel: ${{ fromJSON(needs.validate.outputs.channel) }}
     steps:
       - name: Install requirements leveraging cache
         uses: awalsh128/cache-apt-pkgs-action@latest
