@@ -58,15 +58,21 @@ jobs:
       - name: Validate version value
         run: |
           if [[ -n "${{ inputs.version }}" ]]; then
-            # Same version value can't apply to the stable and testing channels
-            [[ "${{ inputs.channel }}" == *","* ]] && exit 1
-            # Version value containing alpha, beta or rc is invalid for the stable channel
-            if [[ "${{ inputs.channel }}" == "stable" ]]; then
-              [[ ! "${{ inputs.version }}" =~ ^7\.\d+(?:\.\d+)?$ ]] && exit 1
+            if [[ "${{ inputs.channel }}" == *","* ]]; then
+              echo "ERROR: Same version value can't apply to the stable and testing channels"
+              exit 1
             fi
-            # Version value missing alpha, beta or rc is invalid for the testing channel
+            if [[ "${{ inputs.channel }}" == "stable" ]]; then
+              if [[ ! "${{ inputs.version }}" =~ ^7\.\d+(?:\.\d+)?$ ]]; then
+                echo "ERROR: Version value must match ^7\.\d+(?:\.\d+)?$ for the stable channel"
+                exit 1
+              fi
+            fi
             if [[ "${{ inputs.channel }}" == "testing" ]]; then
-              [[ ! "${{ inputs.version }}" =~ ^7\.\d+(?:\.\d+)?(?:alpha|beta|rc)\d+$ ]] && exit 1
+              if [[ ! "${{ inputs.version }}" =~ ^7\.\d+(?:\.\d+)?(?:alpha|beta|rc)\d+$ ]]; then
+                echo "ERROR: Version value must match ^7\.\d+(?:\.\d+)?(?:alpha|beta|rc)\d+$ for the stable channel"
+                exit 1
+              fi
             fi
           fi
       - name: Convert channel value into JSON
