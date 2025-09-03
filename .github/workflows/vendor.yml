@@ -44,9 +44,6 @@ permissions:
   contents: write
 
 env:
-  BRANCH_HOST: ${{ inputs.host }}
-  BRANCH_PREFIX: ${{ inputs.prefix }}
-  BRANCH_VERSION: ${{ inputs.version }}
   TZ: 'Europe/London'
 
 jobs:
@@ -98,25 +95,29 @@ jobs:
   download:
     needs: validate
     runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.refine_version.outputs.VERSION }}
     strategy:
       matrix:
         channel: ${{ fromJSON(needs.validate.outputs.channel) }}
     steps:
-      - name: Get the latest version
+      - name: Refine version value
+        id: refine_version
         run: |
-          if [[ -z "${{ env.BRANCH_VERSION }}" ]]; then
-            BRANCH_VERSION_URL="https://${{ env.BRANCH_HOST }}/routeros/NEWESTa7.${{ matrix.channel }}"
-            echo "BRANCH_VERSION_URL=${BRANCH_VERSION_URL}"
-            BRANCH_VERSION=$(wget -nv -O - ${BRANCH_VERSION_URL} | cut -d ' ' -f1)
-            echo "BRANCH_VERSION=${BRANCH_VERSION}"
+          VERSION="${{ needs.validate.outputs.version }}"
+          if [[ -z "${VERSION}" ]]; then
+            VERSION_URL="https://${{ needs.validate.outputs.host }}/routeros/NEWESTa7.${{ matrix.channel }}"
+            echo "::debug::VERSION_URL=${VERSION_URL}"
+            VERSION=$(wget -nv -O - ${VERSION_URL} | cut -d ' ' -f1)
+            echo "::debug::VERSION=${VERSION}"
           fi
-          echo "BRANCH_VERSION=${BRANCH_VERSION}" >> $GITHUB_ENV
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Cache files
-        id: cache-files
+        id: cache_files
         uses: actions/cache@v4
         with:
-          key: ${{ env.BRANCH_PREFIX }}-${{ matrix.channel }}-${{ env.BRANCH_VERSION }}
+          key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ steps.refine_version.outputs.VERSION }}
           lookup-only: true
           path: |
             changelog.txt
@@ -130,45 +131,47 @@ jobs:
             x86
 
       - name: Get a changelog
-        if: steps.cache-files.outputs.cache-hit != 'true'
+        if: steps.cache_files.outputs.cache-hit != 'true'
         run: |
-          BRANCH_CHANGELOG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/CHANGELOG"
-          echo "BRANCH_CHANGELOG_URL=${BRANCH_CHANGELOG_URL}"
-          wget -nv -O changelog.txt ${BRANCH_CHANGELOG_URL}
+          CHANGELOG_URL="https://${{ needs.validate.outputs.host }}/routeros/${{ steps.refine_version.outputs.VERSION }}/CHANGELOG"
+          echo "::debug::CHANGELOG_URL=${CHANGELOG_URL}"
+          wget -nv -O changelog.txt ${CHANGELOG_URL}
 
       - name: Download files
-        if: steps.cache-files.outputs.cache-hit != 'true'
+        if: steps.cache_files.outputs.cache-hit != 'true'
         run: |
           ARHCS=(arm arm64 mipsbe mmips ppc smips tile x86)
+          HOST="${{ needs.validate.outputs.host }}"
           PACKAGES=(routeros calea container dude extra-nic gps iot iot-bt-extra lora rose-storage switch-marvell tr069-client ups user-manager wifi-mediatek wifi-qcom wifi-qcom-ac wireless zerotier)
+          VERSION="${{ steps.refine_version.outputs.VERSION }}"
           for ARCH in ${ARHCS[@]}; do
             mkdir -p ${ARCH}
             [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
             if [ "${ARCH}" == 'x86' ] || [ "${ARCH}" == 'arm64' ]; then
-              IMG_FILE="${ARCH}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
-              IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/chr-${BRANCH_VERSION}${SUFFIX}.img.zip"
+              IMG_FILE="${ARCH}/chr-${VERSION}${SUFFIX}.img.zip"
+              IMG_URL="https://${HOST}/routeros/${VERSION}/chr-${VERSION}${SUFFIX}.img.zip"
               wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
-              ISO_FILE="${ARCH}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
-              ISO_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/mikrotik-${BRANCH_VERSION}${SUFFIX}.iso"
+              ISO_FILE="${ARCH}/mikrotik-${VERSION}${SUFFIX}.iso"
+              ISO_URL="https://${HOST}/routeros/${VERSION}/mikrotik-${VERSION}${SUFFIX}.iso"
               wget -nv -O ${ISO_FILE} ${ISO_URL} || rm -f ${ISO_FILE}
               if [ "${ARCH}" == 'x86' ]; then
-                IMG_FILE="${ARCH}/install-image-${BRANCH_VERSION}${SUFFIX}.img.zip"
-                IMG_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/install-image-${BRANCH_VERSION}${SUFFIX}.zip"
+                IMG_FILE="${ARCH}/install-image-${VERSION}${SUFFIX}.img.zip"
+                IMG_URL="https://${HOST}/routeros/${VERSION}/install-image-${VERSION}${SUFFIX}.zip"
                 wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
-                TGZ_FILE="${ARCH}/netinstall-cli-${BRANCH_VERSION}${SUFFIX}.tar.gz"
-                TGZ_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/netinstall-${BRANCH_VERSION}${SUFFIX}.tar.gz"
+                TGZ_FILE="${ARCH}/netinstall-cli-${VERSION}${SUFFIX}.tar.gz"
+                TGZ_URL="https://${HOST}/routeros/${VERSION}/netinstall-${VERSION}${SUFFIX}.tar.gz"
                 wget -nv -O ${TGZ_FILE} ${TGZ_URL} || rm -f ${TGZ_FILE}
-                W32_FILE="${ARCH}/netinstall-w32-${BRANCH_VERSION}${SUFFIX}.exe.zip"
-                W32_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/netinstall-${BRANCH_VERSION}${SUFFIX}.zip"
+                W32_FILE="${ARCH}/netinstall-w32-${VERSION}${SUFFIX}.exe.zip"
+                W32_URL="https://${HOST}/routeros/${VERSION}/netinstall-${VERSION}${SUFFIX}.zip"
                 wget -nv -O ${W32_FILE} ${W32_URL} || rm -f ${W32_FILE}
-                W64_FILE="${ARCH}/netinstall-w64-${BRANCH_VERSION}${SUFFIX}.exe.zip"
-                W64_URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/netinstall64-${BRANCH_VERSION}${SUFFIX}.zip"
+                W64_FILE="${ARCH}/netinstall-w64-${VERSION}${SUFFIX}.exe.zip"
+                W64_URL="https://${HOST}/routeros/${VERSION}/netinstall64-${VERSION}${SUFFIX}.zip"
                 wget -nv -O ${W64_FILE} ${W64_URL} || rm -f ${W64_FILE}
               fi
             fi
             for PACKAGE in ${PACKAGES[@]}; do
-              FILE="${ARCH}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
-              URL="https://${{ env.BRANCH_HOST }}/routeros/${BRANCH_VERSION}/${PACKAGE}-${BRANCH_VERSION}${SUFFIX}.npk"
+              FILE="${ARCH}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
+              URL="https://${HOST}/routeros/${VERSION}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
               wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
             done
           done
@@ -213,27 +216,18 @@ jobs:
           cp ./*.sh /tmp/
           chmod +x /tmp/*.sh        
 
-      - name: Get the latest version
-        run: |
-          if [[ -z "${{ env.BRANCH_VERSION }}" ]]; then
-            BRANCH_VERSION_URL="https://${{ env.BRANCH_HOST }}/routeros/NEWESTa7.${{ matrix.channel }}"
-            echo "BRANCH_VERSION_URL=${BRANCH_VERSION_URL}"
-            BRANCH_VERSION=$(wget -nv -O - ${BRANCH_VERSION_URL} | cut -d ' ' -f1)
-            echo "BRANCH_VERSION=${BRANCH_VERSION}"
-          fi
-          echo "BRANCH_VERSION=${BRANCH_VERSION}" >> $GITHUB_ENV
-
       - name: Prepare an empty branch
+        id: prepare_branch
         run: |
-          BRANCH_NAME="${{ env.BRANCH_PREFIX }}-${{ matrix.channel }}-${{ env.BRANCH_VERSION }}"
-          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
-          git switch --orphan ${BRANCH_NAME}
+          BRANCH="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ needs.download.outputs.version }}"
+          echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
+          git switch --orphan ${BRANCH}
 
       - name: Cache files
-        id: cache-files
+        id: cache_files
         uses: actions/cache@v4
         with:
-          key: ${{ env.BRANCH_PREFIX }}-${{ matrix.channel }}-${{ env.BRANCH_VERSION }}
+          key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ needs.download.outputs.version }}
           path: |
             changelog.txt
             arm
@@ -752,6 +746,6 @@ jobs:
       - name: Add files, commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          branch: ${{ env.BRANCH_NAME }}
+          branch: ${{ steps.prepare_branch.outputs.BRANCH }}
           create_branch: true
           push_options: '--force'
