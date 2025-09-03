@@ -75,13 +75,13 @@ jobs:
               exit 1
             fi
             if [[ "${{ inputs.channel }}" == "stable" ]]; then
-              if [[ ! "${{ inputs.version }}" =~ ^7\.\d+(?:\.\d+)?$ ]]; then
+              if [[ ! "${{ inputs.version }}" =~ ^7\.\d+(\.\d+)?$ ]]; then
                 echo "::error input=version,value=${{ inputs.version }}::Invalid version value for the stable channel"
                 exit 1
               fi
             fi
             if [[ "${{ inputs.channel }}" == "testing" ]]; then
-              if [[ ! "${{ inputs.version }}" =~ ^7\.\d+(?:\.\d+)?(?:alpha|beta|rc)\d+$ ]]; then
+              if [[ ! "${{ inputs.version }}" =~ ^7\.\d+(\.\d+)?(alpha|beta|rc)\d+$ ]]; then
                 echo "::error input=version,value=${{ inputs.version }}::Invalid version value for the testing channel"
                 exit 1
               fi
