@@ -1,24 +1,70 @@
 name: Vendor RouterOS 7.x Internals Workflow
 on:
-  push:
-    branches:
-      - main
+#  push:
+#    branches:
+#      - main
+  workflow_dispatch:
+    inputs:
+      prefix:
+        description: "Prefix (e.g., vendor)"
+        required: false
+        default: 'vendor'
+        type: string
+      host:
+        description: "Host (e.g., dl.example.com)"
+        required: false
+        default: 'download.mikrotik.com'
+        type: string
+      channel:
+        description: 'Channel (e.g., stable)'
+        required: true
+        default: 'stable'
+        type: choice
+        options:
+          - 'stable'
+          - 'testing'
+          - 'stable,testing'
+      version:
+        description: "Version (e.g., 7.19.4; empty for latest)"
+        required: false
+        default: ''
+        type: string
+      read_cache:
+        description: "Read files from cache"
+        required: false
+        default: true
+        type: boolean
+      write_cache:
+        description: "Write files to cache"
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: write
 
 env:
-  BRANCH_HOST: 'download.mikrotik.com'
-  BRANCH_PREFIX: 'vendor'
-  BRANCH_VERSION: ${{ secrets.VENDOR_BRANCH_VERSION }}
+  BRANCH_HOST: ${{ inputs.host }}
+  BRANCH_PREFIX: ${{ inputs.prefix }}
+  BRANCH_VERSION: ${{ inputs.version }}
 
 jobs:
-  Download_Files:
+  validate_inputs:
+    runs-on: ubuntu-24.04
+    outputs:
+      channel: ${{ steps.convert_channel.outputs.json }}
+    steps:
+      - name: Convert channel value into JSON
+        id: convert_channel
+        run: |
+          list=${{ inputs.channel }}
+          echo "json=[\"${list//,/\",\"}\"]" >> $GITHUB_OUTPUT
+  download_files:
+    needs: validate_inputs
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        channel: [ stable ]
-        #channel: [ stable, testing ]
+        channel: ${{ fromJSON(needs.validate_inputs.outputs.channel) }}
     env:
       TZ: 'Europe/London'
     steps:
@@ -93,13 +139,14 @@ jobs:
             done
           done
 
-  Obtain_Internals:
-    needs: Download_Files
+  obtain_internals:
+    needs:
+      - validate_inputs
+      - download_files
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        channel: [ stable ]
-        #channel: [ stable, testing ]
+        channel: ${{ fromJSON(needs.validate_inputs.outputs.channel) }}
     env:
       TZ: 'Europe/London'
     steps:
