@@ -53,8 +53,23 @@ jobs:
   validate:
     runs-on: ubuntu-24.04
     outputs:
+      prefix: ${{ inputs.prefix }}
+      host: ${{ inputs.host }}
       channel: ${{ steps.convert_channel.outputs.JSON }}
+      version: ${{ inputs.version }}
     steps:
+      - name: Validate prefix value
+        run: |
+          if [[ ! "${{ inputs.prefix }}" =~ ^[0-9a-zA-Z]+$ ]]; then
+            echo "ERROR: Invalid prefix value"
+            exit 1
+          fi
+      - name: Validate host value
+        run: |
+          if [[ ! "${{ inputs.host }}" =~ ^(?=.{1,255}$)(?:(?:.{1,63}\.){1,127}(?![0-9]*$)[a-z0-9-]+)$ ]]; then
+            echo "ERROR: Invalid host value"
+            exit 1
+          fi
       - name: Validate version value
         run: |
           if [[ -n "${{ inputs.version }}" ]]; then
@@ -64,13 +79,13 @@ jobs:
             fi
             if [[ "${{ inputs.channel }}" == "stable" ]]; then
               if [[ ! "${{ inputs.version }}" =~ ^7\.\d+(?:\.\d+)?$ ]]; then
-                echo "ERROR: Version value must match ^7\.\d+(?:\.\d+)?$ for the stable channel"
+                echo "ERROR: Invalid version value for the stable channel"
                 exit 1
               fi
             fi
             if [[ "${{ inputs.channel }}" == "testing" ]]; then
               if [[ ! "${{ inputs.version }}" =~ ^7\.\d+(?:\.\d+)?(?:alpha|beta|rc)\d+$ ]]; then
-                echo "ERROR: Version value must match ^7\.\d+(?:\.\d+)?(?:alpha|beta|rc)\d+$ for the stable channel"
+                echo "ERROR: Invalid version value for the testing channel"
                 exit 1
               fi
             fi
