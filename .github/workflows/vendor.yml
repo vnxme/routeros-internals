@@ -63,8 +63,7 @@ jobs:
           fi
       - name: Validate host value
         run: |
-          shopt -s extglob
-          if [[ ! "${{ inputs.host }}" =~ ^(?=.{1,255}$)(?:(?:.{1,63}\.){1,127}(?![0-9]*$)[a-z0-9-]+)$ ]]; then
+          if [[ -z "$(echo "${{ inputs.host }}" | grep -P '(?=^.{1,254}$)(^(?>(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)')" ]]; then
             echo "::error input=host,value=${{ inputs.host }}::Invalid host value"
             exit 1
           fi
