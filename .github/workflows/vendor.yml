@@ -220,7 +220,7 @@ jobs:
         id: prepare_branch
         run: |
           BRANCH="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ needs.download.outputs.version }}"
-          echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
+          echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
           git switch --orphan ${BRANCH}
 
       - name: Cache files
