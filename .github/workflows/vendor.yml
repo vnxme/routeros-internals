@@ -52,22 +52,26 @@ jobs:
     outputs:
       prefix: ${{ inputs.prefix }}
       host: ${{ inputs.host }}
-      channel: ${{ steps.convert_channel.outputs.JSON }}
+      channel: ${{ inputs.channel }}
       version: ${{ inputs.version }}
+      matrix: ${{ steps.generate_matrix.outputs.JSON }}
     steps:
       - name: Validate prefix value
+        id: validate_prefix
         run: |
           if [[ ! "${{ inputs.prefix }}" =~ ^[0-9a-zA-Z]+$ ]]; then
             echo "::error input=prefix,value=${{ inputs.prefix }}::Invalid prefix value"
             exit 1
           fi
       - name: Validate host value
+        id: validate_host
         run: |
           if [[ -z "$(echo "${{ inputs.host }}" | grep -P '(?=^.{1,254}$)(^(?>(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)')" ]]; then
             echo "::error input=host,value=${{ inputs.host }}::Invalid host value"
             exit 1
           fi
       - name: Validate version value
+        id: validate_version
         run: |
           if [[ -n "${{ inputs.version }}" ]]; then
             if [[ "${{ inputs.channel }}" == *","* ]]; then
@@ -87,11 +91,24 @@ jobs:
               fi
             fi
           fi
-      - name: Convert channel value into JSON
-        id: convert_channel
+      - name: Generate matrix using channel and version values
+        id: generate_matrix
         run: |
-          LIST="${{ inputs.channel }}"
-          echo "JSON=[\"${LIST//,/\",\"}\"]" >> $GITHUB_OUTPUT
+          readarray -d ',' -t CHANNELS < <(printf '%s' "${{ inputs.channel }}")
+          VERSION="${{ inputs.version }}"
+          JSON=""
+          for CHANNEL in ${CHANNELS[@]}; do
+            if [[ -z "${VERSION}" ]]; then
+              VERSION_URL="https://${{ inputs.host }}/routeros/NEWESTa7.${CHANNEL}"
+              echo "::debug::VERSION_URL=${VERSION_URL}"
+              VERSION="$(wget -nv -O - ${VERSION_URL} | cut -d ' ' -f1)"
+              echo "::debug::VERSION=${VERSION}"
+            fi
+            [[ ${#JSON} -ne 0 ]] && JSON="${JSON},"
+            JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"version\":\"${VERSION}\"}"
+          done
+          JSON="[${JSON}]"
+          echo "JSON=${JSON}" >> $GITHUB_OUTPUT
   download:
     needs: validate
     runs-on: ubuntu-24.04
@@ -99,25 +116,13 @@ jobs:
       version: ${{ steps.refine_version.outputs.VERSION }}
     strategy:
       matrix:
-        channel: ${{ fromJSON(needs.validate.outputs.channel) }}
+        include: ${{ fromJSON(needs.validate.outputs.matrix) }}
     steps:
-      - name: Refine version value
-        id: refine_version
-        run: |
-          VERSION="${{ needs.validate.outputs.version }}"
-          if [[ -z "${VERSION}" ]]; then
-            VERSION_URL="https://${{ needs.validate.outputs.host }}/routeros/NEWESTa7.${{ matrix.channel }}"
-            echo "::debug::VERSION_URL=${VERSION_URL}"
-            VERSION=$(wget -nv -O - ${VERSION_URL} | cut -d ' ' -f1)
-            echo "::debug::VERSION=${VERSION}"
-          fi
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-
       - name: Cache files
         id: cache_files
         uses: actions/cache@v4
         with:
-          key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ steps.refine_version.outputs.VERSION }}
+          key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}
           lookup-only: true
           path: |
             changelog.txt
@@ -133,7 +138,7 @@ jobs:
       - name: Get a changelog
         if: steps.cache_files.outputs.cache-hit != 'true'
         run: |
-          CHANGELOG_URL="https://${{ needs.validate.outputs.host }}/routeros/${{ steps.refine_version.outputs.VERSION }}/CHANGELOG"
+          CHANGELOG_URL="https://${{ needs.validate.outputs.host }}/routeros/${{ matrix.version }}/CHANGELOG"
           echo "::debug::CHANGELOG_URL=${CHANGELOG_URL}"
           wget -nv -O changelog.txt ${CHANGELOG_URL}
 
@@ -143,7 +148,7 @@ jobs:
           ARHCS=(arm arm64 mipsbe mmips ppc smips tile x86)
           HOST="${{ needs.validate.outputs.host }}"
           PACKAGES=(routeros calea container dude extra-nic gps iot iot-bt-extra lora rose-storage switch-marvell tr069-client ups user-manager wifi-mediatek wifi-qcom wifi-qcom-ac wireless zerotier)
-          VERSION="${{ steps.refine_version.outputs.VERSION }}"
+          VERSION="${{ matrix.version }}"
           for ARCH in ${ARHCS[@]}; do
             mkdir -p ${ARCH}
             [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
@@ -183,7 +188,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        channel: ${{ fromJSON(needs.validate.outputs.channel) }}
+        include: ${{ fromJSON(needs.validate.outputs.matrix) }}
     steps:
       - name: Install requirements leveraging cache
         uses: awalsh128/cache-apt-pkgs-action@latest
@@ -219,7 +224,7 @@ jobs:
       - name: Prepare an empty branch
         id: prepare_branch
         run: |
-          BRANCH="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ needs.download.outputs.version }}"
+          BRANCH="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
           echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
           git switch --orphan ${BRANCH}
 
@@ -227,7 +232,7 @@ jobs:
         id: cache_files
         uses: actions/cache@v4
         with:
-          key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ needs.download.outputs.version }}
+          key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}
           path: |
             changelog.txt
             arm
