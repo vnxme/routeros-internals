@@ -1,0 +1,92 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        div.voucher {
+            margin-left: 5px;
+            margin-top: 5px;
+            width: 300px;
+            height: 180px;
+            border: 1px solid #904c49;
+            font-family: "Helvetica Neue", Helvetica, sans-serif;
+            padding: 10px;
+
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            border-radius: 10px;
+            float: left;
+        }
+        div.header {
+            height: 25%;
+        }
+        div.content table {
+            padding-left: 8px;
+            color: #904c49;
+            font-size: 12px;
+            line-height: 26px;
+        }
+        div.content table td {
+            padding: 0 10px 0 20px;
+        }
+        td.value {
+            font-weight: bold;
+            color: black;
+            font-size: 16px;
+        }
+
+        div.opt {
+            text-align: center;
+            font-weight: bold;
+            color: black;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        div.footer {
+            margin-top: 15px;
+            font-size: 12px;
+            text-align: center;
+            color: #904c49;
+        }
+        .header img {
+            height: 50%;
+            float:right;
+        }
+    </style>
+</head>
+<body>
+
+    $(DYNAMIC_START)
+    <div class="voucher">
+        <div class="header">
+            <img src="../../../img/mikrotik_logo.png" />
+        </div>
+
+        <div class="content">
+            <table>
+                <tr>
+                    <td>Username:</td>
+                    <td class="value">$(username)</td>
+                </tr>
+                <tr>
+                    <td>Password:</td>
+                    <td class="value">$(password)</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="opt">
+            $(userprofname)
+        </div>
+        <div class="opt">
+            $(userprofendtime)
+        </div>
+
+        <div class="footer">
+            If you want to extend time, please contact reception
+        </div>
+    </div>
+    $(DYNAMIC_END)
+
+</body>
+</html>

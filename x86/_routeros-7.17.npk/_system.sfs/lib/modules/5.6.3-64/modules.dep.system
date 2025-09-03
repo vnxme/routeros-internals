@@ -1,0 +1,135 @@
+mpls_router
+ip6_tablesnf_nat
+x_tables
+des3_ede-x86_64:	libdes
+x_tables
+mrp
+mbim:	packet_hook
+sfc:	mdio ptp
+ip_tablesx_tables
+x_tables
+chacha-x86_64:	libchacha
+curve25519-x86_64:	libcurve25519-generic
+blake2s-x86_64:	libblake2s-generic
+xfrm_algo
+des_generic:	libdes
+arc4:	libarc4
+x_tables
+ip_tunnel
+nf_natnf_conntrack_pptp
+nfnetlink
+cxgb3:	mdio
+libblake2s:	blake2s-x86_64
+x_tables
+nf_natx_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+vxlan2:	packet_hook udp_tunnel ip6_udp_tunnel
+x_tables
+x_tables
+x_tables
+ip6_tablesx_tables
+b44:	libphy ssb
+x_tables
+alx:	mdio
+vmxnet3:	packet_hook
+virtio_net:	packet_hook net_failover
+ebtables
+ebtables
+mlx5_core:	ptp
+nf_natx_tables
+ne2k-pci:	8390
+nf_natx_tables
+mesh:	packet_hook
+nf_natnf_conntrack_tftp
+ip_tablesx_tables
+ip_tablesnf_nat
+nf_natnf_conntrack_irc
+x_tables
+option:	usb_wwan
+x_tables
+x_tables
+x_tables
+x_tables
+switch:	packet_hook phy_helper
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+snifx_tables
+x_tables
+nf_natx_tables
+snifx_tables
+nf_natnf_conntrack_rtsp
+x_tables
+x_tables
+x_tables
+cxgb4:	ptp zlib_deflate
+nf_natnf_conntrack_h323
+xfrm_algo
+x_tables
+mpls_fp:	packet_hook mpls_router
+ip6_tablesx_tables
+cifs:	libarc4 libdes
+qcserial:	usb_wwan
+nf_reject_ipv6x_tables
+realtek:	libphy
+packet_hookx_tables
+x_tables
+ksmbd:	asn1_decoder oid_registry
+x_tables
+nf_natx_tables
+x_tables
+x_tables
+smsc95xx:	usbnet
+nf_natx_tables
+wireguard:	libblake2s libchacha20poly1305 curve25519-x86_64 libcurve25519-generic udp_tunnel ip6_udp_tunnel
+ip6_tablesx_tables
+nf_reject_ipv4x_tables
+ulogx_tables
+ip_tablesx_tables
+nf_natnf_conntrack_sip
+sierra_net:	usbnet
+x_tables
+it87:	hwmon-vid
+lm87:	hwmon-vid
+x_tables
+ipw:	usb_wwan
+x_tables
+x_tables
+dot1x:	packet_hook
+ptp:	pps_core
+atl1c:	packet_hook
+ulogx_tables
+packet_hookx_tables
+ax88179_178a:	usbnet
+imq:	cls_fw cls_linear
+r6040:	libphy
+smsc75xx:	usbnet
+hso:	rfkill
+mlx4_en:	mlx4_core ptp
+fp_usbnet:	packet_hook
+r8169:	libphy
+packet_hookswitch
+e1000e:	ptp
+romon:	packet_hook
+nf_natnf_conntrack_ftp
+bridge2
+bnx2x:	mdio ptp zlib_inflate
+libchacha20poly1305:	chacha-x86_64 poly1305-x86_64
+traffic_gen:	packet_hook
+net_failover:	failover
+tg3:	libphy ptp
