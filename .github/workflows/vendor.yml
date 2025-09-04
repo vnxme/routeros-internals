@@ -29,6 +29,11 @@ on:
         required: false
         default: ''
         type: string
+      reuse_commits:
+        description: "Reuse committed files"
+        required: false
+        default: true
+        type: boolean
       override_cache:
         description: "Override cached files"
         required: false
@@ -152,11 +157,24 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
     steps:
+      - name: Generate a cache key
+        id: generate_key
+        run: |
+          KEY="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
+          echo "key=${KEY}" >> $GITHUB_OUTPUT
+
+      - name: Generate download urls
+        id: generate_urls
+        run: |
+          BRANCH="${{ steps.generate_key.outputs.key }}"
+          echo "github=https://github.com/${{ github.repository }}/raw/refs/heads/${BRANCH}" >> $GITHUB_OUTPUT
+          echo "vendor=https://${{ needs.validate.outputs.host }}/routeros/${{ matrix.version }}" >> $GITHUB_OUTPUT
+
       - name: Restore files from cache
         id: restore_files
         uses: actions/cache/restore@v4
         with:
-          key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}
+          key: ${{ steps.generate_key.outputs.key }}
           lookup-only: true
           path: |
             changelog.txt
@@ -170,31 +188,43 @@ jobs:
         if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
         run: |
           FILE="changelog.txt"
-          URL="https://${{ needs.validate.outputs.host }}/routeros/${{ matrix.version }}/CHANGELOG"
-          wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+          if [ "${{ inputs.reuse_commits }}" == "true" ]; then
+            URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+            wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+          fi
+          if [ ! -f "${FILE}" ]; then
+            URL="${{ steps.generate_urls.outputs.vendor }}/CHANGELOG"
+            wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+          fi
 
       - name: Download packages
         id: download_packages
         if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
         run: |
           ARCHS=(arm arm64 mipsbe mmips ppc smips tile x86)
-          HOST="${{ needs.validate.outputs.host }}"
           PACKAGES=(routeros)
           VERSION="${{ matrix.version }}"
           for ARCH in ${ARCHS[@]}; do
             mkdir -p ${ARCH}
             [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
+            
             for PACKAGE in ${PACKAGES[@]}; do
               FILE="${ARCH}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
-              URL="https://${HOST}/routeros/${VERSION}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              if [ "${{ inputs.reuse_commits }}" == "true" ]; then
+                URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              fi
+              if [ ! -f "${FILE}" ]; then
+                URL="${{ steps.generate_urls.outputs.vendor }}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
+                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              fi
             done
-          
+            
             FILE="${ARCH}/all_packages-${VERSION}${SUFFIX}.zip"
-            URL="https://${HOST}/routeros/${VERSION}/all_packages-${ARCH}-${VERSION}.zip"
+            URL="${{ steps.generate_urls.outputs.vendor }}/all_packages-${ARCH}-${VERSION}.zip"
             wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
             if [ -f "${FILE}" ]; then
-              unzip -d "${ARCH}/" "${FILE}" && rm -f ${FILE}
+              unzip -o -d "${ARCH}/" "${FILE}" && rm -f ${FILE}
             fi
           done
 
@@ -203,21 +233,41 @@ jobs:
         if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
         run: |
           ARCHS=(arm64 x86)
-          HOST="${{ needs.validate.outputs.host }}"
           VERSION="${{ matrix.version }}"
           for ARCH in ${ARCHS[@]}; do
             mkdir -p ${ARCH}
             [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
-            IMG_FILE="${ARCH}/chr-${VERSION}${SUFFIX}.img.zip"
-            IMG_URL="https://${HOST}/routeros/${VERSION}/chr-${VERSION}${SUFFIX}.img.zip"
-            wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
-            ISO_FILE="${ARCH}/mikrotik-${VERSION}${SUFFIX}.iso"
-            ISO_URL="https://${HOST}/routeros/${VERSION}/mikrotik-${VERSION}${SUFFIX}.iso"
-            wget -nv -O ${ISO_FILE} ${ISO_URL} || rm -f ${ISO_FILE}
+            
+            FILE="${ARCH}/chr-${VERSION}${SUFFIX}.img.zip"
+            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
+              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            if [ ! -f "${FILE}" ]; then
+              URL="${{ steps.generate_urls.outputs.vendor }}/chr-${VERSION}${SUFFIX}.img.zip"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            
+            FILE="${ARCH}/mikrotik-${VERSION}${SUFFIX}.iso"
+            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
+              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            if [ ! -f "${FILE}" ]; then
+              URL="${{ steps.generate_urls.outputs.vendor }}/mikrotik-${VERSION}${SUFFIX}.iso"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            
             if [ "${ARCH}" == 'x86' ]; then
-              IMG_FILE="${ARCH}/install-image-${VERSION}${SUFFIX}.img.zip"
-              IMG_URL="https://${HOST}/routeros/${VERSION}/install-image-${VERSION}${SUFFIX}.zip"
-              wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
+              FILE="${ARCH}/install-image-${VERSION}${SUFFIX}.img.zip"
+              if [ "${{ inputs.reuse_commits }}" == "true" ]; then
+                URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              fi
+              if [ ! -f "${FILE}" ]; then
+                URL="${{ steps.generate_urls.outputs.vendor }}/install-image-${VERSION}${SUFFIX}.zip"
+                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              fi
             fi
           done
 
@@ -226,20 +276,40 @@ jobs:
         if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
         run: |
           ARCHS=(x86)
-          HOST="${{ needs.validate.outputs.host }}"
           VERSION="${{ matrix.version }}"
           for ARCH in ${ARCHS[@]}; do
             mkdir -p ${ARCH}
             [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
-            TGZ_FILE="${ARCH}/netinstall-cli-${VERSION}${SUFFIX}.tar.gz"
-            TGZ_URL="https://${HOST}/routeros/${VERSION}/netinstall-${VERSION}${SUFFIX}.tar.gz"
-            wget -nv -O ${TGZ_FILE} ${TGZ_URL} || rm -f ${TGZ_FILE}
-            W32_FILE="${ARCH}/netinstall-w32-${VERSION}${SUFFIX}.exe.zip"
-            W32_URL="https://${HOST}/routeros/${VERSION}/netinstall-${VERSION}${SUFFIX}.zip"
-            wget -nv -O ${W32_FILE} ${W32_URL} || rm -f ${W32_FILE}
-            W64_FILE="${ARCH}/netinstall-w64-${VERSION}${SUFFIX}.exe.zip"
-            W64_URL="https://${HOST}/routeros/${VERSION}/netinstall64-${VERSION}${SUFFIX}.zip"
-            wget -nv -O ${W64_FILE} ${W64_URL} || rm -f ${W64_FILE}
+            
+            FILE="${ARCH}/netinstall-cli-${VERSION}${SUFFIX}.tar.gz"
+            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
+              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            if [ ! -f "${FILE}" ]; then
+              URL="${{ steps.generate_urls.outputs.vendor }}/netinstall-${VERSION}${SUFFIX}.tar.gz"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            
+            FILE="${ARCH}/netinstall-w32-${VERSION}${SUFFIX}.exe.zip"
+            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
+              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            if [ ! -f "${FILE}" ]; then
+              URL="${{ steps.generate_urls.outputs.vendor }}/netinstall-${VERSION}${SUFFIX}.zip"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            
+            FILE="${ARCH}/netinstall-w64-${VERSION}${SUFFIX}.exe.zip"
+            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
+              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            if [ ! -f "${FILE}" ]; then
+              URL="${{ steps.generate_urls.outputs.vendor }}/netinstall64-${VERSION}${SUFFIX}.zip"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
           done
 
       - name: Delete files from cache
@@ -248,19 +318,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          KEY="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
           # Note: actions:write permission is required
           gh api --method DELETE \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/actions/caches?key=${KEY}&ref=${{ github.ref }}
+            /repos/${{ github.repository }}/actions/caches?key=${{ steps.generate_key.outputs.key }}&ref=${{ github.ref }}
 
       - name: Save files to cache
         id: save_files
         if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}
+          key: ${{ steps.generate_key.outputs.key }}
           path: |
             changelog.txt
             */*.iso
