@@ -355,19 +355,6 @@ jobs:
           packages: binutils-common binwalk bzip2 device-tree-compiler genisoimage gzip lz4 lzma lzop qemu-utils rsync xz-utils zip zstd
           version: 1.0
 
-      #- name: Install requirements
-      #  run: |
-      #    echo $(uname -a)
-      #    sudo apt update > /dev/null
-      #    sudo apt install -y binutils-common binwalk bzip2 genisoimage gzip lz4 lzma lzop rsync xz-utils zip zstd
-      #    #sudo apt install -y dosfstools extlinux mkisofs qemu-utils xorriso > /dev/null
-      #    #sudo modprobe nbd > /dev/null
-
-      #- name: Install Python
-      #  uses: actions/setup-python@v5
-      #  with:
-      #    python-version: '3.11'
-
       - name: Checkout the repository
         id: checkout_repository
         uses: actions/checkout@v5
