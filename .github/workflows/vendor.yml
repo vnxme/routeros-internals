@@ -372,13 +372,13 @@ jobs:
         id: checkout_repository
         uses: actions/checkout@v5
 
-      - name: Prepare scripts
+      - name: Copy executable files
+        id: copy_files
         run: |
-          wget -nv -O /tmp/extract-vmlinux.sh "https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-vmlinux" || true
           cp -r ./tools /tmp/
           cp ./*.py /tmp/
           cp ./*.sh /tmp/
-          chmod +x /tmp/*.sh        
+          chmod +x /tmp/*.sh
 
       - name: Generate a cache key
         id: generate_key
