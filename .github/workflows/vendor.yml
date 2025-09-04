@@ -82,7 +82,7 @@ jobs:
           CHANNEL="$(echo "${{ inputs.channel }}" | xargs)"
           readarray -d ',' -t CHANNELS < <(printf '%s' "${CHANNEL}")
           for CHANNEL in ${CHANNELS[@]}; do
-            if [ ! ( "${CHANNEL}" == "stable" || "${CHANNEL}" == "testing" ) ]; then
+            if [ "${CHANNEL}" != "stable" -a "${CHANNEL}" != "testing" ]; then
               echo "::error input=channel,value=${CHANNEL}::Invalid channel value"
               exit 1
             fi
