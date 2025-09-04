@@ -153,14 +153,10 @@ jobs:
           lookup-only: true
           path: |
             changelog.txt
-            arm
-            arm64
-            mipsbe
-            mmips
-            ppc
-            smips
-            tile
-            x86
+            */*.iso
+            */*.npk
+            */*.tar.gz
+            */*.zip
 
       - name: Download a changelog
         id: download_changelog
@@ -293,14 +289,10 @@ jobs:
           key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}
           path: |
             changelog.txt
-            arm
-            arm64
-            mipsbe
-            mmips
-            ppc
-            smips
-            tile
-            x86
+            */*.iso
+            */*.npk
+            */*.tar.gz
+            */*.zip
 
       - name: Unpack NETINSTALL*.TAR.GZ files (1/2)
         run: |
