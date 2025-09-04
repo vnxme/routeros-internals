@@ -348,6 +348,7 @@ jobs:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
     steps:
       - name: Install requirements leveraging cache
+        id: install_requirements
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           execute_install_scripts: true
@@ -368,7 +369,8 @@ jobs:
       #    python-version: '3.11'
 
       - name: Checkout the repository
-        uses: actions/checkout@v4
+        id: checkout_repository
+        uses: actions/checkout@v5
 
       - name: Prepare scripts
         run: |
@@ -378,18 +380,23 @@ jobs:
           cp ./*.sh /tmp/
           chmod +x /tmp/*.sh        
 
+      - name: Generate a cache key
+        id: generate_key
+        run: |
+          KEY="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
+          echo "key=${KEY}" >> $GITHUB_OUTPUT
+
       - name: Prepare an empty branch
         id: prepare_branch
         run: |
-          BRANCH="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
-          echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
+          BRANCH="${{ steps.generate_key.outputs.key }}"
           git switch --orphan ${BRANCH}
 
       - name: Restore files from cache
         id: restore_files
         uses: actions/cache/restore@v4
         with:
-          key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}
+          key: ${{ steps.generate_key.outputs.key }}
           path: |
             changelog.txt
             */*.iso
@@ -904,6 +911,6 @@ jobs:
       - name: Add files, commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          branch: ${{ steps.prepare_branch.outputs.BRANCH }}
+          branch: ${{ steps.generate_key.outputs.key }}
           create_branch: true
           push_options: '--force'
