@@ -164,7 +164,7 @@ jobs:
         run: |
           FILE="changelog.txt"
           URL="https://${{ needs.validate.outputs.host }}/routeros/${{ matrix.version }}/CHANGELOG"
-          wget -nv -O ${FILE} ${CHANGELOG_URL} || rm -f ${FILE}
+          wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
 
       - name: Download packages
         id: download_packages
