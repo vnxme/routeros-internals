@@ -29,15 +29,10 @@ on:
         required: false
         default: ''
         type: string
-      read_cache:
-        description: "Read files from cache"
+      override_cache:
+        description: "Override cached files"
         required: false
-        default: true
-        type: boolean
-      write_cache:
-        description: "Write files to cache"
-        required: false
-        default: true
+        default: false
         type: boolean
 
 permissions:
@@ -145,9 +140,9 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
     steps:
-      - name: Cache files
-        id: cache_files
-        uses: actions/cache@v4
+      - name: Restore files from cache
+        id: restore_files
+        uses: actions/cache/restore@v4
         with:
           key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}
           lookup-only: true
@@ -160,7 +155,7 @@ jobs:
 
       - name: Download a changelog
         id: download_changelog
-        if: steps.cache_files.outputs.cache-hit != 'true'
+        if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
         run: |
           FILE="changelog.txt"
           URL="https://${{ needs.validate.outputs.host }}/routeros/${{ matrix.version }}/CHANGELOG"
@@ -168,7 +163,7 @@ jobs:
 
       - name: Download packages
         id: download_packages
-        if: steps.cache_files.outputs.cache-hit != 'true'
+        if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
         run: |
           ARCHS=(arm arm64 mipsbe mmips ppc smips tile x86)
           HOST="${{ needs.validate.outputs.host }}"
@@ -193,7 +188,7 @@ jobs:
 
       - name: Download images
         id: download_images
-        if: steps.cache_files.outputs.cache-hit != 'true'
+        if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
         run: |
           ARCHS=(arm64 x86)
           HOST="${{ needs.validate.outputs.host }}"
@@ -216,7 +211,7 @@ jobs:
 
       - name: Download binaries
         id: download_binaries
-        if: steps.cache_files.outputs.cache-hit != 'true'
+        if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
         run: |
           ARCHS=(x86)
           HOST="${{ needs.validate.outputs.host }}"
@@ -234,6 +229,19 @@ jobs:
             W64_URL="https://${HOST}/routeros/${VERSION}/netinstall64-${VERSION}${SUFFIX}.zip"
             wget -nv -O ${W64_FILE} ${W64_URL} || rm -f ${W64_FILE}
           done
+
+      - name: Save files to cache
+        id: save_files
+        if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}
+          path: |
+            changelog.txt
+            */*.iso
+            */*.npk
+            */*.tar.gz
+            */*.zip
 
   obtain_internals:
     needs:
@@ -282,9 +290,9 @@ jobs:
           echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
           git switch --orphan ${BRANCH}
 
-      - name: Cache files
-        id: cache_files
-        uses: actions/cache@v4
+      - name: Restore files from cache
+        id: restore_files
+        uses: actions/cache/restore@v4
         with:
           key: ${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}
           path: |
