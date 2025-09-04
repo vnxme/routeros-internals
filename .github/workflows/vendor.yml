@@ -373,11 +373,17 @@ jobs:
           KEY="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
           echo "key=${KEY}" >> $GITHUB_OUTPUT
 
-      - name: Prepare an empty branch
+      - name: Prepare a branch
         id: prepare_branch
         run: |
           BRANCH="${{ steps.generate_key.outputs.key }}"
-          git switch --orphan ${BRANCH}
+          if [ -z "$(git ls-remote --heads origin ${BRANCH})" ]; then
+            git switch --orphan ${BRANCH}
+          else
+            git fetch origin ${BRANCH}
+            git update-ref refs/heads/${BRANCH} origin/${BRANCH}
+            git rm -r .
+          fi
 
       - name: Restore files from cache
         id: restore_files
@@ -895,9 +901,20 @@ jobs:
             echo -e "*\n!.gitignore\n" > "${DIR}/.gitignore"
           done
 
+      - name: Compose a commit message
+        id: compose_message
+        run: |
+          {
+            echo 'message<<EOF'
+            echo -e "Apply automatic changes\n\n"
+            echo -e "Created by https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
       - name: Add files, commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           branch: ${{ steps.generate_key.outputs.key }}
+          commit_message: ${{ steps.compose_message.outputs.message }}
           create_branch: true
           push_options: '--force'
