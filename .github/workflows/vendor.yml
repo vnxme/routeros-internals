@@ -230,6 +230,14 @@ jobs:
             wget -nv -O ${W64_FILE} ${W64_URL} || rm -f ${W64_FILE}
           done
 
+      - name: Delete cache
+        id: delete_cache
+        if: inputs.override_cache
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh cache delete "${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
+
       - name: Save files to cache
         id: save_files
         if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
