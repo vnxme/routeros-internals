@@ -60,49 +60,52 @@ jobs:
         id: validate_prefix
         run: |
           PREFIX="$(echo "${{ inputs.prefix }}" | xargs)"
-          if [[ ! "${PREFIX}" =~ ^[0-9a-zA-Z]+$ ]]; then
+          if [ -z "$(echo "${PREFIX}" | grep -P '^[0-9a-zA-Z]+$')" ]; then
             echo "::error input=prefix,value=${PREFIX}::Invalid prefix value"
             exit 1
           fi
           echo "prefix=${PREFIX}" >> $GITHUB_OUTPUT
+
       - name: Validate host value
         id: validate_host
         run: |
           HOST="$(echo "${{ inputs.host }}" | xargs)"
-          if [[ -z "$(echo "${HOST}" | grep -P '(?=^.{1,254}$)(^(?>(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)')" ]]; then
+          if [ -z "$(echo "${HOST}" | grep -P '(?=^.{1,254}$)(^(?>(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)')" ]; then
             echo "::error input=host,value=${HOST}::Invalid host value"
             exit 1
           fi
           echo "host=${HOST}" >> $GITHUB_OUTPUT
+
       - name: Validate channel value
         id: validate_channel
         run: |
           CHANNEL="$(echo "${{ inputs.channel }}" | xargs)"
           readarray -d ',' -t CHANNELS < <(printf '%s' "${CHANNEL}")
           for CHANNEL in ${CHANNELS[@]}; do
-            if [[ ! ( "${CHANNEL}" == "stable" || "${CHANNEL}" == "testing" ) ]]; then
+            if [ ! ( "${CHANNEL}" == "stable" || "${CHANNEL}" == "testing" ) ]; then
               echo "::error input=channel,value=${CHANNEL}::Invalid channel value"
               exit 1
             fi
           done
           printf -v CHANNEL '%s,' "${CHANNELS[@]}"
           echo "channel=${CHANNEL%,}" >> $GITHUB_OUTPUT
+
       - name: Validate version value
         id: validate_version
         run: |
           VERSION="$(echo "${{ inputs.version }}" | xargs)"
           CHANNEL="$(echo "${{ steps.validate_channel.outputs.channel }}" | xargs)"
-          if [[ -n "${VERSION}" ]]; then
-            if [[ "${CHANNEL}" == *","* ]]; then
+          if [ -n "${VERSION}" ]; then
+            if [ -n "$(echo "${CHANNEL}" | grep ',')" ]; then
               echo "::error input=version,value=${VERSION}::Same version value can't apply to multiple channels"
               exit 1
-            elif [[ "${CHANNEL}" == "stable" ]]; then
-              if [[ ! "${VERSION}" =~ ^7\.[0-9]+(\.[0-9]+)?$ ]]; then
+            elif [ "${CHANNEL}" == "stable" ]; then
+              if [ -z "$(echo "${VERSION}" | grep -P '^7\.[0-9]+(\.[0-9]+)?$')" ]; then
                 echo "::error input=version,value=${VERSION}::Invalid version value for the ${CHANNEL} channel"
                 exit 1
               fi
-            elif [[ "${CHANNEL}" == "testing" ]]; then
-              if [[ ! "${VERSION}" =~ ^7\.[0-9]+(\.[0-9]+)?(ab|beta|rc)[0-9]+$ ]]; then
+            elif [ "${CHANNEL}" == "testing" ]; then
+              if [ -z "$(echo "${VERSION}" | grep -P '^7\.[0-9]+(\.[0-9]+)?(ab|beta|rc)[0-9]+$')" ]; then
                 echo "::error input=version,value=${VERSION}::Invalid version value for the ${CHANNEL} channel"
                 exit 1
               fi
@@ -111,6 +114,7 @@ jobs:
             fi
           fi
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
       - name: Generate matrix using channel and version values
         id: generate_matrix
         run: |
@@ -118,22 +122,21 @@ jobs:
           VERSION="${{ steps.validate_version.outputs.version }}"
           JSON=""
           for CHANNEL in ${CHANNELS[@]}; do
-            if [[ -z "${VERSION}" ]]; then
+            if [ -z "${VERSION}" ]; then
               VERSION_URL="https://${{ steps.validate_host.outputs.host }}/routeros/NEWESTa7.${CHANNEL}"
               echo "::debug::VERSION_URL=${VERSION_URL}"
               VERSION="$(wget -nv -O - ${VERSION_URL} | cut -d ' ' -f1)"
               echo "::debug::VERSION=${VERSION}"
             fi
-            [[ ${#JSON} -ne 0 ]] && JSON="${JSON},"
+            [ ${#JSON} -ne 0 ] && JSON="${JSON},"
             JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"version\":\"${VERSION}\"}"
           done
           JSON="[${JSON}]"
           echo "matrix=${JSON}" >> $GITHUB_OUTPUT
+
   download:
     needs: validate
     runs-on: ubuntu-24.04
-    outputs:
-      version: ${{ steps.refine_version.outputs.VERSION }}
     strategy:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
@@ -155,50 +158,74 @@ jobs:
             tile
             x86
 
-      - name: Get a changelog
+      - name: Download a changelog
+        id: download_changelog
         if: steps.cache_files.outputs.cache-hit != 'true'
         run: |
           CHANGELOG_URL="https://${{ needs.validate.outputs.host }}/routeros/${{ matrix.version }}/CHANGELOG"
           echo "::debug::CHANGELOG_URL=${CHANGELOG_URL}"
-          wget -nv -O changelog.txt ${CHANGELOG_URL}
+          wget -nv -O changelog.txt ${CHANGELOG_URL} || rm -f changelog.txt
 
-      - name: Download files
+      - name: Download packages
+        id: download_packages
         if: steps.cache_files.outputs.cache-hit != 'true'
         run: |
-          ARHCS=(arm arm64 mipsbe mmips ppc smips tile x86)
+          ARCHS=(arm arm64 mipsbe mmips ppc smips tile x86)
           HOST="${{ needs.validate.outputs.host }}"
           PACKAGES=(routeros calea container dude extra-nic gps iot iot-bt-extra lora rose-storage switch-marvell tr069-client ups user-manager wifi-mediatek wifi-qcom wifi-qcom-ac wireless zerotier)
           VERSION="${{ matrix.version }}"
-          for ARCH in ${ARHCS[@]}; do
+          for ARCH in ${ARCHS[@]}; do
             mkdir -p ${ARCH}
             [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
-            if [ "${ARCH}" == 'x86' ] || [ "${ARCH}" == 'arm64' ]; then
-              IMG_FILE="${ARCH}/chr-${VERSION}${SUFFIX}.img.zip"
-              IMG_URL="https://${HOST}/routeros/${VERSION}/chr-${VERSION}${SUFFIX}.img.zip"
-              wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
-              ISO_FILE="${ARCH}/mikrotik-${VERSION}${SUFFIX}.iso"
-              ISO_URL="https://${HOST}/routeros/${VERSION}/mikrotik-${VERSION}${SUFFIX}.iso"
-              wget -nv -O ${ISO_FILE} ${ISO_URL} || rm -f ${ISO_FILE}
-              if [ "${ARCH}" == 'x86' ]; then
-                IMG_FILE="${ARCH}/install-image-${VERSION}${SUFFIX}.img.zip"
-                IMG_URL="https://${HOST}/routeros/${VERSION}/install-image-${VERSION}${SUFFIX}.zip"
-                wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
-                TGZ_FILE="${ARCH}/netinstall-cli-${VERSION}${SUFFIX}.tar.gz"
-                TGZ_URL="https://${HOST}/routeros/${VERSION}/netinstall-${VERSION}${SUFFIX}.tar.gz"
-                wget -nv -O ${TGZ_FILE} ${TGZ_URL} || rm -f ${TGZ_FILE}
-                W32_FILE="${ARCH}/netinstall-w32-${VERSION}${SUFFIX}.exe.zip"
-                W32_URL="https://${HOST}/routeros/${VERSION}/netinstall-${VERSION}${SUFFIX}.zip"
-                wget -nv -O ${W32_FILE} ${W32_URL} || rm -f ${W32_FILE}
-                W64_FILE="${ARCH}/netinstall-w64-${VERSION}${SUFFIX}.exe.zip"
-                W64_URL="https://${HOST}/routeros/${VERSION}/netinstall64-${VERSION}${SUFFIX}.zip"
-                wget -nv -O ${W64_FILE} ${W64_URL} || rm -f ${W64_FILE}
-              fi
-            fi
             for PACKAGE in ${PACKAGES[@]}; do
               FILE="${ARCH}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
               URL="https://${HOST}/routeros/${VERSION}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
               wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
             done
+          done
+
+      - name: Download images
+        id: download_images
+        if: steps.cache_files.outputs.cache-hit != 'true'
+        run: |
+          ARCHS=(arm64 x86)
+          HOST="${{ needs.validate.outputs.host }}"
+          VERSION="${{ matrix.version }}"
+          for ARCH in ${ARCHS[@]}; do
+            mkdir -p ${ARCH}
+            [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
+            IMG_FILE="${ARCH}/chr-${VERSION}${SUFFIX}.img.zip"
+            IMG_URL="https://${HOST}/routeros/${VERSION}/chr-${VERSION}${SUFFIX}.img.zip"
+            wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
+            ISO_FILE="${ARCH}/mikrotik-${VERSION}${SUFFIX}.iso"
+            ISO_URL="https://${HOST}/routeros/${VERSION}/mikrotik-${VERSION}${SUFFIX}.iso"
+            wget -nv -O ${ISO_FILE} ${ISO_URL} || rm -f ${ISO_FILE}
+            if [ "${ARCH}" == 'x86' ]; then
+              IMG_FILE="${ARCH}/install-image-${VERSION}${SUFFIX}.img.zip"
+              IMG_URL="https://${HOST}/routeros/${VERSION}/install-image-${VERSION}${SUFFIX}.zip"
+              wget -nv -O ${IMG_FILE} ${IMG_URL} || rm -f ${IMG_FILE}
+            fi
+          done
+
+      - name: Download binaries
+        id: download_binaries
+        if: steps.cache_files.outputs.cache-hit != 'true'
+        run: |
+          ARCHS=(x86)
+          HOST="${{ needs.validate.outputs.host }}"
+          VERSION="${{ matrix.version }}"
+          for ARCH in ${ARCHS[@]}; do
+            mkdir -p ${ARCH}
+            [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
+            TGZ_FILE="${ARCH}/netinstall-cli-${VERSION}${SUFFIX}.tar.gz"
+            TGZ_URL="https://${HOST}/routeros/${VERSION}/netinstall-${VERSION}${SUFFIX}.tar.gz"
+            wget -nv -O ${TGZ_FILE} ${TGZ_URL} || rm -f ${TGZ_FILE}
+            W32_FILE="${ARCH}/netinstall-w32-${VERSION}${SUFFIX}.exe.zip"
+            W32_URL="https://${HOST}/routeros/${VERSION}/netinstall-${VERSION}${SUFFIX}.zip"
+            wget -nv -O ${W32_FILE} ${W32_URL} || rm -f ${W32_FILE}
+            W64_FILE="${ARCH}/netinstall-w64-${VERSION}${SUFFIX}.exe.zip"
+            W64_URL="https://${HOST}/routeros/${VERSION}/netinstall64-${VERSION}${SUFFIX}.zip"
+            wget -nv -O ${W64_FILE} ${W64_URL} || rm -f ${W64_FILE}
           done
 
   obtain_internals:
