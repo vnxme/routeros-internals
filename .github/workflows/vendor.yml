@@ -123,10 +123,14 @@ jobs:
           JSON=""
           for CHANNEL in ${CHANNELS[@]}; do
             if [ -z "${VERSION}" ]; then
-              VERSION_URL="https://${{ steps.validate_host.outputs.host }}/routeros/NEWESTa7.${CHANNEL}"
-              echo "::debug::VERSION_URL=${VERSION_URL}"
-              VERSION="$(wget -nv -O - ${VERSION_URL} | cut -d ' ' -f1)"
-              echo "::debug::VERSION=${VERSION}"
+              FILE="version.txt"
+              URL="https://${{ steps.validate_host.outputs.host }}/routeros/NEWESTa7.${CHANNEL}"
+              wget -nv -O ${FILE} ${CHANGELOG_URL} || rm -f ${FILE}
+              if [ ! -f "${FILE}" ]; then
+                echo "::error::Failed to get the latest version for the ${CHANNEL} channel"
+                exit 1
+              fi
+              VERSION="$(cat ${FILE} | cut -d ' ' -f1)"
             fi
             [ ${#JSON} -ne 0 ] && JSON="${JSON},"
             JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"version\":\"${VERSION}\"}"
@@ -162,9 +166,9 @@ jobs:
         id: download_changelog
         if: steps.cache_files.outputs.cache-hit != 'true'
         run: |
-          CHANGELOG_URL="https://${{ needs.validate.outputs.host }}/routeros/${{ matrix.version }}/CHANGELOG"
-          echo "::debug::CHANGELOG_URL=${CHANGELOG_URL}"
-          wget -nv -O changelog.txt ${CHANGELOG_URL} || rm -f changelog.txt
+          FILE="changelog.txt"
+          URL="https://${{ needs.validate.outputs.host }}/routeros/${{ matrix.version }}/CHANGELOG"
+          wget -nv -O ${FILE} ${CHANGELOG_URL} || rm -f ${FILE}
 
       - name: Download packages
         id: download_packages
@@ -172,7 +176,7 @@ jobs:
         run: |
           ARCHS=(arm arm64 mipsbe mmips ppc smips tile x86)
           HOST="${{ needs.validate.outputs.host }}"
-          PACKAGES=(routeros calea container dude extra-nic gps iot iot-bt-extra lora rose-storage switch-marvell tr069-client ups user-manager wifi-mediatek wifi-qcom wifi-qcom-ac wireless zerotier)
+          PACKAGES=(routeros)
           VERSION="${{ matrix.version }}"
           for ARCH in ${ARCHS[@]}; do
             mkdir -p ${ARCH}
@@ -182,6 +186,13 @@ jobs:
               URL="https://${HOST}/routeros/${VERSION}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
               wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
             done
+          
+            FILE="${ARCH}/all_packages-${VERSION}${SUFFIX}.zip"
+            URL="https://${HOST}/routeros/${VERSION}/all_packages-${ARCH}-${VERSION}.zip"
+            wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            if [ -f "${FILE}" ]; then
+              unzip -d "${ARCH}/" "${FILE}" && rm -f ${FILE}
+            fi
           done
 
       - name: Download images
