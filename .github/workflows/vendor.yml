@@ -6,15 +6,15 @@ on:
 #      - main
   workflow_dispatch:
     inputs:
-      prefix:
-        description: "Prefix (e.g., vendor)"
-        required: true
-        default: 'vendor'
-        type: string
       host:
         description: "Host (e.g., dl.example.com)"
         required: true
         default: 'download.mikrotik.com'
+        type: string
+      prefix:
+        description: "Prefix (e.g., vendor)"
+        required: true
+        default: 'vendor'
         type: string
       channel:
         description: 'Channel (e.g., stable)'
@@ -30,6 +30,15 @@ on:
         required: false
         default: ''
         type: string
+      scope:
+        description: 'Scope of work (list of jobs)'
+        required: true
+        default: 'validate,download,process'
+        type: choice
+        options:
+          - 'validate'
+          - 'validate,download'
+          - 'validate,download,process'
       reuse_commits:
         description: "Reuse committed files"
         required: false
@@ -37,16 +46,6 @@ on:
         type: boolean
       override_cache:
         description: "Override cached files"
-        required: false
-        default: false
-        type: boolean
-      download_only:
-        description: "Download files only"
-        required: false
-        default: false
-        type: boolean
-      validate_only:
-        description: "Validate inputs only"
         required: false
         default: false
         type: boolean
@@ -60,24 +59,15 @@ env:
 
 jobs:
   validate:
+    if: ${{ contains(inputs.scope, github.job) }}
     runs-on: ubuntu-24.04
     outputs:
-      prefix: ${{ steps.validate_prefix.outputs.prefix }}
       host: ${{ steps.validate_host.outputs.host }}
+      prefix: ${{ steps.validate_prefix.outputs.prefix }}
       channel: ${{ steps.validate_channel.outputs.channel }}
       version: ${{ steps.validate_version.outputs.version }}
       matrix: ${{ steps.generate_matrix.outputs.matrix }}
     steps:
-      - name: Validate prefix value
-        id: validate_prefix
-        run: |
-          PREFIX="$(echo "${{ inputs.prefix }}" | xargs)"
-          if [ -z "$(echo "${PREFIX}" | grep -P '^[0-9a-zA-Z]+$')" ]; then
-            echo "::error input=prefix,value=${PREFIX}::Invalid prefix value"
-            exit 1
-          fi
-          echo "prefix=${PREFIX}" >> $GITHUB_OUTPUT
-
       - name: Validate host value
         id: validate_host
         run: |
@@ -87,6 +77,16 @@ jobs:
             exit 1
           fi
           echo "host=${HOST}" >> $GITHUB_OUTPUT
+
+      - name: Validate prefix value
+        id: validate_prefix
+        run: |
+          PREFIX="$(echo "${{ inputs.prefix }}" | xargs)"
+          if [ -z "$(echo "${PREFIX}" | grep -P '^[0-9a-zA-Z]+$')" ]; then
+            echo "::error input=prefix,value=${PREFIX}::Invalid prefix value"
+            exit 1
+          fi
+          echo "prefix=${PREFIX}" >> $GITHUB_OUTPUT
 
       - name: Validate channel value
         id: validate_channel
@@ -151,7 +151,7 @@ jobs:
           echo "matrix=${JSON}" >> $GITHUB_OUTPUT
 
   download:
-    if: ${{ !inputs.validate_only }}
+    if: ${{ contains(inputs.scope, github.job) }}
     needs: validate
     runs-on: ubuntu-24.04
     strategy:
@@ -338,8 +338,8 @@ jobs:
             */*.tar.gz
             */*.zip
 
-  obtain_internals:
-    if: ${{ !inputs.validate_only && !inputs.download_only }}
+  process:
+    if: ${{ contains(inputs.scope, github.job) }}
     needs:
       - validate
       - download
