@@ -496,7 +496,7 @@ jobs:
         id: remove_files
         run: |
           readarray -d '' -t FILES < <(
-            find */* -type f -print0 2>/dev/null || true
+            find */* -maxdepth 0 -type f -print0 2>/dev/null || true
           )
           for FILE in "${FILES[@]}"; do
             DIR="$(dirname "${FILE}")/_$(basename "${FILE}")"
@@ -504,6 +504,8 @@ jobs:
               rm -rf "${DIR}"
             fi
           done
+          rm -f 'hashes.txt'
+          rm -f 'replacements.txt'
 
       - name: Unpack NETINSTALL*.TAR.GZ files (1/2)
         run: |
