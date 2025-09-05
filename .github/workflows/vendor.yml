@@ -953,7 +953,7 @@ jobs:
       - name: Remove the release file
         if: ${{ inputs.release }}
         run: |
-          rm -f "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.tar.gz"
+          sudo rm -f "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.tar.gz"
 
       - name: Upload an artifact
         if: ${{ !inputs.release }}
