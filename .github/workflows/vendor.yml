@@ -39,6 +39,11 @@ on:
           - 'validate'
           - 'download'
           - 'process'
+      release:
+        description: "Release files (otherwise upload an artifact)"
+        required: false
+        default: true
+        type: boolean
       reuse_commits:
         description: "Reuse committed files"
         required: false
@@ -910,6 +915,30 @@ jobs:
               fi
             fi
           done
+
+      - name: Create a release file
+        if: ${{ inputs.release }}
+        run: |
+          zip -r "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.zip" ./ -x ".*"
+
+      - name: Upload the release file
+        if: ${{ inputs.release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.prefix }}"
+          body_path: "changelog.txt"
+          make_latest:  ${{ matrix.channel == 'stable' }}
+          prerelease:  ${{ matrix.channel == 'testing' }}
+          files: |
+            /tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.zip
+
+      - name: Upload an artifact
+        if: ${{ !inputs.release }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: routeros-internals-${{ steps.generate_ref.outputs.ref }}
+          path: |
+            .
 
       - name: Remove block and character devices before commit
         run: |
