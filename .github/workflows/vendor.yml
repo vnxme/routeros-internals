@@ -176,14 +176,14 @@ jobs:
         run: |
           {
             echo "### Outputs"
-            echo "- host: `${{ steps.validate_host.outputs.host }}`"
-            echo "- prefix: `${{ steps.validate_prefix.outputs.prefix }}`"
-            echo "- channel: `${{ steps.validate_channel.outputs.channel }}`"
-            echo "- version: `${{ steps.validate_version.outputs.version }}`"
-            echo "- matrix: `${{ steps.generate_matrix.outputs.matrix }}`"
-            echo "- scope: `${{ steps.validate_scope.outputs.scope }}`"
-            echo "- scope_has_download: `${{ steps.validate_scope.outputs.download }}`"
-            echo "- scope_has_process: `${{ steps.validate_scope.outputs.process }}`"
+            echo "- host: \`${{ steps.validate_host.outputs.host }}\`"
+            echo "- prefix: \`${{ steps.validate_prefix.outputs.prefix }}\`"
+            echo "- channel: \`${{ steps.validate_channel.outputs.channel }}\`"
+            echo "- version: \`${{ steps.validate_version.outputs.version }}\`"
+            echo "- matrix: \`${{ steps.generate_matrix.outputs.matrix }}\`"
+            echo "- scope: \`${{ steps.validate_scope.outputs.scope }}\`"
+            echo "- scope_has_download: \`${{ steps.validate_scope.outputs.download }}\`"
+            echo "- scope_has_process: \`${{ steps.validate_scope.outputs.process }}\`"
           } >> $GITHUB_STEP_SUMMARY
 
   download:
