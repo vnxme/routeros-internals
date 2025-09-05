@@ -175,19 +175,19 @@ jobs:
         id: compose_summary
         run: |
           {
-            echo "Outputs:"
-            echo -e "\thost: ${{ steps.validate_host.outputs.host }}"
-            echo -e "\tprefix: ${{ steps.validate_prefix.outputs.prefix }}"
-            echo -e "\tchannel: ${{ steps.validate_channel.outputs.channel }}"
-            echo -e "\tversion: ${{ steps.validate_version.outputs.version }}"
-            echo -e "\tmatrix: ${{ steps.generate_matrix.outputs.matrix }}"
-            echo -e "\tscope: ${{ steps.validate_scope.outputs.scope }}"
-            echo -e "\tscope_has_download: ${{ steps.validate_scope.outputs.download }}"
-            echo -e "\tscope_has_process: ${{ steps.validate_scope.outputs.process }}"
+            echo "### Outputs"
+            echo "- host: `${{ steps.validate_host.outputs.host }}`"
+            echo "- prefix: `${{ steps.validate_prefix.outputs.prefix }}`"
+            echo "- channel: `${{ steps.validate_channel.outputs.channel }}`"
+            echo "- version: `${{ steps.validate_version.outputs.version }}`"
+            echo "- matrix: `${{ steps.generate_matrix.outputs.matrix }}`"
+            echo "- scope: `${{ steps.validate_scope.outputs.scope }}`"
+            echo "- scope_has_download: `${{ steps.validate_scope.outputs.download }}`"
+            echo "- scope_has_process: `${{ steps.validate_scope.outputs.process }}`"
           } >> $GITHUB_STEP_SUMMARY
 
   download:
-    if: needs.validate.outputs.scope_has_download
+    if: needs.validate.outputs.scope_has_download == 'true'
     needs: validate
     runs-on: ubuntu-24.04
     strategy:
@@ -375,7 +375,7 @@ jobs:
             */*.zip
 
   process:
-    if: needs.validate.outputs.scope_has_process
+    if: needs.validate.outputs.scope_has_process == 'true'
     needs:
       - validate
       - download
