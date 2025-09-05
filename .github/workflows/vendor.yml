@@ -1,5 +1,5 @@
 name: "Vendor RouterOS 7.x Internals Workflow"
-run-name: "RouterOS 7.x: [${{ inputs.prefix }}]-[${{ inputs.channel }}]-[${{ inputs.version }}]"
+run-name: "RouterOS 7.x: [${{ inputs.host }}]-[${{ inputs.prefix }}]-[${{ inputs.channel }}]-[${{ inputs.version }}]"
 on:
 #  push:
 #    branches:
@@ -26,9 +26,9 @@ on:
           - 'testing'
           - 'stable,testing'
       version:
-        description: "Version (e.g., 7.19.4; empty for latest)"
+        description: "Version (e.g., 7.19.4; empty means latest)"
         required: false
-        default: ''
+        default: 'latest'
         type: string
       scope:
         description: 'Scope of work (list of jobs)'
@@ -109,7 +109,7 @@ jobs:
         run: |
           VERSION="$(echo "${{ inputs.version }}" | xargs)"
           CHANNEL="$(echo "${{ steps.validate_channel.outputs.channel }}" | xargs)"
-          if [ -n "${VERSION}" ]; then
+          if [ -n "${VERSION}" -a "${VERSION}" != "latest" ]; then
             if [ -n "$(echo "${CHANNEL}" | grep ',')" ]; then
               echo "::error input=version,value=${VERSION}::Same version value can't apply to multiple channels"
               exit 1
@@ -136,15 +136,15 @@ jobs:
           VERSION="${{ steps.validate_version.outputs.version }}"
           JSON=""
           for CHANNEL in ${CHANNELS[@]}; do
-            if [ -z "${VERSION}" ]; then
+            if [ -z "${VERSION}" -o "${VERSION}" == "latest" ]; then
               FILE="version.txt"
               URL="https://${{ steps.validate_host.outputs.host }}/routeros/NEWESTa7.${CHANNEL}"
-              wget -nv -O ${FILE} ${CHANGELOG_URL} || rm -f ${FILE}
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
               if [ ! -f "${FILE}" ]; then
                 echo "::error::Failed to get the latest version for the ${CHANNEL} channel"
                 exit 1
               fi
-              VERSION="$(cat ${FILE} | cut -d ' ' -f1)"
+              VERSION="$(cat ${FILE} | cut -d ' ' -f1)" && rm -f "${FILE}"
             fi
             [ ${#JSON} -ne 0 ] && JSON="${JSON},"
             JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"version\":\"${VERSION}\"}"
