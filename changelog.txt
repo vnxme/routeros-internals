@@ -1,0 +1,22 @@
+What's new in 7.18.1 (2025-Feb-28 13:31):
+
+*) bridge - improved stability in case of configuration error (introduced in v7.15);
+*) bridge - show warning instead of causing error when using multicast MAC as admin-mac (introduced in v7.17);
+*) cloud - fixed issues when BTH is toggled fast between enable/disable;
+*) cloud - improved "BTH Files" web page design;
+*) console - fixed issue with files when using scripts (introduced in v7.18);
+*) console - improved file add/remove process stability;
+*) dhcpv6-relay - clear saved routes on DHCP release;
+*) dhcpv6-relay - show client address;
+*) disk - add "sector-size" property in print detail;
+*) disk - improved stability when formatting crypted partitions;
+*) l3hw - remove VLAN tag before VXLAN encapsulation (fixes pvid behavior for bridged VXLAN);
+*) lte - fixed modem recovery after firmware upgrade for R11e-LTE modem;
+*) lte - fixed Router Advertisement processing issue for AT modems when an APN with "ip-type=ipv6" was configured;
+*) ovpn - disable hardware accelerator for GCM on MMIPS CPUs (introduced in v7.18);
+*) poe-out - fixed health showing 0V voltage when using PoE-in for RB960;
+*) poe-out - upgraded firmware for 802.3at/bt PSE controlled boards (the update will cause brief power interruption to PoE-out interfaces);
+*) route - show BGP session name instead of cache-id;
+*) switch - improved stability when enabling IGMP snooping with VXLAN (introduced in v7.18);
+*) system - improved internal "flash/" prefix handling for different file path related settings;
+*) winbox - fixed missing SMB client on non-ROSE devices;
