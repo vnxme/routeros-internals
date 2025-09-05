@@ -380,8 +380,8 @@ jobs:
           if [ -z "$(git ls-remote --heads origin ${BRANCH})" ]; then
             git switch --orphan ${BRANCH}
           else
-            git fetch origin ${BRANCH}
-            git update-ref refs/heads/${BRANCH} origin/${BRANCH}
+            git fetch --depth=1 origin ${BRANCH}
+            git checkout ${BRANCH}
             git rm -r .
           fi
 
