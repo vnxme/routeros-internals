@@ -918,7 +918,7 @@ jobs:
       - name: Create a release file
         if: ${{ inputs.release }}
         run: |
-          zip -ry "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.zip" ./ -x ".*"
+          sudo zip -ry "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.zip" ./ -x ".*"
 
       - name: Upload the release file
         if: ${{ inputs.release }}
