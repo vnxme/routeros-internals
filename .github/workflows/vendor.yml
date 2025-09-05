@@ -367,7 +367,6 @@ jobs:
           {
             echo 'message<<EOF'
             echo -e "Automatic changes by ${{ github.run_id }}:${{ github.run_attempt }}:download\n\n"
-            echo -e "Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}"
             echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
             echo EOF
           } >> $GITHUB_OUTPUT
@@ -919,7 +918,7 @@ jobs:
       - name: Create a release file
         if: ${{ inputs.release }}
         run: |
-          zip -r "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.zip" ./ -x ".*"
+          zip -ry "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.zip" ./ -x ".*"
 
       - name: Upload the release file
         if: ${{ inputs.release }}
@@ -973,7 +972,6 @@ jobs:
           {
             echo 'message<<EOF'
             echo -e "Automatic changes by ${{ github.run_id }}:${{ github.run_attempt }}:process\n\n"
-            echo -e "Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}"
             echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
             echo EOF
           } >> $GITHUB_OUTPUT
