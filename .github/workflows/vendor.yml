@@ -40,12 +40,12 @@ on:
           - 'download'
           - 'process'
       release:
-        description: "Release files (otherwise upload an artifact)"
+        description: "Release files (or upload an artifact)"
         required: false
         default: true
         type: boolean
       reuse_commits:
-        description: "Reuse committed files"
+        description: "Reuse previously released files"
         required: false
         default: true
         type: boolean
