@@ -907,8 +907,8 @@ jobs:
         run: |
           {
             echo 'message<<EOF'
-            echo -e "Apply automatic changes\n\n"
-            echo -e "Created by https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo -e "Apply automatic changes ${{ github.run_id }}:${{ github.run_attempt }}\n\n"
+            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
             echo EOF
           } >> $GITHUB_OUTPUT
 
