@@ -918,7 +918,7 @@ jobs:
       - name: Create a release file
         if: ${{ inputs.release }}
         run: |
-          sudo zip -ry "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.zip" ./ -x ".*"
+          sudo tar -czf "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.tar.gz"  --exclude='.*' ./
 
       - name: Upload the release file
         if: ${{ inputs.release }}
@@ -929,7 +929,7 @@ jobs:
           make_latest:  ${{ matrix.channel == 'stable' }}
           prerelease:  ${{ matrix.channel == 'testing' }}
           files: |
-            /tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.zip
+            /tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.tar.gz
 
       - name: Upload an artifact
         if: ${{ !inputs.release }}
