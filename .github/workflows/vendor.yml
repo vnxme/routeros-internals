@@ -196,35 +196,51 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
     steps:
-      - name: Generate a cache key
-        id: generate_key
+      - name: Checkout the repository
+        id: checkout_repository
+        uses: actions/checkout@v5
+
+      - name: Generate a branch ref
+        id: generate_ref
         run: |
-          KEY="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
-          echo "key=${KEY}" >> $GITHUB_OUTPUT
+          REF="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
+          echo "ref=${REF}" >> $GITHUB_OUTPUT
+
+      - name: Prepare a branch
+        id: prepare_branch
+        run: |
+          BRANCH="${{ steps.generate_ref.outputs.ref }}"
+          if [ -z "$(git ls-remote --heads origin ${BRANCH})" -o "${{ inputs.override_cache }}" == "true" ]; then
+            git switch --orphan ${BRANCH}
+            echo "new=true" >> $GITHUB_OUTPUT
+          else
+            echo "new=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Generate download urls
         id: generate_urls
+        if: steps.prepare_branch.outputs.new == 'true'
         run: |
-          BRANCH="${{ steps.generate_key.outputs.key }}"
+          BRANCH="${{ steps.generate_ref.outputs.ref }}"
           echo "github=https://github.com/${{ github.repository }}/raw/refs/heads/${BRANCH}" >> $GITHUB_OUTPUT
           echo "vendor=https://${{ needs.validate.outputs.host }}/routeros/${{ matrix.version }}" >> $GITHUB_OUTPUT
 
-      - name: Restore files from cache
-        id: restore_files
-        uses: actions/cache/restore@v4
-        with:
-          key: ${{ steps.generate_key.outputs.key }}
-          lookup-only: true
-          path: |
-            changelog.txt
-            */*.iso
-            */*.npk
-            */*.tar.gz
-            */*.zip
+#      - name: Restore files from cache
+#        id: restore_files
+#        uses: actions/cache/restore@v4
+#        with:
+#          key: ${{ steps.generate_ref.outputs.ref }}
+#          lookup-only: true
+#          path: |
+#            changelog.txt
+#            */*.iso
+#            */*.npk
+#            */*.tar.gz
+#            */*.zip
 
       - name: Download a changelog
         id: download_changelog
-        if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
+        if: steps.prepare_branch.outputs.new == 'true'
         run: |
           FILE="changelog.txt"
           if [ "${{ inputs.reuse_commits }}" == "true" ]; then
@@ -238,7 +254,7 @@ jobs:
 
       - name: Download packages
         id: download_packages
-        if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
+        if: steps.prepare_branch.outputs.new == 'true'
         run: |
           ARCHS=(arm arm64 mipsbe mmips ppc smips tile x86)
           PACKAGES=(routeros)
@@ -269,7 +285,7 @@ jobs:
 
       - name: Download images
         id: download_images
-        if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
+        if: steps.prepare_branch.outputs.new == 'true'
         run: |
           ARCHS=(arm64 x86)
           VERSION="${{ matrix.version }}"
@@ -312,7 +328,7 @@ jobs:
 
       - name: Download binaries
         id: download_binaries
-        if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
+        if: steps.prepare_branch.outputs.new == 'true'
         run: |
           ARCHS=(x86)
           VERSION="${{ matrix.version }}"
@@ -351,30 +367,48 @@ jobs:
             fi
           done
 
-      - name: Delete files from cache
-        id: delete_files
-        if: inputs.override_cache
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # Note: actions:write permission is required
-          gh api --method DELETE \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/actions/caches?key=${{ steps.generate_key.outputs.key }}&ref=${{ github.ref }}
+#      - name: Delete files from cache
+#        id: delete_files
+#        if: inputs.override_cache
+#        env:
+#          GH_TOKEN: ${{ github.token }}
+#        run: |
+#          # Note: actions:write permission is required
+#          gh api --method DELETE \
+#            -H "Accept: application/vnd.github+json" \
+#            -H "X-GitHub-Api-Version: 2022-11-28" \
+#            /repos/${{ github.repository }}/actions/caches?key=${{ steps.generate_ref.outputs.ref }}&ref=${{ github.ref }}
 
-      - name: Save files to cache
-        id: save_files
-        if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+#      - name: Save files to cache
+#        id: save_files
+#        if: inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true'
+#        uses: actions/cache/save@v4
+#        with:
+#          key: ${{ steps.generate_ref.outputs.ref }}
+#          path: |
+#            changelog.txt
+#            */*.iso
+#            */*.npk
+#            */*.tar.gz
+#            */*.zip
+
+      - name: Compose a commit message
+        id: compose_message
+        run: |
+          {
+            echo 'message<<EOF'
+            echo -e "Download ${{ github.run_id }}:${{ github.run_attempt }}\n\n"
+            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Add files, commit and push
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          key: ${{ steps.generate_key.outputs.key }}
-          path: |
-            changelog.txt
-            */*.iso
-            */*.npk
-            */*.tar.gz
-            */*.zip
+          branch: ${{ steps.generate_ref.outputs.ref }}
+          commit_message: ${{ steps.compose_message.outputs.message }}
+          create_branch: true
+          push_options: '--force'
 
   process:
     if: needs.validate.outputs.scope_has_process == 'true'
@@ -394,8 +428,8 @@ jobs:
           packages: binutils-common binwalk bzip2 device-tree-compiler genisoimage gzip lz4 lzma lzop qemu-utils rsync xz-utils zip zstd
           version: 1.0
 
-      - name: Checkout the repository
-        id: checkout_repository
+      - name: Checkout the main branch
+        id: checkout_main
         uses: actions/checkout@v5
 
       - name: Copy executable files
@@ -406,35 +440,65 @@ jobs:
           cp ./*.sh /tmp/
           chmod +x /tmp/*.sh
 
-      - name: Generate a cache key
-        id: generate_key
+      - name: Generate a branch ref
+        id: generate_ref
         run: |
-          KEY="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
-          echo "key=${KEY}" >> $GITHUB_OUTPUT
+          REF="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
+          echo "ref=${REF}" >> $GITHUB_OUTPUT
 
-      - name: Prepare a branch
-        id: prepare_branch
-        run: |
-          BRANCH="${{ steps.generate_key.outputs.key }}"
-          if [ -z "$(git ls-remote --heads origin ${BRANCH})" ]; then
-            git switch --orphan ${BRANCH}
-          else
-            git fetch --depth=1 origin ${BRANCH}
-            git checkout ${BRANCH}
-            git rm -r .
-          fi
-
-      - name: Restore files from cache
-        id: restore_files
-        uses: actions/cache/restore@v4
+      - name: Checkout the current branch
+        id: checkout_branch
+        uses: actions/checkout@v5
         with:
-          key: ${{ steps.generate_key.outputs.key }}
-          path: |
-            changelog.txt
-            */*.iso
-            */*.npk
-            */*.tar.gz
-            */*.zip
+          ref: ${{ steps.generate_ref.outputs.ref }}
+
+#      - name: Prepare a branch
+#        id: prepare_branch
+#        run: |
+#          BRANCH="${{ steps.generate_ref.outputs.ref }}"
+#          if [ -z "$(git ls-remote --heads origin ${BRANCH})" ]; then
+#            echo "::error::Nothing to process because the branch can't be found"
+#            exit 1
+#          fi
+#          git fetch --depth=1 origin ${BRANCH}
+#
+#          COMMITS="$(git log ${BRANCH} --oneline)"
+#
+#          FIRST="$(echo "${COMMITS}" | tail -1 | cut -d ' ' -f1)"
+#          LAST="$(echo "${COMMITS}" | head -1 | cut -d ' ' -f1)"
+#          if [ -z "${FIRST}" -o -z "${LAST}" ]; then
+#            echo "::error::Nothing to process because the first and the last commits can't be identified"
+#            exit 1
+#          fi
+#          git checkout ${BRANCH}
+#
+#          echo "first=${FIRST}" >> $GITHUB_OUTPUT
+#          echo "last=${LAST}" >> $GITHUB_OUTPUT
+
+#      - name: Restore files from cache
+#        id: restore_files
+#        uses: actions/cache/restore@v4
+#        with:
+#          key: ${{ steps.generate_ref.outputs.ref }}
+#          path: |
+#            changelog.txt
+#            */*.iso
+#            */*.npk
+#            */*.tar.gz
+#            */*.zip
+
+      - name: Remove unpacked files if any
+        id: remove_files
+        run: |
+          readarray -d '' -t FILES < <(
+            find */* -type f -print0 2>/dev/null || true
+          )
+          for FILE in "${FILES[@]}"; do
+            DIR="$(dirname ${FILE})/_$(basename ${FILE})"
+            if [ -d "${DIR}" ]; then
+              rm -rf "${DIR}"
+            fi
+          done
 
       - name: Unpack NETINSTALL*.TAR.GZ files (1/2)
         run: |
@@ -945,7 +1009,7 @@ jobs:
         run: |
           {
             echo 'message<<EOF'
-            echo -e "Apply automatic changes ${{ github.run_id }}:${{ github.run_attempt }}\n\n"
+            echo -e "Process ${{ github.run_id }}:${{ github.run_attempt }}\n\n"
             echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
             echo EOF
           } >> $GITHUB_OUTPUT
@@ -953,7 +1017,7 @@ jobs:
       - name: Add files, commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          branch: ${{ steps.generate_key.outputs.key }}
+          branch: ${{ steps.generate_ref.outputs.ref }}
           commit_message: ${{ steps.compose_message.outputs.message }}
           create_branch: true
           push_options: '--force'
