@@ -1,4 +1,5 @@
-name: Vendor RouterOS 7.x Internals Workflow
+name: "Vendor RouterOS 7.x Internals Workflow"
+run-name: "RouterOS 7.x: [${{ inputs.prefix }}]-[${{ inputs.channel }}]-[${{ inputs.version }}]"
 on:
 #  push:
 #    branches:
