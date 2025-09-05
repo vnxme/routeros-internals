@@ -396,6 +396,7 @@ jobs:
 
       - name: Compose a commit message
         id: compose_message
+        if: steps.prepare_branch.outputs.new == 'true'
         run: |
           {
             echo 'message<<EOF'
@@ -405,6 +406,8 @@ jobs:
           } >> $GITHUB_OUTPUT
 
       - name: Add files, commit and push
+        id: push_files
+        if: steps.prepare_branch.outputs.new == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           branch: ${{ steps.generate_ref.outputs.ref }}
@@ -496,7 +499,7 @@ jobs:
             find */* -type f -print0 2>/dev/null || true
           )
           for FILE in "${FILES[@]}"; do
-            DIR="$(dirname ${FILE})/_$(basename ${FILE})"
+            DIR="$(dirname "${FILE}")/_$(basename "${FILE}")"
             if [ -d "${DIR}" ]; then
               rm -rf "${DIR}"
             fi
