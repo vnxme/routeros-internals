@@ -217,7 +217,7 @@ jobs:
         run: |
           BRANCH="${{ steps.generate_ref.outputs.ref }}"
           if [ -z "$(git ls-remote --heads origin ${BRANCH})" -o "${{ inputs.reset_commits }}" == "true" ]; then
-#            git switch --orphan ${BRANCH}
+            #git switch --orphan ${BRANCH}
             echo "new=true" >> $GITHUB_OUTPUT
           else
             echo "new=false" >> $GITHUB_OUTPUT
