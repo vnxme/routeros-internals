@@ -49,6 +49,11 @@ on:
         required: false
         default: true
         type: boolean
+      override_cache:
+        description: "Override download cache"
+        required: false
+        default: false
+        type: boolean
       reset_commits:
         description: "Reset branch (delete all commits)"
         required: false
@@ -56,6 +61,7 @@ on:
         type: boolean
 
 permissions:
+  actions: write
   contents: write
 
 env:
@@ -195,198 +201,19 @@ jobs:
           } >> $GITHUB_STEP_SUMMARY
 
   download:
-    if: needs.validate.outputs.scope_has_download == 'true'
     needs: validate
-    runs-on: ubuntu-24.04
+    if: needs.validate.outputs.scope_has_download == 'true'
     strategy:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
-    steps:
-#      - name: Checkout the repository
-#        id: checkout_repository
-#        uses: actions/checkout@v5
-
-      - name: Generate a branch ref
-        id: generate_ref
-        run: |
-          REF="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
-          echo "ref=${REF}" >> $GITHUB_OUTPUT
-
-      - name: Prepare a branch
-        id: prepare_branch
-        run: |
-          BRANCH="${{ steps.generate_ref.outputs.ref }}"
-          if [ -z "$(git ls-remote --heads origin ${BRANCH})" -o "${{ inputs.reset_commits }}" == "true" ]; then
-            #git switch --orphan ${BRANCH}
-            echo "new=true" >> $GITHUB_OUTPUT
-          else
-            echo "new=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Generate download urls
-        id: generate_urls
-        if: steps.prepare_branch.outputs.new == 'true'
-        run: |
-          BRANCH="${{ steps.generate_ref.outputs.ref }}"
-          echo "github=https://github.com/${{ github.repository }}/raw/refs/heads/${BRANCH}" >> $GITHUB_OUTPUT
-          echo "vendor=https://${{ needs.validate.outputs.host }}/routeros/${{ matrix.version }}" >> $GITHUB_OUTPUT
-
-      - name: Download a changelog
-        id: download_changelog
-        if: steps.prepare_branch.outputs.new == 'true'
-        run: |
-          FILE="changelog.txt"
-          if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-            URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-            wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-          fi
-          if [ ! -f "${FILE}" ]; then
-            URL="${{ steps.generate_urls.outputs.vendor }}/CHANGELOG"
-            wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-          fi
-
-      - name: Download packages
-        id: download_packages
-        if: steps.prepare_branch.outputs.new == 'true'
-        run: |
-          ARCHS=(arm arm64 mipsbe mmips ppc smips tile x86)
-          PACKAGES=(routeros)
-          VERSION="${{ matrix.version }}"
-          for ARCH in ${ARCHS[@]}; do
-            mkdir -p ${ARCH}
-            [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
-            
-            for PACKAGE in ${PACKAGES[@]}; do
-              FILE="${ARCH}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
-              if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-                URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-              fi
-              if [ ! -f "${FILE}" ]; then
-                URL="${{ steps.generate_urls.outputs.vendor }}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
-                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-              fi
-            done
-            
-            FILE="${ARCH}/all_packages-${VERSION}${SUFFIX}.zip"
-            URL="${{ steps.generate_urls.outputs.vendor }}/all_packages-${ARCH}-${VERSION}.zip"
-            wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            if [ -f "${FILE}" ]; then
-              unzip -o -d "${ARCH}/" "${FILE}" && rm -f ${FILE}
-            fi
-          done
-
-      - name: Download images
-        id: download_images
-        if: steps.prepare_branch.outputs.new == 'true'
-        run: |
-          ARCHS=(arm64 x86)
-          VERSION="${{ matrix.version }}"
-          for ARCH in ${ARCHS[@]}; do
-            mkdir -p ${ARCH}
-            [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
-            
-            FILE="${ARCH}/chr-${VERSION}${SUFFIX}.img.zip"
-            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            fi
-            if [ ! -f "${FILE}" ]; then
-              URL="${{ steps.generate_urls.outputs.vendor }}/chr-${VERSION}${SUFFIX}.img.zip"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            fi
-            
-            FILE="${ARCH}/mikrotik-${VERSION}${SUFFIX}.iso"
-            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            fi
-            if [ ! -f "${FILE}" ]; then
-              URL="${{ steps.generate_urls.outputs.vendor }}/mikrotik-${VERSION}${SUFFIX}.iso"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            fi
-            
-            if [ "${ARCH}" == 'x86' ]; then
-              FILE="${ARCH}/install-image-${VERSION}${SUFFIX}.img.zip"
-              if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-                URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-              fi
-              if [ ! -f "${FILE}" ]; then
-                URL="${{ steps.generate_urls.outputs.vendor }}/install-image-${VERSION}${SUFFIX}.zip"
-                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-              fi
-            fi
-          done
-
-      - name: Download binaries
-        id: download_binaries
-        if: steps.prepare_branch.outputs.new == 'true'
-        run: |
-          ARCHS=(x86)
-          VERSION="${{ matrix.version }}"
-          for ARCH in ${ARCHS[@]}; do
-            mkdir -p ${ARCH}
-            [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
-            
-            FILE="${ARCH}/netinstall-cli-${VERSION}${SUFFIX}.tar.gz"
-            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            fi
-            if [ ! -f "${FILE}" ]; then
-              URL="${{ steps.generate_urls.outputs.vendor }}/netinstall-${VERSION}${SUFFIX}.tar.gz"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            fi
-            
-            FILE="${ARCH}/netinstall-w32-${VERSION}${SUFFIX}.exe.zip"
-            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            fi
-            if [ ! -f "${FILE}" ]; then
-              URL="${{ steps.generate_urls.outputs.vendor }}/netinstall-${VERSION}${SUFFIX}.zip"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            fi
-            
-            FILE="${ARCH}/netinstall-w64-${VERSION}${SUFFIX}.exe.zip"
-            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            fi
-            if [ ! -f "${FILE}" ]; then
-              URL="${{ steps.generate_urls.outputs.vendor }}/netinstall64-${VERSION}${SUFFIX}.zip"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            fi
-          done
-
-      - name: Upload an artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.generate_ref.outputs.ref }}
-          path: |
-            .
-
-#      - name: Compose a commit message
-#        id: compose_message
-#        if: steps.prepare_branch.outputs.new == 'true'
-#        run: |
-#          {
-#            echo 'message<<EOF'
-#            echo -e "Automatic changes by ${{ github.run_id }}:${{ github.run_attempt }}:download\n\n"
-#            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
-#            echo EOF
-#          } >> $GITHUB_OUTPUT
-#
-#      - name: Add files, commit and push
-#        id: push_files
-#        if: steps.prepare_branch.outputs.new == 'true'
-#        uses: stefanzweifel/git-auto-commit-action@v5
-#        with:
-#          branch: ${{ steps.generate_ref.outputs.ref }}
-#          commit_message: ${{ steps.compose_message.outputs.message }}
-#          create_branch: true
-#          push_options: '--force'
+    uses: ./.github/workflows/download.yml
+    with:
+      channel: ${{ matrix.channel }}
+      host: ${{ needs.validate.outputs.host }}
+      override: ${{ inputs.override_cache }}
+      prefix: ${{ needs.validate.outputs.prefix }}
+      reuse: $${{ inputs.reuse_commits }}
+      version: ${{ matrix.version }}
 
   process:
     if: needs.validate.outputs.scope_has_process == 'true'
@@ -424,22 +251,40 @@ jobs:
           REF="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
           echo "ref=${REF}" >> $GITHUB_OUTPUT
 
+      - name: Prepare the branch
+        id: prepare_branch
+        run: |
+          BRANCH="${{ steps.generate_ref.outputs.ref }}"
+          git switch --orphan ${BRANCH}
+
 #      - name: Checkout the current branch
 #        id: checkout_branch
 #        uses: actions/checkout@v5
 #        with:
 #          ref: ${{ steps.generate_ref.outputs.ref }}
 
-      - name: Download the artifact
-        uses: actions/download-artifact@v5
-        with:
-          name: ${{ steps.generate_ref.outputs.ref }}
+#      - name: Download the artifact
+#        uses: actions/download-artifact@v5
+#        with:
+#          name: ${{ steps.generate_ref.outputs.ref }}
+#
+#      - name: Delete the artifact
+#        uses: geekyeggo/delete-artifact@v5
+#        with:
+#          name: ${{ steps.generate_ref.outputs.ref }}
+#          failOnError: false
 
-      - name: Delete the artifact
-        uses: geekyeggo/delete-artifact@v5
+      - name: Restore files from cache
+        id: restore_files
+        uses: actions/cache/restore@v4
         with:
-          name: ${{ steps.generate_ref.outputs.ref }}
-          failOnError: false
+          key: ${{ steps.generate_ref.outputs.ref }}
+          path: |
+            *.txt
+            */*.iso
+            */*.npk
+            */*.tar.gz
+            */*.zip
 
       - name: Remove unpacked files if any
         id: remove_files

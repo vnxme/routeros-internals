@@ -1,0 +1,213 @@
+name: RouterOS 7.x Download Reusable Workflow
+
+on:
+  workflow_call:
+    inputs:
+      channel:
+        required: true
+        type: string
+      host:
+        required: true
+        type: string
+      override:
+        default: false
+        required: false
+        type: boolean
+      prefix:
+        required: true
+        type: string
+      reuse:
+        default: true
+        required: false
+        type: boolean
+      version:
+        required: true
+        type: string
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  download:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Generate a branch ref
+        id: generate_ref
+        run: |
+          REF="${{ inputs.prefix }}-${{ inputs.channel }}-${{ inputs.version }}"
+          echo "ref=${REF}" >> $GITHUB_OUTPUT
+
+      - name: Look for files in cache
+        id: restore_files
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ steps.generate_ref.outputs.ref }}
+          lookup-only: true
+          path: |
+            *.txt
+            */*.iso
+            */*.npk
+            */*.tar.gz
+            */*.zip
+
+      - name: Generate download URLs
+        id: generate_urls
+        if: ${{ inputs.override || steps.restore_files.outputs.cache-hit != 'true' }}
+        run: |
+          BRANCH="${{ steps.generate_ref.outputs.ref }}"
+          echo "github=https://github.com/${{ github.repository }}/raw/refs/heads/${BRANCH}" >> $GITHUB_OUTPUT
+          echo "vendor=https://${{ inputs.host }}/routeros/${{ inputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: Download a changelog
+        id: download_changelog
+        if: ${{ inputs.override || steps.restore_files.outputs.cache-hit != 'true' }}
+        run: |
+          FILE="changelog.txt"
+          if [ "${{ inputs.reuse }}" == "true" ]; then
+            URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+            wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+          fi
+          if [ ! -f "${FILE}" ]; then
+            URL="${{ steps.generate_urls.outputs.vendor }}/CHANGELOG"
+            wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+          fi
+
+      - name: Download packages
+        id: download_packages
+        if: ${{ inputs.override || steps.restore_files.outputs.cache-hit != 'true' }}
+        run: |
+          ARCHS=(arm arm64 mipsbe mmips ppc smips tile x86)
+          PACKAGES=(routeros)
+          VERSION="${{ inputs.version }}"
+          for ARCH in ${ARCHS[@]}; do
+            mkdir -p ${ARCH}
+            [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
+            
+            for PACKAGE in ${PACKAGES[@]}; do
+              FILE="${ARCH}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
+              if [ "${{ inputs.reuse }}" == "true" ]; then
+                URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              fi
+              if [ ! -f "${FILE}" ]; then
+                URL="${{ steps.generate_urls.outputs.vendor }}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
+                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              fi
+            done
+            
+            FILE="${ARCH}/all_packages-${VERSION}${SUFFIX}.zip"
+            URL="${{ steps.generate_urls.outputs.vendor }}/all_packages-${ARCH}-${VERSION}.zip"
+            wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            if [ -f "${FILE}" ]; then
+              unzip -o -d "${ARCH}/" "${FILE}" && rm -f ${FILE}
+            fi
+          done
+
+      - name: Download images
+        id: download_images
+        if: ${{ inputs.override || steps.restore_files.outputs.cache-hit != 'true' }}
+        run: |
+          ARCHS=(arm64 x86)
+          VERSION="${{ inputs.version }}"
+          for ARCH in ${ARCHS[@]}; do
+            mkdir -p ${ARCH}
+            [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
+            
+            FILE="${ARCH}/chr-${VERSION}${SUFFIX}.img.zip"
+            if [ "${{ inputs.reuse }}" == "true" ]; then
+              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            if [ ! -f "${FILE}" ]; then
+              URL="${{ steps.generate_urls.outputs.vendor }}/chr-${VERSION}${SUFFIX}.img.zip"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            
+            FILE="${ARCH}/mikrotik-${VERSION}${SUFFIX}.iso"
+            if [ "${{ inputs.reuse }}" == "true" ]; then
+              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            if [ ! -f "${FILE}" ]; then
+              URL="${{ steps.generate_urls.outputs.vendor }}/mikrotik-${VERSION}${SUFFIX}.iso"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            
+            if [ "${ARCH}" == 'x86' ]; then
+              FILE="${ARCH}/install-image-${VERSION}${SUFFIX}.img.zip"
+              if [ "${{ inputs.reuse }}" == "true" ]; then
+                URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              fi
+              if [ ! -f "${FILE}" ]; then
+                URL="${{ steps.generate_urls.outputs.vendor }}/install-image-${VERSION}${SUFFIX}.zip"
+                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              fi
+            fi
+          done
+
+      - name: Download binaries
+        id: download_binaries
+        if: ${{ inputs.override || steps.restore_files.outputs.cache-hit != 'true' }}
+        run: |
+          ARCHS=(x86)
+          VERSION="${{ inputs.version }}"
+          for ARCH in ${ARCHS[@]}; do
+            mkdir -p ${ARCH}
+            [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
+            
+            FILE="${ARCH}/netinstall-cli-${VERSION}${SUFFIX}.tar.gz"
+            if [ "${{ inputs.reuse }}" == "true" ]; then
+              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            if [ ! -f "${FILE}" ]; then
+              URL="${{ steps.generate_urls.outputs.vendor }}/netinstall-${VERSION}${SUFFIX}.tar.gz"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            
+            FILE="${ARCH}/netinstall-w32-${VERSION}${SUFFIX}.exe.zip"
+            if [ "${{ inputs.reuse }}" == "true" ]; then
+              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            if [ ! -f "${FILE}" ]; then
+              URL="${{ steps.generate_urls.outputs.vendor }}/netinstall-${VERSION}${SUFFIX}.zip"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            
+            FILE="${ARCH}/netinstall-w64-${VERSION}${SUFFIX}.exe.zip"
+            if [ "${{ inputs.reuse }}" == "true" ]; then
+              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+            if [ ! -f "${FILE}" ]; then
+              URL="${{ steps.generate_urls.outputs.vendor }}/netinstall64-${VERSION}${SUFFIX}.zip"
+              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            fi
+          done
+
+      - name: Delete files from cache
+        id: delete_files
+        if: ${{ inputs.override }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method DELETE \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/${{ github.repository }}/actions/caches?key=${{ steps.generate_ref.outputs.ref }}&ref=${{ github.ref }}
+
+      - name: Save files to cache
+        id: save_files
+        if: ${{ inputs.override || steps.restore_files.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          key: ${{ steps.generate_ref.outputs.ref }}
+          path: |
+            *.txt
+            */*.iso
+            */*.npk
+            */*.tar.gz
+            */*.zip
