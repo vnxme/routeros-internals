@@ -1,5 +1,5 @@
 name: "Vendor RouterOS 7.x Internals Workflow"
-run-name: "RouterOS 7.x: [${{ inputs.host }}]-[${{ inputs.prefix }}]-[${{ inputs.channel }}]-[${{ inputs.version }}]"
+run-name: "RouterOS 7.x: [${{ inputs.host }}]-[${{ inputs.prefix }}]-[${{ inputs.channel }}]-[${{ inputs.version }}]-[${{ inputs.scope }}]"
 on:
 #  push:
 #    branches:
@@ -31,14 +31,14 @@ on:
         default: 'latest'
         type: string
       scope:
-        description: 'Scope of work (list of jobs)'
+        description: 'Scope of work (do jobs up to, inclusive)'
         required: true
-        default: 'validate,download,process'
+        default: 'process'
         type: choice
         options:
           - 'validate'
-          - 'validate,download'
-          - 'validate,download,process'
+          - 'download'
+          - 'process'
       reuse_commits:
         description: "Reuse committed files"
         required: false
@@ -156,17 +156,19 @@ jobs:
         id: validate_scope
         run: |
           SCOPE="$(echo "${{ inputs.scope }}" | xargs)"
-          DOWNLOAD=false
-          PROCESS=false
-          readarray -d ',' -t JOBS < <(printf '%s' "${SCOPE}")
-          for JOB in ${JOBS[@]}; do
-            if [ "${JOB}" == "download" ]; then
-              DOWNLOAD=true
-            elif [ "${JOB}" == "process" ]; then
-              PROCESS=true
-            fi
-          done
-          printf -v SCOPE '%s,' "${JOBS[@]}"
+          if [ "${SCOPE}" == "validate" ]; then
+            DOWNLOAD=false
+            PROCESS=false
+          elif [ "${SCOPE}" == "download" ]; then
+            DOWNLOAD=true
+            PROCESS=false
+          elif [ "${SCOPE}" == "process" ]; then
+            DOWNLOAD=true
+            PROCESS=true
+          else
+            echo "::error input=scope,value=${SCOPE}::Invalid scope value"
+            exit 1
+          fi
           echo "scope=${SCOPE%,}" >> $GITHUB_OUTPUT
           echo "download=${DOWNLOAD}" >> $GITHUB_OUTPUT
           echo "process=${PROCESS}" >> $GITHUB_OUTPUT
