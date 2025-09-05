@@ -59,7 +59,6 @@ env:
 
 jobs:
   validate:
-    if: ${{ contains(inputs.scope, github.job) }}
     runs-on: ubuntu-24.04
     outputs:
       host: ${{ steps.validate_host.outputs.host }}
@@ -67,6 +66,9 @@ jobs:
       channel: ${{ steps.validate_channel.outputs.channel }}
       version: ${{ steps.validate_version.outputs.version }}
       matrix: ${{ steps.generate_matrix.outputs.matrix }}
+      scope: ${{ steps.validate_scope.outputs.scope }}
+      scope_has_download: ${{ steps.validate_scope.outputs.download }}
+      scope_has_process: ${{ steps.validate_scope.outputs.process }}
     steps:
       - name: Validate host value
         id: validate_host
@@ -150,8 +152,42 @@ jobs:
           JSON="[${JSON}]"
           echo "matrix=${JSON}" >> $GITHUB_OUTPUT
 
+      - name: Validate scope value
+        id: validate_scope
+        run: |
+          SCOPE="$(echo "${{ inputs.scope }}" | xargs)"
+          DOWNLOAD=false
+          PROCESS=false
+          readarray -d ',' -t JOBS < <(printf '%s' "${SCOPE}")
+          for JOB in ${JOBS[@]}; do
+            if [ "${JOB}" == "download" ]; then
+              DOWNLOAD=true
+            elif [ "${JOB}" == "process" ]; then
+              PROCESS=true
+            fi
+          done
+          printf -v SCOPE '%s,' "${JOBS[@]}"
+          echo "scope=${SCOPE%,}" >> $GITHUB_OUTPUT
+          echo "download=${DOWNLOAD}" >> $GITHUB_OUTPUT
+          echo "process=${PROCESS}" >> $GITHUB_OUTPUT
+
+      - name: Compose a step summary
+        id: compose_summary
+        run: |
+          {
+            echo "Outputs:"
+            echo -e "\thost: ${{ steps.validate_host.outputs.host }}"
+            echo -e "\tprefix: ${{ steps.validate_prefix.outputs.prefix }}"
+            echo -e "\tchannel: ${{ steps.validate_channel.outputs.channel }}"
+            echo -e "\tversion: ${{ steps.validate_version.outputs.version }}"
+            echo -e "\tmatrix: ${{ steps.generate_matrix.outputs.matrix }}"
+            echo -e "\tscope: ${{ steps.validate_scope.outputs.scope }}"
+            echo -e "\tscope_has_download: ${{ steps.validate_scope.outputs.download }}"
+            echo -e "\tscope_has_process: ${{ steps.validate_scope.outputs.process }}"
+          } >> $GITHUB_STEP_SUMMARY
+
   download:
-    if: ${{ contains(inputs.scope, github.job) }}
+    if: needs.validate.outputs.scope_has_download
     needs: validate
     runs-on: ubuntu-24.04
     strategy:
@@ -339,7 +375,7 @@ jobs:
             */*.zip
 
   process:
-    if: ${{ contains(inputs.scope, github.job) }}
+    if: needs.validate.outputs.scope_has_process
     needs:
       - validate
       - download
