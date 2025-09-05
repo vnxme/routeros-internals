@@ -1,0 +1,7 @@
+asf:	qdf
+rfkill
+qdf:	cfg80211
+qca_ol:	umac qdf mem_manager asf ipq_cnss2 qca_spectral
+qca_spectral:	cfg80211 qdf umac
+wifi_2_0:	umac qdf mem_manager qca_ol
+umac:	qdf cfg80211 asf flash
