@@ -24,6 +24,6 @@ tile/_routeros-7.18-tile.npk/system.files/boot/initrd.rgz (1/1)
 ```
 /:
 total 300
--rw-r--r-- 1 root root 329728 2025-09-05 15:51:16.157149164 +0100 initrd
+-rw-r--r-- 1 root root 329728 2025-09-05 18:33:03.051453355 +0100 initrd
 ```
 

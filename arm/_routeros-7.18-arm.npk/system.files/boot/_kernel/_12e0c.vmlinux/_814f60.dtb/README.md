@@ -7,6 +7,6 @@ Device Tree Blob version 17, size=13709, boot CPU=0, string block size=1377, DT 
 ```
 /:
 total 16
--rw-r--r-- 1 root root 16150 2025-09-05 15:51:18.929149722 +0100 wAP PCIE.dts
+-rw-r--r-- 1 root root 16150 2025-09-05 18:33:05.883473414 +0100 wAP PCIE.dts
 ```
 

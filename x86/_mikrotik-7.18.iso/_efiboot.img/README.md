@@ -28,7 +28,7 @@ Number  Start  End     Size    File system  Flags
 /:
 total 5
 drwxr-xr-x 3 root root 512 1970-01-01 01:00:00.000000000 +0100 loop
--rw-r--r-- 1 root root 512 2025-09-05 15:49:48.476177508 +0100 mbr.bin
+-rw-r--r-- 1 root root 512 2025-09-05 18:31:35.634972506 +0100 mbr.bin
 
 /loop:
 total 3451

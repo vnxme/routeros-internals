@@ -76,8 +76,8 @@ Number  Start (sector)    End (sector)  Size       Code  Name
 ```
 /:
 total 32
--rw-r--r-- 1 root root 17920 2025-09-05 15:49:43.979176601 +0100 gpt.bin
--rw-r--r-- 1 root root   512 2025-09-05 15:49:43.963176593 +0100 mbr.bin
+-rw-r--r-- 1 root root 17920 2025-09-05 18:31:31.118947937 +0100 gpt.bin
+-rw-r--r-- 1 root root   512 2025-09-05 18:31:31.102947837 +0100 mbr.bin
 drwxr-xr-x 4 root root  4096 2025-02-24 09:55:45.000000000 +0000 part1
 drwxr-xr-x 9 root root  4096 2025-02-24 09:55:45.000000000 +0000 part2
 

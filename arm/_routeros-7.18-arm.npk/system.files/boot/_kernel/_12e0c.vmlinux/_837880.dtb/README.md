@@ -7,6 +7,6 @@ Device Tree Blob version 17, size=14019, boot CPU=0, string block size=1447, DT 
 ```
 /:
 total 20
--rw-r--r-- 1 root root 16495 2025-09-05 15:51:20.212149981 +0100 D24GiR.dts
+-rw-r--r-- 1 root root 16495 2025-09-05 18:33:07.158480696 +0100 D24GiR.dts
 ```
 

@@ -7,6 +7,6 @@ Device Tree Blob version 17, size=13097, boot CPU=0, string block size=1377, DT 
 ```
 /:
 total 16
--rw-r--r-- 1 root root 15384 2025-09-05 15:51:20.470150033 +0100 LHG 5HnD60ad.dts
+-rw-r--r-- 1 root root 15384 2025-09-05 18:33:07.415482133 +0100 LHG 5HnD60ad.dts
 ```
 

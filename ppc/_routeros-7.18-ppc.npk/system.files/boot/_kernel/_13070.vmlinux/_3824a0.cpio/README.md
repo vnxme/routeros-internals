@@ -7,7 +7,7 @@ ASCII cpio archive (SVR4 with no CRC)
 ```
 /:
 total 8
-drwxr-xr-x 2 root root 4096 2025-09-05 15:51:17.131149360 +0100 dev
+drwxr-xr-x 2 root root 4096 2025-09-05 18:33:04.108460842 +0100 dev
 drwx------ 2 root root 4096 2025-02-24 09:00:24.000000000 +0000 root
 
 /dev:

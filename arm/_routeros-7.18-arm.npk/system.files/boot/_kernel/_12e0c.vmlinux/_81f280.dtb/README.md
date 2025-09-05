@@ -7,6 +7,6 @@ Device Tree Blob version 17, size=14462, boot CPU=0, string block size=1406, DT 
 ```
 /:
 total 20
--rw-r--r-- 1 root root 17100 2025-09-05 15:51:19.314149800 +0100 RBD23UGS-5HPacD2HnD.dts
+-rw-r--r-- 1 root root 17100 2025-09-05 18:33:06.266475708 +0100 RBD23UGS-5HPacD2HnD.dts
 ```
 

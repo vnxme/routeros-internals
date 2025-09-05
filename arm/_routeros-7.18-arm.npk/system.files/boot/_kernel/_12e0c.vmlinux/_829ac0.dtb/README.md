@@ -7,6 +7,6 @@ Device Tree Blob version 17, size=14437, boot CPU=0, string block size=1425, DT 
 ```
 /:
 total 20
--rw-r--r-- 1 root root 16974 2025-09-05 15:51:19.699149877 +0100 D53iGR_5HacD2HnD.dts
+-rw-r--r-- 1 root root 16974 2025-09-05 18:33:06.648477844 +0100 D53iGR_5HacD2HnD.dts
 ```
 

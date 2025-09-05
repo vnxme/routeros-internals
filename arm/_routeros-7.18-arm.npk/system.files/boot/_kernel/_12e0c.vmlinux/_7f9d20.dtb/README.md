@@ -7,6 +7,6 @@ Device Tree Blob version 17, size=14492, boot CPU=0, string block size=1364, DT 
 ```
 /:
 total 20
--rw-r--r-- 1 root root 17816 2025-09-05 15:51:17.893149514 +0100 RB3011.dts
+-rw-r--r-- 1 root root 17816 2025-09-05 18:33:04.862466182 +0100 RB3011.dts
 ```
 

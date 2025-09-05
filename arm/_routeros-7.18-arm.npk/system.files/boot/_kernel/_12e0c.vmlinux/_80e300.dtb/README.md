@@ -7,6 +7,6 @@ Device Tree Blob version 17, size=13906, boot CPU=0, string block size=1394, DT 
 ```
 /:
 total 20
--rw-r--r-- 1 root root 16434 2025-09-05 15:51:18.660149668 +0100 wAP R ac.dts
+-rw-r--r-- 1 root root 16434 2025-09-05 18:33:05.628471608 +0100 wAP R ac.dts
 ```
 

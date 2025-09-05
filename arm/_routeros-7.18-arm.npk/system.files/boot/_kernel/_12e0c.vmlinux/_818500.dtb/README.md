@@ -7,6 +7,6 @@ Device Tree Blob version 17, size=13602, boot CPU=0, string block size=1366, DT 
 ```
 /:
 total 16
--rw-r--r-- 1 root root 16040 2025-09-05 15:51:19.057149748 +0100 PL002 5acD2nD.dts
+-rw-r--r-- 1 root root 16040 2025-09-05 18:33:06.011474282 +0100 PL002 5acD2nD.dts
 ```
 
