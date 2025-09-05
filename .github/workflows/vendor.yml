@@ -145,6 +145,8 @@ jobs:
                 exit 1
               fi
               LATEST="$(cat ${FILE} | cut -d ' ' -f1)" && rm -f "${FILE}"
+            else
+              LATEST="${VERSION}"
             fi
             [ ${#JSON} -ne 0 ] && JSON="${JSON},"
             JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"version\":\"${LATEST}\"}"
