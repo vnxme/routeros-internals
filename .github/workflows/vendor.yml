@@ -202,9 +202,9 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
     steps:
-      - name: Checkout the repository
-        id: checkout_repository
-        uses: actions/checkout@v5
+#      - name: Checkout the repository
+#        id: checkout_repository
+#        uses: actions/checkout@v5
 
       - name: Generate a branch ref
         id: generate_ref
@@ -217,7 +217,7 @@ jobs:
         run: |
           BRANCH="${{ steps.generate_ref.outputs.ref }}"
           if [ -z "$(git ls-remote --heads origin ${BRANCH})" -o "${{ inputs.reset_commits }}" == "true" ]; then
-            git switch --orphan ${BRANCH}
+#            git switch --orphan ${BRANCH}
             echo "new=true" >> $GITHUB_OUTPUT
           else
             echo "new=false" >> $GITHUB_OUTPUT
@@ -360,26 +360,33 @@ jobs:
             fi
           done
 
-      - name: Compose a commit message
-        id: compose_message
-        if: steps.prepare_branch.outputs.new == 'true'
-        run: |
-          {
-            echo 'message<<EOF'
-            echo -e "Automatic changes by ${{ github.run_id }}:${{ github.run_attempt }}:download\n\n"
-            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
-            echo EOF
-          } >> $GITHUB_OUTPUT
-
-      - name: Add files, commit and push
-        id: push_files
-        if: steps.prepare_branch.outputs.new == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Upload an artifact
+        uses: actions/upload-artifact@v4
         with:
-          branch: ${{ steps.generate_ref.outputs.ref }}
-          commit_message: ${{ steps.compose_message.outputs.message }}
-          create_branch: true
-          push_options: '--force'
+          name: ${{ steps.generate_ref.outputs.ref }}
+          path: |
+            .
+
+#      - name: Compose a commit message
+#        id: compose_message
+#        if: steps.prepare_branch.outputs.new == 'true'
+#        run: |
+#          {
+#            echo 'message<<EOF'
+#            echo -e "Automatic changes by ${{ github.run_id }}:${{ github.run_attempt }}:download\n\n"
+#            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
+#            echo EOF
+#          } >> $GITHUB_OUTPUT
+#
+#      - name: Add files, commit and push
+#        id: push_files
+#        if: steps.prepare_branch.outputs.new == 'true'
+#        uses: stefanzweifel/git-auto-commit-action@v5
+#        with:
+#          branch: ${{ steps.generate_ref.outputs.ref }}
+#          commit_message: ${{ steps.compose_message.outputs.message }}
+#          create_branch: true
+#          push_options: '--force'
 
   process:
     if: needs.validate.outputs.scope_has_process == 'true'
@@ -417,11 +424,22 @@ jobs:
           REF="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
           echo "ref=${REF}" >> $GITHUB_OUTPUT
 
-      - name: Checkout the current branch
-        id: checkout_branch
-        uses: actions/checkout@v5
+#      - name: Checkout the current branch
+#        id: checkout_branch
+#        uses: actions/checkout@v5
+#        with:
+#          ref: ${{ steps.generate_ref.outputs.ref }}
+
+      - name: Download the artifact
+        uses: actions/download-artifact@v5
         with:
-          ref: ${{ steps.generate_ref.outputs.ref }}
+          name: ${{ steps.generate_ref.outputs.ref }}
+
+      - name: Delete the artifact
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: ${{ steps.generate_ref.outputs.ref }}
+          failOnError: false
 
       - name: Remove unpacked files if any
         id: remove_files
@@ -932,6 +950,11 @@ jobs:
           files: |
             /tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.tar.gz
 
+      - name: Remove the release file
+        if: ${{ inputs.release }}
+        run: |
+          rm -f "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.tar.gz"
+
       - name: Upload an artifact
         if: ${{ !inputs.release }}
         uses: actions/upload-artifact@v4
@@ -967,19 +990,19 @@ jobs:
             echo -e "*\n!.gitignore\n" > "${DIR}/.gitignore"
           done
 
-      - name: Compose a commit message
-        id: compose_message
-        run: |
-          {
-            echo 'message<<EOF'
-            echo -e "Automatic changes by ${{ github.run_id }}:${{ github.run_attempt }}:process\n\n"
-            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
-            echo EOF
-          } >> $GITHUB_OUTPUT
-
-      - name: Add files, commit and push
-        uses: stefanzweifel/git-auto-commit-action@v6
-        with:
-          branch: ${{ steps.generate_ref.outputs.ref }}
-          commit_message: ${{ steps.compose_message.outputs.message }}
-          push_options: '--force'
+#      - name: Compose a commit message
+#        id: compose_message
+#        run: |
+#          {
+#            echo 'message<<EOF'
+#            echo -e "Automatic changes by ${{ github.run_id }}:${{ github.run_attempt }}:process\n\n"
+#            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
+#            echo EOF
+#          } >> $GITHUB_OUTPUT
+#
+#      - name: Add files, commit and push
+#        uses: stefanzweifel/git-auto-commit-action@v6
+#        with:
+#          branch: ${{ steps.generate_ref.outputs.ref }}
+#          commit_message: ${{ steps.compose_message.outputs.message }}
+#          push_options: '--force'
