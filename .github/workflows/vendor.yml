@@ -137,17 +137,17 @@ jobs:
           JSON=""
           for CHANNEL in ${CHANNELS[@]}; do
             if [ -z "${VERSION}" -o "${VERSION}" == "latest" ]; then
-              FILE="version.txt"
+              FILE="version_${CHANNEL}.txt"
               URL="https://${{ steps.validate_host.outputs.host }}/routeros/NEWESTa7.${CHANNEL}"
               wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
               if [ ! -f "${FILE}" ]; then
                 echo "::error::Failed to get the latest version for the ${CHANNEL} channel"
                 exit 1
               fi
-              VERSION="$(cat ${FILE} | cut -d ' ' -f1)" && rm -f "${FILE}"
+              LATEST="$(cat ${FILE} | cut -d ' ' -f1)" && rm -f "${FILE}"
             fi
             [ ${#JSON} -ne 0 ] && JSON="${JSON},"
-            JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"version\":\"${VERSION}\"}"
+            JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"version\":\"${LATEST}\"}"
           done
           JSON="[${JSON}]"
           echo "matrix=${JSON}" >> $GITHUB_OUTPUT
