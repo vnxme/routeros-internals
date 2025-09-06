@@ -9,14 +9,18 @@ on:
       host:
         required: true
         type: string
-      override:
+      override_cache:
         default: false
         required: false
         type: boolean
       prefix:
         required: true
         type: string
-      reuse:
+      reuse_commits:
+        default: true
+        required: false
+        type: boolean
+      reuse_releases:
         default: true
         required: false
         type: boolean
@@ -53,7 +57,7 @@ jobs:
 
       - name: Generate download URLs
         id: generate_urls
-        if: ${{ inputs.override || steps.restore_files.outputs.cache-hit != 'true' }}
+        if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
         run: |
           BRANCH="${{ steps.generate_ref.outputs.ref }}"
           echo "github=https://github.com/${{ github.repository }}/raw/refs/heads/${BRANCH}" >> $GITHUB_OUTPUT
@@ -61,10 +65,10 @@ jobs:
 
       - name: Download a changelog
         id: download_changelog
-        if: ${{ inputs.override || steps.restore_files.outputs.cache-hit != 'true' }}
+        if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
         run: |
           FILE="changelog.txt"
-          if [ "${{ inputs.reuse }}" == "true" ]; then
+          if [ "${{ inputs.reuse_commits }}" == "true" ]; then
             URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
             wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
           fi
@@ -75,7 +79,7 @@ jobs:
 
       - name: Download packages
         id: download_packages
-        if: ${{ inputs.override || steps.restore_files.outputs.cache-hit != 'true' }}
+        if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
         run: |
           ARCHS=(arm arm64 mipsbe mmips ppc smips tile x86)
           PACKAGES=(routeros)
@@ -86,7 +90,7 @@ jobs:
             
             for PACKAGE in ${PACKAGES[@]}; do
               FILE="${ARCH}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
-              if [ "${{ inputs.reuse }}" == "true" ]; then
+              if [ "${{ inputs.reuse_commits }}" == "true" ]; then
                 URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
                 wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
               fi
@@ -106,7 +110,7 @@ jobs:
 
       - name: Download images
         id: download_images
-        if: ${{ inputs.override || steps.restore_files.outputs.cache-hit != 'true' }}
+        if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
         run: |
           ARCHS=(arm64 x86)
           VERSION="${{ inputs.version }}"
@@ -115,7 +119,7 @@ jobs:
             [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
             
             FILE="${ARCH}/chr-${VERSION}${SUFFIX}.img.zip"
-            if [ "${{ inputs.reuse }}" == "true" ]; then
+            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
               URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
               wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
             fi
@@ -125,7 +129,7 @@ jobs:
             fi
             
             FILE="${ARCH}/mikrotik-${VERSION}${SUFFIX}.iso"
-            if [ "${{ inputs.reuse }}" == "true" ]; then
+            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
               URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
               wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
             fi
@@ -136,7 +140,7 @@ jobs:
             
             if [ "${ARCH}" == 'x86' ]; then
               FILE="${ARCH}/install-image-${VERSION}${SUFFIX}.img.zip"
-              if [ "${{ inputs.reuse }}" == "true" ]; then
+              if [ "${{ inputs.reuse_commits }}" == "true" ]; then
                 URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
                 wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
               fi
@@ -149,7 +153,7 @@ jobs:
 
       - name: Download binaries
         id: download_binaries
-        if: ${{ inputs.override || steps.restore_files.outputs.cache-hit != 'true' }}
+        if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
         run: |
           ARCHS=(x86)
           VERSION="${{ inputs.version }}"
@@ -158,7 +162,7 @@ jobs:
             [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
             
             FILE="${ARCH}/netinstall-cli-${VERSION}${SUFFIX}.tar.gz"
-            if [ "${{ inputs.reuse }}" == "true" ]; then
+            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
               URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
               wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
             fi
@@ -168,7 +172,7 @@ jobs:
             fi
             
             FILE="${ARCH}/netinstall-w32-${VERSION}${SUFFIX}.exe.zip"
-            if [ "${{ inputs.reuse }}" == "true" ]; then
+            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
               URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
               wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
             fi
@@ -178,7 +182,7 @@ jobs:
             fi
             
             FILE="${ARCH}/netinstall-w64-${VERSION}${SUFFIX}.exe.zip"
-            if [ "${{ inputs.reuse }}" == "true" ]; then
+            if [ "${{ inputs.reuse_commits }}" == "true" ]; then
               URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
               wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
             fi
@@ -190,7 +194,7 @@ jobs:
 
       - name: Delete files from cache
         id: delete_files
-        if: ${{ inputs.override }}
+        if: ${{ inputs.override_cache }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -201,7 +205,7 @@ jobs:
 
       - name: Save files to cache
         id: save_files
-        if: ${{ inputs.override || steps.restore_files.outputs.cache-hit != 'true' }}
+        if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v4
         with:
           key: ${{ steps.generate_ref.outputs.ref }}
