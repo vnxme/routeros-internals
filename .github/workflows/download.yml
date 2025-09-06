@@ -115,6 +115,12 @@ jobs:
         id: download_packages
         if: ${{ steps.download_everything.outputs.done != 'true' && (inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true') }}
         run: |
+          PACKAGES_FILE="packages.txt"
+          if [ "${{ inputs.reuse_commits }}" == "true" ]; then
+            URL="${{ steps.generate_urls.outputs.self_c }}/${PACKAGES_FILE}"
+            wget -nv -O "${PACKAGES_FILE}" "${URL}" || rm -f "${PACKAGES_FILE}"
+          fi
+
           ARCHS=(arm arm64 mipsbe mmips ppc smips tile x86)
           PACKAGES=(routeros)
           VERSION="${{ inputs.version }}"
@@ -136,19 +142,14 @@ jobs:
             
             if [ ${#PACKAGES[@]} -eq 1 -a "${PACKAGES[0]}" == "routeros" ]; then
               DOWNLOAD_ALL_PACKAGES=true
-              if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-                FILE="packages.txt"
-                URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
-                wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
-                if [ -f "${FILE}" ]; then
-                  PACKAGES_C=$(cat "${FILE}" | grep "${ARCH}/")
-                  for PACKAGE_C in ${PACKAGES_C[@]}; do
-                    FILE="${PACKAGE_C}"
-                    URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
-                    wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
-                  done
-                  DOWNLOAD_ALL_PACKAGES=false
-                fi
+              if [ "${{ inputs.reuse_commits }}" == "true" -a -f "${PACKAGES_FILE}" ]; then
+                OTHER_PACKAGES=$(cat "${PACKAGES_FILE}" | grep "${ARCH}/")
+                for OTHER_PACKAGE in ${OTHER_PACKAGES[@]}; do
+                  FILE="${OTHER_PACKAGE}"
+                  URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
+                  wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
+                done
+                DOWNLOAD_ALL_PACKAGES=false
               fi
               if [ "${DOWNLOAD_ALL_PACKAGES}" == "true" ]; then
                 FILE="${ARCH}/all_packages-${VERSION}${SUFFIX}.zip"
@@ -156,7 +157,7 @@ jobs:
                 wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
                 if [ -f "${FILE}" ]; then
                   unzip -o -d "${ARCH}/" "${FILE}" && rm -f "${FILE}"
-                  find ${ARCH}/* -maxdepth 0 -type f -name '*.npk' ! -name 'routeros*.npk' >> packages.txt
+                  find ${ARCH}/* -maxdepth 0 -type f -name '*.npk' ! -name 'routeros*.npk' >> "${PACKAGES_FILE}"
                 fi
               fi
             fi
