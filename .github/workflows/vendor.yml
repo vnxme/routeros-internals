@@ -781,7 +781,7 @@ jobs:
       - name: Create a release file
         if: ${{ inputs.release }}
         run: |
-          sudo tar -czf "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.tar.gz" .
+          sudo tar -czf "/tmp/routeros-${{ steps.generate_ref.outputs.ref }}.tar.gz" .
 
       - name: Upload the release file
         if: ${{ inputs.release }}
@@ -793,18 +793,18 @@ jobs:
           make_latest:  ${{ matrix.channel == 'stable' }}
           prerelease:  ${{ matrix.channel == 'testing' }}
           files: |
-            /tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.tar.gz
+            /tmp/routeros-${{ steps.generate_ref.outputs.ref }}.tar.gz
 
       - name: Remove the release file
         if: ${{ inputs.release }}
         run: |
-          sudo rm -f "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.tar.gz"
+          sudo rm -f "/tmp/routeros-${{ steps.generate_ref.outputs.ref }}.tar.gz"
 
       - name: Upload an artifact
         if: ${{ !inputs.release }}
         uses: actions/upload-artifact@v4
         with:
-          name: routeros-internals-${{ steps.generate_ref.outputs.ref }}
+          name: routeros-${{ steps.generate_ref.outputs.ref }}
           path: |
             .
 
