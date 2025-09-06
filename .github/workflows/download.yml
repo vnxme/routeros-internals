@@ -194,7 +194,7 @@ jobs:
 
       - name: Delete files from cache
         id: delete_files
-        if: ${{ inputs.override_cache }}
+        if: ${{ inputs.override_cache && steps.restore_files.outputs.cache-hit == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
