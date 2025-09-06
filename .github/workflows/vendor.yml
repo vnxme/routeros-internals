@@ -781,7 +781,7 @@ jobs:
       - name: Create a release file
         if: ${{ inputs.release }}
         run: |
-          sudo tar -czvf "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.tar.gz" .
+          sudo tar -czf "/tmp/routeros-internals-${{ steps.generate_ref.outputs.ref }}.tar.gz" .
 
       - name: Upload the release file
         if: ${{ inputs.release }}
