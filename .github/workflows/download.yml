@@ -42,7 +42,7 @@ jobs:
           REF="${{ inputs.prefix }}-${{ inputs.channel }}-${{ inputs.version }}"
           TAG="v${{ inputs.version }}-${{ inputs.prefix }}"
           echo "ref=${REF}" >> $GITHUB_OUTPUT
-          echo "tag=${TAG}" >> $GUTHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
 
       - name: Look for files in cache
         id: restore_files
