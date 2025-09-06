@@ -212,7 +212,7 @@ jobs:
       host: ${{ needs.validate.outputs.host }}
       override: ${{ inputs.override_cache }}
       prefix: ${{ needs.validate.outputs.prefix }}
-      reuse: $${{ inputs.reuse_commits }}
+      reuse: ${{ inputs.reuse_commits }}
       version: ${{ matrix.version }}
 
   process:
