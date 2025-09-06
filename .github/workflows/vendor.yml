@@ -44,15 +44,20 @@ on:
         required: false
         default: true
         type: boolean
-      reuse_commits:
-        description: "Reuse previously released files"
-        required: false
+      reuse_releases:
         default: true
+        description: "Download: reuse released files"
+        required: false
+        type: boolean
+      reuse_commits:
+        default: true
+        description: "Download: reuse committed files"
+        required: false
         type: boolean
       override_cache:
-        description: "Override download cache"
-        required: false
         default: false
+        description: "Download: override cached files"
+        required: false
         type: boolean
       reset_commits:
         description: "Reset branch (delete all commits)"
@@ -198,6 +203,9 @@ jobs:
             echo "- scope: \`${{ steps.validate_scope.outputs.scope }}\`"
             echo "- scope_has_download: \`${{ steps.validate_scope.outputs.download }}\`"
             echo "- scope_has_process: \`${{ steps.validate_scope.outputs.process }}\`"
+            echo "- reuse_releases: \`${{ inputs.reuse_releases }}\`"
+            echo "- reuse_commits: \`${{ inputs.reuse_commits }}\`"
+            echo "- override_cache: \`${{ inputs.override_cache }}\`"
           } >> $GITHUB_STEP_SUMMARY
 
   download:
@@ -210,9 +218,10 @@ jobs:
     with:
       channel: ${{ matrix.channel }}
       host: ${{ needs.validate.outputs.host }}
-      override: ${{ inputs.override_cache }}
+      override_cache: ${{ inputs.override_cache }}
       prefix: ${{ needs.validate.outputs.prefix }}
-      reuse: ${{ inputs.reuse_commits }}
+      reuse_commits: ${{ inputs.reuse_commits }}
+      reuse_releases: ${{ inputs.reuse_releases }}
       version: ${{ matrix.version }}
 
   process:
