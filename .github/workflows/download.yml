@@ -1,4 +1,4 @@
-name: RouterOS 7.x Download Reusable Workflow
+name: RouterOS 7.x Download Workflow
 
 on:
   workflow_call:
