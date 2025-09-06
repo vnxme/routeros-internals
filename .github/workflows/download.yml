@@ -40,7 +40,9 @@ jobs:
         id: generate_ref
         run: |
           REF="${{ inputs.prefix }}-${{ inputs.channel }}-${{ inputs.version }}"
+          TAG="v${{ inputs.version }}-${{ inputs.prefix }}"
           echo "ref=${REF}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GUTHUB_OUTPUT
 
       - name: Look for files in cache
         id: restore_files
@@ -60,26 +62,58 @@ jobs:
         if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
         run: |
           BRANCH="${{ steps.generate_ref.outputs.ref }}"
-          echo "github=https://github.com/${{ github.repository }}/raw/refs/heads/${BRANCH}" >> $GITHUB_OUTPUT
+          TAG="${{ steps.generate_ref.outputs.tag }}"
+          echo "self_r=https://github.com/${{ github.repository }}/releases/download/${TAG}" >> $GITHUB_OUTPUT
+          echo "self_c=https://github.com/${{ github.repository }}/raw/refs/heads/${BRANCH}" >> $GITHUB_OUTPUT
           echo "vendor=https://${{ inputs.host }}/routeros/${{ inputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: Download everything
+        id: download_everything
+        if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
+        run: |
+          FILE="routeros-${{ steps.generate_ref.outputs.ref }}.tar.gz"
+          if [ "${{ inputs.reuse_releases }}" == "true" ]; then
+            URL="${{ steps.generate_urls.outputs.self_r }}/${FILE}"
+            wget -nv -O "/tmp/${FILE}" "${URL}" || rm -f "/tmp/${FILE}"
+          fi
+          if [ -f "/tmp/${FILE}" ]; then
+            sudo tar -xzf "/tmp/${FILE}" -C . && rm -f "/tmp/${FILE}"
+            
+            # cleanup
+            readarray -d '' -t FILES < <(
+              find */* -maxdepth 0 -type f -print0 2>/dev/null || true
+            )
+            for FILE in "${FILES[@]}"; do
+              DIR="$(dirname "${FILE}")/_$(basename "${FILE}")"
+              if [ -d "${DIR}" ]; then
+                rm -rf "${DIR}"
+              fi
+            done
+            rm -f 'hashes.txt'
+            rm -f 'replacements.txt'
+            
+            echo "done=true" >> $GITHUB_OUTPUT
+          else
+            echo "done=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Download a changelog
         id: download_changelog
-        if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
+        if: ${{ steps.download_everything.outputs.done != 'true' && (inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true') }}
         run: |
           FILE="changelog.txt"
           if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-            URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-            wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
+            wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
           fi
           if [ ! -f "${FILE}" ]; then
             URL="${{ steps.generate_urls.outputs.vendor }}/CHANGELOG"
-            wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+            wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
           fi
 
       - name: Download packages
         id: download_packages
-        if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
+        if: ${{ steps.download_everything.outputs.done != 'true' && (inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true') }}
         run: |
           ARCHS=(arm arm64 mipsbe mmips ppc smips tile x86)
           PACKAGES=(routeros)
@@ -91,26 +125,46 @@ jobs:
             for PACKAGE in ${PACKAGES[@]}; do
               FILE="${ARCH}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
               if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-                URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+                URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
+                wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
               fi
               if [ ! -f "${FILE}" ]; then
                 URL="${{ steps.generate_urls.outputs.vendor }}/${PACKAGE}-${VERSION}${SUFFIX}.npk"
-                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+                wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
               fi
             done
             
-            FILE="${ARCH}/all_packages-${VERSION}${SUFFIX}.zip"
-            URL="${{ steps.generate_urls.outputs.vendor }}/all_packages-${ARCH}-${VERSION}.zip"
-            wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-            if [ -f "${FILE}" ]; then
-              unzip -o -d "${ARCH}/" "${FILE}" && rm -f ${FILE}
+            if [ ${#PACKAGES[@]} -eq 1 -a "${PACKAGES[0]}" == "routeros" ]; then
+              DOWNLOAD_ALL_PACKAGES=true
+              if [ "${{ inputs.reuse_commits }}" == "true" ]; then
+                FILE="packages.txt"
+                URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
+                wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
+                if [ -f "${FILE}" ]; then
+                  PACKAGES_C=$(cat "${FILE}" | grep "${ARCH}/")
+                  for PACKAGE_C in ${PACKAGES_C[@]}; do
+                    FILE="${PACKAGE_C}"
+                    URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
+                    wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
+                  done
+                  DOWNLOAD_ALL_PACKAGES=false
+                fi
+              fi
+              if [ "${DOWNLOAD_ALL_PACKAGES}" == "true" ]; then
+                FILE="${ARCH}/all_packages-${VERSION}${SUFFIX}.zip"
+                URL="${{ steps.generate_urls.outputs.vendor }}/all_packages-${ARCH}-${VERSION}.zip"
+                wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
+                if [ -f "${FILE}" ]; then
+                  unzip -o -d "${ARCH}/" "${FILE}" && rm -f "${FILE}"
+                  find ${ARCH}/* -maxdepth 0 -type f -name '*.npk' ! -name 'routeros*.npk' >> packages.txt
+                fi
+              fi
             fi
           done
 
       - name: Download images
         id: download_images
-        if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
+        if: ${{ steps.download_everything.outputs.done != 'true' && (inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true') }}
         run: |
           ARCHS=(arm64 x86)
           VERSION="${{ inputs.version }}"
@@ -120,40 +174,40 @@ jobs:
             
             FILE="${ARCH}/chr-${VERSION}${SUFFIX}.img.zip"
             if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
+              wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
             fi
             if [ ! -f "${FILE}" ]; then
               URL="${{ steps.generate_urls.outputs.vendor }}/chr-${VERSION}${SUFFIX}.img.zip"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
             fi
             
             FILE="${ARCH}/mikrotik-${VERSION}${SUFFIX}.iso"
             if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
+              wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
             fi
             if [ ! -f "${FILE}" ]; then
               URL="${{ steps.generate_urls.outputs.vendor }}/mikrotik-${VERSION}${SUFFIX}.iso"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
             fi
             
             if [ "${ARCH}" == 'x86' ]; then
               FILE="${ARCH}/install-image-${VERSION}${SUFFIX}.img.zip"
               if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-                URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+                URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
+                wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
               fi
               if [ ! -f "${FILE}" ]; then
                 URL="${{ steps.generate_urls.outputs.vendor }}/install-image-${VERSION}${SUFFIX}.zip"
-                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+                wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
               fi
             fi
           done
 
       - name: Download binaries
         id: download_binaries
-        if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
+        if: ${{ steps.download_everything.outputs.done != 'true' && (inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true') }}
         run: |
           ARCHS=(x86)
           VERSION="${{ inputs.version }}"
@@ -163,32 +217,32 @@ jobs:
             
             FILE="${ARCH}/netinstall-cli-${VERSION}${SUFFIX}.tar.gz"
             if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
+              wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
             fi
             if [ ! -f "${FILE}" ]; then
               URL="${{ steps.generate_urls.outputs.vendor }}/netinstall-${VERSION}${SUFFIX}.tar.gz"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
             fi
             
             FILE="${ARCH}/netinstall-w32-${VERSION}${SUFFIX}.exe.zip"
             if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
+              wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
             fi
             if [ ! -f "${FILE}" ]; then
               URL="${{ steps.generate_urls.outputs.vendor }}/netinstall-${VERSION}${SUFFIX}.zip"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
             fi
             
             FILE="${ARCH}/netinstall-w64-${VERSION}${SUFFIX}.exe.zip"
             if [ "${{ inputs.reuse_commits }}" == "true" ]; then
-              URL="${{ steps.generate_urls.outputs.github }}/${FILE}"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              URL="${{ steps.generate_urls.outputs.self_c }}/${FILE}"
+              wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
             fi
             if [ ! -f "${FILE}" ]; then
               URL="${{ steps.generate_urls.outputs.vendor }}/netinstall64-${VERSION}${SUFFIX}.zip"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+              wget -nv -O "${FILE}" "${URL}" || rm -f "${FILE}"
             fi
           done
 
