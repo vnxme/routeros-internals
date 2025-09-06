@@ -216,14 +216,14 @@ jobs:
       version: ${{ matrix.version }}
 
   process:
-    if: needs.validate.outputs.scope_has_process == 'true'
     needs:
       - validate
       - download
-    runs-on: ubuntu-24.04
+    if: needs.validate.outputs.scope_has_process == 'true'
     strategy:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
+    runs-on: ubuntu-24.04
     steps:
       - name: Install requirements leveraging cache
         id: install_requirements
@@ -779,11 +779,14 @@ jobs:
           done
 
       - name: Create a release file
-        if: ${{ inputs.release }}
+        id: create_archive
         run: |
-          sudo tar -czf "/tmp/routeros-${{ steps.generate_ref.outputs.ref }}.tar.gz" .
+          FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}.tar.gz"
+          sudo tar -czf "${FILE}" .
+          echo "file=${FILE}" >> $GITHUB_OUTPUT
 
       - name: Upload the release file
+        id: upload_release
         if: ${{ inputs.release }}
         uses: softprops/action-gh-release@v2
         with:
@@ -793,20 +796,22 @@ jobs:
           make_latest:  ${{ matrix.channel == 'stable' }}
           prerelease:  ${{ matrix.channel == 'testing' }}
           files: |
-            /tmp/routeros-${{ steps.generate_ref.outputs.ref }}.tar.gz
-
-      - name: Remove the release file
-        if: ${{ inputs.release }}
-        run: |
-          sudo rm -f "/tmp/routeros-${{ steps.generate_ref.outputs.ref }}.tar.gz"
+            ${{ steps.create_archive.outputs.file }}
 
       - name: Upload an artifact
+        id: upload_artifact
         if: ${{ !inputs.release }}
         uses: actions/upload-artifact@v4
         with:
+          compression-level: 0
           name: routeros-${{ steps.generate_ref.outputs.ref }}
           path: |
-            .
+            ${{ steps.create_archive.outputs.file }}
+
+      - name: Remove the release file
+        id: remove_archive
+        run: |
+          sudo rm -f "${{ steps.create_archive.outputs.file }}"
 
       - name: Remove block and character devices before commit
         run: |
