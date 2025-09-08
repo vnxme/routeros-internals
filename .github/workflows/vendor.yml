@@ -252,6 +252,7 @@ jobs:
           cp -r ./tools /tmp/
           cp ./*.py /tmp/
           cp ./*.sh /tmp/
+          chmod +x /tmp/*.py
           chmod +x /tmp/*.sh
 
       - name: Generate a branch ref
