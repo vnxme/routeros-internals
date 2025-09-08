@@ -30,11 +30,12 @@ function process_files {
   declare -A H2RP # maps hashes to real paths
   for FILE in "${FILES[@]}"; do
     HASH="$(sha256sum "${FILE}" | cut -d ' ' -f1)"
-    FOUND="${H2RP[${HASH}]}"
-    if [ -n "${FOUND}" ]; then
-      echo "${ME}: Found ${FILE} with a matching SHA256 hash. Replacing it with a symbolic link to ${FOUND}"
-      ln -sfr "${FOUND}" "${FILE}"
-      echo -e "${FILE} $(realpath --relative-to='.' "${FOUND}")" >> "${LN}"
+    REAL="${H2RP[${HASH}]}"
+    if [ -n "${REAL}" ]; then
+      RELATIVE="$(realpath --relative-to='.' "${REAL}")"
+      echo "${ME}: Found ${FILE} with a matching SHA256 hash. Replacing it with a symbolic link to ${RELATIVE}"
+      ln -sfr "${REAL}" "${FILE}"
+      echo -e "${FILE} ${RELATIVE}" >> "${LN}"
     else
       echo "${ME}: Found ${FILE} with a SHA256 hash of ${HASH}. Calling $2"
       "$2" "${FILE}" || true
@@ -96,7 +97,7 @@ process_files <(
   find */_*.img.zip/_*.img/loop/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
   find */_*.img.zip/_*.img/part2/var/pdb/*/image -maxdepth 0 -type f -print0 2>/dev/null || true
   find */_*.iso/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
-) "python /tmp/unpack-npk.py"
+) "/tmp/unpack-npk.py"
 
 # Unpack SFS files
 process_files <(
@@ -124,7 +125,7 @@ process_files <(
   find */_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
   find */_*.iso/_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
   find */_*.iso/_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-) "python /tmp/unpack-x3.py"
+) "/tmp/unpack-x3.py"
 
 # Unpack bzImage files
 process_files <(
@@ -228,4 +229,4 @@ process_files <(
   find */_*.npk/_*.sfs/etc/* -maxdepth 0 -type f -name "*.fwf" -print0 2>/dev/null || true
   find */_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/etc/* -maxdepth 0 -type f -name "*.fwf" -print0 2>/dev/null || true
   find */_*.iso/_*.npk/_*.sfs/etc/* -maxdepth 0 -type f -name "*.fwf" -print0 2>/dev/null || true
-) "python /tmp/unpack-fwf.py"
+) "/tmp/unpack-fwf.py"

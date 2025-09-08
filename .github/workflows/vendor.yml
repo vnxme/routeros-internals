@@ -841,7 +841,7 @@ jobs:
             find . -type d -not -perm 755 -print0 2>/dev/null || true
           )
           for DIR in "${DIRS[@]}"; do
-            chmod 755 "${DIR}"
+            sudo chmod 755 "${DIR}"
           done
 
       - name: Put .gitignore into empty directories
