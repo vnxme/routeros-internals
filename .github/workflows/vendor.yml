@@ -64,11 +64,6 @@ on:
         description: "Process: skip main work"
         required: false
         type: boolean
-      reset_commits:
-        description: "Reset branch (delete all commits)"
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   actions: write
