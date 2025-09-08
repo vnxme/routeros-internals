@@ -792,14 +792,22 @@ jobs:
         run: |
           sudo /tmp/process.sh
 
-      - name: Create a release file
+      - name: Create release files
         id: create_archive
         run: |
-          FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}.tar.gz"
+          FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}-full.tar.gz"
           sudo tar -czf "${FILE}" .
-          echo "file=${FILE}" >> $GITHUB_OUTPUT
+          echo "full=${FILE}" >> $GITHUB_OUTPUT
+          du -h "${FILE}"
+          
+          EXCL="exclusions.txt"
+          find * -type f -size +30M > "${EXCL}" || true
+          FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}-light.tar.gz"
+          sudo tar -czf "${FILE}" -X "${EXCL}" .
+          echo "light=${FILE}" >> $GITHUB_OUTPUT
+          du -h "${FILE}"
 
-      - name: Upload the release file
+      - name: Upload release files as attachments
         id: upload_release
         if: ${{ inputs.release }}
         uses: softprops/action-gh-release@v2
@@ -810,9 +818,10 @@ jobs:
           make_latest:  ${{ matrix.channel == 'stable' }}
           prerelease:  ${{ matrix.channel == 'testing' }}
           files: |
-            ${{ steps.create_archive.outputs.file }}
+            ${{ steps.create_archive.outputs.full }}
+            ${{ steps.create_archive.outputs.light }}
 
-      - name: Upload an artifact
+      - name: Upload release files as artifacts
         id: upload_artifact
         if: ${{ !inputs.release }}
         uses: actions/upload-artifact@v4
@@ -820,12 +829,14 @@ jobs:
           compression-level: 0
           name: routeros-${{ steps.generate_ref.outputs.ref }}
           path: |
-            ${{ steps.create_archive.outputs.file }}
+            ${{ steps.create_archive.outputs.full }}
+            ${{ steps.create_archive.outputs.light }}
 
       - name: Remove the release file
         id: remove_archive
         run: |
-          sudo rm -f "${{ steps.create_archive.outputs.file }}"
+          sudo rm -f "${{ steps.create_archive.outputs.full }}"
+          sudo rm -f "${{ steps.create_archive.outputs.light }}"
 
       - name: Remove block and character devices before commit
         run: |
@@ -851,7 +862,7 @@ jobs:
             find . -type d -empty -print0 2>/dev/null || true
           )
           for DIR in "${DIRS[@]}"; do
-            echo -e "*\n!.gitignore\n" > "${DIR}/.gitignore"
+            sudo echo -e "*\n!.gitignore\n" > "${DIR}/.gitignore"
           done
 
 #      - name: Compose a commit message

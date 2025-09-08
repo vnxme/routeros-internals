@@ -71,7 +71,7 @@ jobs:
         id: download_everything
         if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
         run: |
-          FILE="routeros-${{ steps.generate_ref.outputs.ref }}.tar.gz"
+          FILE="routeros-${{ steps.generate_ref.outputs.ref }}-full.tar.gz"
           if [ "${{ inputs.reuse_releases }}" == "true" ]; then
             URL="${{ steps.generate_urls.outputs.self_r }}/${FILE}"
             wget -nv -O "/tmp/${FILE}" "${URL}" || rm -f "/tmp/${FILE}"
