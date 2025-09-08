@@ -803,13 +803,13 @@ jobs:
           EXCL="exclusions.txt"
           find * -type f -size +30M > "${EXCL}" || true
 
-          FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}-full.tar.gz"
-          sudo tar -czf "${FILE}" --exclude=.git --exclude="${EXCL}" .
+          FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}-full.tar.zst"
+          sudo tar --zst -cf "${FILE}" --exclude=.git --exclude="${EXCL}" .
           echo "full=${FILE}" >> $GITHUB_OUTPUT
           du -h "${FILE}"
           
-          FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}-light.tar.gz"
-          sudo tar -czf "${FILE}" --exclude=.git -X "${EXCL}" .
+          FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}-light.tar.zst"
+          sudo tar --zst -cf "${FILE}" --exclude=.git -X "${EXCL}" .
           echo "light=${FILE}" >> $GITHUB_OUTPUT
           du -h "${FILE}"
 
