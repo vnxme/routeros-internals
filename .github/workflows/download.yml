@@ -90,7 +90,7 @@ jobs:
               fi
             done
             rm -f 'hashes.txt'
-            rm -f 'replacements.txt'
+            rm -f 'links.txt'
             
             echo "done=true" >> $GITHUB_OUTPUT
           else
