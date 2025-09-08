@@ -59,6 +59,11 @@ on:
         description: "Download: override cached files"
         required: false
         type: boolean
+      skip_mainwork:
+        default: false
+        description: "Process: skip main work"
+        required: false
+        type: boolean
       reset_commits:
         description: "Reset branch (delete all commits)"
         required: false
@@ -206,6 +211,7 @@ jobs:
             echo "- reuse_releases: \`${{ inputs.reuse_releases }}\`"
             echo "- reuse_commits: \`${{ inputs.reuse_commits }}\`"
             echo "- override_cache: \`${{ inputs.override_cache }}\`"
+            echo "- skip_mainwork: \`${{ inputs.skip_mainwork }}\`"
           } >> $GITHUB_STEP_SUMMARY
 
   download:
@@ -790,20 +796,25 @@ jobs:
 
       - name: Process files
         run: |
-          sudo /tmp/process.sh
+          if [ "${{ inputs.skip_mainwork }}" == "true" ]; then
+            echo "process" > 'skipped.txt'
+          else
+            sudo /tmp/process.sh
+          fi
 
       - name: Create release files
         id: create_archive
         run: |
+          EXCL="exclusions.txt"
+          find * -type f -size +30M > "${EXCL}" || true
+
           FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}-full.tar.gz"
-          sudo tar -czf "${FILE}" .
+          sudo tar -czf "${FILE}" --exclude=.git --exclude="${EXCL}" .
           echo "full=${FILE}" >> $GITHUB_OUTPUT
           du -h "${FILE}"
           
-          EXCL="exclusions.txt"
-          find * -type f -size +30M > "${EXCL}" || true
           FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}-light.tar.gz"
-          sudo tar -czf "${FILE}" -X "${EXCL}" .
+          sudo tar -czf "${FILE}" --exclude=.git -X "${EXCL}" .
           echo "light=${FILE}" >> $GITHUB_OUTPUT
           du -h "${FILE}"
 
@@ -821,15 +832,24 @@ jobs:
             ${{ steps.create_archive.outputs.full }}
             ${{ steps.create_archive.outputs.light }}
 
-      - name: Upload release files as artifacts
-        id: upload_artifact
+      - name: Upload release files as artifacts (1/2)
+        id: upload_artifact_1
         if: ${{ !inputs.release }}
         uses: actions/upload-artifact@v4
         with:
           compression-level: 0
-          name: routeros-${{ steps.generate_ref.outputs.ref }}
+          name: routeros-${{ steps.generate_ref.outputs.ref }}-full
           path: |
             ${{ steps.create_archive.outputs.full }}
+
+      - name: Upload release files as artifacts (2/2)
+        id: upload_artifact_2
+        if: ${{ !inputs.release }}
+        uses: actions/upload-artifact@v4
+        with:
+          compression-level: 0
+          name: routeros-${{ steps.generate_ref.outputs.ref }}-light
+          path: |
             ${{ steps.create_archive.outputs.light }}
 
       - name: Remove the release file
