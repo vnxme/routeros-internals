@@ -801,7 +801,7 @@ jobs:
         id: create_archive
         run: |
           EXCL="exclusions.txt"
-          find * -type f -size +30M > "${EXCL}" || true
+          sudo find * -type f -size +30M > "${EXCL}" || true
 
           FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}-full.tar.zst"
           sudo tar --zst -cf "${FILE}" --exclude=.git --exclude="${EXCL}" .
