@@ -208,7 +208,7 @@ jobs:
             echo "- reuse_releases: \`${{ inputs.reuse_releases }}\`"
             echo "- reuse_commits: \`${{ inputs.reuse_commits }}\`"
             echo "- override_cache: \`${{ inputs.override_cache }}\`"
-            echo "- skip_mainwork: \`${{ inputs.skip_mainwork }}\`"
+            echo "- extra_args: \`${{ inputs.extra_args }}\`"
           } >> $GITHUB_STEP_SUMMARY
 
   download:
