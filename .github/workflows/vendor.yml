@@ -857,6 +857,8 @@ jobs:
         id: normalize_files
         run: |
           sudo /tmp/normalize.sh
+          sudo chown -hR $(id -un):$(id -gn) .
+          find . -type f -o -type d \! -readable -exec bash -c 'echo "warning: {} is still not readable"' \;
 
 #      - name: Compose a commit message
 #        id: compose_message
