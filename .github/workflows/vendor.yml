@@ -223,8 +223,10 @@ jobs:
       host: ${{ needs.validate.outputs.host }}
       override_cache: ${{ inputs.override_cache }}
       prefix: ${{ needs.validate.outputs.prefix }}
+      ref: ${{ matrix.ref }}
       reuse_commits: ${{ inputs.reuse_commits }}
       reuse_releases: ${{ inputs.reuse_releases }}
+      tag: ${{ matrix.tag }}
       version: ${{ matrix.version }}
 
   process:

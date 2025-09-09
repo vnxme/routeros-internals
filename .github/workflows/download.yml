@@ -16,6 +16,9 @@ on:
       prefix:
         required: true
         type: string
+      ref:
+        required: true
+        type: string
       reuse_commits:
         default: true
         required: false
@@ -24,6 +27,9 @@ on:
         default: true
         required: false
         type: boolean
+      tag:
+        required: true
+        type: string
       version:
         required: true
         type: string
@@ -40,7 +46,7 @@ jobs:
         id: restore_files
         uses: actions/cache/restore@v4
         with:
-          key: ${{ matrix.ref }}
+          key: ${{ inputs.ref }}
           lookup-only: true
           path: |
             *.txt
@@ -53,8 +59,8 @@ jobs:
         id: generate_urls
         if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
         run: |
-          BRANCH="${{ matrix.ref }}"
-          TAG="${{ matrix.tag }}"
+          BRANCH="${{ inputs.ref }}"
+          TAG="${{ inputs.tag }}"
           echo "self_r=https://github.com/${{ github.repository }}/releases/download/${TAG}" >> $GITHUB_OUTPUT
           echo "self_c=https://github.com/${{ github.repository }}/raw/refs/heads/${BRANCH}" >> $GITHUB_OUTPUT
           echo "vendor=https://${{ inputs.host }}/routeros/${{ inputs.version }}" >> $GITHUB_OUTPUT
@@ -63,7 +69,7 @@ jobs:
         id: download_everything
         if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
         run: |
-          FILE="routeros-${{ matrix.ref }}-full.tar.zst"
+          FILE="routeros-${{ inputs.ref }}-full.tar.zst"
           if [ "${{ inputs.reuse_releases }}" == "true" ]; then
             URL="${{ steps.generate_urls.outputs.self_r }}/${FILE}"
             wget -nv -O "/tmp/${FILE}" "${URL}" || rm -f "/tmp/${FILE}"
@@ -248,14 +254,14 @@ jobs:
           gh api --method DELETE \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/actions/caches?key=${{ matrix.ref }}&ref=${{ github.ref }}
+            /repos/${{ github.repository }}/actions/caches?key=${{ inputs.ref }}&ref=${{ github.ref }}
 
       - name: Save files to cache
         id: save_files
         if: ${{ inputs.override_cache || steps.restore_files.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v4
         with:
-          key: ${{ matrix.ref }}
+          key: ${{ inputs.ref }}
           path: |
             *.txt
             */*.iso
