@@ -250,11 +250,8 @@ jobs:
       - name: Copy executable files
         id: copy_files
         run: |
-          cp -r ./tools /tmp/
-          cp ./*.py /tmp/
-          cp ./*.sh /tmp/
-          chmod +x /tmp/*.py
-          chmod +x /tmp/*.sh
+          cp -r ./* /tmp/
+          chmod +x /tmp/*.py /tmp/*.sh
 
       - name: Generate a branch ref
         id: generate_ref
@@ -273,17 +270,6 @@ jobs:
 #        uses: actions/checkout@v5
 #        with:
 #          ref: ${{ steps.generate_ref.outputs.ref }}
-
-#      - name: Download the artifact
-#        uses: actions/download-artifact@v5
-#        with:
-#          name: ${{ steps.generate_ref.outputs.ref }}
-#
-#      - name: Delete the artifact
-#        uses: geekyeggo/delete-artifact@v5
-#        with:
-#          name: ${{ steps.generate_ref.outputs.ref }}
-#          failOnError: false
 
       - name: Restore files from cache
         id: restore_files
@@ -312,483 +298,6 @@ jobs:
           rm -f 'hashes.txt'
           rm -f 'links.txt'
 
-#      - name: Unpack NETINSTALL*.TAR.GZ files (1/2)
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */* -maxdepth 0 -type f -name 'netinstall*.tar.gz' -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              sudo /tmp/unpack.sh "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#            fi
-#          done
-#
-#      - name: Unpack NETINSTALL*.EXE.ZIP files (1/2)
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */* -maxdepth 0 -type f -name 'netinstall*.exe.zip' -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              sudo /tmp/unpack.sh "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#            fi
-#          done
-#
-#      - name: Unpack NETINSTALL*.EXE files
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */_netinstall*.exe.zip/* -maxdepth 0 -type f -name '*.exe' -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              sudo /tmp/unpack.sh "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#            fi
-#          done
-#
-#      - name: Unpack NETINSTALL*.EXE.ZIP files (2/2)
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */_netinstall*.exe.zip/* -maxdepth 0 -type f -name '*.exe' -print0 2>/dev/null || true
-#          )
-#          for FILE in "${FILES[@]}"; do
-#            rm "${FILE}"
-#            #if [ -d "$(dirname "${FILE}")/_$(basename "${FILE}")" ]; then
-#            #  mv "$(dirname "${FILE}")/_$(basename "${FILE}")" "/tmp/_$(basename "${FILE}")"
-#            #  rm -rf "$(dirname "${FILE}")/*"
-#            #  mv "/tmp/_$(basename "${FILE}")/*" "$(dirname "${FILE}")/"
-#            #  rm -rf "/tmp/_$(basename "${FILE}")"
-#            #fi
-#          done
-#
-#      - name: Unpack ISO files
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */* -maxdepth 0 -type f -name '*.iso' -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              sudo /tmp/unpack.sh "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#
-#              README="$(dirname ${FILE})/_$(basename ${FILE})/README.md"
-#              echo -e "#### Notes:\n- Some NPK files are replaced with symlinks to save space, if their SHA256 hashes match those of NPK files downloaded separately.\n" >> "${README}"
-#            fi
-#          done
-#
-#      - name: Unpack IMG.ZIP files (1/2)
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */* -maxdepth 0 -type f -name '*.img.zip' -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              unzip -d "$(dirname "${FILE}")/" "${FILE}" || true
-#            fi
-#          done
-#
-#      - name: Unpack IMG files
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */* -maxdepth 0 -type f -name '*.img' -print0 2>/dev/null || true
-#            find */_*.iso/* -maxdepth 0 -type f -name '*.img' -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              sudo /tmp/unpack.sh "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#            fi
-#          done
-#
-#      - name: Unpack IMG.ZIP files (2/2)
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */* -maxdepth 0 -type f -name '*.img.zip' -print0 2>/dev/null || true
-#          )
-#          for FILE in "${FILES[@]}"; do
-#            if [ -s "${FILE%%.zip}" ]; then
-#              rm "${FILE%%.zip}"
-#              if [ -d "$(dirname "${FILE}")/_$(basename "${FILE%%.zip}")" ]; then
-#                mv "$(dirname "${FILE}")/_$(basename "${FILE%%.zip}")" "$(dirname "${FILE}")/_$(basename "${FILE}")"
-#              fi
-#            fi
-#          done
-#
-#      - name: Unpack NPK files
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
-#            find */_*.img.zip/loop/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
-#            find */_*.img.zip/part2/var/pdb/*/image -maxdepth 0 -type f -print0 2>/dev/null || true
-#            find */_*.iso/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              python /tmp/unpack-npk.py "${FILE}" || true
-#            fi
-#          done
-#
-#      - name: Unpack SFS files
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
-#            find */_*.img.zip/loop/_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
-#            find */_*.img.zip/part2/var/pdb/*/_image/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
-#            find */_*.iso/_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              sudo /tmp/unpack.sh "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#            fi
-#          done
-#
-#      - name: Unpack JG.GZ files
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
-#            find */_*.img.zip/loop/_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
-#            find */_*.img.zip/part2/var/pdb/*/_image/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
-#            find */_*.iso/_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              mkdir -p "$(dirname "${FILE}")/_$(basename "${FILE}")"
-#              gzip -cdk < "${FILE}" > "$(dirname "${FILE}")/_$(basename "${FILE}")/$(basename "${FILE%%.gz}")" || true
-#            fi
-#          done
-#
-#      - name: Unpack X3 files
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-#            find */_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-#            find */_*.img.zip/loop/_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-#            find */_*.img.zip/loop/_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-#            find */_*.img.zip/part2/var/pdb/*/_image/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-#            find */_*.img.zip/part2/var/pdb/*/_image/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-#            find */_*.iso/_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-#            find */_*.iso/_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              echo "DEBUG: unpacking ${FILE}"
-#              python /tmp/unpack-x3.py "${FILE}" || true
-#            fi
-#          done
-#
-#      - name: Unpack bzImage files
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find x86/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 0 -type f -name "*.EFI" -print0 2>/dev/null || true
-#            find x86/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 0 -type f -name "*.EFI" -print0 2>/dev/null || true
-#            find x86/_*.img.zip/loop/* -maxdepth 0 -type f -name "linux" -print0 2>/dev/null || true
-#            find x86/_*.img.zip/part1/EFI/BOOT/* -maxdepth 0 -type f -name "*.EFI" -print0 2>/dev/null || true
-#            find x86/_*.img.zip/part2/var/pdb/*/_image/*.files/boot/EFI/BOOT/* -maxdepth 0 -type f -name "*.EFI" -print0 2>/dev/null || true
-#            find x86/_*.img.zip/part2/var/pdb/*/_image/_*.sfs/boot/EFI/BOOT/* -maxdepth 0 -type f -name "*.EFI" -print0 2>/dev/null || true
-#            find x86/_*.iso/_*.img/loop/* -maxdepth 0 -type f -name "linux.*" -print0 2>/dev/null || true
-#            find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 0 -type f -name "*.EFI" -print0 2>/dev/null || true
-#            find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 0 -type f -name "*.EFI" -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              sudo /tmp/unpack.sh "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#            fi
-#          done
-#
-#      - name: Unpack Image and ELF files (1/2)
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find arm/_*.npk/*.files/boot/* -maxdepth 0 -type f -name "kernel" -print0 2>/dev/null || true
-#            find arm64/_*.npk/*.files/boot/* -maxdepth 0 -type f -name "kernel" -print0 2>/dev/null || true
-#            find arm64/_*.img.zip/part1/EFI/BOOT/* -maxdepth 0 -type f -name "*.EFI" -print0 2>/dev/null || true
-#            find arm64/_*.img.zip/part2/var/pdb/*/_image/*.files/boot/* -maxdepth 0 -type f -name "kernel" -print0 2>/dev/null || true
-#            find arm64/_*.iso/_*.img/loop/EFI/BOOT/* -maxdepth 0 -type f -name "*.EFI" -print0 2>/dev/null || true
-#            find arm64/_*.iso/_*.npk/*.files/boot/* -maxdepth 0 -type f -name "kernel" -print0 2>/dev/null || true
-#            find mipsbe/_*.npk/*.files/boot/* -maxdepth 0 -type f -name "kernel" -print0 2>/dev/null || true
-#            find mmips/_*.npk/*.files/boot/* -maxdepth 0 -type f -name "kernel" -print0 2>/dev/null || true
-#            find ppc/_*.npk/*.files/boot/* -maxdepth 0 -type f -name "kernel" -print0 2>/dev/null || true
-#            find smips/_*.npk/*.files/boot/* -maxdepth 0 -type f -name "kernel" -print0 2>/dev/null || true
-#            find tile/_*.npk/*.files/boot/* -maxdepth 0 -type f -name "kernel" -print0 2>/dev/null || true
-#            find x86/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find x86/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find x86/_*.img.zip/loop/_linux/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find x86/_*.img.zip/part1/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find x86/_*.img.zip/part2/var/pdb/*/_image/*.files/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find x86/_*.img.zip/part2/var/pdb/*/_image/_*.sfs/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find x86/_*.iso/_*.img/loop/_linux.*/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              sudo /tmp/unpack.sh "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#            fi
-#          done
-#
-#      - name: Unpack Image and ELF files (2/2)
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find arm/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find arm64/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find arm64/_*.img.zip/part2/var/pdb/*/_image/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find arm64/_*.iso/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find mipsbe/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find mmips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find ppc/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find smips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#            find tile/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.vmlinux" -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              sudo /tmp/unpack.sh "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#            fi
-#          done
-#
-#      - name: Unpack RGZ files
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find tile/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'initrd.rgz' -print0 2>/dev/null || true
-#            find tile/_*.npk/_*.sfs/boot/* -maxdepth 0 -type f -name 'initrd.rgz' -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              sudo /tmp/unpack.sh "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#            fi
-#          done
-#
-#      - name: Unpack CPIO files
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find arm/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find arm/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find arm64/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find arm64/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find arm64/_*.img.zip/part1/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find arm64/_*.img.zip/part2/var/pdb/*/_image/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find arm64/_*.img.zip/part2/var/pdb/*/_image/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find arm64/_*.iso/_*.img/loop/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find arm64/_*.iso/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find arm64/_*.iso/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find mipsbe/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find mipsbe/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find mmips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find mmips/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find ppc/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find ppc/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find smips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find smips/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find tile/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find tile/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find tile/_*.npk/*.files/boot/_initrd.rgz/* -maxdepth 0 -type f -name 'initrd' -print0 2>/dev/null || true
-#            find tile/_*.npk/_*.sfs/boot/_initrd.rgz/* -maxdepth 0 -type f -name 'initrd' -print0 2>/dev/null || true
-#            find x86/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find x86/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find x86/_*.img.zip/loop/_linux/_*.vmlinux/ -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find x86/_*.img.zip/part1/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find x86/_*.img.zip/part2/var/pdb/*/_image/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find x86/_*.img.zip/part2/var/pdb/*/_image/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find x86/_*.iso/_*.img/loop/_linux.*/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#            find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name "*.cpio" -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              sudo /tmp/unpack.sh "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#            fi
-#          done
-#
-#      - name: Unpack DTB files
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find arm/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.dtb" -print0 2>/dev/null || true
-#            find mmips/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name "*.dtb" -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              sudo /tmp/unpack.sh "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#            fi
-#          done
-#
-#      - name: Unpack FWF files
-#        run: |
-#          readarray -d '' -t FILES < <(
-#            find */_*.npk/_*.sfs/etc/* -maxdepth 0 -type f -name "*.fwf" -print0 2>/dev/null || true
-#            find */_*.iso/_*.npk/_*.sfs/etc/* -maxdepth 0 -type f -name "*.fwf" -print0 2>/dev/null || true
-#          )
-#          declare -A HASHES
-#          for FILE in "${FILES[@]}"; do
-#            HASH="$(sha256sum "${FILE}" | gawk '{ print $1 }')"
-#            if [ -n "${HASHES[${HASH}]}" ]; then
-#              ln -sfr "${HASHES[${HASH}]}" "${FILE}"
-#              echo -e "${FILE} $(realpath --relative-to='.' "${HASHES[${HASH}]}")" >> 'links.txt'
-#            else
-#              HASHES[${HASH}]="$(realpath "${FILE}")"
-#              echo -e "${HASH} ${FILE}" >> 'hashes.txt'
-#              python /tmp/unpack-fwf.py "${FILE}" || true
-#
-#              if [ -d "$(dirname ${FILE})/_$(basename ${FILE})" ]; then
-#                sudo chown -hR $(id -un):$(id -gn) "$(dirname ${FILE})/_$(basename ${FILE})"
-#              fi
-#            fi
-#          done
-
       - name: Process files
         run: |
           if [ "${{ inputs.skip_mainwork }}" == "true" ]; then
@@ -798,60 +307,52 @@ jobs:
           fi
 
       - name: Create release files
-        id: create_archive
+        id: create_release
         run: |
-          EXCL="exclusions.txt"
+          EXCL='exclusions.txt'
           sudo find * -type f -size +30M > "${EXCL}" || true
-
-          FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}-full.tar.zst"
+          
+          DIR='release'
+          mkdir -p "${DIR}"
+          echo "dir=${DIR}" >> $GITHUB_OUTPUT
+          
+          FILE="${DIR}/routeros-${{ steps.generate_ref.outputs.ref }}-full.tar.zst"
           sudo tar --zst -cf "${FILE}" --exclude=.git --exclude="${EXCL}" .
           echo "full=${FILE}" >> $GITHUB_OUTPUT
           du -h "${FILE}"
           
-          FILE="/tmp/routeros-${{ steps.generate_ref.outputs.ref }}-light.tar.zst"
+          FILE="${DIR}/routeros-${{ steps.generate_ref.outputs.ref }}-light.tar.zst"
           sudo tar --zst -cf "${FILE}" --exclude=.git -X "${EXCL}" .
           echo "light=${FILE}" >> $GITHUB_OUTPUT
           du -h "${FILE}"
 
       - name: Upload release files as attachments
-        id: upload_release
+        id: upload_attachments
         if: ${{ inputs.release }}
         uses: softprops/action-gh-release@v2
         with:
           name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.prefix }}"
-          body_path: "changelog.txt"
+          body_path: 'changelog.txt'
           tag_name: v${{ matrix.version }}-${{ needs.validate.outputs.prefix }}
           make_latest:  ${{ matrix.channel == 'stable' }}
           prerelease:  ${{ matrix.channel == 'testing' }}
           files: |
-            ${{ steps.create_archive.outputs.full }}
-            ${{ steps.create_archive.outputs.light }}
+            ${{ steps.create_release.outputs.dir }}/*
 
-      - name: Upload release files as artifacts (1/2)
-        id: upload_artifact_1
+      - name: Upload release files as artifacts
+        id: upload_artifacts
         if: ${{ !inputs.release }}
         uses: actions/upload-artifact@v4
         with:
           compression-level: 0
           name: routeros-${{ steps.generate_ref.outputs.ref }}-full
           path: |
-            ${{ steps.create_archive.outputs.full }}
+            ${{ steps.create_release.outputs.dir }}/*
 
-      - name: Upload release files as artifacts (2/2)
-        id: upload_artifact_2
-        if: ${{ !inputs.release }}
-        uses: actions/upload-artifact@v4
-        with:
-          compression-level: 0
-          name: routeros-${{ steps.generate_ref.outputs.ref }}-light
-          path: |
-            ${{ steps.create_archive.outputs.light }}
-
-      - name: Remove the release file
-        id: remove_archive
+      - name: Remove release files
+        id: remove_release
         run: |
-          sudo rm -f "${{ steps.create_archive.outputs.full }}"
-          sudo rm -f "${{ steps.create_archive.outputs.light }}"
+          sudo rm -rf "${{ steps.create_release.outputs.dir }}"
 
       - name: Normalize files
         id: normalize_files
