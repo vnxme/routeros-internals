@@ -497,7 +497,7 @@ for DEP in ${DEPS[@]}; do
   fi
 done
 
-echo "${ME}: Processing arguments $@"
+[ $# -gt 0 ] && echo "${ME}: Started with $# arguments: $@" || echo "${ME}: Started with no arguments"
 
 FILE="$1"
 if [ "$#" -ne 1 -o ! -s "${FILE}" ]; then

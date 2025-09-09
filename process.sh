@@ -58,7 +58,7 @@ if [ "${EUID:-$(id -u)}" -ne 0 ]; then
   fi
 fi
 
-echo "${ME}: Parsing arguments $@"
+[ $# -gt 0 ] && echo "${ME}: Started with $# arguments: $@" || echo "${ME}: Started with no arguments"
 
 # Unpack NETINSTALL*.TAR.GZ files
 process_files <(
