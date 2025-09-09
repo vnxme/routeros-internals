@@ -1,4 +1,4 @@
-name: "Vendor RouterOS 7.x Internals Workflow"
+name: 'Vendor RouterOS 7.x Internals Workflow'
 run-name: "RouterOS 7.x: [${{ inputs.host }}]-[${{ inputs.prefix }}]-[${{ inputs.channel }}]-[${{ inputs.version }}]-[${{ inputs.scope }}]"
 on:
 #  push:
@@ -7,12 +7,12 @@ on:
   workflow_dispatch:
     inputs:
       host:
-        description: "Host (e.g., dl.example.com)"
+        description: 'Host (e.g., dl.example.com)'
         required: true
         default: 'download.mikrotik.com'
         type: string
       prefix:
-        description: "Prefix (e.g., vendor)"
+        description: 'Prefix (e.g., vendor)'
         required: true
         default: 'vendor'
         type: string
@@ -26,7 +26,7 @@ on:
           - 'testing'
           - 'stable,testing'
       version:
-        description: "Version (e.g., 7.19.4; empty means latest)"
+        description: 'Version (e.g., 7.19.4; empty means latest)'
         required: false
         default: 'latest'
         type: string
@@ -40,30 +40,30 @@ on:
           - 'download'
           - 'process'
       release:
-        description: "Release files (or upload an artifact)"
+        description: 'Release files (or upload an artifact)'
         required: false
         default: true
         type: boolean
       reuse_releases:
         default: true
-        description: "Download: reuse released files"
+        description: 'Download: reuse released files'
         required: false
         type: boolean
       reuse_commits:
         default: true
-        description: "Download: reuse committed files"
+        description: 'Download: reuse committed files'
         required: false
         type: boolean
       override_cache:
         default: false
-        description: "Download: override cached files"
+        description: 'Download: override cached files'
         required: false
         type: boolean
-      skip_mainwork:
-        default: false
-        description: "Process: skip main work"
+      extra_args:
+        default: '{"process_ignore_files":"false"}'
+        description: 'JSON of additional options'
         required: false
-        type: boolean
+        type: string
 
 permissions:
   actions: write
@@ -296,9 +296,7 @@ jobs:
 
       - name: Process files
         run: |
-          if [ "${{ inputs.skip_mainwork }}" == "true" ]; then
-            echo "process" > 'skipped.txt'
-          else
+          if [ " ${{ fromJson(inputs.extra_args).process_ignore_files }}" != "true" ]; then
             sudo /tmp/process.sh
           fi
 
