@@ -32,33 +32,13 @@ fi
 echo "${ME}: Parsing arguments $@"
 
 # Fix directory permissions
-readarray -d '' -t DIRS < <(
-  find . -type d -not -perm 755 -print0 2>/dev/null || true
-)
-for DIR in "${DIRS[@]}"; do
-  chmod 755 "${DIR}"
-done
+find . -type d -not -perm 755 -exec chmod 755 {} \;
 
 # Fix file permissions
-readarray -d '' -t FILES < <(
-  find . -type f -not -perm 644 -print0 2>/dev/null || true
-)
-for FILE in "${FILES[@]}"; do
-  chmod 644 "${FILE}"
-done
+find . -type f -not -perm 644 -exec chmod 644 {} \;
 
 # Remove block and character devices
-readarray -d '' -t DEVICES < <(
-  find . -type b -o -type c -print0 2>/dev/null || true
-)
-for DEVICE in "${DEVICES[@]}"; do
-  rm -f "${DEVICE}"
-done
+find . -type b -o -type c -exec rm -f {} \;
 
 # Put .gitignore into empty directories
-readarray -d '' -t DIRS < <(
-  find . -type d -empty -print0 2>/dev/null || true
-)
-for DIR in "${DIRS[@]}"; do
-  echo -e "*\n!.gitignore\n" > "${DIR}/.gitignore"
-done
+find . -type d -empty -exec bash -c 'echo -e "*\n!.gitignore\n" > "{}/.gitignore"' \;
