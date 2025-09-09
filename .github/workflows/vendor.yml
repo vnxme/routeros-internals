@@ -313,12 +313,12 @@ jobs:
           echo "dir=${DIR}" >> $GITHUB_OUTPUT
           
           FILE="${DIR}/routeros-${{ matrix.ref }}-full.tar.zst"
-          sudo tar --zst -cf "${FILE}" --exclude=.git --exclude="${EXCL}" .
+          sudo tar --zst -cf "${FILE}" --exclude='.git' --exclude="${DIR}" --exclude="${EXCL}" .
           echo "full=${FILE}" >> $GITHUB_OUTPUT
           du -h "${FILE}"
           
           FILE="${DIR}/routeros-${{ matrix.ref }}-light.tar.zst"
-          sudo tar --zst -cf "${FILE}" --exclude=.git -X "${EXCL}" .
+          sudo tar --zst -cf "${FILE}" --exclude='.git' --exclude="${DIR}" -X "${EXCL}" .
           echo "light=${FILE}" >> $GITHUB_OUTPUT
           du -h "${FILE}"
 
