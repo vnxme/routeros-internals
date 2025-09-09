@@ -853,32 +853,10 @@ jobs:
           sudo rm -f "${{ steps.create_archive.outputs.full }}"
           sudo rm -f "${{ steps.create_archive.outputs.light }}"
 
-      - name: Remove block and character devices before commit
+      - name: Normalize files
+        id: normalize_files
         run: |
-          readarray -d '' -t BLOCKS < <(
-            find . -type b -o -type c -print0 2>/dev/null || true
-          )
-          for BLOCK in "${BLOCKS[@]}"; do
-            sudo rm -f "${BLOCK}"
-          done
-
-      - name: Fix directory permissions
-        run: |
-          readarray -d '' -t DIRS < <(
-            find . -type d -not -perm 755 -print0 2>/dev/null || true
-          )
-          for DIR in "${DIRS[@]}"; do
-            sudo chmod 755 "${DIR}"
-          done
-
-      - name: Put .gitignore into empty directories
-        run: |
-          readarray -d '' -t DIRS < <(
-            find . -type d -empty -print0 2>/dev/null || true
-          )
-          for DIR in "${DIRS[@]}"; do
-            sudo echo -e "*\n!.gitignore\n" > "${DIR}/.gitignore"
-          done
+          sudo /tmp/normalize.sh
 
 #      - name: Compose a commit message
 #        id: compose_message
