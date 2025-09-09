@@ -164,7 +164,9 @@ jobs:
               LATEST="${VERSION}"
             fi
             [ ${#JSON} -ne 0 ] && JSON="${JSON},"
-            JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"version\":\"${LATEST}\"}"
+            REF="${{ steps.validate_prefix.outputs.prefix }}-${CHANNEL}-${LATEST}"
+            TAG="v${LATEST}-${{ steps.validate_prefix.outputs.prefix }}"
+            JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"ref\":\"${REF}\",\"tag\":\"${TAG}\",\"version\":\"${LATEST}\"}"
           done
           JSON="[${JSON}]"
           echo "matrix=${JSON}" >> $GITHUB_OUTPUT
@@ -253,29 +255,23 @@ jobs:
           cp -r ./* /tmp/
           chmod +x /tmp/*.py /tmp/*.sh
 
-      - name: Generate a branch ref
-        id: generate_ref
-        run: |
-          REF="${{ needs.validate.outputs.prefix }}-${{ matrix.channel }}-${{ matrix.version }}"
-          echo "ref=${REF}" >> $GITHUB_OUTPUT
-
-      - name: Prepare the branch
+      - name: Prepare the current branch
         id: prepare_branch
         run: |
-          BRANCH="${{ steps.generate_ref.outputs.ref }}"
+          BRANCH="${{ matrix.ref }}"
           git switch --orphan ${BRANCH}
 
 #      - name: Checkout the current branch
 #        id: checkout_branch
 #        uses: actions/checkout@v5
 #        with:
-#          ref: ${{ steps.generate_ref.outputs.ref }}
+#          ref: ${{ matrix.ref }}
 
       - name: Restore files from cache
         id: restore_files
         uses: actions/cache/restore@v4
         with:
-          key: ${{ steps.generate_ref.outputs.ref }}
+          key: ${{ matrix.ref }}
           path: |
             *.txt
             */*.iso
@@ -316,12 +312,12 @@ jobs:
           mkdir -p "${DIR}"
           echo "dir=${DIR}" >> $GITHUB_OUTPUT
           
-          FILE="${DIR}/routeros-${{ steps.generate_ref.outputs.ref }}-full.tar.zst"
+          FILE="${DIR}/routeros-${{ matrix.ref }}-full.tar.zst"
           sudo tar --zst -cf "${FILE}" --exclude=.git --exclude="${EXCL}" .
           echo "full=${FILE}" >> $GITHUB_OUTPUT
           du -h "${FILE}"
           
-          FILE="${DIR}/routeros-${{ steps.generate_ref.outputs.ref }}-light.tar.zst"
+          FILE="${DIR}/routeros-${{ matrix.ref }}-light.tar.zst"
           sudo tar --zst -cf "${FILE}" --exclude=.git -X "${EXCL}" .
           echo "light=${FILE}" >> $GITHUB_OUTPUT
           du -h "${FILE}"
@@ -345,7 +341,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           compression-level: 0
-          name: routeros-${{ steps.generate_ref.outputs.ref }}-full
+          name: routeros-${{ matrix.ref }}
           path: |
             ${{ steps.create_release.outputs.dir }}/*
 
@@ -374,6 +370,6 @@ jobs:
 #      - name: Add files, commit and push
 #        uses: stefanzweifel/git-auto-commit-action@v6
 #        with:
-#          branch: ${{ steps.generate_ref.outputs.ref }}
+#          branch: ${{ matrix.ref }}
 #          commit_message: ${{ steps.compose_message.outputs.message }}
 #          push_options: '--force'
