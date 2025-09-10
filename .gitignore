@@ -1,0 +1,18 @@
+# This branch contains an unpacked routeros-...-light.tar.zst archive.
+# Unlike routeros-...-full.tar.zst, it lacks devices and sizeable files.
+# The following files have been excluded because their size exceeds 32MB.
+arm64/mikrotik-7.19.4-arm64.iso
+arm64/_switch-marvell-7.19.4-arm64.npk/_switch-marvell.sfs/lib/libcpss.so
+arm64/_chr-7.19.4-arm64.img.zip/chr-7.19.4-arm64.img
+arm64/_mikrotik-7.19.4-arm64.iso/efiboot.img
+x86/netinstall-w64-7.19.4.exe.zip
+x86/_install-image-7.19.4.img.zip/install-image-7.19.4.img
+x86/chr-7.19.4.img.zip
+x86/_netinstall-w64-7.19.4.exe.zip/netinstall64.exe
+x86/_chr-7.19.4.img.zip/chr-7.19.4.img
+x86/_netinstall-cli-7.19.4.tar.gz/netinstall-cli
+x86/mikrotik-7.19.4.iso
+x86/netinstall-cli-7.19.4.tar.gz
+x86/_mikrotik-7.19.4.iso/efiboot.img
+x86/netinstall-w32-7.19.4.exe.zip
+x86/_netinstall-w32-7.19.4.exe.zip/netinstall.exe

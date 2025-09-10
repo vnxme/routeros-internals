@@ -1,0 +1,17 @@
+What's new in 7.19.4 (2025-Jul-28 13:00):
+
+*) arm - improved system stability when processing encrypted traffic;
+*) arm64 - increased maximum number of CPU cores to 128;
+*) ethernet - improved ethernet stability when handling invalid packets on Alpine CPUs;
+*) iot - fixed incorrectly set LoRa channel plan behavior;
+*) ipv6 - fixed policy routing;
+*) leds - fixed issues after changing "dark-mode" configuration (introduced in v7.19);
+*) license - updated URL for "libcroco" package in the license notice;
+*) log - output PoE-Out LLDP negotiation to poe,info topic;
+*) net - ensure packet sockets from containers do not disable RouterOS fastpath/fasttrack;
+*) netinstall-cli - recognize RouterOS v6 system package;
+*) port - give "gps" prefix for R11e-LR8G and R11e-LR9G GPS ports;
+*) ptp - allow priority1 value of 0 (improves stability when receiving announce messages with priority1 set to 0);
+*) routing-filter - fixed route origin matcher;
+*) system - improved system stability for CCR2216 device;
+*) system - improved system stability when using fasttrack;
