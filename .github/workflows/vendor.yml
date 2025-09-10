@@ -296,7 +296,7 @@ jobs:
         id: create_release
         run: |
           EXCL='exclusions.txt'
-          sudo find * -type f -size +30M > "${EXCL}" || true
+          sudo find * -type f -size +32M > "${EXCL}" || true
           
           DIR='release'
           mkdir -p "${DIR}"
@@ -369,6 +369,12 @@ jobs:
           sudo /tmp/normalize.sh
           sudo chown -hR $(id -un):$(id -gn) .
           find . -type f -o -type d \! -readable -exec bash -c 'echo "warning: {} is still not readable"' \;
+          {
+            echo '# This branch contains an unpacked routeros-...-light.tar.zst archive.'
+            echo '# Unlike routeros-...-full.tar.zst, it lacks devices and sizeable files.'
+            echo '# The following files have been excluded because their size exceeds 32MB.'
+            cat 'exclusions.txt'
+          } > '.gitignore'
 
       - name: Compose a commit message
         id: compose_message
