@@ -70,7 +70,7 @@ fi
 
 [ $# -gt 0 ] && echo "${ME}: Started with $# arguments: $@" || echo "${ME}: Started with no arguments"
 
-if [ -n "$1" ]; then
+if [ -n "$1" -a "${1%/}" != '.' ]; then
   DIR="${1%/}/"
   [ ! -d "${DIR}" ] && echo "${ME}: Not found directory ${DIR} ($(realpath "${DIR}")). Exiting" && exit 1
 else
