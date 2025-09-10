@@ -76,20 +76,7 @@ jobs:
           fi
           if [ -f "/tmp/${FILE}" ]; then
             sudo tar --zst -xf "/tmp/${FILE}" -C . && rm -f "/tmp/${FILE}"
-            
-            # cleanup
-            readarray -d '' -t FILES < <(
-              find */* -maxdepth 0 -type f -print0 2>/dev/null || true
-            )
-            for FILE in "${FILES[@]}"; do
-              DIR="$(dirname "${FILE}")/_$(basename "${FILE}")"
-              if [ -d "${DIR}" ]; then
-                rm -rf "${DIR}"
-              fi
-            done
-            rm -f 'hashes.txt'
-            rm -f 'links.txt'
-            
+            sudo /tmp/cleanup.sh
             echo "done=true" >> $GITHUB_OUTPUT
           else
             echo "done=false" >> $GITHUB_OUTPUT

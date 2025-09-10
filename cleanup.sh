@@ -32,20 +32,24 @@ fi
 [ $# -gt 0 ] && echo "${ME}: Started with $# arguments: $@" || echo "${ME}: Started with no arguments"
 
 if [ -n "$1" -a "${1%/}" != '.' ]; then
-  SWD="${1%/}"
+  SWD="${1%/}/"
   [ ! -d "${SWD}" ] && echo "${ME}: Not found directory ${SWD} ($(realpath "${SWD}")). Exiting" && exit 1
 else
-  SWD='.'
+  SWD=''
 fi
 
-# Fix directory permissions
-find "${SWD}" -type d -not -perm 755 -exec chmod 755 {} \;
+# Remove unpacked subdirectories in arch-based directories
+readarray -d '' -t FILES < <(
+  find "${SWD}"*/* -maxdepth 0 -type f -print0 2>/dev/null || true
+)
+for FILE in "${FILES[@]}"; do
+  DIR="$(dirname "${FILE}")/_$(basename "${FILE}")"
+  if [ -d "${DIR}" ]; then
+    rm -rf "${DIR}"
+  fi
+done
 
-# Fix file permissions
-find "${SWD}" -type f -not -perm 644 -exec chmod 644 {} \;
-
-# Remove block and character devices
-find "${SWD}" -type b -o -type c -exec rm -f {} \;
-
-# Put .gitignore into empty directories
-find "${SWD}" -type d -empty -exec bash -c 'echo -e "*\n!.gitignore\n" > "{}/.gitignore"' \;
+# Remove support files in the root directory
+rm -f "${SWD}exclusions.txt"
+rm -f "${SWD}hashes.txt"
+rm -f "${SWD}links.txt"

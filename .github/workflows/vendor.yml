@@ -284,17 +284,7 @@ jobs:
       - name: Remove unpacked files if any
         id: remove_files
         run: |
-          readarray -d '' -t FILES < <(
-            find */* -maxdepth 0 -type f -print0 2>/dev/null || true
-          )
-          for FILE in "${FILES[@]}"; do
-            DIR="$(dirname "${FILE}")/_$(basename "${FILE}")"
-            if [ -d "${DIR}" ]; then
-              rm -rf "${DIR}"
-            fi
-          done
-          rm -f 'hashes.txt'
-          rm -f 'links.txt'
+          sudo /tmp/cleanup.sh
 
       - name: Process files
         run: |
