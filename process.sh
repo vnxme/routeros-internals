@@ -20,10 +20,10 @@ MYDIR="$(dirname "$(realpath "$0")")"
 FILE_HASHES='hashes.txt'
 FILE_LINKS='links.txt'
 
-SCRIPT_UNPACK="unpack.sh"
-SCRIPT_UNPACK_FWF="unpack-fwf.py"
-SCRIPT_UNPACK_NPK="unpack-npk.py"
-SCRIPT_UNPACK_X3="unpack-x3.py"
+SCRIPT_UNPACK='unpack.sh'
+SCRIPT_UNPACK_FWF='unpack-fwf.py'
+SCRIPT_UNPACK_NPK='unpack-npk.py'
+SCRIPT_UNPACK_X3='unpack-x3.py'
 
 function process_files {
   # arguments:
