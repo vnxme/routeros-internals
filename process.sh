@@ -14,15 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ME="$(basename $0)"
+ME="$(basename "$0")"
+MYDIR="$(dirname "$(realpath "$0")")"
 
-HA='hashes.txt'
-LN='links.txt'
+FILE_HASHES='hashes.txt'
+FILE_LINKS='links.txt'
+
+SCRIPT_UNPACK="unpack.sh"
+SCRIPT_UNPACK_FWF="unpack-fwf.py"
+SCRIPT_UNPACK_NPK="unpack-npk.py"
+SCRIPT_UNPACK_X3="unpack-x3.py"
 
 function process_files {
   # arguments:
   # $1 - file descriptor with a null-separated list of files
   # $2 - script to call with each file as an argument
+
+  SCRIPT="${MYDIR}/$2"
+  [ ! -f "${SCRIPT}" ] && echo "${ME}: Not found ${SCRIPT}. Exiting" && exit 1
+  [ ! -x "${SCRIPT}" ] && chmod +x "${SCRIPT}"
 
   readarray -d '' -t FILES < <(
     cat "$1"
@@ -35,11 +45,11 @@ function process_files {
       RELATIVE="$(realpath --relative-to='.' "${REAL}")"
       echo "${ME}: Found ${FILE} with a matching SHA256 hash. Replacing it with a symbolic link to ${RELATIVE}"
       ln -sfr "${REAL}" "${FILE}"
-      echo -e "${FILE} ${RELATIVE}" >> "${LN}"
+      echo -e "${FILE} ${RELATIVE}" >> "${FILE_LINKS}"
     else
       echo "${ME}: Found ${FILE} with a SHA256 hash of ${HASH}. Calling $2"
-      "$2" "${FILE}" || true
-      echo -e "${HASH} ${FILE}" >> "${HA}"
+      "${SCRIPT}" "${FILE}" || true
+      echo -e "${HASH} ${FILE}" >> "${FILE_HASHES}"
       H2RP[${HASH}]="$(realpath "${FILE}")"
     fi
   done
@@ -63,33 +73,33 @@ fi
 # Unpack TAR.GZ files
 process_files <(
   find */* -maxdepth 0 -type f -name '*.tar.gz' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack EXE.ZIP files
 process_files <(
   find */* -maxdepth 0 -type f -name '*.exe.zip' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack EXE files
 process_files <(
   find */_*.exe.zip/* -maxdepth 0 -type f -name '*.exe' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack ISO files
 process_files <(
   find */* -maxdepth 0 -type f -name '*.iso' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack IMG.ZIP files
 process_files <(
   find */* -maxdepth 0 -type f -name '*.img.zip' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack IMG files
 process_files <(
   find */_*.img.zip/* -maxdepth 0 -type f -name '*.img' -print0 2>/dev/null || true
   find */_*.iso/* -maxdepth 0 -type f -name '*.img' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack NPK files
 process_files <(
@@ -97,7 +107,7 @@ process_files <(
   find */_*.img.zip/_*.img/loop/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
   find */_*.img.zip/_*.img/part2/var/pdb/*/image -maxdepth 0 -type f -print0 2>/dev/null || true
   find */_*.iso/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
-) '/tmp/unpack-npk.py'
+) "${SCRIPT_UNPACK_NPK}"
 
 # Unpack SFS files
 process_files <(
@@ -105,7 +115,7 @@ process_files <(
   find */_*.img.zip/_*.img/loop/_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
   find */_*.img.zip/_*.img/part2/var/pdb/*/_image/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
   find */_*.iso/_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack JG.GZ files
 process_files <(
@@ -113,7 +123,7 @@ process_files <(
   find */_*.img.zip/_*.img/loop/_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
   find */_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
   find */_*.iso/_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack X3 files
 process_files <(
@@ -125,7 +135,7 @@ process_files <(
   find */_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
   find */_*.iso/_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
   find */_*.iso/_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-) '/tmp/unpack-x3.py'
+) "${SCRIPT_UNPACK_X3}"
 
 # Unpack bzImage files
 process_files <(
@@ -138,7 +148,7 @@ process_files <(
   find x86/_*.iso/_*.img/loop/* -maxdepth 0 -type f -name 'linux.*' -print0 2>/dev/null || true
   find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
   find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack Image and ELF files (1/2)
 process_files <(
@@ -162,7 +172,7 @@ process_files <(
   find x86/_*.iso/_*.img/loop/_linux.*/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
   find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
   find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack Image and ELF files (2/2)
 process_files <(
@@ -175,13 +185,13 @@ process_files <(
   find ppc/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
   find smips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
   find tile/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack RGZ files
 process_files <(
   find tile/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'initrd.rgz' -print0 2>/dev/null || true
   find tile/_*.npk/_*.sfs/boot/* -maxdepth 0 -type f -name 'initrd.rgz' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack CPIO files
 process_files <(
@@ -216,17 +226,17 @@ process_files <(
   find x86/_*.iso/_*.img/loop/_linux.*/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
   find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
   find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack DTB files
 process_files <(
   find arm/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.dtb' -print0 2>/dev/null || true
   find mmips/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.dtb' -print0 2>/dev/null || true
-) '/tmp/unpack.sh'
+) "${SCRIPT_UNPACK}"
 
 # Unpack FWF files
 process_files <(
   find */_*.npk/_*.sfs/etc/* -maxdepth 0 -type f -name '*.fwf' -print0 2>/dev/null || true
   find */_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/etc/* -maxdepth 0 -type f -name '*.fwf' -print0 2>/dev/null || true
   find */_*.iso/_*.npk/_*.sfs/etc/* -maxdepth 0 -type f -name '*.fwf' -print0 2>/dev/null || true
-) '/tmp/unpack-fwf.py'
+) "${SCRIPT_UNPACK_FWF}"
