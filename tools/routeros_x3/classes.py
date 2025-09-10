@@ -27,12 +27,14 @@ from .enums import *
 
 
 class Attribute:
-    HEADER_FMT = '<5I'
-    HEADER_LEN = struct.calcsize(HEADER_FMT)
-    TOTAL_SIZE_FMT = '<I'
-    TOTAL_SIZE_LEN = struct.calcsize(TOTAL_SIZE_FMT)
+    _HEADER_FMT_BE_ = '>5I'
+    _HEADER_FMT_LE_ = '<5I'
+    _HEADER_LEN_ = struct.calcsize(_HEADER_FMT_LE_)
+    _TOTAL_SIZE_FMT_BE_ = '>I'
+    _TOTAL_SIZE_FMT_LE_ = '<I'
+    _TOTAL_SIZE_LEN_ = struct.calcsize(_TOTAL_SIZE_FMT_LE_)
 
-    def __init__(self, tag: str | int = 0, value_type: str | int = 0, values: None | list = None,
+    def __init__(self, be: bool = False, tag: str | int = 0, value_type: str | int = 0, values: None | list = None,
                  text: None | str = None):
         if isinstance(tag, str):
             if tag not in TAG_NAMES:
@@ -68,7 +70,7 @@ class Attribute:
                     if not isinstance(value, int):
                         raise ValueError('Values must be of type corresponding to value type')
         if text is None: text = ""
-        self.tag, self.value_type, self.values, self.text, self.text_hash = tag, value_type, values, text, False
+        self.be, self.tag, self.value_type, self.values, self.text, self.text_hash = be, tag, value_type, values, text, False
 
     def __repr__(self) -> str:
         return self.to_dict().__repr__()
@@ -87,33 +89,41 @@ class Attribute:
         result = tag + '=\"' + self.text + '\"'
         return result
 
-    def unpack(self, raw: bytes) -> Attribute:
-        if len(raw) < self.HEADER_LEN: raise ValueError("Corrupt data")
-        total_size, self.tag, self.value_type, values_count, text_size = struct.unpack(self.HEADER_FMT,
-                                                                                       raw[:self.HEADER_LEN])
-        if total_size == 0 or len(raw) != total_size + self.TOTAL_SIZE_LEN:
-            raise ValueError("Raw data length doesn't match total size")
+    def unpack(self, raw: bytes, be: bool = False) -> Attribute:
+        if len(raw) < self._HEADER_LEN_: raise ValueError("Corrupt data")
+        total_size, self.tag, self.value_type, values_count, text_size = struct.unpack(self._HEADER_FMT_BE_ if be else self._HEADER_FMT_LE_,
+                                                                                       raw[:self._HEADER_LEN_])
+        if total_size == 0 or len(raw) != total_size + self._TOTAL_SIZE_LEN_:
+            if not be:
+                total_size, self.tag, self.value_type, values_count, text_size = struct.unpack(
+                    self._HEADER_FMT_BE_, raw[:self._HEADER_LEN_])
+            if total_size == 0 or len(raw) != total_size + self._TOTAL_SIZE_LEN_:
+                raise ValueError("Raw data length doesn't match total size")
+            else:
+                self.be = True
+        else:
+            self.be = be
         if self.value_type == 0:  # string
             if values_count > 0:
                 raise ValueError("String attribute must have no non-string values")
-            if text_size + self.HEADER_LEN != len(raw):
+            if text_size + self._HEADER_LEN_ != len(raw):
                 raise ValueError("Raw data length doesn't match text size")
             try:
-                self.text = raw[self.HEADER_LEN:].decode('utf-8')
+                self.text = raw[self._HEADER_LEN_:].decode('utf-8')
             except UnicodeDecodeError:  # occurs when text contains SHA-1 or another hash
-                self.text, self.text_hash = raw[self.HEADER_LEN:].hex(), True
+                self.text, self.text_hash = raw[self._HEADER_LEN_:].hex(), True
         elif 1 <= self.value_type <= 3:  # bool, uint, int
             if values_count == 0:
                 raise ValueError("Non-string attribute must have at least one non-string value")
-            values_fmt = '<' + ('?' if self.value_type == 1 else ('I' if self.value_type == 2 else 'i')) * values_count
+            values_fmt = ('>' if self.be else '<') + ('?' if self.value_type == 1 else ('I' if self.value_type == 2 else 'i')) * values_count
             values_len = struct.calcsize(values_fmt)
-            if text_size + self.HEADER_LEN + values_len != len(raw):
+            if text_size + self._HEADER_LEN_ + values_len != len(raw):
                 raise ValueError("Raw data length doesn't match values count and type")
-            self.values = struct.unpack(values_fmt, raw[self.HEADER_LEN:][:values_len])
+            self.values = struct.unpack(values_fmt, raw[self._HEADER_LEN_:][:values_len])
             try:
-                self.text = raw[self.HEADER_LEN:][values_len:].decode('utf-8')
+                self.text = raw[self._HEADER_LEN_:][values_len:].decode('utf-8')
             except UnicodeDecodeError:  # occurs when text contains SHA-1 or another hash
-                self.text, self.text_hash = raw[self.HEADER_LEN:][values_len:].hex(), True
+                self.text, self.text_hash = raw[self._HEADER_LEN_:][values_len:].hex(), True
         else:  # unknown
             raise ValueError("Attribute of unknown value type can't be unpacked")
         return self
@@ -127,25 +137,27 @@ class Attribute:
             if len(self.values) == 0:
                 raise ValueError("Non-string attribute must have at least one non-string value")
             for value in self.values:
-                result += struct.pack('<' + ('?' if self.value_type == 1 else ('I' if self.value_type == 2 else 'i')),
+                result += struct.pack(('>' if self.be else '<') + ('?' if self.value_type == 1 else ('I' if self.value_type == 2 else 'i')),
                                       value)
         else:  # unknown
             raise ValueError("Attribute of unknown value type can't be packed")
         result += bytes.fromhex(self.text) if self.text_hash else self.text.encode('utf-8')
         text_size = len(self.text) >> 1 if self.text_hash else len(self.text)
-        total_size = len(result) + self.HEADER_LEN - self.TOTAL_SIZE_LEN
-        result = struct.pack(self.HEADER_FMT, total_size, self.tag, self.value_type, len(self.values),
+        total_size = len(result) + self._HEADER_LEN_ - self._TOTAL_SIZE_LEN_
+        result = struct.pack(self._HEADER_FMT_BE_ if self.be else self._HEADER_FMT_LE_, total_size, self.tag, self.value_type, len(self.values),
                              text_size) + result
         return result
 
 
 class Node:
-    HEADER_FMT = '<3I'
-    HEADER_LEN = struct.calcsize(HEADER_FMT)
-    TOTAL_SIZE_FMT = '<I'
-    TOTAL_SIZE_LEN = struct.calcsize(TOTAL_SIZE_FMT)
+    _HEADER_FMT_BE_ = '>3I'
+    _HEADER_FMT_LE_ = '<3I'
+    _HEADER_LEN_ = struct.calcsize(_HEADER_FMT_LE_)
+    _TOTAL_SIZE_FMT_BE_ = '>I'
+    _TOTAL_SIZE_FMT_LE_ = '<I'
+    _TOTAL_SIZE_LEN_ = struct.calcsize(_TOTAL_SIZE_FMT_LE_)
 
-    def __init__(self, tag: str | int = 0, attributes: None | list[Attribute] = None, nodes: None | list[Node] = None):
+    def __init__(self, be: bool = False, tag: str | int = 0, attributes: None | list[Attribute] = None, nodes: None | list[Node] = None):
         if isinstance(tag, str):
             if tag not in TAG_NAMES:
                 raise ValueError('Tag must be int or one of ' + ', '.join(TAG_NAMES))
@@ -155,7 +167,7 @@ class Node:
                 raise ValueError('Tag must be str or int within [0;' + str(len(TAG_NAMES) - 1) + '] range')
         if attributes is None: attributes = []
         if nodes is None: nodes = []
-        self.tag, self.attributes, self.nodes = tag, attributes, nodes
+        self.be, self.tag, self.attributes, self.nodes = be, tag, attributes, nodes
 
     def __repr__(self) -> str:
         return self.to_dict().__repr__()
@@ -192,25 +204,32 @@ class Node:
         result = indent_spaces * level + '<' + tag + attributes + nodes + '>'
         return result
 
-    def unpack(self, raw: bytes) -> Node:
-        if len(raw) < self.HEADER_LEN:
-            raise ValueError("Raw data must have at least " + str(self.HEADER_LEN) + " bytes")
-        total_size, self.tag, attributes_size = struct.unpack(self.HEADER_FMT, raw[:self.HEADER_LEN])
-        if total_size == 0 or len(raw) != total_size + self.TOTAL_SIZE_LEN:
-            raise ValueError("Raw data length doesn't match total size")
-        i, j = self.HEADER_LEN, 0
-        while i < self.HEADER_LEN + attributes_size:
+    def unpack(self, raw: bytes, be: bool = False) -> Node:
+        if len(raw) < self._HEADER_LEN_:
+            raise ValueError("Raw data must have at least " + str(self._HEADER_LEN_) + " bytes")
+        total_size, self.tag, attributes_size = struct.unpack(self._HEADER_FMT_BE_ if be else self._HEADER_FMT_LE_, raw[:self._HEADER_LEN_])
+        if total_size == 0 or len(raw) != total_size + self._TOTAL_SIZE_LEN_:
+            if not be:
+                total_size, self.tag, attributes_size = struct.unpack(self._HEADER_FMT_BE_, raw[:self._HEADER_LEN_])
+            if total_size == 0 or len(raw) != total_size + self._TOTAL_SIZE_LEN_:
+                raise ValueError("Raw data length doesn't match total size")
+            else:
+                self.be = True
+        else:
+            self.be = be
+        i, j = self._HEADER_LEN_, 0
+        while i < self._HEADER_LEN_ + attributes_size:
             a = Attribute()
-            j = i + a.TOTAL_SIZE_LEN
-            j += struct.unpack(a.TOTAL_SIZE_FMT, raw[i:j])[0]
-            self.attributes.append(a.unpack(raw[i:j]))
+            j = i + a._TOTAL_SIZE_LEN_
+            j += struct.unpack(a._TOTAL_SIZE_FMT_BE_ if self.be else a._TOTAL_SIZE_FMT_LE_, raw[i:j])[0]
+            self.attributes.append(a.unpack(raw[i:j], self.be))
             i = j
-        i, j = self.HEADER_LEN + attributes_size, 0
+        i, j = self._HEADER_LEN_ + attributes_size, 0
         while i < len(raw):
             n = Node()
-            j = i + n.TOTAL_SIZE_LEN
-            j += struct.unpack(n.TOTAL_SIZE_FMT, raw[i:j])[0]
-            self.nodes.append(n.unpack(raw[i:j]))
+            j = i + n._TOTAL_SIZE_LEN_
+            j += struct.unpack(n._TOTAL_SIZE_FMT_BE_ if self.be else n._TOTAL_SIZE_FMT_LE_, raw[i:j])[0]
+            self.nodes.append(n.unpack(raw[i:j], self.be))
             i = j
         return self
 
@@ -221,8 +240,8 @@ class Node:
         attributes_size = len(result)
         for node in self.nodes:
             result += node.pack()
-        total_size = len(result) + self.HEADER_LEN - self.TOTAL_SIZE_LEN
-        result = struct.pack(self.HEADER_FMT, total_size, self.tag, attributes_size) + result
+        total_size = len(result) + self._HEADER_LEN_ - self._TOTAL_SIZE_LEN_
+        result = struct.pack(self._HEADER_FMT_BE_ if self.be else self._HEADER_FMT_LE_, total_size, self.tag, attributes_size) + result
         return result
 
 
