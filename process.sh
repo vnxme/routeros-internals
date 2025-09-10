@@ -70,173 +70,180 @@ fi
 
 [ $# -gt 0 ] && echo "${ME}: Started with $# arguments: $@" || echo "${ME}: Started with no arguments"
 
+if [ -n "$1" ]; then
+  DIR="${1%/}/"
+  [ ! -d "${DIR}" ] && echo "${ME}: Not found directory ${DIR} ($(realpath "${DIR}")). Exiting" && exit 1
+else
+  DIR=''
+fi
+
 # Unpack TAR.GZ files
 process_files <(
-  find */* -maxdepth 0 -type f -name '*.tar.gz' -print0 2>/dev/null || true
+  find "${DIR}"*/* -maxdepth 0 -type f -name '*.tar.gz' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack EXE.ZIP files
 process_files <(
-  find */* -maxdepth 0 -type f -name '*.exe.zip' -print0 2>/dev/null || true
+  find "${DIR}"*/* -maxdepth 0 -type f -name '*.exe.zip' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack EXE files
 process_files <(
-  find */_*.exe.zip/* -maxdepth 0 -type f -name '*.exe' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.exe.zip/* -maxdepth 0 -type f -name '*.exe' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack ISO files
 process_files <(
-  find */* -maxdepth 0 -type f -name '*.iso' -print0 2>/dev/null || true
+  find "${DIR}"*/* -maxdepth 0 -type f -name '*.iso' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack IMG.ZIP files
 process_files <(
-  find */* -maxdepth 0 -type f -name '*.img.zip' -print0 2>/dev/null || true
+  find "${DIR}"*/* -maxdepth 0 -type f -name '*.img.zip' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack IMG files
 process_files <(
-  find */_*.img.zip/* -maxdepth 0 -type f -name '*.img' -print0 2>/dev/null || true
-  find */_*.iso/* -maxdepth 0 -type f -name '*.img' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.img.zip/* -maxdepth 0 -type f -name '*.img' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.iso/* -maxdepth 0 -type f -name '*.img' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack NPK files
 process_files <(
-  find */* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
-  find */_*.img.zip/_*.img/loop/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
-  find */_*.img.zip/_*.img/part2/var/pdb/*/image -maxdepth 0 -type f -print0 2>/dev/null || true
-  find */_*.iso/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
+  find "${DIR}"*/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.img.zip/_*.img/loop/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.img.zip/_*.img/part2/var/pdb/*/image -maxdepth 0 -type f -print0 2>/dev/null || true
+  find "${DIR}"*/_*.iso/* -maxdepth 0 -type f -name '*.npk' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK_NPK}"
 
 # Unpack SFS files
 process_files <(
-  find */_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
-  find */_*.img.zip/_*.img/loop/_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
-  find */_*.img.zip/_*.img/part2/var/pdb/*/_image/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
-  find */_*.iso/_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.img.zip/_*.img/loop/_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.img.zip/_*.img/part2/var/pdb/*/_image/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.iso/_*.npk/* -maxdepth 0 -type f -name '*.sfs' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack JG.GZ files
 process_files <(
-  find */_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
-  find */_*.img.zip/_*.img/loop/_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
-  find */_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
-  find */_*.iso/_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.img.zip/_*.img/loop/_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.iso/_*.npk/_*.sfs/home/web/webfig/* -maxdepth 0 -type f -name '*-*.jg.gz' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack X3 files
 process_files <(
-  find */_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-  find */_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-  find */_*.img.zip/_*.img/loop/_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-  find */_*.img.zip/_*.img/loop/_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-  find */_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-  find */_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-  find */_*.iso/_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
-  find */_*.iso/_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.img.zip/_*.img/loop/_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.img.zip/_*.img/loop/_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.iso/_*.npk/_*.sfs/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.iso/_*.npk/_*.sfs/bndl/*/nova/etc/*/* -maxdepth 0 -type f -name '*.x3' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK_X3}"
 
 # Unpack bzImage files
 process_files <(
-  find x86/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
-  find x86/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
-  find x86/_*.img.zip/_*.img/loop/* -maxdepth 0 -type f -name 'linux' -print0 2>/dev/null || true
-  find x86/_*.img.zip/_*.img/part1/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
-  find x86/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
-  find x86/_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
-  find x86/_*.iso/_*.img/loop/* -maxdepth 0 -type f -name 'linux.*' -print0 2>/dev/null || true
-  find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
-  find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.img.zip/_*.img/loop/* -maxdepth 0 -type f -name 'linux' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.img.zip/_*.img/part1/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.iso/_*.img/loop/* -maxdepth 0 -type f -name 'linux.*' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack Image and ELF files (1/2)
 process_files <(
-  find arm/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
-  find arm64/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
-  find arm64/_*.img.zip/_*.img/part1/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
-  find arm64/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
-  find arm64/_*.iso/_*.img/loop/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
-  find arm64/_*.iso/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
-  find mipsbe/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
-  find mmips/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
-  find ppc/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
-  find smips/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
-  find tile/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
-  find x86/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find x86/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find x86/_*.img.zip/_*.img/loop/_linux/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find x86/_*.img.zip/_*.img/part1/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find x86/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find x86/_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find x86/_*.iso/_*.img/loop/_linux.*/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"arm/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.img.zip/_*.img/part1/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.iso/_*.img/loop/EFI/BOOT/* -maxdepth 0 -type f -name '*.EFI' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.iso/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
+  find "${DIR}"mipsbe/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
+  find "${DIR}"mmips/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
+  find "${DIR}"ppc/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
+  find "${DIR}"smips/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
+  find "${DIR}"tile/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'kernel' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.img.zip/_*.img/loop/_linux/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.img.zip/_*.img/part1/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.iso/_*.img/loop/_linux.*/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack Image and ELF files (2/2)
 process_files <(
-  find arm/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find arm64/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find arm64/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find arm64/_*.iso/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find mipsbe/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find mmips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find ppc/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find smips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
-  find tile/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"arm/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.iso/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"mipsbe/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"mmips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"ppc/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"smips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
+  find "${DIR}"tile/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.vmlinux' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack RGZ files
 process_files <(
-  find tile/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'initrd.rgz' -print0 2>/dev/null || true
-  find tile/_*.npk/_*.sfs/boot/* -maxdepth 0 -type f -name 'initrd.rgz' -print0 2>/dev/null || true
+  find "${DIR}"tile/_*.npk/*.files/boot/* -maxdepth 0 -type f -name 'initrd.rgz' -print0 2>/dev/null || true
+  find "${DIR}"tile/_*.npk/_*.sfs/boot/* -maxdepth 0 -type f -name 'initrd.rgz' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack CPIO files
 process_files <(
-  find arm/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find arm/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find arm64/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find arm64/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find arm64/_*.img.zip/_*.img/part1/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find arm64/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find arm64/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find arm64/_*.iso/_*.img/loop/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find arm64/_*.iso/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find arm64/_*.iso/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find mipsbe/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find mipsbe/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find mmips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find mmips/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find ppc/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find ppc/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find smips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find smips/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find tile/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find tile/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find tile/_*.npk/*.files/boot/_initrd.rgz/* -maxdepth 0 -type f -name 'initrd' -print0 2>/dev/null || true
-  find tile/_*.npk/_*.sfs/boot/_initrd.rgz/* -maxdepth 0 -type f -name 'initrd' -print0 2>/dev/null || true
-  find x86/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find x86/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find x86/_*.img.zip/_*.img/loop/_linux/_*.vmlinux/ -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find x86/_*.img.zip/_*.img/part1/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find x86/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find x86/_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find x86/_*.iso/_*.img/loop/_linux.*/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
-  find x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"arm/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"arm/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.img.zip/_*.img/part1/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.iso/_*.img/loop/EFI/BOOT/_*.EFI/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.iso/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"arm64/_*.iso/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"mipsbe/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"mipsbe/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"mmips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"mmips/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"ppc/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"ppc/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"smips/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"smips/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"tile/_*.npk/*.files/boot/_kernel/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"tile/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"tile/_*.npk/*.files/boot/_initrd.rgz/* -maxdepth 0 -type f -name 'initrd' -print0 2>/dev/null || true
+  find "${DIR}"tile/_*.npk/_*.sfs/boot/_initrd.rgz/* -maxdepth 0 -type f -name 'initrd' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.img.zip/_*.img/loop/_linux/_*.vmlinux/ -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.img.zip/_*.img/part1/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.img.zip/_*.img/part2/var/pdb/*/_image/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.iso/_*.img/loop/_linux.*/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
+  find "${DIR}"x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/* -maxdepth 0 -type f -name '*.cpio' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack DTB files
 process_files <(
-  find arm/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.dtb' -print0 2>/dev/null || true
-  find mmips/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.dtb' -print0 2>/dev/null || true
+  find "${DIR}"arm/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.dtb' -print0 2>/dev/null || true
+  find "${DIR}"mmips/_*.npk/*.files/boot/_kernel/_*.vmlinux/* -maxdepth 0 -type f -name '*.dtb' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK}"
 
 # Unpack FWF files
 process_files <(
-  find */_*.npk/_*.sfs/etc/* -maxdepth 0 -type f -name '*.fwf' -print0 2>/dev/null || true
-  find */_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/etc/* -maxdepth 0 -type f -name '*.fwf' -print0 2>/dev/null || true
-  find */_*.iso/_*.npk/_*.sfs/etc/* -maxdepth 0 -type f -name '*.fwf' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.npk/_*.sfs/etc/* -maxdepth 0 -type f -name '*.fwf' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/etc/* -maxdepth 0 -type f -name '*.fwf' -print0 2>/dev/null || true
+  find "${DIR}"*/_*.iso/_*.npk/_*.sfs/etc/* -maxdepth 0 -type f -name '*.fwf' -print0 2>/dev/null || true
 ) "${SCRIPT_UNPACK_FWF}"
