@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ME="$(basename $0)"
+ME="$(basename "$0")"
 
 if [ "${EUID:-$(id -u)}" -ne 0 ]; then
   echo "${ME}: Root permissions are required"
