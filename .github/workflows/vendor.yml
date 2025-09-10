@@ -60,7 +60,7 @@ on:
         required: false
         type: boolean
       extra_args:
-        default: '{"process_ignore_files":"false"}'
+        default: '{"process_ignore_files":"false","no_push":"false"}'
         description: 'JSON of additional options'
         required: false
         type: string
@@ -374,24 +374,28 @@ jobs:
 
       - name: Normalize files
         id: normalize_files
+        if: ${{ fromJSON(inputs.extra_args).no_push != 'true' }}
         run: |
           sudo /tmp/normalize.sh
           sudo chown -hR $(id -un):$(id -gn) .
           find . -type f -o -type d \! -readable -exec bash -c 'echo "warning: {} is still not readable"' \;
 
-#      - name: Compose a commit message
-#        id: compose_message
-#        run: |
-#          {
-#            echo 'message<<EOF'
-#            echo -e "Automatic changes by ${{ github.run_id }}:${{ github.run_attempt }}:process\n\n"
-#            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
-#            echo EOF
-#          } >> $GITHUB_OUTPUT
-#
-#      - name: Add files, commit and push
-#        uses: stefanzweifel/git-auto-commit-action@v6
-#        with:
-#          branch: ${{ matrix.ref }}
-#          commit_message: ${{ steps.compose_message.outputs.message }}
-#          push_options: '--force'
+      - name: Compose a commit message
+        id: compose_message
+        if: ${{ fromJSON(inputs.extra_args).no_push != 'true' }}
+        run: |
+          {
+            echo 'message<<EOF'
+            echo -e "Automatic changes by ${{ github.run_id }}:${{ github.run_attempt }}:process\n\n"
+            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Add files, commit and push
+        id: push_files
+        if: ${{ fromJSON(inputs.extra_args).no_push != 'true' }}
+        uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+          branch: ${{ matrix.ref }}
+          commit_message: ${{ steps.compose_message.outputs.message }}
+          push_options: '--force'
