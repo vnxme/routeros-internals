@@ -476,7 +476,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.label }}"
-          body_path: 'changelog.txt'
+          body_path: "${{ env.box }}/changelog.txt"
           tag_name: "${{ env.tag }}"
 #          make_latest:  ${{ matrix.channel == 'stable' }}
           prerelease:  ${{ matrix.channel == 'testing' }}
