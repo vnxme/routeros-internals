@@ -284,7 +284,7 @@ jobs:
       key: "${{ needs.validate.outputs.label }}-${{ matrix.version }}-process"
     steps:
       - name: Look up processed files in cache
-        id: lookup
+        id: lookup_processed
         uses: actions/cache/restore@v4
         with:
           key: "${{ env.key }}"
@@ -294,22 +294,22 @@ jobs:
 
       - name: Make '${{ env.app }}', '${{ env.box }}' and '${{ env.tmp }}' directories
         id: make_dirs
-        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup_processed.outputs.cache-hit != 'true' }}
         run: |
           mkdir -p {"${{ env.app }}","${{ env.box }}","${{ env.tmp }}"}
 
       - name: Restore an archive with downloaded files from cache into '${{ env.tmp }}' directory
-        id: restore_cache
-        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        id: restore_downloaded
+        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup_processed.outputs.cache-hit != 'true' }}
         uses: actions/cache/restore@v4
         with:
           key: "${{ env.dkey }}"
           path:
-            "${{ env.box }}/${{ env.dkey }}.tar.zst"
+            "${{ env.tmp }}/${{ env.dkey }}.tar.zst"
 
       - name: Unpack downloaded files into '${{ env.box }}' directory
         id: unpack_archive
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.dkey }}.tar.zst"
           sudo tar --zst -xf "${FILE}" -C "${{ env.box }}" && rm -f "${FILE}"
@@ -318,14 +318,14 @@ jobs:
 
       - name: Checkout 'main' branch into '${{ env.app }}' directory
         id: checkout_repository
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         uses: actions/checkout@v5
         with:
           path: "${{ env.app }}"
 
       - name: Install requirements leveraging cache
         id: install_requirements
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           execute_install_scripts: true
@@ -334,7 +334,7 @@ jobs:
 
       - name: Process files in '${{ env.box }}' directory
         id: process_files
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         run: |
           if [ " ${{ fromJson(inputs.extras).process_ignore_files }}" != "true" ]; then
             sudo "${{ env.app }}/process.sh" "${{ env.box }}"
@@ -342,14 +342,14 @@ jobs:
 
       - name: Create an archive in '${{ env.tmp }}' directory with processed files in '${{ env.box }}' directory
         id: create_archive
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.key }}.tar.zst"
           sudo tar --zst -cf "${FILE}" -X "${{ env.tmp }}/downloaded.txt" -C "${{ env.box }}" .
 
       - name: Delete processed files from cache
         id: delete_cache
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && steps.lookup.outputs.cache-hit == 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.lookup_processed.outputs.cache-hit == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -360,7 +360,7 @@ jobs:
 
       - name: Save processed files from '${{ env.box }}' directory to cache
         id: save_cache
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         uses: actions/cache/save@v4
         with:
           key: "${{ env.key }}"
