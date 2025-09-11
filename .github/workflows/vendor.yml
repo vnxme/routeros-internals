@@ -446,7 +446,7 @@ jobs:
           du -h "${FILE}"
           
           FILE="${DIR}/routeros-${{ env.branch }}-light.tar.zst"
-          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' -X "${EXCL}"  -C "${{ env.box }}" .
+          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' -X "${{ env.box }}/${EXCL}"  -C "${{ env.box }}" .
           du -h "${FILE}"
 
       - name: Delete duplicate release and tag
