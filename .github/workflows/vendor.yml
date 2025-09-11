@@ -436,16 +436,15 @@ jobs:
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' }}
         run: |
           EXCL='exclusions.txt'
-          sudo find "${{ env.box }}"/* -type f -size +32M > "${{ env.box }}/${EXCL}" || true
+          cd "${{ env.box }}"
+          sudo find * -type f -size +32M > "${EXCL}" || true
+          cd -
           
-          DIR="${{ env.tmp }}"
-          mkdir -p "${DIR}"
-          
-          FILE="${DIR}/routeros-${{ env.branch }}-full.tar.zst"
+          FILE="${{ env.tmp }}/routeros-${{ env.branch }}-full.tar.zst"
           sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' --exclude="${EXCL}" -C "${{ env.box }}" .
           du -h "${FILE}"
           
-          FILE="${DIR}/routeros-${{ env.branch }}-light.tar.zst"
+          FILE="${{ env.tmp }}/routeros-${{ env.branch }}-light.tar.zst"
           sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' -X "${{ env.box }}/${EXCL}"  -C "${{ env.box }}" .
           du -h "${FILE}"
 
