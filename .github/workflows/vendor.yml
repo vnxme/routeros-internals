@@ -342,7 +342,7 @@ jobs:
           name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.prefix }}"
           body_path: 'changelog.txt'
           tag_name: v${{ matrix.version }}-${{ needs.validate.outputs.prefix }}
-          make_latest:  ${{ matrix.channel == 'stable' }}
+#          make_latest:  ${{ matrix.channel == 'stable' }}
           prerelease:  ${{ matrix.channel == 'testing' }}
           files: |
             ${{ steps.create_release.outputs.dir }}/*
