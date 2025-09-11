@@ -50,15 +50,11 @@ jobs:
           lookup-only: true
           path: 'sandbox'
 
-      - name: Generate download URLs
-        id: generate_urls
-        if: ${{ inputs.override_cache || steps.lookup_cache.outputs.cache-hit != 'true' }}
-        run: |
-          BRANCH="${{ inputs.ref }}"
-          TAG="${{ inputs.tag }}"
-          echo "self_r=https://github.com/${{ github.repository }}/releases/download/${TAG}" >> $GITHUB_OUTPUT
-          echo "self_c=https://github.com/${{ github.repository }}/raw/refs/heads/${BRANCH}" >> $GITHUB_OUTPUT
-          echo "vendor=https://${{ inputs.host }}/routeros/${{ inputs.version }}" >> $GITHUB_OUTPUT
+      - name: Checkout 'main' branch into 'app' directory
+        id: checkout_repository
+        uses: actions/checkout@v5
+        with:
+          path: 'app'
 
       - name: Download files from release, branch or vendor
         id: download_files
