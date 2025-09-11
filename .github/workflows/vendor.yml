@@ -290,7 +290,7 @@ jobs:
           key: "${{ env.key }}"
           lookup-only: 'true'
           path:
-            "${{ env.box }}/${{ env.key }}.tar.zst"
+            "${{ env.tmp }}/${{ env.key }}.tar.zst"
 
       - name: Make '${{ env.app }}', '${{ env.box }}' and '${{ env.tmp }}' directories
         id: make_dirs
