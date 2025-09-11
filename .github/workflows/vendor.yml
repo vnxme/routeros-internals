@@ -373,7 +373,7 @@ jobs:
             echo '# This branch contains an unpacked routeros-...-light.tar.zst archive.'
             echo '# Unlike routeros-...-full.tar.zst, it lacks devices and sizeable files.'
             echo '# The following files have been excluded because their size exceeds 32MB.'
-            cat 'exclusions.txt'
+            sort 'exclusions.txt' | xargs du -h | gawk '{print $2 " # " $1}'
           } > '.gitignore'
 
       - name: Compose a commit message
