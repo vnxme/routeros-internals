@@ -52,6 +52,7 @@ jobs:
 
       - name: Checkout 'main' branch into 'app' directory
         id: checkout_repository
+        if: ${{ inputs.override_cache || steps.lookup_cache.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v5
         with:
           path: 'app'
@@ -60,6 +61,7 @@ jobs:
         id: download_files
         if: ${{ inputs.override_cache || steps.lookup_cache.outputs.cache-hit != 'true' }}
         run: |
+          mkdir -p 'sandbox'
           sudo app/download.sh -d 'sandbox' -l "${{ inputs.prefix }}" -v "${{ inputs.version }}"
 
       - name: Delete downloaded files from cache
