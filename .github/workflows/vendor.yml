@@ -39,6 +39,7 @@ on:
           - 'validate'
           - 'download'
           - 'process'
+          - 'release'
       release:
         description: 'Release files (or upload an artifact)'
         required: false
@@ -60,7 +61,7 @@ on:
         required: false
         type: boolean
       extra_args:
-        default: '{"process_ignore_files":"false","no_push":"false"}'
+        default: '{"force_process":"false","process_ignore_files":"false","no_push":"false"}'
         description: 'JSON of additional options'
         required: false
         type: string
@@ -84,6 +85,7 @@ jobs:
       scope: ${{ steps.validate_scope.outputs.scope }}
       scope_has_download: ${{ steps.validate_scope.outputs.download }}
       scope_has_process: ${{ steps.validate_scope.outputs.process }}
+      scope_has_release: ${{ steps.validate_scope.outputs.release }}
     steps:
       - name: Validate host value
         id: validate_host
@@ -178,12 +180,19 @@ jobs:
           if [ "${SCOPE}" == "validate" ]; then
             DOWNLOAD=false
             PROCESS=false
+            RELEASE=false
           elif [ "${SCOPE}" == "download" ]; then
             DOWNLOAD=true
             PROCESS=false
+            RELEASE=false
           elif [ "${SCOPE}" == "process" ]; then
             DOWNLOAD=true
             PROCESS=true
+            RELEASE=false
+          elif [ "${SCOPE}" == "release" ]; then
+            DOWNLOAD=true
+            PROCESS=true
+            RELEASE=true
           else
             echo "::error input=scope,value=${SCOPE}::Invalid scope value"
             exit 1
@@ -191,6 +200,7 @@ jobs:
           echo "scope=${SCOPE%,}" >> $GITHUB_OUTPUT
           echo "download=${DOWNLOAD}" >> $GITHUB_OUTPUT
           echo "process=${PROCESS}" >> $GITHUB_OUTPUT
+          echo "release=${RELEASE}" >> $GITHUB_OUTPUT
 
       - name: Compose a step summary
         id: compose_summary
@@ -247,74 +257,117 @@ jobs:
           packages: binutils-common binwalk bzip2 device-tree-compiler genisoimage gzip lz4 lzma lzop qemu-utils rsync xz-utils zip zstd
           version: 1.0
 
-      - name: Checkout the main branch
-        id: checkout_main
+      - name: Checkout 'main' branch into 'app' directory
+        id: checkout_repository
         uses: actions/checkout@v5
+        with:
+          path: 'app'
 
-      - name: Copy executable files
-        id: copy_files
+      - name: Look up processed files in cache
+        id: lookup_cache
+        uses: actions/cache/restore@v4
+        with:
+          key: "${{ matrix.ref }}-process"
+          lookup-only: 'true'
+          path: 'sandbox'
+
+      - name: Restore downloaded files from cache into 'sandbox' directory
+        id: restore_cache
+        if: ${{ fromJSON(inputs.extra_args).force_process == 'true' || steps.lookup_cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/restore@v4
+        with:
+          key: "${{ matrix.ref }}-download"
+          path: 'sandbox'
+
+      - name: Process files in 'sandbox' directory
+        id: process_files
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
         run: |
-          cp -r ./* /tmp/
-          chmod +x /tmp/*.py /tmp/*.sh
+          if [ " ${{ fromJson(inputs.extra_args).process_ignore_files }}" != "true" ]; then
+            sudo app/cleanup.sh 'sandbox'
+            sudo app/process.sh 'sandbox'
+          fi
 
-      - name: Prepare the current branch
+      - name: Delete processed files from cache
+        id: delete_cache
+        if: ${{ fromJSON(inputs.extra_args).force_process == 'true' && steps.lookup_cache.outputs.cache-hit == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method DELETE \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/${{ github.repository }}/actions/caches?key=${{ matrix.ref }}-process&ref=${{ github.ref }}
+
+      - name: Save processed files from 'sandbox' directory to cache
+        id: save_cache
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          key: "${{ matrix.ref }}-process"
+          path: 'sandbox'
+
+  release:
+    needs:
+      - validate
+      - download
+      - process
+    if: needs.validate.outputs.scope_has_release == 'true'
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.validate.outputs.matrix) }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout 'main' branch into 'sandbox' directory
+        id: checkout_repository
+        uses: actions/checkout@v5
+        with:
+          path: 'sandbox'
+
+#      - name: Checkout '${{ matrix.ref }}' branch into 'sandbox' directory
+#        id: checkout_repository
+#        uses: actions/checkout@v5
+#        with:
+#          path: 'sandbox'
+#          ref: ${{ matrix.ref }}
+
+      - name: Switch 'main' branch to '${{ matrix.ref }}' branch
         id: prepare_branch
         run: |
           BRANCH="${{ matrix.ref }}"
-          git switch --orphan ${BRANCH}
+          cd 'sandbox' && git switch --orphan "${BRANCH}"
 
-#      - name: Checkout the current branch
-#        id: checkout_branch
-#        uses: actions/checkout@v5
-#        with:
-#          ref: ${{ matrix.ref }}
-
-      - name: Restore files from cache
-        id: restore_files
+      - name: Restore processed files from cache into 'sandbox' directory
+        id: restore_cache
         uses: actions/cache/restore@v4
         with:
-          key: ${{ matrix.ref }}
-          path: |
-            *.txt
-            */*.iso
-            */*.npk
-            */*.tar.gz
-            */*.zip
-
-      - name: Remove unpacked files if any
-        id: remove_files
-        run: |
-          sudo /tmp/cleanup.sh
-
-      - name: Process files
-        run: |
-          if [ " ${{ fromJson(inputs.extra_args).process_ignore_files }}" != "true" ]; then
-            sudo /tmp/process.sh
-          fi
+          key: ${{ matrix.ref }}-processed
+          path: 'sandbox'
 
       - name: Create release files
         id: create_release
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
         run: |
           EXCL='exclusions.txt'
-          sudo find * -type f -size +32M > "${EXCL}" || true
+          sudo find sandbox/* -type f -size +32M > "sandbox/${EXCL}" || true
           
           DIR='release'
           mkdir -p "${DIR}"
           echo "dir=${DIR}" >> $GITHUB_OUTPUT
           
           FILE="${DIR}/routeros-${{ matrix.ref }}-full.tar.zst"
-          sudo tar --zst -cf "${FILE}" --exclude='.git' --exclude="${DIR}" --exclude="${EXCL}" .
+          sudo tar --zst -cf "${FILE}" --exclude='.git' --exclude="${EXCL}" -C 'sandbox' .
           echo "full=${FILE}" >> $GITHUB_OUTPUT
           du -h "${FILE}"
           
           FILE="${DIR}/routeros-${{ matrix.ref }}-light.tar.zst"
-          sudo tar --zst -cf "${FILE}" --exclude='.git' --exclude="${DIR}" -X "${EXCL}" .
+          sudo tar --zst -cf "${FILE}" --exclude='.git' -X "${EXCL}"  -C 'sandbox' .
           echo "light=${FILE}" >> $GITHUB_OUTPUT
           du -h "${FILE}"
 
       - name: Delete duplicate release and tag
         id: delete_release
-        if: ${{ inputs.release }}
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && inputs.release }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -336,7 +389,7 @@ jobs:
 
       - name: Upload release files as attachments
         id: upload_attachments
-        if: ${{ inputs.release }}
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && inputs.release }}
         uses: softprops/action-gh-release@v2
         with:
           name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.prefix }}"
@@ -349,7 +402,7 @@ jobs:
 
       - name: Upload release files as artifacts
         id: upload_artifacts
-        if: ${{ !inputs.release }}
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && !inputs.release }}
         uses: actions/upload-artifact@v4
         with:
           compression-level: 0
@@ -359,26 +412,27 @@ jobs:
 
       - name: Remove release files
         id: remove_release
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
         run: |
           sudo rm -rf "${{ steps.create_release.outputs.dir }}"
 
       - name: Normalize files
         id: normalize_files
-        if: ${{ fromJSON(inputs.extra_args).no_push != 'true' }}
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && fromJSON(inputs.extra_args).no_push != 'true' }}
         run: |
-          sudo /tmp/normalize.sh
-          sudo chown -hR $(id -un):$(id -gn) .
-          find . -type f -o -type d \! -readable -exec bash -c 'echo "warning: {} is still not readable"' \;
+          sudo app/normalize.sh 'sandbox'
+          sudo chown -hR $(id -un):$(id -gn) 'sandbox'
+          find sandbox/* -type f -o -type d \! -readable -exec bash -c 'echo "warning: {} is still not readable"' \;
           {
             echo '# This branch contains an unpacked routeros-...-light.tar.zst archive.'
             echo '# Unlike routeros-...-full.tar.zst, it lacks devices and sizeable files.'
             echo '# The following files have been excluded because their size exceeds 32MB.'
-            sort 'exclusions.txt' | xargs du -h | gawk '{print $2 " # " $1}'
-          } > '.gitignore'
+            sort 'sandbox/exclusions.txt' | xargs du -h | gawk '{print $2 " # " $1}'
+          } > 'sandbox/.gitignore'
 
       - name: Compose a commit message
         id: compose_message
-        if: ${{ fromJSON(inputs.extra_args).no_push != 'true' }}
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && fromJSON(inputs.extra_args).no_push != 'true' }}
         run: |
           {
             echo 'message<<EOF'
@@ -389,9 +443,10 @@ jobs:
 
       - name: Add files, commit and push
         id: push_files
-        if: ${{ fromJSON(inputs.extra_args).no_push != 'true' }}
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && fromJSON(inputs.extra_args).no_push != 'true' }}
         uses: stefanzweifel/git-auto-commit-action@v6
         with:
           branch: ${{ matrix.ref }}
           commit_message: ${{ steps.compose_message.outputs.message }}
           push_options: '--force'
+          repository: 'sandbox'
