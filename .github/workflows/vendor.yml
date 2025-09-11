@@ -1,21 +1,20 @@
-name: 'Vendor RouterOS 7.x Internals Workflow'
-run-name: "RouterOS 7.x: [${{ inputs.host }}]-[${{ inputs.prefix }}]-[${{ inputs.channel }}]-[${{ inputs.version }}]-[${{ inputs.scope }}]"
+name: 'RouterOS 7.x Internals Workflow'
+run-name: "RouterOS 7.x: [${{ inputs.label }}]-[${{ inputs.channel }}]-[${{ inputs.version }}]-[${{ inputs.scope }}]"
 on:
 #  push:
 #    branches:
 #      - main
   workflow_dispatch:
     inputs:
-      host:
-        description: 'Host (e.g., dl.example.com)'
-        required: true
-        default: 'download.mikrotik.com'
-        type: string
-      prefix:
-        description: 'Prefix (e.g., vendor)'
+      label:
+        description: 'Label (e.g., vendor)'
         required: true
         default: 'vendor'
-        type: string
+        type: choice
+        options:
+          - 'vendor'
+          - 'elseif'
+          - 'custom'
       channel:
         description: 'Channel (e.g., stable)'
         required: true
@@ -33,7 +32,7 @@ on:
       scope:
         description: 'Scope of work (do jobs up to, inclusive)'
         required: true
-        default: 'process'
+        default: 'release'
         type: choice
         options:
           - 'validate'
@@ -55,13 +54,8 @@ on:
         description: 'Download: reuse committed files'
         required: false
         type: boolean
-      override_cache:
-        default: false
-        description: 'Download: override cached files'
-        required: false
-        type: boolean
-      extra_args:
-        default: '{"force_process":"false","process_ignore_files":"false","no_push":"false"}'
+      extras:
+        default: '{"custom_label":"vnxme","custom_repo":"vnxme/MikroTikPatch","force_download":"false","force_process":"false","process_ignore_files":"false","no_push":"false"}'
         description: 'JSON of additional options'
         required: false
         type: string
@@ -71,14 +65,16 @@ permissions:
   contents: write
 
 env:
+  app: 'app'
+  box: 'box'
+  tmp: 'tmp'
   TZ: 'Europe/London'
 
 jobs:
   validate:
     runs-on: ubuntu-24.04
     outputs:
-      host: ${{ steps.validate_host.outputs.host }}
-      prefix: ${{ steps.validate_prefix.outputs.prefix }}
+      label: ${{ steps.validate_label.outputs.label }}
       channel: ${{ steps.validate_channel.outputs.channel }}
       version: ${{ steps.validate_version.outputs.version }}
       matrix: ${{ steps.generate_matrix.outputs.matrix }}
@@ -87,25 +83,15 @@ jobs:
       scope_has_process: ${{ steps.validate_scope.outputs.process }}
       scope_has_release: ${{ steps.validate_scope.outputs.release }}
     steps:
-      - name: Validate host value
-        id: validate_host
+      - name: Validate label value
+        id: validate_label
         run: |
-          HOST="$(echo "${{ inputs.host }}" | xargs)"
-          if [ -z "$(echo "${HOST}" | grep -P '(?=^.{1,254}$)(^(?>(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)')" ]; then
-            echo "::error input=host,value=${HOST}::Invalid host value"
+          LABEL="$(echo "${{ inputs.label }}" | xargs)"
+          if [ -z "$(echo "${LABEL}" | grep -P '^[0-9a-zA-Z]+$')" ]; then
+            echo "::error input=label,value=${LABEL}::Invalid label value"
             exit 1
           fi
-          echo "host=${HOST}" >> $GITHUB_OUTPUT
-
-      - name: Validate prefix value
-        id: validate_prefix
-        run: |
-          PREFIX="$(echo "${{ inputs.prefix }}" | xargs)"
-          if [ -z "$(echo "${PREFIX}" | grep -P '^[0-9a-zA-Z]+$')" ]; then
-            echo "::error input=prefix,value=${PREFIX}::Invalid prefix value"
-            exit 1
-          fi
-          echo "prefix=${PREFIX}" >> $GITHUB_OUTPUT
+          echo "label=${LABEL}" >> $GITHUB_OUTPUT
 
       - name: Validate channel value
         id: validate_channel
@@ -155,7 +141,7 @@ jobs:
           for CHANNEL in ${CHANNELS[@]}; do
             if [ -z "${VERSION}" -o "${VERSION}" == "latest" ]; then
               FILE="version_${CHANNEL}.txt"
-              URL="https://${{ steps.validate_host.outputs.host }}/routeros/NEWESTa7.${CHANNEL}"
+              URL="https://download.mikrotik.com/routeros/NEWESTa7.${CHANNEL}"
               wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
               if [ ! -f "${FILE}" ]; then
                 echo "::error::Failed to get the latest version for the ${CHANNEL} channel"
@@ -166,9 +152,7 @@ jobs:
               LATEST="${VERSION}"
             fi
             [ ${#JSON} -ne 0 ] && JSON="${JSON},"
-            REF="${{ steps.validate_prefix.outputs.prefix }}-${CHANNEL}-${LATEST}"
-            TAG="v${LATEST}-${{ steps.validate_prefix.outputs.prefix }}"
-            JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"ref\":\"${REF}\",\"tag\":\"${TAG}\",\"version\":\"${LATEST}\"}"
+            JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"version\":\"${LATEST}\"}"
           done
           JSON="[${JSON}]"
           echo "matrix=${JSON}" >> $GITHUB_OUTPUT
@@ -207,8 +191,7 @@ jobs:
         run: |
           {
             echo "### Outputs"
-            echo "- host: \`${{ steps.validate_host.outputs.host }}\`"
-            echo "- prefix: \`${{ steps.validate_prefix.outputs.prefix }}\`"
+            echo "- label: \`${{ steps.validate_label.outputs.label }}\`"
             echo "- channel: \`${{ steps.validate_channel.outputs.channel }}\`"
             echo "- version: \`${{ steps.validate_version.outputs.version }}\`"
             echo "- matrix: \`${{ steps.generate_matrix.outputs.matrix }}\`"
@@ -217,8 +200,7 @@ jobs:
             echo "- scope_has_process: \`${{ steps.validate_scope.outputs.process }}\`"
             echo "- reuse_releases: \`${{ inputs.reuse_releases }}\`"
             echo "- reuse_commits: \`${{ inputs.reuse_commits }}\`"
-            echo "- override_cache: \`${{ inputs.override_cache }}\`"
-            echo "- extra_args: \`${{ inputs.extra_args }}\`"
+            echo "- extras: \`${{ inputs.extras }}\`"
           } >> $GITHUB_STEP_SUMMARY
 
   download:
@@ -227,17 +209,66 @@ jobs:
     strategy:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
-    uses: ./.github/workflows/download.yml
-    with:
-      channel: ${{ matrix.channel }}
-      host: ${{ needs.validate.outputs.host }}
-      override_cache: ${{ inputs.override_cache }}
-      prefix: ${{ needs.validate.outputs.prefix }}
-      ref: ${{ matrix.ref }}
-      reuse_commits: ${{ inputs.reuse_commits }}
-      reuse_releases: ${{ inputs.reuse_releases }}
-      tag: ${{ matrix.tag }}
-      version: ${{ matrix.version }}
+    runs-on: ubuntu-24.04
+    env:
+      key: "${{ needs.validate.outputs.label }}-${{ matrix.version }}-download"
+    steps:
+      - name: Look up downloaded files in cache
+        id: lookup
+        uses: actions/cache/restore@v4
+        with:
+          key: "${{ env.key }}"
+          lookup-only: true
+          path:
+            "${{ env.tmp }}/${{ env.key }}.tar.zst"
+
+      - name: Make '${{ env.app }}', '${{ env.box }}' and '${{ env.tmp }}' directories
+        id: make_dirs
+        if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        run: |
+          mkdir -p {"${{ env.app }}","${{ env.box }}","${{ env.tmp }}"}
+
+      - name: Checkout 'main' branch into '${{ env.app }}' directory
+        id: checkout_repository
+        if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@v5
+        with:
+          path: "${{ env.app }}"
+
+      - name: Download files from release, branch or vendor into '${{ env.box }}' directory
+        id: download_files
+        if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        env:
+          label: "${{ needs.validate.outputs.label }}"
+        run: |
+          sudo "${{ env.app }}/download.sh" -d "${{ env.box }}" -l "${{ env.label }}" -v "${{ matrix.version }}"
+
+      - name: Create an archive in '${{ env.tmp }}' directory with downloaded files in '${{ env.box }}' directory
+        id: create_archive
+        if: ${{ fromJSON(inputs.extras).force_download == 'true' && steps.lookup.outputs.cache-hit != 'true' }}
+        run: |
+          FILE="${{ env.tmp }}/${{ env.key }}.tar.zst"
+          sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" .
+
+      - name: Delete downloaded files from cache
+        id: delete_cache
+        if: ${{ fromJSON(inputs.extras).force_download == 'true' && steps.lookup.outputs.cache-hit == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method DELETE \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/${{ github.repository }}/actions/caches?key=${{ env.key }}&ref=${{ github.ref }}
+
+      - name: Save downloaded files from '${{ env.box }}' directory to cache
+        id: save_cache
+        if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          key: "${{ env.key }}"
+          path: 
+            "${{ env.tmp }}/${{ env.key }}.tar.zst"
 
   process:
     needs:
@@ -248,64 +279,93 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
     runs-on: ubuntu-24.04
+    env:
+      dkey: "${{ needs.validate.outputs.label }}-${{ matrix.version }}-download"
+      key: "${{ needs.validate.outputs.label }}-${{ matrix.version }}-process"
     steps:
+      - name: Look up processed files in cache
+        id: lookup
+        uses: actions/cache/restore@v4
+        with:
+          key: "${{ env.key }}"
+          lookup-only: 'true'
+          path:
+            "${{ env.box }}/${{ env.key }}.tar.zst"
+
       - name: Install requirements leveraging cache
         id: install_requirements
+        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           execute_install_scripts: true
           packages: binutils-common binwalk bzip2 device-tree-compiler genisoimage gzip lz4 lzma lzop qemu-utils rsync xz-utils zip zstd
           version: 1.0
 
-      - name: Checkout 'main' branch into 'app' directory
+      - name: Make '${{ env.app }}', '${{ env.box }}' and '${{ env.tmp }}' directories
+        id: make_dirs
+        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        run: |
+          mkdir -p {"${{ env.app }}","${{ env.box }}","${{ env.tmp }}"}
+
+      - name: Checkout 'main' branch into '${{ env.app }}' directory
         id: checkout_repository
+        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v5
         with:
-          path: 'app'
+          path: "${{ env.app }}"
 
-      - name: Look up processed files in cache
-        id: lookup_cache
-        uses: actions/cache/restore@v4
-        with:
-          key: "${{ matrix.ref }}-process"
-          lookup-only: 'true'
-          path: 'sandbox'
-
-      - name: Restore downloaded files from cache into 'sandbox' directory
+      - name: Restore an archive with downloaded files from cache into '${{ env.tmp }}' directory
         id: restore_cache
-        if: ${{ fromJSON(inputs.extra_args).force_process == 'true' || steps.lookup_cache.outputs.cache-hit != 'true' }}
+        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         uses: actions/cache/restore@v4
         with:
-          key: "${{ matrix.ref }}-download"
-          path: 'sandbox'
+          key: "${{ env.dkey }}"
+          path:
+            "${{ env.box }}/${{ env.dkey }}.tar.zst"
 
-      - name: Process files in 'sandbox' directory
-        id: process_files
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
+      - name: Unpack downloaded files into '${{ env.box }}' directory
+        id: unpack_archive
+        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         run: |
-          if [ " ${{ fromJson(inputs.extra_args).process_ignore_files }}" != "true" ]; then
-            sudo app/cleanup.sh 'sandbox'
-            sudo app/process.sh 'sandbox'
+          FILE="${{ env.tmp }}/${{ env.dkey }}.tar.zst"
+          sudo tar --zst -xf "${FILE}" -C "${{ env.box }}" && rm -f "${FILE}"
+          cd "${{ env.box }}" && sudo find . -type f > "../${{ env.tmp }}/downloaded.txt"
+          cd .. && cat "${{ env.tmp }}/downloaded.txt"
+
+      - name: Process files in '${{ env.box }}' directory
+        id: process_files
+        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        run: |
+          if [ " ${{ fromJson(inputs.extras).process_ignore_files }}" != "true" ]; then
+            sudo "${{ env.app }}/process.sh" "${{ env.box }}"
           fi
+
+      - name: Create an archive in '${{ env.tmp }}' directory with processed files in '${{ env.box }}' directory
+        id: create_archive
+        if: ${{ fromJSON(inputs.extras).force_download == 'true' && steps.lookup.outputs.cache-hit != 'true' }}
+        run: |
+          FILE="${{ env.tmp }}/${{ env.key }}.tar.zst"
+          sudo tar --zst -cf "${FILE}" -X "${{ env.tmp }}/downloaded.txt" -C "${{ env.box }}" .
 
       - name: Delete processed files from cache
         id: delete_cache
-        if: ${{ fromJSON(inputs.extra_args).force_process == 'true' && steps.lookup_cache.outputs.cache-hit == 'true' }}
+        if: ${{ fromJSON(inputs.extras).force_process == 'true' && steps.lookup.outputs.cache-hit == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh api --method DELETE \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/actions/caches?key=${{ matrix.ref }}-process&ref=${{ github.ref }}
+            /repos/${{ github.repository }}/actions/caches?key=${{ env.key }}&ref=${{ github.ref }}
 
-      - name: Save processed files from 'sandbox' directory to cache
+      - name: Save processed files from '${{ env.box }}' directory to cache
         id: save_cache
         if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
         uses: actions/cache/save@v4
         with:
-          key: "${{ matrix.ref }}-process"
-          path: 'sandbox'
+          key: "${{ env.key }}"
+          path:
+            "${{ env.box }}/${{ env.key }}.tar.zst"
 
   release:
     needs:
@@ -317,64 +377,89 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
     runs-on: ubuntu-24.04
+    env:
+      branch: "${{ needs.validate.outputs.label }}-${{ matrix.version }}"
+      dkey: "${{ needs.validate.outputs.label }}-${{ matrix.version }}-download"
+      pkey: "${{ needs.validate.outputs.label }}-${{ matrix.version }}-process"
+      tag: "v${{ matrix.version }}-${{ needs.validate.outputs.label }}"
     steps:
-      - name: Checkout 'main' branch into 'sandbox' directory
+      - name: Make '${{ env.app }}', '${{ env.box }}' and '${{ env.tmp }}' directories
+        id: make_dirs
+        run: |
+          mkdir -p {"${{ env.app }}","${{ env.box }}","${{ env.tmp }}"}
+
+      - name: Checkout 'main' branch into '${{ env.box }}' directory
         id: checkout_repository
         uses: actions/checkout@v5
         with:
-          path: 'sandbox'
+          path: "${{ env.box }}"
 
-#      - name: Checkout '${{ matrix.ref }}' branch into 'sandbox' directory
+#      - name: Checkout '${{ env.branch }}' branch into '${{ env.box }}' directory
 #        id: checkout_repository
 #        uses: actions/checkout@v5
 #        with:
-#          path: 'sandbox'
-#          ref: ${{ matrix.ref }}
+#          path: "${{ env.box }}"
+#          ref: "${{ env.branch }}"
 
-      - name: Switch 'main' branch to '${{ matrix.ref }}' branch
-        id: prepare_branch
+      - name: Switch 'main' branch to '${{ env.branch }}' branch
+        id: switch_branch
         run: |
-          BRANCH="${{ matrix.ref }}"
-          cd 'sandbox' && git switch --orphan "${BRANCH}"
+          cd "${{ env.box }}" && git switch --orphan "${{ env.branch }}"
 
-      - name: Restore processed files from cache into 'sandbox' directory
-        id: restore_cache
+      - name: Restore an archive with downloaded files from cache into '${{ env.tmp }}' directory
+        id: restore_downloaded
         uses: actions/cache/restore@v4
         with:
-          key: ${{ matrix.ref }}-processed
-          path: 'sandbox'
+          key: "${{ env.dkey }}"
+          path:
+            "${{ env.tmp }}/${{ env.dkey }}.tar.zst"
+
+      - name: Restore an archive with processed files from cache into '${{ env.tmp }}' directory
+        id: restore_processed
+        uses: actions/cache/restore@v4
+        with:
+          key: "${{ env.pkey }}"
+          path:
+            "${{ env.tmp }}/${{ env.pkey }}.tar.zst"
+
+      - name: Extract archives with downloaded and processed files into '${{ env.box }}' directory
+        id: extract_archives
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' }}
+        run: |
+          FILE="${{ env.tmp }}/${{ env.dkey }}.tar.zst"
+          sudo tar --zst -xf "${FILE}" -C "${{ env.box }}" && rm -f "${FILE}"
+          
+          FILE="${{ env.tmp }}/${{ env.pkey }}.tar.zst"
+          sudo tar --zst -xf "${FILE}" -C "${{ env.box }}" && rm -f "${FILE}"
 
       - name: Create release files
         id: create_release
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' }}
         run: |
           EXCL='exclusions.txt'
-          sudo find sandbox/* -type f -size +32M > "sandbox/${EXCL}" || true
+          sudo find "${{ env.box }}"/* -type f -size +32M > "${{ env.box }}/${EXCL}" || true
           
-          DIR='release'
+          DIR="${{ env.tmp }}"
           mkdir -p "${DIR}"
-          echo "dir=${DIR}" >> $GITHUB_OUTPUT
           
-          FILE="${DIR}/routeros-${{ matrix.ref }}-full.tar.zst"
-          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' --exclude="${EXCL}" -C 'sandbox' .
-          echo "full=${FILE}" >> $GITHUB_OUTPUT
+          FILE="${DIR}/routeros-${{ env.branch }}-full.tar.zst"
+          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' --exclude="${EXCL}" -C "${{ env.box }}" .
           du -h "${FILE}"
           
-          FILE="${DIR}/routeros-${{ matrix.ref }}-light.tar.zst"
-          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' -X "${EXCL}"  -C 'sandbox' .
-          echo "light=${FILE}" >> $GITHUB_OUTPUT
+          FILE="${DIR}/routeros-${{ env.branch }}-light.tar.zst"
+          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' -X "${EXCL}"  -C "${{ env.box }}" .
           du -h "${FILE}"
 
       - name: Delete duplicate release and tag
         id: delete_release
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && inputs.release }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           ID="$(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/releases/tags/${{ matrix.tag }} \
+            /repos/${{ github.repository }}/releases/tags/${{ env.tag }} \
             --jq '.id')"
           if [ -n "${ID}" ]; then
             gh api --method DELETE \
@@ -384,55 +469,55 @@ jobs:
             gh api --method DELETE \
               -H "Accept: application/vnd.github+json" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
-              /repos/${{ github.repository }}/git/refs/tags/${{ matrix.tag }}
+              /repos/${{ github.repository }}/git/refs/tags/${{ env.tag }}
           fi
 
       - name: Upload release files as attachments
         id: upload_attachments
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && inputs.release }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release }}
         uses: softprops/action-gh-release@v2
         with:
-          name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.prefix }}"
+          name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.label }}"
           body_path: 'changelog.txt'
-          tag_name: v${{ matrix.version }}-${{ needs.validate.outputs.prefix }}
+          tag_name: "${{ env.tag }}"
 #          make_latest:  ${{ matrix.channel == 'stable' }}
           prerelease:  ${{ matrix.channel == 'testing' }}
           files: |
-            ${{ steps.create_release.outputs.dir }}/*
+            "${{ env.tmp }}"/*
 
       - name: Upload release files as artifacts
         id: upload_artifacts
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && !inputs.release }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && !inputs.release }}
         uses: actions/upload-artifact@v4
         with:
           compression-level: 0
-          name: routeros-${{ matrix.ref }}
+          name: "${{ env.branch }}"
           path: |
-            ${{ steps.create_release.outputs.dir }}/*
+            "${{ env.tmp }}"/*
 
       - name: Remove release files
         id: remove_release
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' }}
         run: |
-          sudo rm -rf "${{ steps.create_release.outputs.dir }}"
+          sudo rm -f "${{ env.tmp }}"/*
 
       - name: Normalize files
         id: normalize_files
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && fromJSON(inputs.extra_args).no_push != 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && fromJSON(inputs.extras).no_push != 'true' }}
         run: |
-          sudo app/normalize.sh 'sandbox'
-          sudo chown -hR $(id -un):$(id -gn) 'sandbox'
-          find sandbox/* -type f -o -type d \! -readable -exec bash -c 'echo "warning: {} is still not readable"' \;
+          sudo "${{ env.app }}/normalize.sh" "${{ env.box }}"
+          sudo chown -hR $(id -un):$(id -gn) "${{ env.box }}"
+          find "${{ env.box }}"/* -type f -o -type d \! -readable -exec bash -c 'echo "warning: {} is still not readable"' \;
           {
             echo '# This branch contains an unpacked routeros-...-light.tar.zst archive.'
             echo '# Unlike routeros-...-full.tar.zst, it lacks devices and sizeable files.'
             echo '# The following files have been excluded because their size exceeds 32MB.'
-            sort 'sandbox/exclusions.txt' | xargs du -h | gawk '{print $2 " # " $1}'
-          } > 'sandbox/.gitignore'
+            sort "${{ env.box }}/exclusions.txt" | xargs du -h | gawk '{print $2 " # " $1}'
+          } > "${{ env.box }}/.gitignore"
 
       - name: Compose a commit message
         id: compose_message
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && fromJSON(inputs.extra_args).no_push != 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && fromJSON(inputs.extras).no_push != 'true' }}
         run: |
           {
             echo 'message<<EOF'
@@ -443,10 +528,10 @@ jobs:
 
       - name: Add files, commit and push
         id: push_files
-        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && fromJSON(inputs.extra_args).no_push != 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && fromJSON(inputs.extras).no_push != 'true' }}
         uses: stefanzweifel/git-auto-commit-action@v6
         with:
-          branch: ${{ matrix.ref }}
+          branch: ${{ env.branch }}
           commit_message: ${{ steps.compose_message.outputs.message }}
           push_options: '--force'
-          repository: 'sandbox'
+          repository: "${{ env.box }}"
