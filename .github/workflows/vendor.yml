@@ -245,7 +245,7 @@ jobs:
 
       - name: Create an archive in '${{ env.tmp }}' directory with downloaded files in '${{ env.box }}' directory
         id: create_archive
-        if: ${{ fromJSON(inputs.extras).force_download == 'true' && steps.lookup.outputs.cache-hit != 'true' }}
+        if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.key }}.tar.zst"
           sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" .
@@ -292,27 +292,11 @@ jobs:
           path:
             "${{ env.box }}/${{ env.key }}.tar.zst"
 
-      - name: Install requirements leveraging cache
-        id: install_requirements
-        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
-        uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          execute_install_scripts: true
-          packages: binutils-common binwalk bzip2 device-tree-compiler genisoimage gzip lz4 lzma lzop qemu-utils rsync xz-utils zip zstd
-          version: 1.0
-
       - name: Make '${{ env.app }}', '${{ env.box }}' and '${{ env.tmp }}' directories
         id: make_dirs
         if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         run: |
           mkdir -p {"${{ env.app }}","${{ env.box }}","${{ env.tmp }}"}
-
-      - name: Checkout 'main' branch into '${{ env.app }}' directory
-        id: checkout_repository
-        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v5
-        with:
-          path: "${{ env.app }}"
 
       - name: Restore an archive with downloaded files from cache into '${{ env.tmp }}' directory
         id: restore_cache
@@ -325,16 +309,32 @@ jobs:
 
       - name: Unpack downloaded files into '${{ env.box }}' directory
         id: unpack_archive
-        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.dkey }}.tar.zst"
           sudo tar --zst -xf "${FILE}" -C "${{ env.box }}" && rm -f "${FILE}"
           cd "${{ env.box }}" && sudo find . -type f > "../${{ env.tmp }}/downloaded.txt"
           cd .. && cat "${{ env.tmp }}/downloaded.txt"
 
+      - name: Checkout 'main' branch into '${{ env.app }}' directory
+        id: checkout_repository
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
+        uses: actions/checkout@v5
+        with:
+          path: "${{ env.app }}"
+
+      - name: Install requirements leveraging cache
+        id: install_requirements
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          execute_install_scripts: true
+          packages: binutils-common binwalk bzip2 device-tree-compiler genisoimage gzip lz4 lzma lzop qemu-utils rsync xz-utils zip zstd
+          version: 1.0
+
       - name: Process files in '${{ env.box }}' directory
         id: process_files
-        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
         run: |
           if [ " ${{ fromJson(inputs.extras).process_ignore_files }}" != "true" ]; then
             sudo "${{ env.app }}/process.sh" "${{ env.box }}"
@@ -342,14 +342,14 @@ jobs:
 
       - name: Create an archive in '${{ env.tmp }}' directory with processed files in '${{ env.box }}' directory
         id: create_archive
-        if: ${{ fromJSON(inputs.extras).force_download == 'true' && steps.lookup.outputs.cache-hit != 'true' }}
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.key }}.tar.zst"
           sudo tar --zst -cf "${FILE}" -X "${{ env.tmp }}/downloaded.txt" -C "${{ env.box }}" .
 
       - name: Delete processed files from cache
         id: delete_cache
-        if: ${{ fromJSON(inputs.extras).force_process == 'true' && steps.lookup.outputs.cache-hit == 'true' }}
+        if: ${{ steps.restore_cache.outputs.cache-hit == 'true' && steps.lookup.outputs.cache-hit == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
