@@ -241,7 +241,7 @@ jobs:
         env:
           label: "${{ needs.validate.outputs.label }}"
         run: |
-          CMD="sudo '${{ env.app }}/download.sh' -d '${{ env.box }}' -l '${{ env.label }}' -v '${{ matrix.version }}'"
+          CMD="sudo ${{ env.app }}/download.sh -d '${{ env.box }}' -l '${{ env.label }}' -v '${{ matrix.version }}'"
           [ "${{ inputs.reuse_releases }}" == 'false' ] && CMD="${CMD} --ignore-release"
           [ "${{ inputs.reuse_commits }}" == 'false' ] && CMD="${CMD} --ignore-branch"
           $CMD
