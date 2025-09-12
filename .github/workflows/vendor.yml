@@ -520,8 +520,8 @@ jobs:
             cat 'exclusions.txt' | xargs du -h | gawk '{print $2 " # " $1}'
           } > '.gitignore'
           ls -al ./
-          cat "${{ env.box }}/.gitignore" || true
-          rm -f < 'exclusions.txt' || true
+          cat '.gitignore' || true
+          xargs rm -f < 'exclusions.txt' || true
           cd -
 
       - name: Compose a commit message
