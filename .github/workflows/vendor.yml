@@ -387,17 +387,16 @@ jobs:
         run: |
           mkdir -p {"${{ env.app }}","${{ env.box }}","${{ env.tmp }}"}
 
-      - name: Checkout 'main' branch into '${{ env.app }}' directory
-        id: checkout_repository
-        uses: actions/checkout@v5
-        with:
-          path: "${{ env.app }}"
-
       - name: Checkout 'main' branch into '${{ env.box }}' directory
         id: checkout_repository
         uses: actions/checkout@v5
         with:
           path: "${{ env.box }}"
+
+      - name: Copy files from '${{ env.box }}' directory to '${{ env.app }}' directory
+        id: copy_files
+        run: |
+          cp -r "${{ env.box }}"/* "${{ env.app }}"/
 
 #      - name: Checkout '${{ env.branch }}' branch into '${{ env.box }}' directory
 #        id: checkout_repository
