@@ -1,0 +1,6 @@
+igb:	ptp
+igc:	ptp
+ice:	intel_auxiliary ptp
+ixgbe:	ptp
+iavf:	intel_auxiliary ptp
+i40e:	intel_auxiliary ptp
