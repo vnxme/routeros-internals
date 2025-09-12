@@ -49,4 +49,6 @@ done
 # Remove support files in the root directory
 rm -f -- 'exclusions.txt'
 rm -f -- 'hashes.txt'
-rm -f -- "links.txt"
+rm -f -- 'links.txt'
+rm -f -- 'permissions.txt'
+rm -f -- 'specials.txt'

@@ -16,6 +16,9 @@
 
 ME="$(basename -- "$0")"
 
+FILE_PERMISSIONS='permissions.txt'
+FILE_SPECIALS='specials.txt'
+
 if [ "${EUID:-$(id -u)}" -ne 0 ]; then
   if [ -n "$(which sudo)" ]; then
     echo "${ME}: Root permissions are required. Using sudo to run as root"
@@ -35,14 +38,32 @@ if [ -n "$1" ]; then
   cd "$1"
 fi
 
+# Clear contents of support files
+truncate -s 0 -- "${FILE_PERMISSIONS}"
+truncate -s 0 -- "${FILE_SPECIALS}"
+
 # Fix directory permissions
-find * -type d -not -perm 755 -exec chmod 755 {} \;
+find * -type d -not -perm 755 -printf '%p # type=%y, perm=%m(%M)\n' | while read LINE; do
+  chmod 755 "${LINE%% # *}"
+  echo "${LINE}" > "${FILE_PERMISSIONS}"
+done
 
 # Fix file permissions
-find * -type f -not -perm 644 -exec chmod 644 {} \;
+find * -type f -not -perm 644 -printf '%p # type=%y, perm=%m(%M)\n' | while read LINE; do
+  chmod 644 "${LINE%% # *}"
+  echo "${LINE}" > "${FILE_PERMISSIONS}"
+done
 
 # Remove block and character devices, pipes and sockets
-find * -type b -o -type c -o -type p -o -type s -exec rm -f {} \;
+find * -type b -o -type c -o -type p -o -type s -printf '%p # type: %y\n' | while read LINE; do
+  rm -f -- "${LINE%% # *}"
+  echo "${LINE}" > "${FILE_SPECIALS}"
+done
 
 # Put .gitignore into empty directories
-find * -type d -empty -exec bash -c 'echo -e "*\n!.gitignore\n" > "{}/.gitignore"' \;
+find * -type d -empty | while read LINE; do
+  {
+    echo '*'
+    echo '!.gitignore'
+  } > "${LINE}/.gitignore"
+done
