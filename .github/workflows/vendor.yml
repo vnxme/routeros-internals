@@ -442,7 +442,7 @@ jobs:
         run: |
           EXCL='exclusions.txt'
           cd "${{ env.box }}"
-          sudo find * -type f -size +32M > "${EXCL}" || true
+          sudo find * -type f -size +32M | sort > "${EXCL}" || true
           cd -
           
           FILE="${{ env.tmp }}/routeros-${{ env.branch }}-full.tar.zst"
@@ -450,7 +450,7 @@ jobs:
           du -h "${FILE}"
           
           FILE="${{ env.tmp }}/routeros-${{ env.branch }}-light.tar.zst"
-          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' -X "${{ env.box }}/${EXCL}"  -C "${{ env.box }}" .
+          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' -X "${{ env.box }}/${EXCL}" -C "${{ env.box }}" .
           du -h "${FILE}"
 
       - name: Delete duplicate release and tag
@@ -511,13 +511,14 @@ jobs:
         run: |
           sudo "${{ env.app }}/normalize.sh" "${{ env.box }}"
           sudo chown -hR $(id -un):$(id -gn) "${{ env.box }}"
-          find "${{ env.box }}"/* -type f -o -type d \! -readable -exec bash -c 'echo "warning: {} is still not readable"' \;
+          cd "${{ env.box }}"
+          find * -type f -o -type d \! -readable -exec bash -c 'echo "warning: {} is still not readable"' \;
           {
             echo '# This branch contains an unpacked routeros-...-light.tar.zst archive.'
             echo '# Unlike routeros-...-full.tar.zst, it lacks devices and sizeable files.'
             echo '# The following files have been excluded because their size exceeds 32MB.'
-            sort "${{ env.box }}/exclusions.txt" | xargs du -h | gawk '{print $2 " # " $1}'
-          } > "${{ env.box }}/.gitignore"
+            cat 'exclusions.txt' | xargs du -h | gawk '{print $2 " # " $1}'
+          } > '.gitignore'
 
       - name: Compose a commit message
         id: compose_message
