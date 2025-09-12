@@ -207,7 +207,7 @@ for ARCH in "${ARCHS[@]}"; do
   download_from_branch_or_vendor "${ARCH}/mikrotik-${VERSION}${SUFFIX}.iso" "mikrotik-${VERSION}${SUFFIX}.iso"
 
   if [ "${ARCH}" == 'x86' ]; then
-    download_from_branch_or_vendor "${ARCH}/install-${VERSION}${SUFFIX}.img.zip" "install-image-${VERSION}${SUFFIX}.zip"
+    download_from_branch_or_vendor "${ARCH}/install-image-${VERSION}${SUFFIX}.img.zip" "install-image-${VERSION}${SUFFIX}.zip"
   fi
 done
 
