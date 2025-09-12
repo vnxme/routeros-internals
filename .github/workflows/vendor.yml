@@ -387,6 +387,12 @@ jobs:
         run: |
           mkdir -p {"${{ env.app }}","${{ env.box }}","${{ env.tmp }}"}
 
+      - name: Checkout 'main' branch into '${{ env.app }}' directory
+        id: checkout_repository
+        uses: actions/checkout@v5
+        with:
+          path: "${{ env.app }}"
+
       - name: Checkout 'main' branch into '${{ env.box }}' directory
         id: checkout_repository
         uses: actions/checkout@v5
@@ -454,13 +460,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          FOUND='true'
           ID="$(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             /repos/${{ github.repository }}/releases/tags/${{ env.tag }} \
-            --jq '.id')" || NOID='true'
-          echo "${ID} -- ${NOID}"
-          if [ -n "${ID}" -a "${NOID}" != 'true' ]; then
+            --jq '.id')" || FOUND='false'
+          if [ -n "${ID}" -a "${FOUND}" == 'true' ]; then
             gh api --method DELETE \
               -H "Accept: application/vnd.github+json" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
@@ -482,7 +488,7 @@ jobs:
 #          make_latest:  ${{ matrix.channel == 'stable' }}
           prerelease:  ${{ matrix.channel == 'testing' }}
           files: |
-            "${{ env.tmp }}"/*
+            ${{ env.tmp }}/*
 
       - name: Upload release files as artifacts
         id: upload_artifacts
