@@ -131,9 +131,9 @@ function parse_options {
   [ -z "${VERSION}" ] && echo "${ME}: Version is required, but missing. Use -v or --version. Exiting" && exit 1
   [ $# -gt 0 ] && echo "${ME}: Got more than one positional argument. Exiting" && exit 1
 
-  if [ -n "${DIR}" -a "${DIR%/}" != '.' ]; then
-    [ ! -d "${DIR}" ] && echo "${ME}: Not found directory ${DIR} ($(realpath "${DIR}")). Exiting" && exit 1
-    cd "${DIR}"
+  if [ -n "$1" ]; then
+    [ ! -d "$1" ] && { echo "${ME}: Not found directory $1 ($(realpath "$1")). Exiting"; exit 1; }
+    cd "$1"
   fi
 }
 
