@@ -518,9 +518,13 @@ jobs:
           find * -type f -o -type d \! -readable -exec bash -c 'echo "warning: {} is still not readable"' \;
           {
             echo '# This branch contains an unpacked routeros-...-light.tar.zst archive.'
-            echo '# Unlike routeros-...-full.tar.zst, it lacks devices and sizeable files.'
+            echo '# Unlike routeros-...-full.tar.zst, it excludes relatively large files.'
+            echo '#'
             echo '# The following files have been excluded because their size exceeds 32MB.'
             cat 'exclusions.txt' | xargs du -h | gawk '{print $2 " # " $1}'
+            echo '#'
+            echo '# Block and character devices, pipes and sockets cannot be committed by git,'
+            echo '# so they are only present in the archives mentioned above.'
           } > '.gitignore'
           ls -al ./
           cat '.gitignore' || true
