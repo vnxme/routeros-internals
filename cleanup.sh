@@ -31,8 +31,8 @@ fi
 [ $# -gt 0 ] && { echo "${ME}: Started with $# arguments: $@"; } || { echo "${ME}: Started with no arguments"; }
 
 if [ -n "$1" ]; then
-  [ ! -d "$1" ] && { echo "${ME}: Not found directory $1 ($(realpath "$1")). Exiting"; exit 1; }
-  cd "$1"
+  [ ! -d "$1" ] && { echo "${ME}: Not found directory $1 ($(realpath -- "$1")). Exiting"; exit 1; }
+  cd -- "$1"
 fi
 
 # Remove unpacked subdirectories
@@ -46,7 +46,7 @@ for FILE in "${FILES[@]}"; do
   fi
 done
 
-# Remove support files in the root directory
+# Remove support files
 rm -f -- 'exclusions.txt'
 rm -f -- 'hashes.txt'
 rm -f -- 'links.txt'

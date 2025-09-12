@@ -132,8 +132,8 @@ function parse_options {
   [ $# -gt 0 ] && echo "${ME}: Got more than one positional argument. Exiting" && exit 1
 
   if [ -n "$1" ]; then
-    [ ! -d "$1" ] && { echo "${ME}: Not found directory $1 ($(realpath "$1")). Exiting"; exit 1; }
-    cd "$1"
+    [ ! -d "$1" ] && { echo "${ME}: Not found directory $1 ($(realpath -- "$1")). Exiting"; exit 1; }
+    cd -- "$1"
   fi
 }
 
