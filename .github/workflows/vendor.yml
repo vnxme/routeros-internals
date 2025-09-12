@@ -519,6 +519,9 @@ jobs:
             echo '# The following files have been excluded because their size exceeds 32MB.'
             cat 'exclusions.txt' | xargs du -h | gawk '{print $2 " # " $1}'
           } > '.gitignore'
+          cd -
+          cat '.gitignore' || true
+          cat "${{ env.box }}/.gitignore" || true
 
       - name: Compose a commit message
         id: compose_message
