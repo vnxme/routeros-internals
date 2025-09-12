@@ -32,20 +32,18 @@ fi
 [ $# -gt 0 ] && echo "${ME}: Started with $# arguments: $@" || echo "${ME}: Started with no arguments"
 
 if [ -n "$1" -a "${1%/}" != '.' ]; then
-  SWD="${1%/}"
-  [ ! -d "${SWD}" ] && echo "${ME}: Not found directory ${SWD} ($(realpath "${SWD}")). Exiting" && exit 1
-else
-  SWD='.'
+  [ ! -d "$1" ] && echo "${ME}: Not found directory $1 ($(realpath "$1")). Exiting" && exit 1
+  cd "$1"
 fi
 
 # Fix directory permissions
-find "${SWD}" -type d -not -perm 755 -exec chmod 755 {} \;
+find * -type d -not -perm 755 -exec chmod 755 {} \;
 
 # Fix file permissions
-find "${SWD}" -type f -not -perm 644 -exec chmod 644 {} \;
+find * -type f -not -perm 644 -exec chmod 644 {} \;
 
-# Remove block and character devices
-find "${SWD}" -type b -o -type c -exec rm -f {} \;
+# Remove block and character devices, pipes and sockets
+find * -type b -o -type c -o -type p -o -type s -exec rm -f {} \;
 
 # Put .gitignore into empty directories
-find "${SWD}" -type d -empty -exec bash -c 'echo -e "*\n!.gitignore\n" > "{}/.gitignore"' \;
+find * -type d -empty -exec bash -c 'echo -e "*\n!.gitignore\n" > "{}/.gitignore"' \;

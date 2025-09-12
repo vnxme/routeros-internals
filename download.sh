@@ -132,18 +132,14 @@ function parse_options {
   [ $# -gt 0 ] && echo "${ME}: Got more than one positional argument. Exiting" && exit 1
 
   if [ -n "${DIR}" -a "${DIR%/}" != '.' ]; then
-    [ "${DIR}" != '/' ] && DIR="${DIR%/}"
     [ ! -d "${DIR}" ] && echo "${ME}: Not found directory ${DIR} ($(realpath "${DIR}")). Exiting" && exit 1
-  else
-    DIR=''
+    cd "${DIR}"
   fi
 }
 
 [ $# -gt 0 ] && echo "${ME}: Started with $# arguments: $@" || echo "${ME}: Started with no arguments"
 
 parse_options "$@"
-
-[ -n "${DIR}" ] && cd "${DIR}"
 
 BRANCH="${LABEL}-${VERSION}"
 TAG="v${VERSION}-${LABEL}"

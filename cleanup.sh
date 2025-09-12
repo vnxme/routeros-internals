@@ -32,15 +32,13 @@ fi
 [ $# -gt 0 ] && echo "${ME}: Started with $# arguments: $@" || echo "${ME}: Started with no arguments"
 
 if [ -n "$1" -a "${1%/}" != '.' ]; then
-  SWD="${1%/}/"
-  [ ! -d "${SWD}" ] && echo "${ME}: Not found directory ${SWD} ($(realpath "${SWD}")). Exiting" && exit 1
-else
-  SWD=''
+  [ ! -d "$1" ] && echo "${ME}: Not found directory $1 ($(realpath "$1")). Exiting" && exit 1
+  cd "$1"
 fi
 
 # Remove unpacked subdirectories in arch-based directories
 readarray -d '' -t FILES < <(
-  find "${SWD}"*/* -maxdepth 0 -type f -print0 2>/dev/null || true
+  find */* -maxdepth 0 -type f -print0 2>/dev/null || true
 )
 for FILE in "${FILES[@]}"; do
   DIR="$(dirname "${FILE}")/_$(basename "${FILE}")"
@@ -50,6 +48,6 @@ for FILE in "${FILES[@]}"; do
 done
 
 # Remove support files in the root directory
-rm -f "${SWD}exclusions.txt"
-rm -f "${SWD}hashes.txt"
-rm -f "${SWD}links.txt"
+rm -f "exclusions.txt"
+rm -f "hashes.txt"
+rm -f "links.txt"
