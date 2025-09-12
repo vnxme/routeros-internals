@@ -82,6 +82,10 @@ if [ -n "$1" ]; then
   cd -- "$1"
 fi
 
+# Clear contents of support files
+truncate -s 0 -- "${FILE_HASHES}"
+truncate -s 0 -- "${FILE_LINKS}"
+
 # Unpack TAR.GZ files
 process_files <(
   find_files_by_name '*.tar.gz' '*/*'
