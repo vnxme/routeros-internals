@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ME="$(basename "$0")"
-MYDIR="$(dirname "$(realpath "$0")")"
+ME="$(basename -- "$0")"
+MYDIR="$(dirname -- "$(realpath -- "$0")")"
 
 # Define default flag and option values
 DIR='' # -d or --dir: working directory to save files into
@@ -137,7 +137,7 @@ function parse_options {
   fi
 }
 
-[ $# -gt 0 ] && echo "${ME}: Started with $# arguments: $@" || echo "${ME}: Started with no arguments"
+[ $# -gt 0 ] && { echo "${ME}: Started with $# arguments: $@"; } || { echo "${ME}: Started with no arguments"; }
 
 parse_options "$@"
 

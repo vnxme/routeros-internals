@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ME="$(basename "$0")"
-MYDIR="$(dirname "$(realpath "$0")")"
+ME="$(basename -- "$0")"
+MYDIR="$(dirname -- "$(realpath -- "$0")")"
 
 FILE_HASHES='hashes.txt'
 FILE_LINKS='links.txt'
@@ -64,19 +64,18 @@ function process_files {
 }
 
 if [ "${EUID:-$(id -u)}" -ne 0 ]; then
-  echo "${ME}: Root permissions are required"
   if [ -n "$(which sudo)" ]; then
-    echo "${ME}: Using sudo to run as root"
-    sudo bash "$0" "$@"
+    echo "${ME}: Root permissions are required. Using sudo to run as root"
+    sudo bash -- "$0" "$@"
     exit $?
   else
-    echo "${ME}: Using su -c to run as root"
-    su - root -c "bash $0 $@"
+    echo "${ME}: Root permissions are required. Using su -c to run as root"
+    su - root -c "cd \"${PWD}; bash -- \"$(realpath -- "$0")\" \"$@\""
     exit $?
   fi
 fi
 
-[ $# -gt 0 ] && echo "${ME}: Started with $# arguments: $@" || echo "${ME}: Started with no arguments"
+[ $# -gt 0 ] && { echo "${ME}: Started with $# arguments: $@"; } || { echo "${ME}: Started with no arguments"; }
 
 if [ -n "$1" ]; then
   [ ! -d "$1" ] && { echo "${ME}: Not found directory $1 ($(realpath "$1")). Exiting"; exit 1; }

@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ME="$(basename "$0")"
+ME="$(basename -- "$0")"
 RM=false
 
 function check_path {
@@ -476,14 +476,13 @@ function unpack_zip {
 }
 
 if [ "${EUID:-$(id -u)}" -ne 0 ]; then
-  echo "${ME}: Root permissions are required"
   if [ -n "$(which sudo)" ]; then
-    echo "${ME}: Using sudo to run as root"
-    sudo bash "$0" "$@"
+    echo "${ME}: Root permissions are required. Using sudo to run as root"
+    sudo bash -- "$0" "$@"
     exit $?
   else
-    echo "${ME}: Using su -c to run as root"
-    su - root -c "bash $0 $@"
+    echo "${ME}: Root permissions are required. Using su -c to run as root"
+    su - root -c "cd \"${PWD}; bash -- \"$(realpath -- "$0")\" \"$@\""
     exit $?
   fi
 fi
@@ -497,7 +496,7 @@ for DEP in ${DEPS[@]}; do
   fi
 done
 
-[ $# -gt 0 ] && echo "${ME}: Started with $# arguments: $@" || echo "${ME}: Started with no arguments"
+[ $# -gt 0 ] && { echo "${ME}: Started with $# arguments: $@"; } || { echo "${ME}: Started with no arguments"; }
 
 FILE="$1"
 if [ "$#" -ne 1 -o ! -s "${FILE}" ]; then
