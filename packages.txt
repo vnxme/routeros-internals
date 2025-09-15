@@ -1,0 +1,16 @@
+arm/calea-7.19.6-arm.npk
+arm/container-7.19.6-arm.npk
+arm/dude-7.19.6-arm.npk
+arm/gps-7.19.6-arm.npk
+arm/iot-7.19.6-arm.npk
+arm/iot-bt-extra-7.19.6-arm.npk
+arm/lora-7.19.6-arm.npk
+arm/rose-storage-7.19.6-arm.npk
+arm/tr069-client-7.19.6-arm.npk
+arm/ups-7.19.6-arm.npk
+arm/user-manager-7.19.6-arm.npk
+arm/wifi-mediatek-7.19.6-arm.npk
+arm/wifi-qcom-7.19.6-arm.npk
+arm/wifi-qcom-ac-7.19.6-arm.npk
+arm/wireless-7.19.6-arm.npk
+arm/zerotier-7.19.6-arm.npk

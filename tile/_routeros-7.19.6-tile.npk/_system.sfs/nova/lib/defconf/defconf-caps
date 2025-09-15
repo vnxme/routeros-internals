@@ -1,0 +1,153 @@
+#| CAP configuration
+#|
+#|   * Wireless interfaces are set to be managed by CAPsMAN.
+#|   * All ethernet interfaces and CAPsMAN managed interfaces are bridged.
+#|   * DHCP client is set on bridge interface.
+#|   * If printed on the sticker, "admin" user is protected by password.
+
+:global action;
+:local brName  "bridgeLocal";
+:local logPref "defconf:";
+:local wirelessMenu "wireless"
+:local usingWifiPack false;
+:local needAdminPass 1;
+
+:if ([:len [/system package find name~"wifi" !disabled]] != 0) do={
+  :set usingWifiPack true;
+  :set wirelessMenu "wifi";
+}
+
+:if ($action = "apply") do={
+
+  # wait for ethernet interfaces
+  :local count 0;
+  :while ([/interface ethernet find] = "") do={
+    :if ($count = 30) do={
+      :log warning "DefConf: Unable to find ethernet interfaces";
+      /quit;
+    }
+    :delay 1s; :set count ($count + 1);
+  }
+
+  :local macSet 0;
+  :local tmpMac "";
+
+  :foreach k in=[/interface ethernet find] do={
+    # first ethernet is found; add bridge and set mac address of the ethernet port
+    :if ($macSet = 0) do={
+      :set tmpMac [/interface ethernet get $k mac-address];
+      /interface bridge add name=$brName auto-mac=no admin-mac=$tmpMac comment="defconf";
+      :set macSet 1;
+    }
+    # add bridge ports
+    /interface bridge port add bridge=$brName interface=$k comment="defconf"
+  }
+
+  # try to add dhcp client on bridge interface (may fail if already exist)
+  :do {
+    /ip dhcp-client add interface=$brName disabled=no comment="defconf"
+  } on-error={ :log warning "$logPref unable to add dhcp client";}
+
+  # try to configure caps (may fail if for example specified interfaces are missing)
+  :local findWireless [:parse ":local count 0;
+  :while ([/interface $wirelessMenu find] = \"\") do={
+      :if (\$count = 30) do={
+        :log warning \"DefConf: Unable to find wireless interfaces\"; /quit
+      };
+      :delay 1s;
+      :set count (\$count + 1)
+    }"]
+  [$findWireless]
+
+  :if ($usingWifiPack) do={
+    :local addDatapath [:parse "/interface $wirelessMenu datapath
+    add comment=\"defconf\" name=capdp disabled=no bridge=$brName"]
+    [$addDatapath]
+  }
+
+  # delay just to make sure that all wireless interfaces are loaded
+  :delay 5s;
+
+  :do {
+    :local setCap ""
+    if ($usingWifiPack) do={
+      :set setCap [:parse ":foreach i in=[/interface $wirelessMenu find] do={
+        /interface $wirelessMenu set \$i configuration.manager=capsman datapath=capdp
+      }
+      /interface $wirelessMenu cap
+      set enabled=yes discovery-interfaces=$brName slaves-datapath=capdp"]
+    } else={
+
+      :set setCap [:parse "
+      :local interfacesList \"\";
+      :local bFirst 1;
+      :foreach i in=[/interface $wirelessMenu find] do={
+        if (\$bFirst = 1) do={
+          :set interfacesList [/interface $wirelessMenu get \$i name];
+          :set bFirst 0;
+        } else={
+          :set interfacesList \"\$interfacesList,\$[/interface wireless get \$i name]\";
+        }
+      }
+      /interface $wirelessMenu cap set enabled=yes interfaces=\$interfacesList \\
+        discovery-interfaces=$brName bridge=$brName"]
+    }
+    [$setCap]
+  } on-error={ :log warning "$logPref unable to configure caps";}
+
+  # do not set admin pass for RBD25 boards that do not have it printed
+  :if ([:pick [/system routerboard get model] 0 5] = "RBD25") do={
+    if ((($defconfPassword = "" || $defconfPassword = nil) && \
+        !($defconfWpsPassword = "" || $defconfWpsPassword = nil)) || \
+        (!($defconfPassword = "" || $defconfPassword = nil) && \
+        ($defconfWpsPassword = "" || $defconfWpsPassword = nil))) do={
+      :set needAdminPass 0;
+    }
+  }
+
+  # set admin password
+  :if ($needAdminPass = 1) do={
+    :if (!($keepUsers = "yes")) do={
+      :if (!($defconfPassword = "" || $defconfPassword = nil)) do={
+        /user set admin password=$defconfPassword
+        :delay 0.5
+        /user expire-password admin
+      }
+    }
+  }
+}
+
+:if ($action = "revert") do={
+
+  :if (!($keepUsers = "yes")) do={
+        /user set admin password=""
+        :delay 0.5
+        /user expire-password admin
+  }
+
+  :do {
+    :local removeCap ""
+    if ($usingWifiPack) do={
+      :set removeCap [:parse ":foreach i in=[/interface $wirelessMenu find] do={
+        /interface $wirelessMenu set \$i !configuration.manager !datapath }
+      /interface $wirelessMenu cap
+      set enabled=no !slaves-datapath !discovery-interfaces"]
+    } else={
+      :set removeCap [:parse "/interface $wirelessMenu cap
+      set enabled=no interfaces=\"\" discovery-interfaces=\"\" bridge=none"]
+    }
+    [$removeCap]
+  } on-error={ :log warning "$logPref unable to unset caps";}
+
+  :if ($usingWifiPack) do={
+    :local removeDatapath [:parse "/interface $wirelessMenu datapath remove [find comment=\"defconf\"]"]
+    [$removeDatapath]
+  }
+
+  :local o [/ip dhcp-client find comment="defconf"]
+  :if ([:len $o] != 0) do={ /ip dhcp-client remove $o }
+
+  /interface bridge port remove [find comment="defconf"]
+  /interface bridge remove [find comment="defconf"]
+
+}

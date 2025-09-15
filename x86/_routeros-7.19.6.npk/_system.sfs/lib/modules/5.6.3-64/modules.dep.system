@@ -1,0 +1,135 @@
+mpls_router
+ipw:	usb_wwan
+mrp
+mbim:	packet_hook
+ip_tablesx_tables
+des3_ede-x86_64:	libdes
+nfnetlink
+x_tables
+cxgb3:	mdio
+nf_natnf_conntrack_tftp
+nf_natx_tables
+x_tables
+x_tables
+bnx2x:	mdio ptp zlib_inflate
+vmxnet3:	packet_hook
+virtio_net:	packet_hook net_failover
+ne2k-pci:	8390
+mesh:	packet_hook
+ip_tablesx_tables
+x_tables
+ip6_tablesnf_nat
+x_tables
+x_tables
+nf_natnf_conntrack_irc
+arc4:	libarc4
+x_tables
+x_tables
+x_tables
+imq:	cls_fw cls_linear
+cxgb4:	ptp zlib_deflate
+mpls_fp:	packet_hook mpls_router
+cifs:	libarc4 libdes
+qcserial:	usb_wwan
+x_tables
+nf_natx_tables
+x_tables
+x_tables
+smsc95xx:	usbnet
+nf_natx_tables
+wireguard:	libblake2s libchacha20poly1305 curve25519-x86_64 libcurve25519-generic udp_tunnel ip6_udp_tunnel
+sierra_net:	usbnet
+x_tables
+it87:	hwmon-vid
+x_tables
+x_tables
+mlx4_en:	mlx4_core ptp
+atl1c:	packet_hook
+x_tables
+e1000e:	ptp
+libchacha20poly1305:	chacha-x86_64 poly1305-x86_64
+x_tables
+x_tables
+x_tables
+nf_natnf_conntrack_pptp
+nf_natx_tables
+x_tables
+ip_tablesx_tables
+x_tables
+x_tables
+x_tables
+x_tables
+mlx5_core:	ptp
+option:	usb_wwan
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+nf_natx_tables
+nf_natnf_conntrack_h323
+x_tables
+x_tables
+chacha-x86_64:	libchacha
+sfc:	mdio ptp
+x_tables
+curve25519-x86_64:	libcurve25519-generic
+nf_reject_ipv6x_tables
+realtek:	libphy
+blake2s-x86_64:	libblake2s-generic
+packet_hookx_tables
+ebtables
+ksmbd:	asn1_decoder oid_registry
+x_tables
+romon:	packet_hook
+des_generic:	libdes
+xfrm_algo
+hso:	rfkill
+ip_tunnel
+ip6_tablesx_tables
+x_tables
+ulogx_tables
+x_tables
+nf_natnf_conntrack_sip
+libblake2s:	blake2s-x86_64
+x_tables
+x_tables
+packet_hookswitch
+x_tables
+x_tables
+x_tables
+vxlan2:	packet_hook udp_tunnel ip6_udp_tunnel
+x_tables
+ptp:	pps_core
+ip6_tablesx_tables
+b44:	libphy ssb
+xfrm_algo
+lm87:	hwmon-vid
+ip_tablesnf_nat
+ulogx_tables
+alx:	mdio
+ax88179_178a:	usbnet
+x_tables
+nf_reject_ipv4x_tables
+switch:	packet_hook phy_helper
+x_tables
+fp_usbnet:	packet_hook
+x_tables
+snifx_tables
+nf_natnf_conntrack_rtsp
+snifx_tables
+packet_hookx_tables
+x_tables
+nf_natx_tables
+ip6_tablesx_tables
+nf_natnf_conntrack_ftp
+r6040:	libphy
+ebtables
+smsc75xx:	usbnet
+dot1x:	packet_hook
+traffic_gen:	packet_hook
+bridge2
+r8169:	libphy
+net_failover:	failover
+tg3:	libphy ptp
