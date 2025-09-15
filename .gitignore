@@ -1,0 +1,17 @@
+# This branch contains an unpacked routeros-...-light.tar.zst archive.
+# Unlike routeros-...-full.tar.zst, it lacks devices and sizeable files.
+# The following files have been excluded because their size exceeds 32MB.
+arm64/_chr-7.20rc2-arm64.img.zip/chr-7.20rc2-arm64.img # 128M
+arm64/_mikrotik-7.20rc2-arm64.iso/efiboot.img # 35M
+arm64/mikrotik-7.20rc2-arm64.iso # 68M
+x86/_chr-7.20rc2.img.zip/chr-7.20rc2.img # 129M
+x86/_install-image-7.20rc2.img.zip/install-image-7.20rc2.img # 192M
+x86/_mikrotik-7.20rc2.iso/efiboot.img # 34M
+x86/_netinstall-cli-7.20rc2.tar.gz/netinstall-cli # 70M
+x86/_netinstall-w32-7.20rc2.exe.zip/netinstall.exe # 63M
+x86/_netinstall-w64-7.20rc2.exe.zip/netinstall64.exe # 63M
+x86/chr-7.20rc2.img.zip # 42M
+x86/mikrotik-7.20rc2.iso # 65M
+x86/netinstall-cli-7.20rc2.tar.gz # 58M
+x86/netinstall-w32-7.20rc2.exe.zip # 51M
+x86/netinstall-w64-7.20rc2.exe.zip # 51M
