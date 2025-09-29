@@ -316,7 +316,9 @@ jobs:
         run: |
           FILE="${{ env.tmp }}/${{ env.dkey }}.tar.zst"
           sudo tar --zst -xf "${FILE}" -C "${{ env.box }}" && rm -f "${FILE}"
-          cd "${{ env.box }}" && sudo find * -type f > "../${{ env.tmp }}/downloaded.txt"
+          ls -al ./${{ env.box }}/
+          cd "${{ env.box }}" && sudo find * -type f > "../${{ env.tmp }}/downloaded.txt" 2>/dev/null || true
+          cat "../${{ env.tmp }}/downloaded.txt"
 
       - name: Checkout 'main' branch into '${{ env.app }}' directory
         id: checkout_repository
