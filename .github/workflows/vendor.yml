@@ -251,7 +251,9 @@ jobs:
         if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.key }}.tar.zst"
-          sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" . && sudo chown -hR $(id -un):$(id -gn) "${FILE}"
+          ls -al ./${{ env.box }}/
+          #sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" . && sudo chown -hR $(id -un):$(id -gn) "${FILE}"
+          tar --zst -cf "${FILE}" -C "${{ env.box }}" .
 
       - name: Delete downloaded files from cache
         id: delete_cache
@@ -316,9 +318,7 @@ jobs:
         run: |
           FILE="${{ env.tmp }}/${{ env.dkey }}.tar.zst"
           sudo tar --zst -xf "${FILE}" -C "${{ env.box }}" && rm -f "${FILE}"
-          ls -al ./${{ env.box }}/
           cd "${{ env.box }}" && sudo find * -type f > "../${{ env.tmp }}/downloaded.txt" 2>/dev/null || true
-          cat "../${{ env.tmp }}/downloaded.txt"
 
       - name: Checkout 'main' branch into '${{ env.app }}' directory
         id: checkout_repository
