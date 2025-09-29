@@ -251,9 +251,7 @@ jobs:
         if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.key }}.tar.zst"
-          ls -al ./${{ env.box }}/
-          #sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" . && sudo chown -hR $(id -un):$(id -gn) "${FILE}"
-          tar --zst -cf "${FILE}" -C "${{ env.box }}" .
+          sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" .
 
       - name: Delete downloaded files from cache
         id: delete_cache
