@@ -163,7 +163,11 @@ download_from_branch_or_vendor 'changelog.txt' 'CHANGELOG'
 
 # Download a list of extra packages
 FILE_PACKAGES='packages.txt'
-[ "${IGNORE_BRANCH}" == 'false' ] && download_from_branch "${FILE_PACKAGES}"
+USE_FILE_PACKAGES='false'
+if [ "${IGNORE_BRANCH}" == 'false' ]; then
+  download_from_branch "${FILE_PACKAGES}"
+  [ -f "${FILE_PACKAGES}" ] && USE_FILE_PACKAGES='true'
+fi
 
 # Download all packages
 ARCHS=('arm' 'arm64' 'mipsbe' 'mmips' 'ppc' 'smips' 'tile' 'x86')
@@ -177,7 +181,7 @@ for ARCH in "${ARCHS[@]}"; do
   done
 
   if [ ${#PACKAGES[@]} -eq 1 -a "${PACKAGES[0]}" == 'routeros' ]; then
-    if [ "${IGNORE_BRANCH}" == 'false' -a -f "${FILE_PACKAGES}" ]; then
+    if [ "${USE_FILE_PACKAGES}" == 'true' ]; then
       readarray -t PACKAGES_ < <(cat "${FILE_PACKAGES}" | grep "${ARCH}/")
       for PACKAGE in "${PACKAGES_[@]}"; do
         download_from_branch "${PACKAGE}"
