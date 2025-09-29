@@ -521,14 +521,11 @@ jobs:
             echo '# Unlike routeros-...-full.tar.zst, it excludes relatively large files.'
             echo '#'
             echo '# The following files have been excluded because their size exceeds 32MB.'
-            cat 'exclusions.txt' | xargs du -h | gawk '{print $2 " # " $1}'
+            cat 'exclusions.txt'
             echo '#'
             echo '# Block and character devices, pipes and sockets cannot be committed by git,'
             echo '# so they are only present in the archives mentioned above.'
           } > '.gitignore'
-          ls -al ./
-          cat '.gitignore' || true
-          xargs rm -f < 'exclusions.txt' || true
           cd -
 
       - name: Compose a commit message
@@ -537,8 +534,9 @@ jobs:
         run: |
           {
             echo 'message<<EOF'
-            echo -e "Automatic changes by ${{ github.run_id }}:${{ github.run_attempt }}:process\n\n"
-            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
+            echo -e "Automatic changes\n\n"
+            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}\n"
+            echo -e "Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}"
             echo EOF
           } >> $GITHUB_OUTPUT
 
