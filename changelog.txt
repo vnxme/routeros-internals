@@ -1,0 +1,26 @@
+What's new in 7.19.6 (2025-Sep-12 12:02):
+
+*) bridge - improved system stability with IGMP snooping;
+*) ethernet - improved performance for hEX Refresh and hEX S (2025);
+*) ike2 - improved system stability;
+*) leds - fixed signal strength LEDs for Cube 60G ac;
+*) log - added VRF support for remote logging;
+*) log - establish a new connection to the remote log server when action settings are edited (e.g. after changing the src-address property);
+*) log - fixed memory leak when a connection to remote TCP log server failed;
+*) log - fixed unsent message retransmit to correct endpoints (introduced in v7.18);
+*) log - randomize source port when using remote logging with src-address specified;
+*) lte - fixed wrong subnet mask set to Chateau 5G R17 ax LTE interface;
+*) mac-server - fixed interface-list change behavior;
+*) poe-out - added "poe-in" detection for 802.3at poe-out capable ports;
+*) poe-out - firmware update for 802.3at capable boards (the update will cause brief power interruption to poe-out interfaces);
+*) poe-out - fixed "low-voltage" LLDP deny for RB5009 and RB960 in specific voltage/power-source combinations;
+*) poe-out - fixed missing error status report in rare cases for 802.3at;
+*) routerboot - fixed load of other kernels (e.g. OpenWrt) on NAND-less boards with MT762x, IPQ40xx, QCA955x and QCA953x CPUs ("/system routerboard upgrade" required);
+*) sfp - fixed the I2C clock frequency for the hEX S (2025) to prevent EEPROM read issues with GPON modules;
+*) switch - fixed switch name for CRS418;
+*) switch - improved system stability after switch reset while bonding interfaces are active (introduced in v7.18);
+*) traffic-flow - added support for IPv6 packet sampling;
+*) traffic-flow - fixed flow reports when using IPv6 and packet sampling (introduced in v7.18);
+*) w60g - fixed disconnect issue (introduced in v7.19.4);
+*) winbox - allow selecting bonding interface under "Switch/Rule" menu;
+*) winbox - use "auto" as default value for VXLAN "Don't Fragment" property;

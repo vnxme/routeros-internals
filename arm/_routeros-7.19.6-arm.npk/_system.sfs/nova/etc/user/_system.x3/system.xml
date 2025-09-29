@@ -1,0 +1,19 @@
+<POLICIES>
+    <POLICY ID="1" TYPE="1" NAME="login to the console from gui and serial" ALIAS="local"/>
+    <POLICY ID="2" TYPE="1" NAME="telnet to the router" ALIAS="telnet"/>
+    <POLICY ID="3" TYPE="1" NAME="ssh to the router" ALIAS="ssh"/>
+    <POLICY ID="4" TYPE="0" NAME="ftp to the router" ALIAS="ftp"/>
+    <POLICY ID="10" TYPE="1" NAME="connect to the router via WinBox" ALIAS="winbox"/>
+    <POLICY ID="15" TYPE="1" NAME="connect to the router via API" ALIAS="api"/>
+    <POLICY ID="12" TYPE="1" NAME="connect to the router via Web" ALIAS="web"/>
+    <POLICY ID="19" TYPE="1" NAME="connect to the router via REST API" ALIAS="rest-api"/>
+    <POLICY ID="6" TYPE="0" NAME="read router configuration" ALIAS="read"/>
+    <POLICY ID="7" TYPE="0" NAME="write router configuration" ALIAS="write"/>
+    <POLICY ID="8" TYPE="0" NAME="manage user policies" ALIAS="policy"/>
+    <POLICY ID="5" TYPE="0" NAME="reboot the router" ALIAS="reboot"/>
+    <POLICY ID="9" TYPE="0" NAME="test network" ALIAS="test"/>
+    <POLICY ID="11" TYPE="0" NAME="change password" ALIAS="password"/>
+    <POLICY ID="14" TYPE="0" NAME="see sensitive information" ALIAS="sensitive"/>
+    <POLICY ID="13" TYPE="0" NAME="sniff traffic" ALIAS="sniff"/>
+    <POLICY ID="16" TYPE="0" NAME="connect to RoMON" ALIAS="romon"/>
+</POLICIES>

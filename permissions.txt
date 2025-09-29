@@ -1,0 +1,1 @@
+x86/_wireless-7.19.6.npk/_wireless.sfs/nova/bin/wireless # type=f, perm=755(-rwxr-xr-x)

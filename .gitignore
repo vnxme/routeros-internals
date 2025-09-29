@@ -1,0 +1,22 @@
+# This branch contains an unpacked routeros-...-light.tar.zst archive.
+# Unlike routeros-...-full.tar.zst, it excludes relatively large files.
+#
+# The following files have been excluded because their size exceeds 32MB.
+arm64/_chr-7.19.6-arm64.img.zip/chr-7.19.6-arm64.img # 129M
+arm64/_mikrotik-7.19.6-arm64.iso/efiboot.img # 34M
+arm64/_switch-marvell-7.19.6-arm64.npk/_switch-marvell.sfs/lib/libcpss.so # 33M
+arm64/mikrotik-7.19.6-arm64.iso # 67M
+x86/_chr-7.19.6.img.zip/chr-7.19.6.img # 128M
+x86/_install-image-7.19.6.img.zip/install-image-7.19.6.img # 192M
+x86/_mikrotik-7.19.6.iso/efiboot.img # 34M
+x86/_netinstall-cli-7.19.6.tar.gz/netinstall-cli # 61M
+x86/_netinstall-w32-7.19.6.exe.zip/netinstall.exe # 55M
+x86/_netinstall-w64-7.19.6.exe.zip/netinstall64.exe # 55M
+x86/chr-7.19.6.img.zip # 41M
+x86/mikrotik-7.19.6.iso # 64M
+x86/netinstall-cli-7.19.6.tar.gz # 49M
+x86/netinstall-w32-7.19.6.exe.zip # 43M
+x86/netinstall-w64-7.19.6.exe.zip # 43M
+#
+# Block and character devices, pipes and sockets cannot be committed by git,
+# so they are only present in the archives mentioned above.
