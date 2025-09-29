@@ -544,7 +544,7 @@ jobs:
             echo 'message<<EOF'
             echo -e "Automatic changes\n\n"
             echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}\n"
-            echo -e "Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}"
+            echo -e "Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}"
             echo EOF
           } >> $GITHUB_OUTPUT
 
