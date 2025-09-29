@@ -475,30 +475,17 @@ jobs:
               /repos/${{ github.repository }}/releases/${ID}
           fi
           FOUND='true'
-          TAG="$(gh api \
+          REF="$(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/git/refs/tags/${{ env.tag }} \
-            --jq '.tag')" || FOUND='false'
-          if [ -n "${TAG}" -a "${FOUND}" == 'true' ]; then
+            /repos/${{ github.repository }}/git/ref/tags/${{ env.tag }} \
+            --jq '.ref')" || FOUND='false'
+          if [ -n "${REF}" -a "${FOUND}" == 'true' ]; then
             gh api --method DELETE \
               -H "Accept: application/vnd.github+json" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
-              /repos/${{ github.repository }}/git/refs/tags/${{ env.tag }}
+              /repos/${{ github.repository }}/git/ref/tags/${{ env.tag }}
           fi
-
-      - name: Upload release files as attachments
-        id: upload_attachments
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release }}
-        uses: softprops/action-gh-release@v2
-        with:
-          name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.label }}"
-          body_path: "${{ env.box }}/changelog.txt"
-          tag_name: "${{ env.tag }}"
-#          make_latest:  ${{ matrix.channel == 'stable' }}
-          prerelease:  ${{ matrix.channel == 'testing' }}
-          files: |
-            ${{ env.tmp }}/*
 
       - name: Upload release files as artifacts
         id: upload_artifacts
@@ -509,12 +496,6 @@ jobs:
           name: "${{ env.branch }}"
           path: |
             "${{ env.tmp }}"/*
-
-      - name: Remove release files
-        id: remove_release
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' }}
-        run: |
-          sudo rm -f "${{ env.tmp }}"/*
 
       - name: Normalize files
         id: normalize_files
@@ -557,3 +538,17 @@ jobs:
           commit_message: ${{ steps.compose_message.outputs.message }}
           push_options: '--force'
           repository: "${{ env.box }}"
+          tagging_message: "${{ env.tag }}"
+
+      - name: Upload release files as attachments
+        id: upload_attachments
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.label }}"
+          body_path: "${{ env.box }}/changelog.txt"
+          tag_name: "${{ env.tag }}"
+#          make_latest:  ${{ matrix.channel == 'stable' }}
+          prerelease:  ${{ matrix.channel == 'testing' }}
+          files: |
+            ${{ env.tmp }}/*
