@@ -488,12 +488,24 @@ jobs:
               /repos/${{ github.repository }}/git/refs/tags/${{ env.tag }} || echo 'warning: Failed to delete an existing tag'
           fi
           
-          TAGS="$(gh api \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/git/matching-refs/tags/ \
-            --jq '.[].ref')"
-          echo "${TAGS}"
+          if [ "${{ needs.validate.outputs.label }}" == 'vendor' -a "${{ matrix.channel }}" == 'stable' ]; then 
+            TAGS="$(gh api \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              /repos/${{ github.repository }}/git/matching-refs/tags/ \
+              --jq '.[].ref' 2>/dev/null || true)"
+            LATEST="$({ \
+              echo "${TAGS}" | cut -d '/' -f 3 | grep -P '^v7\.[0-9]+(\.[0-9]+)?-${{ needs.validate.outputs.label }}$' \
+              echo "${{ env.tag }}" \
+            } | sort -V | tail -1)"
+            if [ "${LATEST}" == "${{ env.tag }}" ]; then
+              echo "latest=true" >> $GITHUB_OUTPUT
+            else
+              echo "latest=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "latest=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Compose a release description
         id: compose_description
@@ -519,7 +531,7 @@ jobs:
           name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.label }}"
           body_path: "${{ env.tmp }}/description.txt"
           tag_name: "${{ env.tag }}"
-#          make_latest:  ${{ matrix.channel == 'stable' }}
+          make_latest:  ${{ steps.delete_release.outputs.latest == 'true' }}
           prerelease:  ${{ matrix.channel == 'testing' }}
           files: |
             ${{ env.tmp }}/*.tar.zst
