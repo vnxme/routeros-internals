@@ -507,13 +507,13 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.label }}"
-          body: "${{ steps.compose_description.outputs.description }}"
+          body_path: "${{ env.tmp }}/description.txt"
           tag_name: "${{ env.tag }}"
 #          make_latest:  ${{ matrix.channel == 'stable' }}
           prerelease:  ${{ matrix.channel == 'testing' }}
           files: |
-            "${{ env.tmp }}"/*
-            !"${{ env.tmp }}/description.txt"
+            ${{ env.tmp }}/*
+            !${{ env.tmp }}/description.txt
 
       - name: Upload release files as artifacts
         id: upload_artifacts
@@ -523,8 +523,8 @@ jobs:
           compression-level: 0
           name: "${{ env.branch }}"
           path: |
-            "${{ env.tmp }}"/*
-            !"${{ env.tmp }}/description.txt"
+            ${{ env.tmp }}/*
+            !${{ env.tmp }}/description.txt
 
       - name: Normalize files
         id: normalize_files
