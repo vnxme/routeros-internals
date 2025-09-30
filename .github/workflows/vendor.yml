@@ -493,7 +493,7 @@ jobs:
         run: |
           {
             echo 'description<<EOF'
-            echo -e "Automatic release ($(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }})):\n"
+            echo -e "Automatic release ($(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }} | head -1 && cd --)):\n"
             echo -e "- Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}\n"
             echo -e "- Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}\n"
             echo -e "- Code https://github.com/${{ github.repository }}/commit/${{ github.sha }}\n\n"
@@ -550,7 +550,7 @@ jobs:
         run: |
           {
             echo 'message<<EOF'
-            echo -e "Automatic commit ($(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }}))\n\n"
+            echo -e "Automatic commit ($(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }} | head -1 && cd --))\n\n"
             echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}\n"
             echo -e "Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}\n"
             echo -e "Code https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
