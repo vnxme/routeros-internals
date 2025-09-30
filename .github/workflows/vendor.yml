@@ -474,6 +474,7 @@ jobs:
               -H "X-GitHub-Api-Version: 2022-11-28" \
               /repos/${{ github.repository }}/releases/${ID} || echo 'warning: Failed to delete an existing release'
           fi
+          
           FOUND='true'
           REF="$(gh api \
             -H "Accept: application/vnd.github+json" \
@@ -486,6 +487,13 @@ jobs:
               -H "X-GitHub-Api-Version: 2022-11-28" \
               /repos/${{ github.repository }}/git/refs/tags/${{ env.tag }} || echo 'warning: Failed to delete an existing tag'
           fi
+          
+          TAGS="$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/${{ github.repository }}/git/matching-refs/tags/ \
+            --jq '.[].ref')"
+          echo "${TAGS}"
 
       - name: Compose a release description
         id: compose_description
