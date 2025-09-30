@@ -1,5 +1,5 @@
 name: 'RouterOS 7.x Internals Workflow'
-run-name: "RouterOS 7.x: [${{ inputs.label }}]-[${{ inputs.channel }}]-[${{ inputs.version }}]-[${{ inputs.scope }}]"
+run-name: "RouterOS 7.x: [${{ inputs.label }}]-[${{ inputs.version }}]-[${{ inputs.scope }}]"
 on:
 #  push:
 #    branches:
@@ -15,15 +15,6 @@ on:
           - 'vendor'
           - 'elseif'
           - 'custom'
-      channel:
-        description: 'Channel (e.g., stable)'
-        required: true
-        default: 'stable'
-        type: choice
-        options:
-          - 'stable'
-          - 'testing'
-          - 'stable,testing'
       version:
         description: 'Version (e.g., 7.19.4; empty means latest)'
         required: false
@@ -75,13 +66,12 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       label: ${{ steps.validate_label.outputs.label }}
-      channel: ${{ steps.validate_channel.outputs.channel }}
       version: ${{ steps.validate_version.outputs.version }}
-      matrix: ${{ steps.generate_matrix.outputs.matrix }}
+      matrix: ${{ steps.validate_version.outputs.matrix }}
       scope: ${{ steps.validate_scope.outputs.scope }}
-      scope_has_download: ${{ steps.validate_scope.outputs.download }}
-      scope_has_process: ${{ steps.validate_scope.outputs.process }}
-      scope_has_release: ${{ steps.validate_scope.outputs.release }}
+      do_download: ${{ steps.validate_scope.outputs.download }}
+      do_process: ${{ steps.validate_scope.outputs.process }}
+      do_release: ${{ steps.validate_scope.outputs.release }}
     steps:
       - name: Validate label value
         id: validate_label
@@ -93,69 +83,52 @@ jobs:
           fi
           echo "label=${LABEL}" >> $GITHUB_OUTPUT
 
-      - name: Validate channel value
-        id: validate_channel
-        run: |
-          CHANNEL="$(echo "${{ inputs.channel }}" | xargs)"
-          readarray -d ',' -t CHANNELS < <(printf '%s' "${CHANNEL}")
-          for CHANNEL in ${CHANNELS[@]}; do
-            if [ "${CHANNEL}" != "stable" -a "${CHANNEL}" != "testing" ]; then
-              echo "::error input=channel,value=${CHANNEL}::Invalid channel value"
-              exit 1
-            fi
-          done
-          printf -v CHANNEL '%s,' "${CHANNELS[@]}"
-          echo "channel=${CHANNEL%,}" >> $GITHUB_OUTPUT
-
-      - name: Validate version value
+      - name: Validate version value and generate matrix
         id: validate_version
         run: |
           VERSION="$(echo "${{ inputs.version }}" | xargs)"
-          CHANNEL="$(echo "${{ steps.validate_channel.outputs.channel }}" | xargs)"
-          if [ -n "${VERSION}" -a "${VERSION}" != "latest" ]; then
-            if [ -n "$(echo "${CHANNEL}" | grep ',')" ]; then
-              echo "::error input=version,value=${VERSION}::Same version value can't apply to multiple channels"
-              exit 1
-            elif [ "${CHANNEL}" == "stable" ]; then
-              if [ -z "$(echo "${VERSION}" | grep -P '^7\.[0-9]+(\.[0-9]+)?$')" ]; then
-                echo "::error input=version,value=${VERSION}::Invalid version value for the ${CHANNEL} channel"
-                exit 1
-              fi
-            elif [ "${CHANNEL}" == "testing" ]; then
-              if [ -z "$(echo "${VERSION}" | grep -P '^7\.[0-9]+(\.[0-9]+)?(ab|beta|rc)[0-9]+$')" ]; then
-                echo "::error input=version,value=${VERSION}::Invalid version value for the ${CHANNEL} channel"
-                exit 1
-              fi
+          [ -z "${VERSION}" ] && VERSION='latest'
+          
+          declare -a PAIRS # format: channel|version
+          readarray -d ',' -t VERSIONS < <(printf '%s' "${VERSION,,}") # converts to lower case
+          for VERSION in ${VERSIONS[@]}; do
+            if [ -n "$(echo "${VERSION}" | grep -P '^7\.[0-9]+(\.[0-9]+)?$')" ]; then
+              PAIRS+=("stable|${VERSION}")
+            elif [ -n "$(echo "${VERSION}" | grep -P '^7\.[0-9]+(\.[0-9]+)?(ab|alpha|beta|rc)[0-9]+$')" ]; then
+              PAIRS+=("testing|${VERSION}")
             else
-              echo "::warning::Unknown channel value, so version value has not been validated"
+              [ "${VERSION}" == 'latest' ] && VERSION='stable'
+              if [ "${VERSION}" == 'stable' -o "${VERSION}" == 'testing' ]; then
+                FILE="latest_${VERSION}.txt"
+                URL="https://download.mikrotik.com/routeros/NEWESTa7.${VERSION}"
+                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+                if [ ! -f "${FILE}" ]; then
+                  echo "::error::Failed to get the latest version for the ${VERSION} channel"
+                  exit 1
+                fi
+                VERSION="$(cat ${FILE} | cut -d ' ' -f1)" && rm -f "${FILE}"
+                PAIRS+=("${CHANNEL}|${VERSION}")
+              else
+                echo "::error input=version,value=${VERSION}::Invalid version value"
+                exit 1
+              fi
             fi
-          fi
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-
-      - name: Generate matrix using channel and version values
-        id: generate_matrix
-        run: |
-          readarray -d ',' -t CHANNELS < <(printf '%s' "${{ steps.validate_channel.outputs.channel }}")
-          VERSION="${{ steps.validate_version.outputs.version }}"
+          done
+          
           JSON=""
-          for CHANNEL in ${CHANNELS[@]}; do
-            if [ -z "${VERSION}" -o "${VERSION}" == "latest" ]; then
-              FILE="version_${CHANNEL}.txt"
-              URL="https://download.mikrotik.com/routeros/NEWESTa7.${CHANNEL}"
-              wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
-              if [ ! -f "${FILE}" ]; then
-                echo "::error::Failed to get the latest version for the ${CHANNEL} channel"
-                exit 1
-              fi
-              LATEST="$(cat ${FILE} | cut -d ' ' -f1)" && rm -f "${FILE}"
-            else
-              LATEST="${VERSION}"
-            fi
+          declare -a VERSIONS
+          PAIRS=($(printf '%s\n' "${PAIRS[@]}" | sort -u))
+          for PAIR in ${PAIRS[@]}; do
+            CHANNEL="$(echo "${PAIR}" | cut -d '|' -f1)"
+            VERSION="$(echo "${PAIR}" | cut -d '|' -f2)"
             [ ${#JSON} -ne 0 ] && JSON="${JSON},"
-            JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"version\":\"${LATEST}\"}"
+            JSON="${JSON}{\"channel\":\"${CHANNEL}\",\"version\":\"${VERSION}\"}"
+            VERSIONS+=("${VERSION}")
           done
           JSON="[${JSON}]"
+          printf -v VERSION '%s,' "${VERSIONS[@]}"
           echo "matrix=${JSON}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION%,}" >> $GITHUB_OUTPUT
 
       - name: Validate scope value
         id: validate_scope
@@ -181,7 +154,7 @@ jobs:
             echo "::error input=scope,value=${SCOPE}::Invalid scope value"
             exit 1
           fi
-          echo "scope=${SCOPE%,}" >> $GITHUB_OUTPUT
+          echo "scope=${SCOPE}" >> $GITHUB_OUTPUT
           echo "download=${DOWNLOAD}" >> $GITHUB_OUTPUT
           echo "process=${PROCESS}" >> $GITHUB_OUTPUT
           echo "release=${RELEASE}" >> $GITHUB_OUTPUT
@@ -192,12 +165,12 @@ jobs:
           {
             echo "### Outputs"
             echo "- label: \`${{ steps.validate_label.outputs.label }}\`"
-            echo "- channel: \`${{ steps.validate_channel.outputs.channel }}\`"
             echo "- version: \`${{ steps.validate_version.outputs.version }}\`"
-            echo "- matrix: \`${{ steps.generate_matrix.outputs.matrix }}\`"
+            echo "- matrix: \`${{ steps.validate_version.outputs.matrix }}\`"
             echo "- scope: \`${{ steps.validate_scope.outputs.scope }}\`"
-            echo "- scope_has_download: \`${{ steps.validate_scope.outputs.download }}\`"
-            echo "- scope_has_process: \`${{ steps.validate_scope.outputs.process }}\`"
+            echo "- do_download: \`${{ steps.validate_scope.outputs.download }}\`"
+            echo "- do_process: \`${{ steps.validate_scope.outputs.process }}\`"
+            echo "- do_release: \`${{ steps.validate_scope.outputs.release }}\`"
             echo "- reuse_releases: \`${{ inputs.reuse_releases }}\`"
             echo "- reuse_commits: \`${{ inputs.reuse_commits }}\`"
             echo "- extras: \`${{ inputs.extras }}\`"
@@ -205,7 +178,7 @@ jobs:
 
   download:
     needs: validate
-    if: needs.validate.outputs.scope_has_download == 'true'
+    if: needs.validate.outputs.do_download == 'true'
     strategy:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
@@ -277,7 +250,7 @@ jobs:
     needs:
       - validate
       - download
-    if: needs.validate.outputs.scope_has_process == 'true'
+    if: needs.validate.outputs.do_process == 'true'
     strategy:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
@@ -374,7 +347,7 @@ jobs:
       - validate
       - download
       - process
-    if: needs.validate.outputs.scope_has_release == 'true'
+    if: needs.validate.outputs.do_release == 'true'
     strategy:
       matrix:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
