@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mikrotik User Manager</title>
+    <link rel="stylesheet" type="text/css" href="../css/user.css">
+    <script src="../js/generic.js"></script>
+    <script src="../js/user.js"></script>
+</head>
+<body>
+    <div id="global-blocker" style="width:100%;height:100%;position:absolute;top:0;left:0;visibility:hidden">
+        <div style="background-color:grey;width:100%;height:100%;position:absolute;top:0;left:0;opacity:0.4">
+        </div>
+        <div style="padding:10px;background-color:white;left:50%;top:50%;position:absolute;">
+            <img src="../img/ajax-loader.gif" />
+        </div>
+    </div>
+
+    <div id="header">
+        <img src="../img/mikrotik_logo.png" style="display:block;float:left;">
+        <label for="show-menu" class="show-menu">Menu</label>
+        <input type="checkbox" id="show-menu" role="button">
+
+        <ul class="hmenu" id="menu">
+            <li><a id="menu-status" href="#" onclick="onMenuClick(this); return false;">Status</a></li>
+            <li><a id="menu-sessions" href="#" onclick="onMenuClick(this); return false;">Sessions</a></li>
+            <li><a id="menu-payments" href="#" onclick="onMenuClick(this); return false;">Payments</a></li>
+            <li><a id="menu-profiles" href="#" onclick="onMenuClick(this); return false;">Profiles</a></li>
+            <li><a id="menu-logout" href="#" onclick="onMenuClick(this); return false;">Logout</a></li>
+        </ul>
+    </div>
+    <div id="container">
+        <!-- STATUS VIEW -->
+        <div class="container-view" id="status">
+            <h4>
+                User data
+            </h4>
+            <table id="status-data" class="keyval">
+            </table>
+
+            <h4>
+                User Profiles
+            </h4>
+            <table id="status-profiles" class="flat-table">
+            </table>
+
+            <h4>
+                Expired profiles
+            </h4>
+            <table id="status-exp-profiles" class="flat-table">
+            </table>
+        </div>
+
+        <!-- SESSIONS VIEW -->
+        <div class="container-view" id="sessions">
+            <h4>
+                Sessions
+            </h4>
+            <table style="font-size:14px;" id="sessions-sessions" class="flat-table">
+            </table>
+        </div>
+
+        <!-- PAYMENTS VIEW -->
+        <div class="container-view" id="payments">
+            <h4>
+                Payments
+            </h4>
+            <table style="font-size:14px;" id="payments-payments" class="flat-table">
+            </table>
+        </div>
+
+        <!-- PROFILES VIEW -->
+        <div class="container-view" id="profiles">
+            <h4>
+                All Profiles
+            </h4>
+            <table id="profiles-profiles" class="flat-table">
+            </table>
+        </div>
+
+        <!-- PROFILE VIEW -->
+        <div class="container-view" id="profile">
+            <h4>
+                Profile data
+            </h4>
+            <table id="profile-data" class="keyval">
+            </table>
+
+            <h4>
+                Profile limits
+            </h4>
+            Not yet implemented...
+        </div>
+
+        <!-- BUY PROFILE -->
+        <div class="container-view" id="buyprofile">
+            <h4>
+                Buy profile
+            </h4>
+            <div id="buyprofile-buyprofile">
+            </div>
+        </div>
+
+        <!-- REDIRECTING VIEW -->
+        <div class="container-view" id="redirecting" style="text-align: center; margin-top: 30px;">
+            Payment process started. Redirecting to Paypal. Please wait...
+        </div>
+    </div>
+</body>
+</html>

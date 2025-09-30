@@ -1,0 +1,1 @@
+x86/_chr-7.18.1.img.zip/_chr-7.18.1.img/part2/bin/bash # type=f, perm=755(-rwxr-xr-x)
