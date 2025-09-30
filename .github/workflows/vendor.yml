@@ -491,12 +491,14 @@ jobs:
         id: compose_description
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release }}
         run: |
+          SHA_MSG="$(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }} | head -1)"
           {
             #echo 'description<<EOF'
-            echo -e "Automatic release ($(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }} | head -1 && cd -)):\n"
-            echo -e "- Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}\n"
-            echo -e "- Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}\n"
-            echo -e "- Code https://github.com/${{ github.repository }}/commit/${{ github.sha }}\n\n"
+            echo -e "Automatic release ([${SHA_MSG}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})):"
+            echo -e "- Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
+            echo -e "- Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}"
+            echo -e "- Branch https://github.com/${{ github.repository }}/tree/${{ env.branch }}"
+            echo -e "\n"
             cat "${{ env.box }}/changelog.txt"
             #echo EOF
           } > "${{ env.tmp }}/description.txt"
@@ -550,12 +552,13 @@ jobs:
         id: compose_message
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && fromJSON(inputs.extras).no_push != 'true' }}
         run: |
+          SHA_MSG="$(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }} | head -1)"
           {
             echo 'message<<EOF'
-            echo -e "Automatic commit ($(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }} | head -1 && cd -))\n\n"
-            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}\n"
-            echo -e "Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}\n"
-            echo -e "Code https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+            echo -e "Automatic commit ([${SHA_MSG}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}))\n"
+            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
+            echo -e "Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}"
+            echo -e "Release https://github.com/${{ github.repository }}/releases/tag/${{ env.tag }}"
             echo EOF
           } >> $GITHUB_OUTPUT
 
