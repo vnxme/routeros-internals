@@ -487,6 +487,33 @@ jobs:
               /repos/${{ github.repository }}/git/refs/tags/${{ env.tag }} || echo 'warning: Failed to delete an existing tag'
           fi
 
+      - name: Compose a release description
+        id: compose_description
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release }}
+        run: |
+          {
+            echo 'description<<EOF'
+            echo -e "Automatic release ($(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }})):\n"
+            echo -e "- Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}\n"
+            echo -e "- Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}\n"
+            echo -e "- Code https://github.com/${{ github.repository }}/commit/${{ github.sha }}\n\n"
+            cat "${{ env.box }}/changelog.txt"
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Upload release files as attachments
+        id: upload_attachments
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.label }}"
+          body: "${{ steps.compose_description.outputs.description }}"
+          tag_name: "${{ env.tag }}"
+#          make_latest:  ${{ matrix.channel == 'stable' }}
+          prerelease:  ${{ matrix.channel == 'testing' }}
+          files: |
+            ${{ env.tmp }}/*
+
       - name: Upload release files as artifacts
         id: upload_artifacts
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && !inputs.release }}
@@ -523,9 +550,10 @@ jobs:
         run: |
           {
             echo 'message<<EOF'
-            echo -e "Automatic changes\n\n"
+            echo -e "Automatic commit ($(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }}))\n\n"
             echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}\n"
-            echo -e "Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}"
+            echo -e "Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}\n"
+            echo -e "Code https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
             echo EOF
           } >> $GITHUB_OUTPUT
 
@@ -538,17 +566,4 @@ jobs:
           commit_message: ${{ steps.compose_message.outputs.message }}
           push_options: '--force'
           repository: "${{ env.box }}"
-          tagging_message: "${{ env.tag }}"
-
-      - name: Upload release files as attachments
-        id: upload_attachments
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release }}
-        uses: softprops/action-gh-release@v2
-        with:
-          name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.label }}"
-          body_path: "${{ env.box }}/changelog.txt"
-          tag_name: "${{ env.tag }}"
-#          make_latest:  ${{ matrix.channel == 'stable' }}
-          prerelease:  ${{ matrix.channel == 'testing' }}
-          files: |
-            ${{ env.tmp }}/*
+          #tagging_message: "${{ env.tag }}"
