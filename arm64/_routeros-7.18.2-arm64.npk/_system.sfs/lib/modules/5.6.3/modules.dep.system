@@ -1,0 +1,172 @@
+x_tables
+qca_nss_gmac:	switch packet_hook flash phy_helper
+usb_wwan:	usbcore usbserial
+al:	switch packet_hook flash phy_helper
+xhci-hcd:	usbcore
+vrf:	ipv6
+x_tables
+xhci-plat-hcd:	usbcore usb-common xhci-hcd
+ksmbd:	asn1_decoder oid_registry
+cifs:	libarc4 libdes
+nf_natnf_conntracknf_conntrack_irc
+x_tables
+poe_simple:	flash
+mrp
+packet_hookx_tables
+mvpp2:	switch packet_hook flash phy_helper
+ulogx_tables
+option:	usbserial usbcore usb_wwan
+hid-generic:	hid
+chacha-neon:	libchacha
+ipv6ip6_tablesx_tables
+ehci-hcd:	usbcore
+usbhid:	hid usbcore
+nf_conntrackx_tables
+ftdi_sio:	usbcore usbserial
+nf_conntrackx_tables
+x_tables
+ts:	flash
+des_generic:	libdes
+qcserial:	usbserial usbcore usb_wwan
+vxlan2:	packet_hook udp_tunnel ip6_udp_tunnel
+snifx_tables
+arc4:	libarc4
+ip_tablesx_tables
+mesh:	packet_hook
+packet_hooknf_conntrackx_tables
+sierra_net:	usbcore usbnet
+x_tables
+nf_conntrack
+ipv6xfrm_algo
+mbim:	packet_hook usbcore
+nf_conntracknf_natx_tables
+libchacha20poly1305:	chacha-neon poly1305-neon
+nf_conntracknf_natx_tables
+libblake2s:	libblake2s-generic
+x_tables
+nf_conntrack
+alder_eth:	switch packet_hook flash phy_helper
+x_tables
+ip_tunnel
+x_tables
+mpls_router
+x_tables
+x_tables
+nf_natnf_conntracknf_conntrack_pptp
+x_tables
+x_tables
+x_tables
+dot1x:	packet_hook
+x_tables
+x_tables
+x_tables
+ebtables
+virtio_net:	packet_hook
+dwc3:	usb-common
+nf_conntrack
+sierra:	usbcore usbserial
+crypto_safexcel:	libdes
+x_tables
+packet_hook:	nf_conntrack ipv6 tunnel6
+usbnet:	usbcore
+amt:	ipv6 udp_tunnel
+nf_conntracknf_natnf_conntrack_tftp
+x_tables
+ax88179_178a:	usbcore usbnet
+r8152:	usbcore
+rb:	flash
+ip6_tablesnf_nat
+packet_hookipv6switch
+x_tables
+x_tables
+ebtables
+snifx_tables
+x_tables
+mpls_fp:	packet_hook mpls_router ipv6
+nf_defrag_ipv6
+cdc-acm:	usbcore
+nf_conntracknf_natx_tables
+vmxnet3:	packet_hook
+ch341:	usbcore usbserial
+nf_natnf_conntracknf_conntrack_ftp
+ulogx_tables
+nf_conntrack
+x_tables
+al_cause:	fan_i2c stm8_fan
+x_tables
+x_tables
+wireguard:	libblake2s libchacha20poly1305 libcurve25519-generic ipv6 udp_tunnel ip6_udp_tunnel
+nf_conntrackx_tables
+al_pcie_ep:	switch packet_hook flash
+x_tables
+x_tables
+x_tables
+nf_natnf_conntrack_sipnf_conntrack
+nf_conntrackx_tables
+phy_helper:	flash
+x_tables
+x_tables
+nf_reject_ipv4x_tables
+x_tables
+prestera_dx_mac:	switch packet_hook ipv6 flash phy_helper
+qcrypto:	libdes
+nf_conntracknf_natx_tables
+nf_natnf_conntracknf_conntrack_rtsp
+nf_conntrack
+nf_conntrack
+nf_conntrack
+x_tables
+x_tables
+nf_conntracknfnetlink
+atl1c:	packet_hook
+x_tables
+imq:	cls_fw cls_linear
+marvell_amethyst:	flash packet_hook phy_helper switch
+usb-storage:	usbcore
+ipv6xfrm_algo
+ip_tablesnf_nat
+hk_eth:	switch packet_hook flash phy_helper
+quectel_mhi:	packet_hook
+nf_conntracknf_natx_tables
+ip_tablesx_tables
+nf_natx_tables
+x_tables
+hso:	rfkill usbcore
+nf_conntrack
+ipv6
+panics:	flash
+ip6_tablesx_tables
+al_crypto:	libdes
+x_tables
+ip6_tablesx_tables
+prestera_pci:	flash
+x_tables
+nf_natnf_conntrack_h323nf_conntrack
+quectel_sprd:	packet_hook
+ip_tablesx_tables
+nf_defrag_ipv6
+x_tables
+mvneta:	switch packet_hook phy_helper
+ehci-orion:	ehci-hcd usbcore
+nf_reject_ipv6x_tables
+traffic_gen:	packet_hook
+switch:	packet_hook phy_helper
+xhci-pci:	usbcore xhci-hcd
+x_tables
+smsc95xx:	usbcore usbnet
+x_tables
+fp_usbnet:	packet_hook usbcore
+romon:	packet_hook
+pl2303:	usbcore usbserial
+dwc3-qcom:	usb-common
+ath8327:	flash phy_helper switch
+x_tables
+nf_conntrack
+cp210x:	usbcore usbserial
+nf_conntrack
+nf_conntrackx_tables
+usbserial:	usbcore
+ipw:	usbcore usbserial usb_wwan
+x_tables
+bridge2ipv6
+usbcore:	usb-common

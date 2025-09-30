@@ -1,0 +1,10 @@
+What's new in 7.18.2 (2025-Mar-11 13:59):
+
+*) console - fixed issue with file-name completion (introduced in v7.18);
+*) container - fixed repository name handling to prevent redirect issues when basic authentication is used;
+*) lte - additional fixes for eSIM management support;
+*) lte - AT modems, improved redialing when modem lost connectivity without notifying host about APN status change;
+*) netinstall - fixed socket reset (introduced in v7.18);
+*) queue - fixed system failure when CAKE kind queue was configured but queue type definition does not exist anymore (introduced in v7.18);
+*) wifi - improved stability for wifi interfaces;
+*) winbox - improve graphing efficiency when communicating with WinBox;

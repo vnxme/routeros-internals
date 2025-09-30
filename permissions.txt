@@ -1,0 +1,1 @@
+x86/_calea-7.18.2.npk/_calea.sfs/nova/bin/calea # type=f, perm=755(-rwxr-xr-x)

@@ -1,0 +1,1395 @@
+### system.sfs
+#### Identification (`file <*>`):
+```
+Squashfs filesystem, little endian, version 4.0, xz compressed, 9547876 bytes, 761 inodes, blocksize: 524288 bytes, created: Tue Mar 11 13:00:44 2025
+```
+#### Listing (`ls -AlR --time-style=full-iso <*>`):
+```
+/:
+total 56
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 bin
+drwxr-xr-x 9 root root 4096 2025-03-11 13:00:32.000000000 +0000 bndl
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 boot
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 dev
+lrwxrwxrwx 1 root root   11 2025-03-11 13:00:32.000000000 +0000 dude -> /flash/dude
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 etc
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 flash
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 home
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 nova
+lrwxrwxrwx 1 root root    9 2025-03-11 13:00:32.000000000 +0000 pckg -> /ram/pckg
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 proc
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 ram
+lrwxrwxrwx 1 root root    9 2025-03-11 13:00:32.000000000 +0000 rw -> /flash/rw
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 sbin
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 sys
+lrwxrwxrwx 1 root root    7 2025-03-11 13:00:32.000000000 +0000 tmp -> /rw/tmp
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 var
+
+/bin:
+total 228
+lrwxrwxrwx 1 root root     21 2025-03-11 13:00:32.000000000 +0000 bash -> /pckg/option/bin/bash
+-rwxr-xr-x 1 root root  13724 2025-03-11 12:05:44.000000000 +0000 catlog
+lrwxrwxrwx 1 root root     15 2025-03-11 13:00:32.000000000 +0000 gosh -> /nova/bin/login
+lrwxrwxrwx 1 root root     15 2025-03-11 13:00:32.000000000 +0000 login -> /nova/bin/login
+-rwxr-xr-x 1 root root  19552 2025-03-11 12:43:15.000000000 +0000 mkexfatfs
+-rwxr-xr-x 1 root root   9416 2025-03-11 12:05:44.000000000 +0000 pakp
+lrwxrwxrwx 1 root root     21 2025-03-11 13:00:32.000000000 +0000 sh -> /pckg/option/bin/bash
+lrwxrwxrwx 1 root root     15 2025-03-11 13:00:32.000000000 +0000 shell -> /nova/bin/login
+-rwxr-xr-x 1 root root 183480 2025-03-11 12:44:03.000000000 +0000 sshfs
+
+/bndl:
+total 28
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 advanced-tools
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 dhcp
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 hotspot
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 ipv6
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 ppp
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 security
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 wifi
+
+/bndl/advanced-tools:
+total 8
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 home
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 nova
+
+/bndl/advanced-tools/home:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 web
+
+/bndl/advanced-tools/home/web:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 webfig
+
+/bndl/advanced-tools/home/web/webfig:
+total 8
+-rw-r--r-- 1 root root 2360 2025-03-11 12:45:24.000000000 +0000 advtool-b6a18e54d46e.jg.gz
+-rwxr-xr-x 1 root root  107 2025-03-11 12:45:24.000000000 +0000 advtool.info
+lrwxrwxrwx 1 root root   26 2025-03-11 12:46:44.000000000 +0000 advtool.jg.gz -> advtool-b6a18e54d46e.jg.gz
+
+/bndl/advanced-tools/nova:
+total 8
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 bin
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+
+/bndl/advanced-tools/nova/bin:
+total 208
+-rwxr-xr-x 1 root root 30412 2025-03-11 12:44:42.000000000 +0000 ddns
+-rwxr-xr-x 1 root root 13724 2025-03-11 12:44:23.000000000 +0000 fping
+-rwxr-xr-x 1 root root 17980 2025-03-11 12:44:59.000000000 +0000 macscan
+-rwxr-xr-x 1 root root 67532 2025-03-11 12:46:43.000000000 +0000 netwatch
+-rwxr-xr-x 1 root root 17868 2025-03-11 12:44:31.000000000 +0000 pspeed
+-rwxr-xr-x 1 root root 34536 2025-03-11 12:45:17.000000000 +0000 scanner
+-rwxr-xr-x 1 root root 13732 2025-03-11 12:45:25.000000000 +0000 wakeonlan
+
+/bndl/advanced-tools/nova/lib:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 console
+
+/bndl/advanced-tools/nova/lib/console:
+total 28
+-rwxr-xr-x 1 root root 24705 2025-03-11 12:44:51.000000000 +0000 1166016512.mem
+
+/bndl/dhcp:
+total 12
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 home
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 nova
+
+/bndl/dhcp/home:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 web
+
+/bndl/dhcp/home/web:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 webfig
+
+/bndl/dhcp/home/web/webfig:
+total 12
+-rw-r--r-- 1 root root 4408 2025-03-11 12:45:17.000000000 +0000 dhcp-b0bb4825d0fa.jg.gz
+-rwxr-xr-x 1 root root  101 2025-03-11 12:45:18.000000000 +0000 dhcp.info
+lrwxrwxrwx 1 root root   23 2025-03-11 12:47:38.000000000 +0000 dhcp.jg.gz -> dhcp-b0bb4825d0fa.jg.gz
+
+/bndl/dhcp/lib:
+total 96
+-rwxr-xr-x 1 root root 96572 2025-03-11 12:44:53.000000000 +0000 libudhcp.so
+
+/bndl/dhcp/nova:
+total 8
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 bin
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+
+/bndl/dhcp/nova/bin:
+total 304
+-rwxr-xr-x 1 root root 211640 2025-03-11 12:47:27.000000000 +0000 dhcp
+-rwxr-xr-x 1 root root  96572 2025-03-11 12:46:51.000000000 +0000 dhcpclient
+
+/bndl/dhcp/nova/lib:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 console
+
+/bndl/dhcp/nova/lib/console:
+total 108
+-rwxr-xr-x 1 root root 109639 2025-03-11 12:44:35.000000000 +0000 1128267776.mem
+
+/bndl/hotspot:
+total 12
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 home
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 nova
+
+/bndl/hotspot/home:
+total 4
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 web
+
+/bndl/hotspot/home/web:
+total 8
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 hotspot
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 webfig
+
+/bndl/hotspot/home/web/hotspot:
+total 68
+-rw-r--r-- 1 root root 1094 2025-03-11 11:58:04.000000000 +0000 alogin.html
+-rw-r--r-- 1 root root  311 2025-03-11 11:58:04.000000000 +0000 api.json
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 css
+-rw-r--r-- 1 root root  640 2025-03-11 11:58:04.000000000 +0000 error.html
+-rw-r--r-- 1 root root 3719 2025-03-11 11:58:04.000000000 +0000 errors.txt
+-rw-r--r-- 1 root root  903 2025-03-11 11:58:04.000000000 +0000 favicon.ico
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 img
+-rw-r--r-- 1 root root 4423 2025-03-11 11:58:04.000000000 +0000 login.html
+-rw-r--r-- 1 root root 1459 2025-03-11 11:58:04.000000000 +0000 logout.html
+-rw-r--r-- 1 root root 7218 2025-03-11 11:58:04.000000000 +0000 md5.js
+-rw-r--r-- 1 root root 1204 2025-03-11 11:58:04.000000000 +0000 radvert.html
+-rw-r--r-- 1 root root  330 2025-03-11 11:58:04.000000000 +0000 redirect.html
+-rw-r--r-- 1 root root  877 2025-03-11 11:58:04.000000000 +0000 rlogin.html
+-rw-r--r-- 1 root root 2855 2025-03-11 11:58:04.000000000 +0000 status.html
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 xml
+
+/bndl/hotspot/home/web/hotspot/css:
+total 4
+-rw-r--r-- 1 root root 4053 2025-03-11 11:58:04.000000000 +0000 style.css
+
+/bndl/hotspot/home/web/hotspot/img:
+total 8
+-rw-r--r-- 1 root root 644 2025-03-11 11:58:04.000000000 +0000 password.svg
+-rw-r--r-- 1 root root 444 2025-03-11 11:58:04.000000000 +0000 user.svg
+
+/bndl/hotspot/home/web/hotspot/xml:
+total 32
+-rw-r--r-- 1 root root 4251 2025-03-11 11:58:04.000000000 +0000 WISPAccessGatewayParam.xsd
+-rw-r--r-- 1 root root  839 2025-03-11 11:58:04.000000000 +0000 alogin.html
+-rw-r--r-- 1 root root  428 2025-03-11 11:58:04.000000000 +0000 error.html
+-rw-r--r-- 1 root root  372 2025-03-11 11:58:04.000000000 +0000 flogout.html
+-rw-r--r-- 1 root root  809 2025-03-11 11:58:04.000000000 +0000 login.html
+-rw-r--r-- 1 root root  370 2025-03-11 11:58:04.000000000 +0000 logout.html
+-rw-r--r-- 1 root root  545 2025-03-11 11:58:04.000000000 +0000 rlogin.html
+
+/bndl/hotspot/home/web/webfig:
+total 12
+-rw-r--r-- 1 root root 4216 2025-03-11 12:47:03.000000000 +0000 hotspot-f1e2e1d4af99.jg.gz
+-rwxr-xr-x 1 root root  107 2025-03-11 12:47:03.000000000 +0000 hotspot.info
+lrwxrwxrwx 1 root root   26 2025-03-11 12:47:29.000000000 +0000 hotspot.jg.gz -> hotspot-f1e2e1d4af99.jg.gz
+
+/bndl/hotspot/lib:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 modules
+
+/bndl/hotspot/lib/modules:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 5.6.3
+
+/bndl/hotspot/lib/modules/5.6.3:
+total 8
+-rw-r--r-- 1 root root   13 2025-03-11 12:47:12.000000000 +0000 modules.dep.hotspot
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 net
+
+/bndl/hotspot/lib/modules/5.6.3/net:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 ipv4
+
+/bndl/hotspot/lib/modules/5.6.3/net/ipv4:
+total 64
+-rw-r--r-- 1 root root 62088 2025-03-11 12:46:29.000000000 +0000 unicl.ko
+
+/bndl/hotspot/nova:
+total 12
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 bin
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 etc
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+
+/bndl/hotspot/nova/bin:
+total 232
+-rwxr-xr-x 1 root root 236116 2025-03-11 12:46:30.000000000 +0000 hotspot
+
+/bndl/hotspot/nova/etc:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 radius
+
+/bndl/hotspot/nova/etc/radius:
+total 4
+-rwxr-xr-x 1 root root 57 2025-03-11 12:46:58.000000000 +0000 hotspot.x3
+
+/bndl/hotspot/nova/lib:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 console
+
+/bndl/hotspot/nova/lib/console:
+total 84
+-rwxr-xr-x 1 root root 82346 2025-03-11 12:46:22.000000000 +0000 1132462080.mem
+
+/bndl/ipv6:
+total 8
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 home
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 nova
+
+/bndl/ipv6/home:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 web
+
+/bndl/ipv6/home/web:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 webfig
+
+/bndl/ipv6/home/web/webfig:
+total 12
+-rw-r--r-- 1 root root 7911 2025-03-11 12:45:36.000000000 +0000 ipv6-932ca749791f.jg.gz
+-rwxr-xr-x 1 root root  101 2025-03-11 12:45:36.000000000 +0000 ipv6.info
+lrwxrwxrwx 1 root root   23 2025-03-11 12:45:50.000000000 +0000 ipv6.jg.gz -> ipv6-932ca749791f.jg.gz
+
+/bndl/ipv6/nova:
+total 8
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 bin
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+
+/bndl/ipv6/nova/bin:
+total 92
+-rwxr-xr-x 1 root root 30356 2025-03-11 12:45:50.000000000 +0000 ippool6
+-rwxr-xr-x 1 root root 59228 2025-03-11 12:44:53.000000000 +0000 radvd
+
+/bndl/ipv6/nova/lib:
+total 8
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 console
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 route
+
+/bndl/ipv6/nova/lib/console:
+total 184
+-rwxr-xr-x 1 root root 186728 2025-03-11 12:45:16.000000000 +0000 1212153856.mem
+
+/bndl/ipv6/nova/lib/route:
+total 0
+-rw-r--r-- 1 root root 0 2025-03-11 11:58:04.000000000 +0000 ipv6.rp
+
+/bndl/ppp:
+total 12
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 home
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 nova
+
+/bndl/ppp/home:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 web
+
+/bndl/ppp/home/web:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 webfig
+
+/bndl/ppp/home/web/webfig:
+total 12
+-rw-r--r-- 1 root root 6450 2025-03-11 12:46:06.000000000 +0000 ppp-f833b7b4927e.jg.gz
+-rwxr-xr-x 1 root root   99 2025-03-11 12:46:06.000000000 +0000 ppp.info
+lrwxrwxrwx 1 root root   22 2025-03-11 12:52:23.000000000 +0000 ppp.jg.gz -> ppp-f833b7b4927e.jg.gz
+
+/bndl/ppp/lib:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 modules
+
+/bndl/ppp/lib/modules:
+total 4
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 5.6.3
+
+/bndl/ppp/lib/modules/5.6.3:
+total 16
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 kernel
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 misc
+-rw-r--r-- 1 root root  293 2025-03-11 12:52:04.000000000 +0000 modules.dep.ppp
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 net
+
+/bndl/ppp/lib/modules/5.6.3/kernel:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 drivers
+
+/bndl/ppp/lib/modules/5.6.3/kernel/drivers:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 net
+
+/bndl/ppp/lib/modules/5.6.3/kernel/drivers/net:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 ppp
+
+/bndl/ppp/lib/modules/5.6.3/kernel/drivers/net/ppp:
+total 148
+-rw-r--r-- 1 root root 19456 2025-03-11 12:41:18.000000000 +0000 ppp_async.ko
+-rw-r--r-- 1 root root 10112 2025-03-11 12:41:18.000000000 +0000 ppp_deflate.ko
+-rw-r--r-- 1 root root 49488 2025-03-11 12:41:18.000000000 +0000 ppp_generic.ko
+-rw-r--r-- 1 root root 11880 2025-03-11 12:41:18.000000000 +0000 ppp_mppe.ko
+-rw-r--r-- 1 root root 17816 2025-03-11 12:41:18.000000000 +0000 ppp_synctty.ko
+-rw-r--r-- 1 root root 20408 2025-03-11 12:41:18.000000000 +0000 pppoe.ko
+-rw-r--r-- 1 root root  8272 2025-03-11 12:41:18.000000000 +0000 pppox.ko
+
+/bndl/ppp/lib/modules/5.6.3/misc:
+total 124
+-rw-r--r-- 1 root root 52408 2025-03-11 12:46:27.000000000 +0000 ovpn.ko
+-rw-r--r-- 1 root root  9880 2025-03-11 12:47:27.000000000 +0000 pppoefp.ko
+-rw-r--r-- 1 root root 59736 2025-03-11 12:47:27.000000000 +0000 sstp.ko
+
+/bndl/ppp/lib/modules/5.6.3/net:
+total 88
+-rw-r--r-- 1 root root 67464 2025-03-11 12:45:26.000000000 +0000 l2tp.ko
+-rw-r--r-- 1 root root 17064 2025-03-11 12:45:01.000000000 +0000 pptp.ko
+
+/bndl/ppp/nova:
+total 12
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 bin
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 etc
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+
+/bndl/ppp/nova/bin:
+total 532
+-rwxr-xr-x 1 root root 544768 2025-03-11 12:49:47.000000000 +0000 ppp
+lrwxrwxrwx 1 root root      3 2025-03-11 12:51:30.000000000 +0000 ppp-worker -> ppp
+
+/bndl/ppp/nova/etc:
+total 8
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 net-remote
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 radius
+
+/bndl/ppp/nova/etc/net-remote:
+total 4
+-rwxr-xr-x 1 root root 1974 2025-03-11 12:44:37.000000000 +0000 ppp.x3
+
+/bndl/ppp/nova/etc/radius:
+total 4
+-rwxr-xr-x 1 root root 58 2025-03-11 12:44:37.000000000 +0000 ppp.x3
+
+/bndl/ppp/nova/lib:
+total 8
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 console
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 profiler
+
+/bndl/ppp/nova/lib/console:
+total 144
+-rwxr-xr-x 1 root root 147136 2025-03-11 12:45:52.000000000 +0000 1090519040.mem
+
+/bndl/ppp/nova/lib/profiler:
+total 8
+-rwxr-xr-x 1 root root 5304 2025-03-11 12:46:58.000000000 +0000 ppp.p
+
+/bndl/security:
+total 12
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 home
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 nova
+
+/bndl/security/home:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 web
+
+/bndl/security/home/web:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 webfig
+
+/bndl/security/home/web/webfig:
+total 12
+-rw-r--r-- 1 root root 4365 2025-03-11 12:52:23.000000000 +0000 secure-0a49065a769f.jg.gz
+-rwxr-xr-x 1 root root  105 2025-03-11 12:52:24.000000000 +0000 secure.info
+lrwxrwxrwx 1 root root   25 2025-03-11 13:00:25.000000000 +0000 secure.jg.gz -> secure-0a49065a769f.jg.gz
+
+/bndl/security/lib:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 modules
+
+/bndl/security/lib/modules:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 5.6.3
+
+/bndl/security/lib/modules/5.6.3:
+total 8
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 kernel
+-rw-r--r-- 1 root root  106 2025-03-11 13:00:05.000000000 +0000 modules.dep.security
+
+/bndl/security/lib/modules/5.6.3/kernel:
+total 8
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 crypto
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 net
+
+/bndl/security/lib/modules/5.6.3/kernel/crypto:
+total 96
+-rw-r--r-- 1 root root  9264 2025-03-11 12:41:15.000000000 +0000 blowfish_common.ko
+-rw-r--r-- 1 root root  6848 2025-03-11 12:41:15.000000000 +0000 blowfish_generic.ko
+-rw-r--r-- 1 root root 20600 2025-03-11 12:41:15.000000000 +0000 camellia_generic.ko
+-rw-r--r-- 1 root root 13232 2025-03-11 12:41:15.000000000 +0000 chacha20poly1305.ko
+-rw-r--r-- 1 root root  5688 2025-03-11 12:41:15.000000000 +0000 echainiv.ko
+-rw-r--r-- 1 root root 15400 2025-03-11 12:41:15.000000000 +0000 twofish_common.ko
+-rw-r--r-- 1 root root  9384 2025-03-11 12:41:15.000000000 +0000 twofish_generic.ko
+
+/bndl/security/lib/modules/5.6.3/kernel/net:
+total 12
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 ipv4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 key
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 xfrm
+
+/bndl/security/lib/modules/5.6.3/kernel/net/ipv4:
+total 36
+-rw-r--r-- 1 root root 13152 2025-03-11 12:41:24.000000000 +0000 ah4.ko
+-rw-r--r-- 1 root root 18864 2025-03-11 12:41:24.000000000 +0000 esp4.ko
+
+/bndl/security/lib/modules/5.6.3/kernel/net/key:
+total 44
+-rw-r--r-- 1 root root 41768 2025-03-11 12:41:25.000000000 +0000 af_key.ko
+
+/bndl/security/lib/modules/5.6.3/kernel/net/xfrm:
+total 36
+-rw-r--r-- 1 root root 35040 2025-03-11 12:41:28.000000000 +0000 xfrm_user.ko
+
+/bndl/security/nova:
+total 12
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 bin
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 etc
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+
+/bndl/security/nova/bin:
+total 664
+-rwxr-xr-x 1 root root 496276 2025-03-11 12:57:56.000000000 +0000 ipsec
+lrwxrwxrwx 1 root root      5 2025-03-11 12:58:16.000000000 +0000 ipsec-worker -> ipsec
+-rwxr-xr-x 1 root root 179672 2025-03-11 12:53:55.000000000 +0000 ssh
+lrwxrwxrwx 1 root root      3 2025-03-11 12:54:02.000000000 +0000 sshd -> ssh
+
+/bndl/security/nova/etc:
+total 8
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 radius
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 services
+
+/bndl/security/nova/etc/radius:
+total 4
+-rwxr-xr-x 1 root root 56 2025-03-11 12:51:12.000000000 +0000 security.x3
+
+/bndl/security/nova/etc/services:
+total 4
+-rwxr-xr-x 1 root root 123 2025-03-11 12:51:12.000000000 +0000 security.x3
+
+/bndl/security/nova/lib:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 console
+
+/bndl/security/nova/lib/console:
+total 88
+-rwxr-xr-x 1 root root 89528 2025-03-11 12:51:48.000000000 +0000 1077936128.mem
+
+/bndl/wifi:
+total 8
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 home
+drwxr-xr-x 5 root root 4096 2025-03-11 13:00:32.000000000 +0000 nova
+
+/bndl/wifi/home:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 web
+
+/bndl/wifi/home/web:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 webfig
+
+/bndl/wifi/home/web/webfig:
+total 16
+-rw-r--r-- 1 root root 8897 2025-03-11 12:44:59.000000000 +0000 wave2-5c9c2c711e64.jg.gz
+-rwxr-xr-x 1 root root  103 2025-03-11 12:44:59.000000000 +0000 wave2.info
+lrwxrwxrwx 1 root root   24 2025-03-11 12:55:07.000000000 +0000 wave2.jg.gz -> wave2-5c9c2c711e64.jg.gz
+
+/bndl/wifi/nova:
+total 12
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 bin
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 etc
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+
+/bndl/wifi/nova/bin:
+total 1116
+-rwxr-xr-x 1 root root 1141604 2025-03-11 12:53:54.000000000 +0000 ww2
+
+/bndl/wifi/nova/etc:
+total 8
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 net-remote
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 radius
+
+/bndl/wifi/nova/etc/net-remote:
+total 4
+-rwxr-xr-x 1 root root 183 2025-03-11 12:44:52.000000000 +0000 wifi.x3
+
+/bndl/wifi/nova/etc/radius:
+total 4
+-rwxr-xr-x 1 root root 57 2025-03-11 12:44:52.000000000 +0000 wifi.x3
+
+/bndl/wifi/nova/lib:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 console
+
+/bndl/wifi/nova/lib/console:
+total 192
+-rwxr-xr-x 1 root root 194825 2025-03-11 12:45:21.000000000 +0000 1275068416.mem
+
+/boot:
+total 0
+
+/dev:
+total 0
+
+/etc:
+total 684
+-rw-r--r-- 1 root root  40360 2025-03-11 12:04:47.000000000 +0000 70x0-7.18.2.fwf
+-rw-r--r-- 1 root root  31240 2025-03-11 12:07:54.000000000 +0000 a3700-7.18.2.fwf
+-rw-r--r-- 1 root root  57040 2025-03-11 12:04:52.000000000 +0000 al64-7.18.2.fwf
+-rw-r--r-- 1 root root  61792 2025-03-11 12:04:50.000000000 +0000 al64B-7.18.2.fwf
+-rw-r--r-- 1 root root  53144 2025-03-11 12:04:51.000000000 +0000 al64v3-7.18.2.fwf
+-rw-r--r-- 1 root root  49892 2025-03-11 12:04:55.000000000 +0000 dx2528-7.18.2.fwf
+-rw-r--r-- 1 root root  12316 2025-03-11 11:58:28.000000000 +0000 fan_i2c.stm32
+-rw-r--r-- 1 root root  38108 2025-03-11 12:05:01.000000000 +0000 ipq5300-7.18.2.fwf
+-rw-r--r-- 1 root root  37224 2025-03-11 12:04:50.000000000 +0000 ipq6000-7.18.2.fwf
+-rw-r--r-- 1 root root  39584 2025-03-11 12:04:52.000000000 +0000 ipq807x-7.18.2.fwf
+-rw-r--r-- 1 root root  49064 2025-03-11 12:05:03.000000000 +0000 ipq9574-7.18.2.fwf
+-rw-r--r-- 1 root root 130747 2025-03-11 11:58:28.000000000 +0000 license
+-rw-r--r-- 1 root root  23616 2025-03-11 11:58:28.000000000 +0000 poe-pse-proxy.stm32
+-rw-r--r-- 1 root root  12596 2025-03-11 11:58:28.000000000 +0000 pse-ch4-SUOUT_PSUCTRL.samd20
+-rw-r--r-- 1 root root  12548 2025-03-11 11:58:28.000000000 +0000 pse-ch8-CRS328.samd20
+-rw-r--r-- 1 root root  12852 2025-03-11 11:58:28.000000000 +0000 pse-ch8-RB5009.samd20
+-rw-r--r-- 1 root root   4049 2025-03-11 11:58:28.000000000 +0000 stm8_hw_monitor.bin
+lrwxrwxrwx 1 root root     24 2025-03-11 13:00:32.000000000 +0000 termcap -> /pckg/option/etc/termcap
+
+/flash:
+total 0
+
+/home:
+total 4
+drwxr-xr-x 6 root root 4096 2025-03-11 13:00:32.000000000 +0000 web
+
+/home/web:
+total 64
+drwxr-xr-x 2 root root  4096 2025-03-11 13:00:32.000000000 +0000 assets
+-rwxr-xr-x 1 root root 18983 2025-03-11 12:03:42.000000000 +0000 bth-files.html
+-rwxr-xr-x 1 root root   600 2025-03-11 11:58:29.000000000 +0000 favicon.png
+-rwxr-xr-x 1 root root   689 2025-03-11 11:58:29.000000000 +0000 favicon.svg
+-rwxr-xr-x 1 root root   708 2025-03-11 11:58:27.000000000 +0000 graph.css
+drwxr-xr-x 2 root root  4096 2025-03-11 13:00:32.000000000 +0000 help
+-rwxr-xr-x 1 root root  1254 2025-03-11 11:58:29.000000000 +0000 index2.html
+lrwxrwxrwx 1 root root    12 2025-03-11 12:44:11.000000000 +0000 license.txt -> /etc/license
+-rwxr-xr-x 1 root root    68 2025-03-11 11:58:29.000000000 +0000 logo.png
+-rw-r--r-- 1 root root  2507 2025-03-11 11:58:28.000000000 +0000 mikrotik_logo.svg
+-rwxr-xr-x 1 root root    27 2025-03-11 11:58:29.000000000 +0000 robots.txt
+drwxr-xr-x 2 root root  4096 2025-03-11 13:00:32.000000000 +0000 webfig
+drwxr-xr-x 2 root root  4096 2025-03-11 13:00:32.000000000 +0000 winbox
+
+/home/web/assets:
+total 160
+-rw-r--r-- 1 root root  19040 2025-03-11 11:58:28.000000000 +0000 400.woff2
+-rw-r--r-- 1 root root  19156 2025-03-11 11:58:28.000000000 +0000 700.woff2
+-rwxr-xr-x 1 root root    799 2025-03-11 11:58:29.000000000 +0000 script-bd71a1293274.js
+-rwxr-xr-x 1 root root 117563 2025-03-11 11:58:29.000000000 +0000 style-692511ab2675.css
+
+/home/web/help:
+total 4
+-rw-r--r-- 1 root root 118 2025-03-11 11:58:28.000000000 +0000 license.html
+
+/home/web/webfig:
+total 680
+-rwxr-xr-x 1 root root   9157 2025-03-11 12:02:29.000000000 +0000 curve255-541e54a862be.js
+-rwxr-xr-x 1 root root     70 2025-03-11 12:07:53.000000000 +0000 icons.info
+-rwxr-xr-x 1 root root  24341 2025-03-11 11:58:26.000000000 +0000 icons.png
+-rwxr-xr-x 1 root root     55 2025-03-11 12:07:54.000000000 +0000 icons24.info
+-rwxr-xr-x 1 root root  39797 2025-03-11 11:58:26.000000000 +0000 icons24.png
+-rwxr-xr-x 1 root root     55 2025-03-11 12:07:54.000000000 +0000 icons32.info
+-rwxr-xr-x 1 root root  55094 2025-03-11 11:58:26.000000000 +0000 icons32.png
+-rwxr-xr-x 1 root root  21705 2025-03-11 12:02:29.000000000 +0000 index.html
+lrwxrwxrwx 1 root root     13 2025-03-11 12:02:29.000000000 +0000 list -> /ram/gum.list
+-rwxr-xr-x 1 root root 408548 2025-03-11 12:02:29.000000000 +0000 master-6894ebd52cab.js
+-rw-r--r-- 1 root root 107663 2025-03-11 12:07:56.000000000 +0000 roteros-baf706470128.jg.gz
+-rwxr-xr-x 1 root root    109 2025-03-11 12:07:56.000000000 +0000 roteros.info
+lrwxrwxrwx 1 root root     26 2025-03-11 12:44:11.000000000 +0000 roteros.jg.gz -> roteros-baf706470128.jg.gz
+
+/home/web/winbox:
+total 0
+
+/lib:
+total 1664
+drwxr-xr-x 3 root root   4096 2025-03-11 13:00:32.000000000 +0000 firmware
+-rwxr-xr-x 1 root root 247440 2025-03-11 12:00:35.000000000 +0000 libc.so
+-rwxr-xr-x 1 root root  71836 2025-03-11 12:06:15.000000000 +0000 libeap.so
+-rwxr-xr-x 1 root root  21836 2025-03-11 12:02:36.000000000 +0000 libjson.so
+-rwxr-xr-x 1 root root 145968 2025-03-11 12:04:24.000000000 +0000 librappsup.so
+-rwxr-xr-x 1 root root 100532 2025-03-11 12:03:28.000000000 +0000 libubox.so
+-rwxr-xr-x 1 root root  67508 2025-03-11 12:02:25.000000000 +0000 libuc++.so
+-rwxr-xr-x 1 root root 220392 2025-03-11 12:05:04.000000000 +0000 libucrypto.so
+-rwxr-xr-x 1 root root  26148 2025-03-11 12:03:22.000000000 +0000 libufiber.so
+-rwxr-xr-x 1 root root  59280 2025-03-11 12:03:28.000000000 +0000 libuhttp.so
+-rwxr-xr-x 1 root root 546276 2025-03-11 12:03:11.000000000 +0000 libumsg.so
+-rwxr-xr-x 1 root root  32696 2025-03-11 12:05:20.000000000 +0000 liburadius.so
+-rwxr-xr-x 1 root root   9496 2025-03-11 12:05:13.000000000 +0000 libuxml++.so
+-rwxr-xr-x 1 root root  34608 2025-03-11 12:02:33.000000000 +0000 libwww.so
+-rwxr-xr-x 1 root root  13536 2025-03-11 12:02:36.000000000 +0000 libxml.so
+-rwxr-xr-x 1 root root  67056 2025-03-11 12:02:36.000000000 +0000 libz.so
+drwxr-xr-x 3 root root   4096 2025-03-11 13:00:32.000000000 +0000 modules
+lrwxrwxrwx 1 root root     27 2025-03-11 13:00:32.000000000 +0000 valgrind -> /pckg/valgrind/lib/valgrind
+
+/lib/firmware:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 inside-secure
+
+/lib/firmware/inside-secure:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 eip197_minifw
+
+/lib/firmware/inside-secure/eip197_minifw:
+total 8
+-rw-r--r-- 1 root root 100 2025-03-11 11:58:28.000000000 +0000 ifpp.bin
+-rw-r--r-- 1 root root 108 2025-03-11 11:58:28.000000000 +0000 ipue.bin
+
+/lib/modules:
+total 4
+drwxr-xr-x 6 root root 4096 2025-03-11 13:00:32.000000000 +0000 5.6.3
+
+/lib/modules/5.6.3:
+total 20
+drwxr-xr-x 6 root root 4096 2025-03-11 13:00:32.000000000 +0000 drivers
+drwxr-xr-x 8 root root 4096 2025-03-11 13:00:32.000000000 +0000 kernel
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 misc
+-rw-r--r-- 1 root root 3511 2025-03-11 12:44:06.000000000 +0000 modules.dep.system
+drwxr-xr-x 6 root root 4096 2025-03-11 13:00:32.000000000 +0000 net
+
+/lib/modules/5.6.3/drivers:
+total 16
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 char
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 crypto
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 misc
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 net
+
+/lib/modules/5.6.3/drivers/char:
+total 64
+-rw-r--r-- 1 root root 11744 2025-03-11 12:41:32.000000000 +0000 ac5_gwd.ko
+-rw-r--r-- 1 root root  5160 2025-03-11 12:41:42.000000000 +0000 al_cause.ko
+-rw-r--r-- 1 root root  9272 2025-03-11 12:41:23.000000000 +0000 armada3700_wdt.ko
+-rw-r--r-- 1 root root 12848 2025-03-11 12:41:24.000000000 +0000 ipqhwmon.ko
+-rw-r--r-- 1 root root 14080 2025-03-11 12:36:50.000000000 +0000 ticker.ko
+
+/lib/modules/5.6.3/drivers/crypto:
+total 116
+-rw-r--r-- 1 root root 117504 2025-03-11 12:39:59.000000000 +0000 al_crypto.ko
+
+/lib/modules/5.6.3/drivers/misc:
+total 12
+-rw-r--r-- 1 root root 11984 2025-03-11 12:41:23.000000000 +0000 al3hwmon.ko
+
+/lib/modules/5.6.3/drivers/net:
+total 3112
+-rw-r--r-- 1 root root  114168 2025-03-11 12:39:36.000000000 +0000 al.ko
+-rw-r--r-- 1 root root  222600 2025-03-11 12:41:12.000000000 +0000 alder_eth.ko
+-rw-r--r-- 1 root root   48664 2025-03-11 12:38:24.000000000 +0000 ath8327.ko
+-rw-r--r-- 1 root root   57616 2025-03-11 12:37:24.000000000 +0000 atl1c.ko
+-rw-r--r-- 1 root root  130280 2025-03-11 12:40:43.000000000 +0000 hk_eth.ko
+-rw-r--r-- 1 root root   13656 2025-03-11 12:38:57.000000000 +0000 imq.ko
+-rw-r--r-- 1 root root   55840 2025-03-11 12:38:24.000000000 +0000 marvell_amethyst.ko
+-rw-r--r-- 1 root root   15568 2025-03-11 12:41:56.000000000 +0000 mpls_fp.ko
+-rw-r--r-- 1 root root   44800 2025-03-11 12:41:02.000000000 +0000 mvneta.ko
+-rw-r--r-- 1 root root   99440 2025-03-11 12:41:30.000000000 +0000 mvpp2.ko
+-rw-r--r-- 1 root root  268944 2025-03-11 12:42:00.000000000 +0000 packet_hook.ko
+-rw-r--r-- 1 root root  215576 2025-03-11 12:37:52.000000000 +0000 phy_helper.ko
+-rw-r--r-- 1 root root 1002024 2025-03-11 12:41:40.000000000 +0000 prestera_dx_mac.ko
+-rw-r--r-- 1 root root   74632 2025-03-11 12:39:53.000000000 +0000 qca_nss_gmac.ko
+-rw-r--r-- 1 root root  234584 2025-03-11 12:40:17.000000000 +0000 quectel_mhi.ko
+-rw-r--r-- 1 root root  227672 2025-03-11 12:40:43.000000000 +0000 quectel_sprd.ko
+-rw-r--r-- 1 root root    5512 2025-03-11 12:38:54.000000000 +0000 sram.ko
+-rw-r--r-- 1 root root   99192 2025-03-11 12:38:29.000000000 +0000 switch.ko
+drwxr-xr-x 2 root root    4096 2025-03-11 13:00:32.000000000 +0000 usb
+-rw-r--r-- 1 root root   31592 2025-03-11 12:36:52.000000000 +0000 via-velocity.ko
+-rw-r--r-- 1 root root   49872 2025-03-11 12:41:39.000000000 +0000 virtio_net.ko
+-rw-r--r-- 1 root root   60640 2025-03-11 12:41:41.000000000 +0000 vmxnet3.ko
+-rw-r--r-- 1 root root   68824 2025-03-11 12:42:03.000000000 +0000 vxlan2.ko
+
+/lib/modules/5.6.3/drivers/net/usb:
+total 240
+-rw-r--r-- 1 root root  97760 2025-03-11 12:40:44.000000000 +0000 fp_usbnet.ko
+-rw-r--r-- 1 root root 146696 2025-03-11 12:40:23.000000000 +0000 mbim.ko
+
+/lib/modules/5.6.3/kernel:
+total 24
+drwxr-xr-x  3 root root 4096 2025-03-11 13:00:32.000000000 +0000 arch
+drwxr-xr-x  2 root root 4096 2025-03-11 13:00:32.000000000 +0000 crypto
+drwxr-xr-x  8 root root 4096 2025-03-11 13:00:32.000000000 +0000 drivers
+drwxr-xr-x  7 root root 4096 2025-03-11 13:00:32.000000000 +0000 fs
+drwxr-xr-x  5 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+drwxr-xr-x 13 root root 4096 2025-03-11 13:00:32.000000000 +0000 net
+
+/lib/modules/5.6.3/kernel/arch:
+total 4
+drwxr-xr-x 4 root root 4096 2025-03-11 13:00:32.000000000 +0000 arm64
+
+/lib/modules/5.6.3/kernel/arch/arm64:
+total 8
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 crypto
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 oprofile
+
+/lib/modules/5.6.3/kernel/arch/arm64/crypto:
+total 32
+-rw-r--r-- 1 root root 14744 2025-03-11 12:41:14.000000000 +0000 chacha-neon.ko
+-rw-r--r-- 1 root root 12528 2025-03-11 12:41:14.000000000 +0000 poly1305-neon.ko
+
+/lib/modules/5.6.3/kernel/arch/arm64/oprofile:
+total 60
+-rw-r--r-- 1 root root 59744 2025-03-11 12:41:14.000000000 +0000 oprofile.ko
+
+/lib/modules/5.6.3/kernel/crypto:
+total 52
+-rw-r--r-- 1 root root  5072 2025-03-11 12:41:15.000000000 +0000 arc4.ko
+-rw-r--r-- 1 root root 18016 2025-03-11 12:41:15.000000000 +0000 ccm.ko
+-rw-r--r-- 1 root root  7552 2025-03-11 12:41:15.000000000 +0000 cmac.ko
+-rw-r--r-- 1 root root  6096 2025-03-11 12:41:15.000000000 +0000 des_generic.ko
+-rw-r--r-- 1 root root  6960 2025-03-11 12:41:15.000000000 +0000 md4.ko
+
+/lib/modules/5.6.3/kernel/drivers:
+total 24
+drwxr-xr-x  4 root root 4096 2025-03-11 13:00:32.000000000 +0000 crypto
+drwxr-xr-x  3 root root 4096 2025-03-11 13:00:32.000000000 +0000 dma
+drwxr-xr-x  3 root root 4096 2025-03-11 13:00:32.000000000 +0000 hid
+drwxr-xr-x  6 root root 4096 2025-03-11 13:00:32.000000000 +0000 net
+drwxr-xr-x  3 root root 4096 2025-03-11 13:00:32.000000000 +0000 pci
+drwxr-xr-x 10 root root 4096 2025-03-11 13:00:32.000000000 +0000 usb
+
+/lib/modules/5.6.3/kernel/drivers/crypto:
+total 8
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 inside-secure
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 qce
+
+/lib/modules/5.6.3/kernel/drivers/crypto/inside-secure:
+total 160
+-rw-r--r-- 1 root root 162328 2025-03-11 12:41:15.000000000 +0000 crypto_safexcel.ko
+
+/lib/modules/5.6.3/kernel/drivers/crypto/qce:
+total 48
+-rw-r--r-- 1 root root 45664 2025-03-11 12:41:15.000000000 +0000 qcrypto.ko
+
+/lib/modules/5.6.3/kernel/drivers/dma:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 al
+
+/lib/modules/5.6.3/kernel/drivers/dma/al:
+total 52
+-rw-r--r-- 1 root root 49344 2025-03-11 12:41:16.000000000 +0000 al_dma_drv.ko
+
+/lib/modules/5.6.3/kernel/drivers/hid:
+total 100
+-rw-r--r-- 1 root root  5520 2025-03-11 12:41:16.000000000 +0000 hid-generic.ko
+-rw-r--r-- 1 root root 86168 2025-03-11 12:41:16.000000000 +0000 hid.ko
+drwxr-xr-x 2 root root  4096 2025-03-11 13:00:32.000000000 +0000 usbhid
+
+/lib/modules/5.6.3/kernel/drivers/hid/usbhid:
+total 44
+-rw-r--r-- 1 root root 44752 2025-03-11 12:41:16.000000000 +0000 usbhid.ko
+
+/lib/modules/5.6.3/kernel/drivers/net:
+total 256
+-rw-r--r-- 1 root root 56440 2025-03-11 12:41:16.000000000 +0000 amt.ko
+drwxr-xr-x 2 root root  4096 2025-03-11 13:00:32.000000000 +0000 bonding
+-rw-r--r-- 1 root root 47176 2025-03-11 12:41:18.000000000 +0000 macsec.ko
+-rw-r--r-- 1 root root 27440 2025-03-11 12:41:18.000000000 +0000 macvlan.ko
+drwxr-xr-x 2 root root  4096 2025-03-11 13:00:32.000000000 +0000 slip
+-rw-r--r-- 1 root root 54736 2025-03-11 12:41:18.000000000 +0000 tun.ko
+drwxr-xr-x 2 root root  4096 2025-03-11 13:00:32.000000000 +0000 usb
+-rw-r--r-- 1 root root 23200 2025-03-11 12:41:19.000000000 +0000 veth.ko
+-rw-r--r-- 1 root root 26352 2025-03-11 12:41:19.000000000 +0000 vrf.ko
+drwxr-xr-x 2 root root  4096 2025-03-11 13:00:32.000000000 +0000 wireguard
+
+/lib/modules/5.6.3/kernel/drivers/net/bonding:
+total 172
+-rw-r--r-- 1 root root 175864 2025-03-11 12:41:17.000000000 +0000 bonding.ko
+
+/lib/modules/5.6.3/kernel/drivers/net/slip:
+total 8
+-rw-r--r-- 1 root root 7600 2025-03-11 12:41:18.000000000 +0000 slhc.ko
+
+/lib/modules/5.6.3/kernel/drivers/net/usb:
+total 260
+-rw-r--r-- 1 root root 25952 2025-03-11 12:41:18.000000000 +0000 ax88179_178a.ko
+-rw-r--r-- 1 root root 56184 2025-03-11 12:41:19.000000000 +0000 hso.ko
+-rw-r--r-- 1 root root 75760 2025-03-11 12:41:19.000000000 +0000 r8152.ko
+-rw-r--r-- 1 root root 19144 2025-03-11 12:41:19.000000000 +0000 sierra_net.ko
+-rw-r--r-- 1 root root 35032 2025-03-11 12:41:19.000000000 +0000 smsc95xx.ko
+-rw-r--r-- 1 root root 42696 2025-03-11 12:41:19.000000000 +0000 usbnet.ko
+
+/lib/modules/5.6.3/kernel/drivers/net/wireguard:
+total 124
+-rw-r--r-- 1 root root 126056 2025-03-11 12:41:19.000000000 +0000 wireguard.ko
+
+/lib/modules/5.6.3/kernel/drivers/pci:
+total 4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 controller
+
+/lib/modules/5.6.3/kernel/drivers/pci/controller:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 dwc
+
+/lib/modules/5.6.3/kernel/drivers/pci/controller/dwc:
+total 56
+-rw-r--r-- 1 root root 56704 2025-03-11 12:41:19.000000000 +0000 pcie-qcom.ko
+
+/lib/modules/5.6.3/kernel/drivers/usb:
+total 32
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 class
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 common
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 core
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 dwc3
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 host
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 phy
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 serial
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 storage
+
+/lib/modules/5.6.3/kernel/drivers/usb/class:
+total 40
+-rw-r--r-- 1 root root 37592 2025-03-11 12:41:20.000000000 +0000 cdc-acm.ko
+
+/lib/modules/5.6.3/kernel/drivers/usb/common:
+total 12
+-rw-r--r-- 1 root root 10688 2025-03-11 12:41:20.000000000 +0000 usb-common.ko
+
+/lib/modules/5.6.3/kernel/drivers/usb/core:
+total 284
+-rw-r--r-- 1 root root 288688 2025-03-11 12:41:20.000000000 +0000 usbcore.ko
+
+/lib/modules/5.6.3/kernel/drivers/usb/dwc3:
+total 64
+-rw-r--r-- 1 root root 12208 2025-03-11 12:41:20.000000000 +0000 dwc3-of-simple.ko
+-rw-r--r-- 1 root root 17608 2025-03-11 12:41:20.000000000 +0000 dwc3-qcom.ko
+-rw-r--r-- 1 root root 28912 2025-03-11 12:41:20.000000000 +0000 dwc3.ko
+
+/lib/modules/5.6.3/kernel/drivers/usb/host:
+total 240
+-rw-r--r-- 1 root root  50224 2025-03-11 12:41:21.000000000 +0000 ehci-hcd.ko
+-rw-r--r-- 1 root root  11064 2025-03-11 12:41:21.000000000 +0000 ehci-orion.ko
+-rw-r--r-- 1 root root 149664 2025-03-11 12:41:21.000000000 +0000 xhci-hcd.ko
+-rw-r--r-- 1 root root  10296 2025-03-11 12:41:21.000000000 +0000 xhci-pci.ko
+-rw-r--r-- 1 root root  16112 2025-03-11 12:41:21.000000000 +0000 xhci-plat-hcd.ko
+
+/lib/modules/5.6.3/kernel/drivers/usb/phy:
+total 44
+-rw-r--r-- 1 root root 17568 2025-03-11 12:41:21.000000000 +0000 phy-msm-qusb.ko
+-rw-r--r-- 1 root root 21864 2025-03-11 12:41:21.000000000 +0000 phy-msm-ssusb-qmp.ko
+
+/lib/modules/5.6.3/kernel/drivers/usb/serial:
+total 400
+-rw-r--r-- 1 root root  13760 2025-03-11 12:41:21.000000000 +0000 ch341.ko
+-rw-r--r-- 1 root root  30640 2025-03-11 12:41:21.000000000 +0000 cp210x.ko
+-rw-r--r-- 1 root root  93968 2025-03-11 12:41:21.000000000 +0000 ftdi_sio.ko
+-rw-r--r-- 1 root root   8224 2025-03-11 12:41:21.000000000 +0000 ipw.ko
+-rw-r--r-- 1 root root 114744 2025-03-11 12:41:21.000000000 +0000 option.ko
+-rw-r--r-- 1 root root  22000 2025-03-11 12:41:21.000000000 +0000 pl2303.ko
+-rw-r--r-- 1 root root  17864 2025-03-11 12:41:21.000000000 +0000 qcserial.ko
+-rw-r--r-- 1 root root  20528 2025-03-11 12:41:21.000000000 +0000 sierra.ko
+-rw-r--r-- 1 root root  15024 2025-03-11 12:41:21.000000000 +0000 usb_wwan.ko
+-rw-r--r-- 1 root root  47280 2025-03-11 12:41:21.000000000 +0000 usbserial.ko
+
+/lib/modules/5.6.3/kernel/drivers/usb/storage:
+total 108
+-rw-r--r-- 1 root root 107888 2025-03-11 12:41:21.000000000 +0000 usb-storage.ko
+
+/lib/modules/5.6.3/kernel/fs:
+total 20
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 cifs
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 exfat
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 isofs
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 ksmbd
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 ntfs3
+
+/lib/modules/5.6.3/kernel/fs/cifs:
+total 640
+-rw-r--r-- 1 root root 652880 2025-03-11 12:41:22.000000000 +0000 cifs.ko
+
+/lib/modules/5.6.3/kernel/fs/exfat:
+total 100
+-rw-r--r-- 1 root root 99000 2025-03-11 12:41:22.000000000 +0000 exfat.ko
+
+/lib/modules/5.6.3/kernel/fs/isofs:
+total 44
+-rw-r--r-- 1 root root 42200 2025-03-11 12:41:22.000000000 +0000 isofs.ko
+
+/lib/modules/5.6.3/kernel/fs/ksmbd:
+total 324
+-rw-r--r-- 1 root root 328472 2025-03-11 12:41:22.000000000 +0000 ksmbd.ko
+
+/lib/modules/5.6.3/kernel/fs/ntfs3:
+total 248
+-rw-r--r-- 1 root root 253464 2025-03-11 12:41:23.000000000 +0000 ntfs3.ko
+
+/lib/modules/5.6.3/kernel/lib:
+total 52
+-rw-r--r-- 1 root root 5296 2025-03-11 12:41:23.000000000 +0000 asn1_decoder.ko
+-rw-r--r-- 1 root root 4952 2025-03-11 12:41:23.000000000 +0000 crc-ccitt.ko
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 crypto
+-rw-r--r-- 1 root root 6096 2025-03-11 12:41:23.000000000 +0000 oid_registry.ko
+-rw-r--r-- 1 root root 5472 2025-03-11 12:41:23.000000000 +0000 ts_bm.ko
+-rw-r--r-- 1 root root 5272 2025-03-11 12:41:23.000000000 +0000 ts_kmp.ko
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 zlib_deflate
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 zlib_inflate
+
+/lib/modules/5.6.3/kernel/lib/crypto:
+total 92
+-rw-r--r-- 1 root root  3616 2025-03-11 12:41:23.000000000 +0000 libarc4.ko
+-rw-r--r-- 1 root root  8336 2025-03-11 12:41:23.000000000 +0000 libblake2s-generic.ko
+-rw-r--r-- 1 root root  5920 2025-03-11 12:41:23.000000000 +0000 libblake2s.ko
+-rw-r--r-- 1 root root  3616 2025-03-11 12:41:23.000000000 +0000 libchacha.ko
+-rw-r--r-- 1 root root 10784 2025-03-11 12:41:23.000000000 +0000 libchacha20poly1305.ko
+-rw-r--r-- 1 root root 27368 2025-03-11 12:41:23.000000000 +0000 libcurve25519-generic.ko
+-rw-r--r-- 1 root root  3152 2025-03-11 12:41:23.000000000 +0000 libcurve25519.ko
+-rw-r--r-- 1 root root 19968 2025-03-11 12:41:23.000000000 +0000 libdes.ko
+
+/lib/modules/5.6.3/kernel/lib/zlib_deflate:
+total 24
+-rw-r--r-- 1 root root 21776 2025-03-11 12:41:23.000000000 +0000 zlib_deflate.ko
+
+/lib/modules/5.6.3/kernel/lib/zlib_inflate:
+total 20
+-rw-r--r-- 1 root root 17320 2025-03-11 12:41:23.000000000 +0000 zlib_inflate.ko
+
+/lib/modules/5.6.3/kernel/net:
+total 44
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 802
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 8021q
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 bridge
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 ipv4
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 ipv6
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 mpls
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 netfilter
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 rfkill
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 sched
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 unix
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 xfrm
+
+/lib/modules/5.6.3/kernel/net/802:
+total 16
+-rw-r--r-- 1 root root 15624 2025-03-11 12:41:23.000000000 +0000 mrp.ko
+
+/lib/modules/5.6.3/kernel/net/8021q:
+total 40
+-rw-r--r-- 1 root root 37824 2025-03-11 12:41:23.000000000 +0000 8021q.ko
+
+/lib/modules/5.6.3/kernel/net/bridge:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 netfilter
+
+/lib/modules/5.6.3/kernel/net/bridge/netfilter:
+total 164
+-rw-r--r-- 1 root root  4336 2025-03-11 12:41:23.000000000 +0000 ebt_802_3.ko
+-rw-r--r-- 1 root root  5208 2025-03-11 12:41:24.000000000 +0000 ebt_arp.ko
+-rw-r--r-- 1 root root  4944 2025-03-11 12:41:24.000000000 +0000 ebt_arpreply.ko
+-rw-r--r-- 1 root root  5024 2025-03-11 12:41:24.000000000 +0000 ebt_dnat.ko
+-rw-r--r-- 1 root root  5208 2025-03-11 12:41:24.000000000 +0000 ebt_ip.ko
+-rw-r--r-- 1 root root  5336 2025-03-11 12:41:24.000000000 +0000 ebt_ip6.ko
+-rw-r--r-- 1 root root  6656 2025-03-11 12:41:24.000000000 +0000 ebt_limit.ko
+-rw-r--r-- 1 root root  5776 2025-03-11 12:41:24.000000000 +0000 ebt_mark.ko
+-rw-r--r-- 1 root root  6256 2025-03-11 12:41:24.000000000 +0000 ebt_mark_m.ko
+-rw-r--r-- 1 root root  4208 2025-03-11 12:41:24.000000000 +0000 ebt_pkttype.ko
+-rw-r--r-- 1 root root  4896 2025-03-11 12:41:24.000000000 +0000 ebt_redirect.ko
+-rw-r--r-- 1 root root  4808 2025-03-11 12:41:24.000000000 +0000 ebt_snat.ko
+-rw-r--r-- 1 root root  5728 2025-03-11 12:41:24.000000000 +0000 ebt_stp.ko
+-rw-r--r-- 1 root root  4672 2025-03-11 12:41:24.000000000 +0000 ebt_vlan.ko
+-rw-r--r-- 1 root root  5472 2025-03-11 12:41:24.000000000 +0000 ebtable_filter.ko
+-rw-r--r-- 1 root root  5472 2025-03-11 12:41:24.000000000 +0000 ebtable_nat.ko
+-rw-r--r-- 1 root root 33928 2025-03-11 12:41:24.000000000 +0000 ebtables.ko
+
+/lib/modules/5.6.3/kernel/net/ipv4:
+total 56
+-rw-r--r-- 1 root root 25744 2025-03-11 12:41:24.000000000 +0000 ip_tunnel.ko
+drwxr-xr-x 2 root root  4096 2025-03-11 13:00:32.000000000 +0000 netfilter
+-rw-r--r-- 1 root root 20656 2025-03-11 12:41:24.000000000 +0000 udp_tunnel.ko
+
+/lib/modules/5.6.3/kernel/net/ipv4/netfilter:
+total 116
+-rw-r--r-- 1 root root 34296 2025-03-11 12:41:24.000000000 +0000 ip_tables.ko
+-rw-r--r-- 1 root root  5952 2025-03-11 12:41:24.000000000 +0000 ipt_REJECT.ko
+-rw-r--r-- 1 root root  6496 2025-03-11 12:41:24.000000000 +0000 iptable_filter.ko
+-rw-r--r-- 1 root root  6504 2025-03-11 12:41:24.000000000 +0000 iptable_mangle.ko
+-rw-r--r-- 1 root root  5992 2025-03-11 12:41:24.000000000 +0000 iptable_nat.ko
+-rw-r--r-- 1 root root  6792 2025-03-11 12:41:24.000000000 +0000 iptable_raw.ko
+-rw-r--r-- 1 root root  5696 2025-03-11 12:41:24.000000000 +0000 nf_defrag_ipv4.ko
+-rw-r--r-- 1 root root 14424 2025-03-11 12:41:24.000000000 +0000 nf_nat_h323.ko
+-rw-r--r-- 1 root root  6720 2025-03-11 12:41:24.000000000 +0000 nf_nat_pptp.ko
+-rw-r--r-- 1 root root  6272 2025-03-11 12:41:24.000000000 +0000 nf_reject_ipv4.ko
+
+/lib/modules/5.6.3/kernel/net/ipv6:
+total 628
+-rw-r--r-- 1 root root  13248 2025-03-11 12:41:24.000000000 +0000 ah6.ko
+-rw-r--r-- 1 root root  18520 2025-03-11 12:41:24.000000000 +0000 esp6.ko
+-rw-r--r-- 1 root root   5352 2025-03-11 12:41:24.000000000 +0000 ip6_udp_tunnel.ko
+-rw-r--r-- 1 root root 585072 2025-03-11 12:41:25.000000000 +0000 ipv6.ko
+drwxr-xr-x 2 root root   4096 2025-03-11 13:00:32.000000000 +0000 netfilter
+-rw-r--r-- 1 root root   8032 2025-03-11 12:41:25.000000000 +0000 tunnel6.ko
+
+/lib/modules/5.6.3/kernel/net/ipv6/netfilter:
+total 128
+-rw-r--r-- 1 root root 34720 2025-03-11 12:41:25.000000000 +0000 ip6_tables.ko
+-rw-r--r-- 1 root root  5928 2025-03-11 12:41:25.000000000 +0000 ip6t_NPT.ko
+-rw-r--r-- 1 root root  5904 2025-03-11 12:41:25.000000000 +0000 ip6t_REJECT.ko
+-rw-r--r-- 1 root root  4288 2025-03-11 12:41:25.000000000 +0000 ip6t_eui64.ko
+-rw-r--r-- 1 root root  4928 2025-03-11 12:41:25.000000000 +0000 ip6t_ipv6header.ko
+-rw-r--r-- 1 root root  6528 2025-03-11 12:41:25.000000000 +0000 ip6table_filter.ko
+-rw-r--r-- 1 root root  6568 2025-03-11 12:41:25.000000000 +0000 ip6table_mangle.ko
+-rw-r--r-- 1 root root  6000 2025-03-11 12:41:25.000000000 +0000 ip6table_nat.ko
+-rw-r--r-- 1 root root  6800 2025-03-11 12:41:25.000000000 +0000 ip6table_raw.ko
+-rw-r--r-- 1 root root 17208 2025-03-11 12:41:25.000000000 +0000 nf_defrag_ipv6.ko
+-rw-r--r-- 1 root root  7096 2025-03-11 12:41:25.000000000 +0000 nf_reject_ipv6.ko
+
+/lib/modules/5.6.3/kernel/net/mpls:
+total 68
+-rw-r--r-- 1 root root  7840 2025-03-11 12:41:26.000000000 +0000 mpls_iptunnel.ko
+-rw-r--r-- 1 root root 59440 2025-03-11 12:41:26.000000000 +0000 mpls_router.ko
+
+/lib/modules/5.6.3/kernel/net/netfilter:
+total 848
+-rw-r--r-- 1 root root 199512 2025-03-11 12:41:26.000000000 +0000 nf_conntrack.ko
+-rw-r--r-- 1 root root  14728 2025-03-11 12:41:26.000000000 +0000 nf_conntrack_ftp.ko
+-rw-r--r-- 1 root root  60400 2025-03-11 12:41:26.000000000 +0000 nf_conntrack_h323.ko
+-rw-r--r-- 1 root root  12328 2025-03-11 12:41:26.000000000 +0000 nf_conntrack_irc.ko
+-rw-r--r-- 1 root root  55128 2025-03-11 12:41:26.000000000 +0000 nf_conntrack_netlink.ko
+-rw-r--r-- 1 root root  12208 2025-03-11 12:41:26.000000000 +0000 nf_conntrack_pptp.ko
+-rw-r--r-- 1 root root  12376 2025-03-11 12:41:26.000000000 +0000 nf_conntrack_rtsp.ko
+-rw-r--r-- 1 root root  40224 2025-03-11 12:41:26.000000000 +0000 nf_conntrack_sip.ko
+-rw-r--r-- 1 root root  10200 2025-03-11 12:41:26.000000000 +0000 nf_conntrack_tftp.ko
+-rw-r--r-- 1 root root  45696 2025-03-11 12:41:26.000000000 +0000 nf_nat.ko
+-rw-r--r-- 1 root root   7288 2025-03-11 12:41:26.000000000 +0000 nf_nat_ftp.ko
+-rw-r--r-- 1 root root   6872 2025-03-11 12:41:26.000000000 +0000 nf_nat_irc.ko
+-rw-r--r-- 1 root root  11424 2025-03-11 12:41:26.000000000 +0000 nf_nat_rtsp.ko
+-rw-r--r-- 1 root root  17528 2025-03-11 12:41:26.000000000 +0000 nf_nat_sip.ko
+-rw-r--r-- 1 root root   5144 2025-03-11 12:41:26.000000000 +0000 nf_nat_tftp.ko
+-rw-r--r-- 1 root root  14752 2025-03-11 12:41:26.000000000 +0000 nfnetlink.ko
+-rw-r--r-- 1 root root  55688 2025-03-11 12:41:26.000000000 +0000 x_tables.ko
+-rw-r--r-- 1 root root  11312 2025-03-11 12:41:26.000000000 +0000 xt_CT.ko
+-rw-r--r-- 1 root root   6432 2025-03-11 12:41:26.000000000 +0000 xt_DSCP.ko
+-rw-r--r-- 1 root root   5512 2025-03-11 12:41:27.000000000 +0000 xt_HL.ko
+-rw-r--r-- 1 root root   5736 2025-03-11 12:41:27.000000000 +0000 xt_MASQUERADE.ko
+-rw-r--r-- 1 root root   5800 2025-03-11 12:41:27.000000000 +0000 xt_NETMAP.ko
+-rw-r--r-- 1 root root   5464 2025-03-11 12:41:27.000000000 +0000 xt_REDIRECT.ko
+-rw-r--r-- 1 root root   9408 2025-03-11 12:41:27.000000000 +0000 xt_TCPMSS.ko
+-rw-r--r-- 1 root root   7736 2025-03-11 12:41:27.000000000 +0000 xt_addrtype.ko
+-rw-r--r-- 1 root root   5928 2025-03-11 12:41:27.000000000 +0000 xt_connbytes.ko
+-rw-r--r-- 1 root root   7672 2025-03-11 12:41:27.000000000 +0000 xt_connmark.ko
+-rw-r--r-- 1 root root   7672 2025-03-11 12:41:27.000000000 +0000 xt_conntrack.ko
+-rw-r--r-- 1 root root   5072 2025-03-11 12:41:27.000000000 +0000 xt_dscp.ko
+-rw-r--r-- 1 root root  27264 2025-03-11 12:41:27.000000000 +0000 xt_hashlimit.ko
+-rw-r--r-- 1 root root   5648 2025-03-11 12:41:27.000000000 +0000 xt_helper.ko
+-rw-r--r-- 1 root root   4624 2025-03-11 12:41:27.000000000 +0000 xt_hl.ko
+-rw-r--r-- 1 root root   4560 2025-03-11 12:41:27.000000000 +0000 xt_length.ko
+-rw-r--r-- 1 root root   4224 2025-03-11 12:41:27.000000000 +0000 xt_mac.ko
+-rw-r--r-- 1 root root   4712 2025-03-11 12:41:27.000000000 +0000 xt_mark.ko
+-rw-r--r-- 1 root root   5344 2025-03-11 12:41:27.000000000 +0000 xt_multiport.ko
+-rw-r--r-- 1 root root   8216 2025-03-11 12:41:27.000000000 +0000 xt_nat.ko
+-rw-r--r-- 1 root root   5864 2025-03-11 12:41:27.000000000 +0000 xt_physdev.ko
+-rw-r--r-- 1 root root   6544 2025-03-11 12:41:27.000000000 +0000 xt_policy.ko
+-rw-r--r-- 1 root root   4160 2025-03-11 12:41:27.000000000 +0000 xt_realm.ko
+-rw-r--r-- 1 root root   5512 2025-03-11 12:41:27.000000000 +0000 xt_statistic.ko
+-rw-r--r-- 1 root root   4856 2025-03-11 12:41:27.000000000 +0000 xt_string.ko
+-rw-r--r-- 1 root root   4888 2025-03-11 12:41:27.000000000 +0000 xt_tcpmss.ko
+-rw-r--r-- 1 root root   6408 2025-03-11 12:41:27.000000000 +0000 xt_tcpudp.ko
+
+/lib/modules/5.6.3/kernel/net/rfkill:
+total 28
+-rw-r--r-- 1 root root 26392 2025-03-11 12:41:27.000000000 +0000 rfkill.ko
+
+/lib/modules/5.6.3/kernel/net/sched:
+total 112
+-rw-r--r-- 1 root root 29016 2025-03-11 12:41:27.000000000 +0000 sch_cake.ko
+-rw-r--r-- 1 root root 10960 2025-03-11 12:41:27.000000000 +0000 sch_codel.ko
+-rw-r--r-- 1 root root 14232 2025-03-11 12:41:27.000000000 +0000 sch_fq_codel.ko
+-rw-r--r-- 1 root root 34760 2025-03-11 12:41:27.000000000 +0000 sch_htb.ko
+-rw-r--r-- 1 root root 13648 2025-03-11 12:41:27.000000000 +0000 sch_red.ko
+
+/lib/modules/5.6.3/kernel/net/unix:
+total 48
+-rw-r--r-- 1 root root 47136 2025-03-11 12:41:28.000000000 +0000 unix.ko
+
+/lib/modules/5.6.3/kernel/net/xfrm:
+total 16
+-rw-r--r-- 1 root root 13544 2025-03-11 12:41:28.000000000 +0000 xfrm_algo.ko
+
+/lib/modules/5.6.3/misc:
+total 576
+-rw-r--r-- 1 root root 59416 2025-03-11 12:39:50.000000000 +0000 al_pcie_ep.ko
+-rw-r--r-- 1 root root 15088 2025-03-11 12:36:54.000000000 +0000 btest.ko
+-rw-r--r-- 1 root root 11008 2025-03-11 12:40:49.000000000 +0000 dot1x.ko
+-rw-r--r-- 1 root root 51448 2025-03-11 12:40:30.000000000 +0000 fan_i2c.ko
+-rw-r--r-- 1 root root  9504 2025-03-11 12:37:16.000000000 +0000 flash-uefi.ko
+-rw-r--r-- 1 root root 82272 2025-03-11 12:37:17.000000000 +0000 flash.ko
+-rw-r--r-- 1 root root  7888 2025-03-11 12:39:19.000000000 +0000 jiffies.ko
+-rw-r--r-- 1 root root  4704 2025-03-11 12:37:13.000000000 +0000 ledgroup.ko
+-rw-r--r-- 1 root root 16712 2025-03-11 12:36:48.000000000 +0000 logring.ko
+-rw-r--r-- 1 root root 34352 2025-03-11 12:37:29.000000000 +0000 mesh.ko
+-rw-r--r-- 1 root root 16344 2025-03-11 12:36:46.000000000 +0000 panics.ko
+-rw-r--r-- 1 root root 16760 2025-03-11 12:36:49.000000000 +0000 poe_simple.ko
+-rw-r--r-- 1 root root 47336 2025-03-11 12:36:47.000000000 +0000 poe_v4.ko
+-rw-r--r-- 1 root root 17656 2025-03-11 12:41:40.000000000 +0000 prestera_pci.ko
+-rw-r--r-- 1 root root 12984 2025-03-11 12:38:58.000000000 +0000 rb.ko
+-rw-r--r-- 1 root root  9024 2025-03-11 12:39:26.000000000 +0000 romon.ko
+-rw-r--r-- 1 root root  9160 2025-03-11 12:37:24.000000000 +0000 snif.ko
+-rw-r--r-- 1 root root 41312 2025-03-11 12:40:24.000000000 +0000 stm8_fan.ko
+-rw-r--r-- 1 root root 36352 2025-03-11 12:37:45.000000000 +0000 traffic_gen.ko
+-rw-r--r-- 1 root root 29232 2025-03-11 12:38:15.000000000 +0000 ts.ko
+-rw-r--r-- 1 root root 10048 2025-03-11 12:37:24.000000000 +0000 ulog.ko
+
+/lib/modules/5.6.3/net:
+total 16
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 bridge
+drwxr-xr-x 3 root root 4096 2025-03-11 13:00:32.000000000 +0000 ipv4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 netfilter
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 sched
+
+/lib/modules/5.6.3/net/bridge:
+total 292
+-rw-r--r-- 1 root root 254656 2025-03-11 12:41:13.000000000 +0000 bridge2.ko
+-rw-r--r-- 1 root root  22808 2025-03-11 12:41:08.000000000 +0000 bridge2_netfilter.ko
+-rw-r--r-- 1 root root   4224 2025-03-11 12:37:20.000000000 +0000 ebt_snif.ko
+-rw-r--r-- 1 root root   4456 2025-03-11 12:37:20.000000000 +0000 ebt_ulog.ko
+
+/lib/modules/5.6.3/net/ipv4:
+total 4
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 netfilter
+
+/lib/modules/5.6.3/net/ipv4/netfilter:
+total 44
+-rw-r--r-- 1 root root 5216 2025-03-11 12:36:53.000000000 +0000 ipt_SAME.ko
+-rw-r--r-- 1 root root 8600 2025-03-11 12:36:53.000000000 +0000 ipt_TARPIT.ko
+-rw-r--r-- 1 root root 6496 2025-03-11 12:36:54.000000000 +0000 ipt_psd.ko
+-rw-r--r-- 1 root root 4448 2025-03-11 12:37:20.000000000 +0000 ipt_snif.ko
+-rw-r--r-- 1 root root 5032 2025-03-11 12:37:20.000000000 +0000 ipt_ulog.ko
+
+/lib/modules/5.6.3/net/netfilter:
+total 76
+-rw-r--r-- 1 root root  3408 2025-03-11 12:38:05.000000000 +0000 nf_conntrack_ipv4.ko
+-rw-r--r-- 1 root root  3408 2025-03-11 12:38:06.000000000 +0000 nf_conntrack_ipv6.ko
+-rw-r--r-- 1 root root 15864 2025-03-11 12:38:14.000000000 +0000 xt_ein.ko
+-rw-r--r-- 1 root root 15872 2025-03-11 12:36:59.000000000 +0000 xt_layer7.ko
+-rw-r--r-- 1 root root 24896 2025-03-11 12:38:14.000000000 +0000 xt_misc.ko
+-rw-r--r-- 1 root root  5112 2025-03-11 12:37:08.000000000 +0000 xt_tls.ko
+
+/lib/modules/5.6.3/net/sched:
+total 112
+-rw-r--r-- 1 root root  7984 2025-03-11 12:37:09.000000000 +0000 cls_fw.ko
+-rw-r--r-- 1 root root 16608 2025-03-11 12:37:14.000000000 +0000 cls_linear.ko
+-rw-r--r-- 1 root root 15032 2025-03-11 12:37:28.000000000 +0000 proto_agr.ko
+-rw-r--r-- 1 root root 24408 2025-03-11 12:37:28.000000000 +0000 sch_agr.ko
+-rw-r--r-- 1 root root 13744 2025-03-11 12:36:57.000000000 +0000 sch_pcq.ko
+-rw-r--r-- 1 root root  9592 2025-03-11 12:39:14.000000000 +0000 sch_rate.ko
+-rw-r--r-- 1 root root 12392 2025-03-11 12:39:28.000000000 +0000 sch_sfq.ko
+
+/nova:
+total 12
+drwxr-xr-x  2 root root 4096 2025-03-11 13:00:32.000000000 +0000 bin
+drwxr-xr-x 11 root root 4096 2025-03-11 13:00:32.000000000 +0000 etc
+drwxr-xr-x  5 root root 4096 2025-03-11 13:00:32.000000000 +0000 lib
+lrwxrwxrwx  1 root root    8 2025-03-11 13:00:32.000000000 +0000 logs -> /rw/logs
+lrwxrwxrwx  1 root root    9 2025-03-11 13:00:32.000000000 +0000 store -> /rw/store
+
+/nova/bin:
+total 10744
+-rwxr-xr-x 1 root root   26180 2025-03-11 12:03:18.000000000 +0000 agent
+-rwxr-xr-x 1 root root   13720 2025-03-11 12:03:17.000000000 +0000 arpd
+-rwxr-xr-x 1 root root   18052 2025-03-11 12:05:36.000000000 +0000 backup
+-rwxr-xr-x 1 root root  248260 2025-03-11 12:08:08.000000000 +0000 bridge2
+-rwxr-xr-x 1 root root   67632 2025-03-11 12:05:51.000000000 +0000 btest
+-rwxr-xr-x 1 root root   55172 2025-03-11 12:04:00.000000000 +0000 bth
+-rwxr-xr-x 1 root root  771332 2025-03-11 12:07:11.000000000 +0000 cerm
+lrwxrwxrwx 1 root root       4 2025-03-11 12:07:11.000000000 +0000 cerm-worker -> cerm
+-rwxr-xr-x 1 root root  162080 2025-03-11 12:07:09.000000000 +0000 cloud
+-rwxr-xr-x 1 root root   87804 2025-03-11 12:05:13.000000000 +0000 crossfig
+-rwxr-xr-x 1 root root   63516 2025-03-11 12:06:30.000000000 +0000 detnet
+-rwxr-xr-x 1 root root   79908 2025-03-11 12:04:00.000000000 +0000 discover
+-rwxr-xr-x 1 root root  301792 2025-03-11 12:06:59.000000000 +0000 diskd
+-rwxr-xr-x 1 root root  104640 2025-03-11 12:08:01.000000000 +0000 dot1x
+-rwxr-xr-x 1 root root   42996 2025-03-11 12:05:29.000000000 +0000 email
+-rwxr-xr-x 1 root root  108840 2025-03-11 12:06:05.000000000 +0000 fileman
+-rwxr-xr-x 1 root root   34484 2025-03-11 12:03:18.000000000 +0000 ftpd
+-rwxr-xr-x 1 root root  149052 2025-03-11 12:04:11.000000000 +0000 graphing
+-rwxr-xr-x 1 root root    5212 2025-03-11 12:05:52.000000000 +0000 havecardbus
+-rwxr-xr-x 1 root root   63304 2025-03-11 12:05:04.000000000 +0000 igmpproxy
+-rwxr-xr-x 1 root root  178160 2025-03-11 12:06:46.000000000 +0000 installer
+-rwxr-xr-x 1 root root   30340 2025-03-11 12:06:55.000000000 +0000 ippool
+-rwxr-xr-x 1 root root   59376 2025-03-11 12:05:54.000000000 +0000 keyman
+-rwxr-xr-x 1 root root   46932 2025-03-11 12:03:54.000000000 +0000 kidcontrol
+-rwxr-xr-x 1 root root  219324 2025-03-11 12:04:20.000000000 +0000 lcdstat
+-rwxr-xr-x 1 root root   71812 2025-03-11 12:06:14.000000000 +0000 led
+-rwxr-xr-x 1 root root  112620 2025-03-11 12:07:23.000000000 +0000 letsencrypt
+-rwxr-xr-x 1 root root   84004 2025-03-11 12:05:38.000000000 +0000 loader
+-rwxr-xr-x 1 root root   79984 2025-03-11 12:03:23.000000000 +0000 log
+-rwxr-xr-x 1 root root  150128 2025-03-11 12:08:35.000000000 +0000 login
+-rwxr-xr-x 1 root root   54920 2025-03-11 12:03:21.000000000 +0000 logmaker
+-rwxr-xr-x 1 root root   22132 2025-03-11 12:03:17.000000000 +0000 macping
+-rwxr-xr-x 1 root root   38760 2025-03-11 12:05:49.000000000 +0000 mactel
+-rwxr-xr-x 1 root root   26356 2025-03-11 12:03:19.000000000 +0000 mepty
+-rwxr-xr-x 1 root root   79708 2025-03-11 12:04:03.000000000 +0000 mesh
+-rwxr-xr-x 1 root root   67248 2025-03-11 12:08:49.000000000 +0000 mode
+lrwxrwxrwx 1 root root       7 2025-03-11 12:05:53.000000000 +0000 modprobed -> moduler
+-rwxr-xr-x 1 root root   76140 2025-03-11 12:05:52.000000000 +0000 moduler
+-rwxr-xr-x 1 root root   72188 2025-03-11 12:07:44.000000000 +0000 mproxy
+-rwxr-xr-x 1 root root   59404 2025-03-11 12:05:36.000000000 +0000 mtget
+-rwxr-xr-x 1 root root   46936 2025-03-11 12:03:58.000000000 +0000 natpmp
+-rwxr-xr-x 1 root root 1645264 2025-03-11 12:10:51.000000000 +0000 net
+-rwxr-xr-x 1 root root   71660 2025-03-11 12:06:36.000000000 +0000 ntp
+-rwxr-xr-x 1 root root    9468 2025-03-11 12:03:15.000000000 +0000 panicsl
+-rwxr-xr-x 1 root root  679840 2025-03-11 12:08:51.000000000 +0000 parser
+-rwxr-xr-x 1 root root   34560 2025-03-11 12:03:41.000000000 +0000 partd
+-rwxr-xr-x 1 root root   38636 2025-03-11 12:03:23.000000000 +0000 ping
+-rwxr-xr-x 1 root root   51236 2025-03-11 12:05:33.000000000 +0000 portman
+-rwxr-xr-x 1 root root   34596 2025-03-11 12:42:26.000000000 +0000 profiler
+-rwxr-xr-x 1 root root   83896 2025-03-11 12:07:22.000000000 +0000 ptp
+-rwxr-xr-x 1 root root  141472 2025-03-11 12:03:27.000000000 +0000 quickset
+-rwxr-xr-x 1 root root   51124 2025-03-11 12:05:57.000000000 +0000 radius
+-rwxr-xr-x 1 root root  154084 2025-03-11 12:06:34.000000000 +0000 resolver
+-rwxr-xr-x 1 root root    9596 2025-03-11 12:05:48.000000000 +0000 resolver_ctl
+-rwxr-xr-x 1 root root   92396 2025-03-11 12:07:04.000000000 +0000 romon
+-rwxr-xr-x 1 root root 1593680 2025-03-11 12:11:58.000000000 +0000 route
+-rwxr-xr-x 1 root root   17944 2025-03-11 12:06:25.000000000 +0000 rtrace
+-rwxr-xr-x 1 root root   30504 2025-03-11 12:06:53.000000000 +0000 sermgr
+-rwxr-xr-x 1 root root   34484 2025-03-11 12:03:42.000000000 +0000 sertcp
+-rwxr-xr-x 1 root root   67460 2025-03-11 12:03:56.000000000 +0000 sniffer
+-rwxr-xr-x 1 root root  199088 2025-03-11 12:07:59.000000000 +0000 snmp
+-rwxr-xr-x 1 root root   63424 2025-03-11 12:03:59.000000000 +0000 socks
+-rwxr-xr-x 1 root root  116836 2025-03-11 12:06:24.000000000 +0000 ssld
+-rwxr-xr-x 1 root root   30352 2025-03-11 12:05:30.000000000 +0000 sstore
+-rwxr-xr-x 1 root root  752712 2025-03-11 12:08:55.000000000 +0000 sys2
+-rwxr-xr-x 1 root root   22020 2025-03-11 12:03:21.000000000 +0000 telnet
+-rwxr-xr-x 1 root root   13552 2025-03-11 12:03:14.000000000 +0000 telser
+-rwxr-xr-x 1 root root   38772 2025-03-11 12:03:45.000000000 +0000 tftpd
+-rwxr-xr-x 1 root root   30392 2025-03-11 12:03:17.000000000 +0000 traceroute
+-rwxr-xr-x 1 root root  104424 2025-03-11 12:03:57.000000000 +0000 trafficgen
+-rwxr-xr-x 1 root root   22124 2025-03-11 12:03:35.000000000 +0000 trafflow
+-rwxr-xr-x 1 root root   26208 2025-03-11 12:03:19.000000000 +0000 undo
+-rwxr-xr-x 1 root root  141488 2025-03-11 12:04:04.000000000 +0000 upnp
+-rwxr-xr-x 1 root root   80196 2025-03-11 12:07:10.000000000 +0000 user
+-rwxr-xr-x 1 root root   88092 2025-03-11 12:06:33.000000000 +0000 vrrp
+-rwxr-xr-x 1 root root   30508 2025-03-11 12:03:40.000000000 +0000 watchdog
+-rwxr-xr-x 1 root root  142004 2025-03-11 12:06:50.000000000 +0000 wproxy
+-rwxr-xr-x 1 root root  117312 2025-03-11 12:07:41.000000000 +0000 www
+
+/nova/etc:
+total 52
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 leds
+-rwxr-xr-x 1 root root 1242 2025-03-11 11:58:27.000000000 +0000 lognames
+-rwxr-xr-x 1 root root   10 2025-03-11 11:58:27.000000000 +0000 logo
+-rwxr-xr-x 1 root root    1 2025-03-11 11:58:27.000000000 +0000 manual-url
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 net-remote
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 pciinfo
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 radius
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 services
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 system_names
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 upnp
+-rwxr-xr-x 1 root root   26 2025-03-11 11:58:27.000000000 +0000 url
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 user
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 www
+
+/nova/etc/leds:
+total 124
+-rwxr-xr-x 1 root root 126901 2025-03-11 12:02:31.000000000 +0000 system.x3
+
+/nova/etc/net-remote:
+total 4
+-rwxr-xr-x 1 root root 1204 2025-03-11 12:02:31.000000000 +0000 system.x3
+
+/nova/etc/pciinfo:
+total 216
+-rwxr-xr-x 1 root root 217131 2025-03-11 12:02:31.000000000 +0000 system.x3
+
+/nova/etc/radius:
+total 4
+-rwxr-xr-x 1 root root 57 2025-03-11 12:02:31.000000000 +0000 system.x3
+
+/nova/etc/services:
+total 4
+-rwxr-xr-x 1 root root 992 2025-03-11 12:02:31.000000000 +0000 system.x3
+
+/nova/etc/system_names:
+total 4
+-rwxr-xr-x 1 root root 1324 2025-03-11 12:02:31.000000000 +0000 system.x3
+
+/nova/etc/upnp:
+total 64
+-rwxr-xr-x 1 root root  3378 2025-03-11 11:58:29.000000000 +0000 connectionmanager.xml
+-rwxr-xr-x 1 root root  5684 2025-03-11 11:58:29.000000000 +0000 contentdirectory.xml
+-rwxr-xr-x 1 root root  8764 2025-03-11 11:58:29.000000000 +0000 logo120.png
+-rwxr-xr-x 1 root root   930 2025-03-11 11:58:29.000000000 +0000 logo16.gif
+-rwxr-xr-x 1 root root  1173 2025-03-11 11:58:29.000000000 +0000 logo32.gif
+-rwxr-xr-x 1 root root  1504 2025-03-11 11:58:29.000000000 +0000 logo48.gif
+-rwxr-xr-x 1 root root   735 2025-03-11 11:58:29.000000000 +0000 osinfo.xml
+-rwxr-xr-x 1 root root  5928 2025-03-11 11:58:29.000000000 +0000 wancommonifcfg.xml
+-rwxr-xr-x 1 root root 13444 2025-03-11 11:58:29.000000000 +0000 wanipconn.xml
+
+/nova/etc/user:
+total 4
+-rwxr-xr-x 1 root root 2230 2025-03-11 12:02:31.000000000 +0000 system.x3
+
+/nova/etc/www:
+total 4
+-rwxr-xr-x 1 root root 2458 2025-03-11 12:02:31.000000000 +0000 system.x3
+
+/nova/lib:
+total 16
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 console
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 defconf
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 profiler
+-rwxr-xr-x 1 root root 4085 2025-03-11 11:58:27.000000000 +0000 xmlnames2
+
+/nova/lib/console:
+total 2196
+-rwxr-xr-x 1 root root 2236624 2025-03-11 12:09:35.000000000 +0000 1073741824.mem
+-rwxr-xr-x 1 root root     510 2025-03-11 11:58:26.000000000 +0000 logo.txt
+-rwxr-xr-x 1 root root      18 2025-03-11 11:58:26.000000000 +0000 sublogo.txt
+
+/nova/lib/defconf:
+total 100
+-rwxr-xr-x 1 root root   567 2025-03-11 11:58:26.000000000 +0000 defconf
+-rwxr-xr-x 1 root root  4995 2025-03-11 11:58:26.000000000 +0000 defconf-caps
+-rwxr-xr-x 1 root root  3700 2025-03-11 11:58:26.000000000 +0000 defconf-wps-sync
+-rwxr-xr-x 1 root root 85178 2025-03-11 11:58:26.000000000 +0000 get-custom-defconf
+
+/nova/lib/profiler:
+total 28
+-rwxr-xr-x 1 root root 27520 2025-03-11 12:42:25.000000000 +0000 system.p
+
+/proc:
+total 0
+
+/ram:
+total 0
+
+/sbin:
+total 632
+-rwxr-xr-x 1 root root 173752 2025-03-11 12:03:00.000000000 +0000 kexec
+-rwxr-xr-x 1 root root 321132 2025-03-11 12:43:10.000000000 +0000 mke2fs
+-rwxr-xr-x 1 root root  25584 2025-03-11 12:02:30.000000000 +0000 nandfix
+-rwxr-xr-x 1 root root  63472 2025-03-11 12:05:24.000000000 +0000 sysinit
+-rwxr-xr-x 1 root root  50520 2025-03-11 12:03:00.000000000 +0000 vmcore-dmesg
+
+/sys:
+total 0
+
+/var:
+total 12
+lrwxrwxrwx 1 root root    6 2025-03-11 13:00:32.000000000 +0000 cm -> /rw/cm
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 deinstall
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 lock
+lrwxrwxrwx 1 root root    8 2025-03-11 13:00:32.000000000 +0000 pckg -> /rw/pckg
+lrwxrwxrwx 1 root root   14 2025-03-11 13:00:32.000000000 +0000 pdb -> /flash/var/pdb
+drwxr-xr-x 2 root root 4096 2025-03-11 13:00:32.000000000 +0000 post
+lrwxrwxrwx 1 root root    7 2025-03-11 13:00:32.000000000 +0000 run -> /rw/run
+lrwxrwxrwx 1 root root    4 2025-03-11 13:00:32.000000000 +0000 tmp -> /tmp
+
+/var/deinstall:
+total 0
+
+/var/lock:
+total 0
+
+/var/post:
+total 0
+```
+
