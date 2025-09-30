@@ -514,8 +514,7 @@ jobs:
 #          make_latest:  ${{ matrix.channel == 'stable' }}
           prerelease:  ${{ matrix.channel == 'testing' }}
           files: |
-            ${{ env.tmp }}/*
-            !${{ env.tmp }}/description.txt
+            ${{ env.tmp }}/*.tar.zst
 
       - name: Upload release files as artifacts
         id: upload_artifacts
@@ -526,7 +525,6 @@ jobs:
           name: "${{ env.branch }}"
           path: |
             ${{ env.tmp }}/*
-            !${{ env.tmp }}/description.txt
 
       - name: Normalize files
         id: normalize_files
