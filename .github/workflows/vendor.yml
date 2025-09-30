@@ -116,7 +116,7 @@ jobs:
           done
           
           JSON=""
-          declare -a VERSIONS
+          unset VERSIONS; declare -a VERSIONS
           PAIRS=($(printf '%s\n' "${PAIRS[@]}" | sort -u))
           for PAIR in ${PAIRS[@]}; do
             CHANNEL="$(echo "${PAIR}" | cut -d '|' -f1)"
