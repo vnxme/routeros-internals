@@ -1,0 +1,6 @@
+a9300_ahb:	a9300 flash
+wlan:	capsmanglue packet_hook
+capsman:	capsmanglue packet_hook ipv6
+a9300_pci:	a9300 flash
+a9300:	wlan ath flash
+ath:	wlan packet_hook

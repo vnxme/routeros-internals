@@ -1,0 +1,1 @@
+x86/_gps-7.18.npk/_gps.sfs/nova/bin/gps # type=f, perm=755(-rwxr-xr-x)
