@@ -495,9 +495,9 @@ jobs:
           {
             #echo 'description<<EOF'
             echo -e "Automatic release ([${SHA_MSG}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})):"
-            echo -e "- Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
             echo -e "- Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}"
-            echo -e "- Branch https://github.com/${{ github.repository }}/tree/${{ env.branch }}"
+            echo -e "- Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
+            echo -e "- Tree https://github.com/${{ github.repository }}/tree/${{ env.branch }}"
             echo -e "\n"
             cat "${{ env.box }}/changelog.txt"
             #echo EOF
@@ -553,10 +553,11 @@ jobs:
           SHA_MSG="$(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }} | head -1)"
           {
             echo 'message<<EOF'
-            echo -e "Automatic commit ([${SHA_MSG}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}))\n"
-            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
+            echo -e "Automatic commit (${SHA_MSG})\n"
             echo -e "Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}"
-            echo -e "Release https://github.com/${{ github.repository }}/releases/tag/${{ env.tag }}"
+            echo -e "Run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
+            echo -e "Sha https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+            echo -e "Tag https://github.com/${{ github.repository }}/releases/tag/${{ env.tag }}"
             echo EOF
           } >> $GITHUB_OUTPUT
 
