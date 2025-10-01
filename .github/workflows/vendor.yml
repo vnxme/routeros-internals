@@ -319,7 +319,7 @@ jobs:
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.key }}.tar.zst"
-          sudo tar --zst -cf "${FILE}" -x 'downloads.txt' -X "${{ env.box }}/downloads.txt" -C "${{ env.box }}" . && sudo chown -hR $(id -un):$(id -gn) "${FILE}"
+          sudo tar --zst -cf "${FILE}" --exclude='downloads.txt' -X "${{ env.box }}/downloads.txt" -C "${{ env.box }}" . && sudo chown -hR $(id -un):$(id -gn) "${FILE}"
 
       - name: Delete processed files from cache
         id: delete_cache
