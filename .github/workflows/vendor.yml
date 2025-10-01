@@ -419,7 +419,7 @@ jobs:
           EXCL='exclusions.txt'
           cd "${{ env.box }}"
           ls -al .
-          sudo find * -type f -size +32M | sort > "${EXCL}" || true
+          sudo find * -type f -size +32M | sudo sort > "${EXCL}" || true
           cd -
           
           FILE="${{ env.tmp }}/routeros-${{ env.branch }}-full.tar.zst"
