@@ -1,0 +1,141 @@
+x_tables
+x_tables
+nf_conntrack
+ip_tunnel
+packet_hooknf_conntrackx_tables
+mpls_router
+ip6_tablesx_tables
+rb:	flash
+x_tables
+x_tables
+nf_conntrack
+snifx_tables
+x_tables
+ulogx_tables
+nf_conntracknf_natx_tables
+nf_conntrack
+romon:	packet_hook
+nf_natx_tables
+nls_cp437:	nls_base
+ulogx_tables
+nf_natnf_conntracknf_conntrack_rtsp
+mesh:	packet_hook
+x_tables
+x_tables
+x_tables
+panics:	flash
+gianfar:	switch packet_hook
+vrf:	ipv6
+x_tables
+nf_conntracknf_natx_tables
+virtio_net:	net_failover
+arc4:	libarc4
+dot1x:	packet_hook
+aths16:	flash phy_helper switch
+x_tables
+caamalg_desc:	error
+x_tables
+ipv6
+cifs:	libarc4 libdes nls_base
+nls_iso8859-1:	nls_base
+snifx_tables
+nf_reject_ipv6x_tables
+x_tables
+nf_conntrack
+caamhash_desc:	error
+libchacha20poly1305:	libchacha libpoly1305
+nls_utf8:	nls_base
+imq:	cls_fw cls_linear
+nf_conntracknfnetlink
+ipv6xfrm_algo
+fat:	nls_base
+atl1c:	packet_hook
+vfat:	fat nls_base
+nf_conntrackx_tables
+x_tables
+x_tables
+x_tables
+rsa_generic:	asn1_decoder mpi
+nf_conntrackx_tables
+x_tables
+des_generic:	libdes
+x_tables
+x_tables
+x_tables
+x_tables
+ath8327:	flash phy_helper switch
+x_tables
+wireguard:	libblake2s libchacha20poly1305 libcurve25519-generic ipv6 udp_tunnel ip6_udp_tunnel
+talitos:	libdes
+x_tables
+x_tables
+x_tables
+packet_hookx_tables
+x_tables
+nf_conntrackx_tables
+ebtables
+ebtables
+mrp
+x_tables
+nf_defrag_ipv6
+nf_conntracknf_natx_tables
+ksmbd:	asn1_decoder nls_base oid_registry
+x_tables
+nf_natnf_conntracknf_conntrack_irc
+x_tables
+nf_conntracknf_natx_tables
+net_failover:	failover
+of_mmc_spi:	mmc_core
+nf_natnf_conntrack_sipnf_conntrack
+x_tables
+mmc_spi:	crc7 crc-itu-t mmc_core of_mmc_spi
+switch:	packet_hook phy_helper
+nf_conntrack
+x_tables
+nf_conntrack
+x_tables
+mpls_fp:	packet_hook mpls_router ipv6
+caam_jr:	caam error caamalg_desc caamhash_desc libdes rsa_generic
+nf_conntrackx_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+nf_conntrack
+nf_conntrack
+nf_reject_ipv4x_tables
+nf_conntracknf_natnf_conntrack_tftp
+traffic_gen:	packet_hook
+ntfs3:	nls_base
+exfat:	nls_base
+packet_hookipv6switch
+ipv6xfrm_algo
+nf_defrag_ipv6
+x_tables
+nf_conntrackx_tables
+x_tables
+ip6_tablesx_tables
+ip6_tablesnf_nat
+ipv6ip6_tablesx_tables
+nf_conntracknf_natx_tables
+dpa:	switch phy_helper
+x_tables
+x_tables
+nf_natnf_conntrack_h323nf_conntrack
+bridge2ipv6
+libblake2s:	libblake2s-generic
+nf_natnf_conntracknf_conntrack_ftp
+ext4:	mbcache jbd2
+nf_conntrack
+packet_hook:	nf_conntrack ipv6 tunnel6
+x_tables
+nf_natnf_conntracknf_conntrack_pptp
+ip_tablesx_tables
+ip_tablesx_tables
+caam:	error
+ip_tablesx_tables
+ip_tablesnf_nat
+mmc_block:	mmc_core
+vxlan2:	packet_hook udp_tunnel ip6_udp_tunnel
+nf_conntrack

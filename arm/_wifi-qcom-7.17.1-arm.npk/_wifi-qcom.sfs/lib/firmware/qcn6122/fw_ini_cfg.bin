@@ -1,0 +1,9 @@
+//Number of VAPs
+{"Mode": 0,"num vap":32}
+{"Mode": 1,"num vap":16}
+{"Mode": 2,"num vap":16}
+
+//Number of clients
+{"Mode":0, "num clients":128}
+{"Mode":1, "num clients":128}
+{"Mode":2, "num clients":128}

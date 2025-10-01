@@ -1,0 +1,15 @@
+What's new in 7.17.1 (2025-Jan-30 12:29):
+
+*) bgp - improved system stability when printing BGP advertisements;
+*) bridge - fixed endless MAC update loop (introduced in v7.17);
+*) dhcpv4-server - fixed lease assigning when server address is not bind to server interface (introduced in v7.17);
+*) igmp-proxy - fixed multicast routing after upstream interface flaps (introduced in v7.17);
+*) ipsec - fixed chacha20 poly1305 proposal; 
+*) ipsec - fixed installed SAs update process when SAs are removed;
+*) ipv6 - fixed an issue where bridge, IP, IPv6 and discovery settings were lost after upgrade due to conflicting IPv6 properties (introduced in v7.17);
+*) ovpn - added requirement for server name when exporting configuration;
+*) ppc - fixed HW encryption (introduced in v7.17);
+*) queue - improved system stability when many simple queues are added (introduced in v7.17);
+*) resolver - fixed static FQDN resolving (introduced in v7.17);
+*) system,arm - automatically increase boot part size on upgrade or netinstall (fixed upgrade failed due to a lack of space on kernel disk/partition); 
+*) winbox - show warning messages for static DNS entries;
