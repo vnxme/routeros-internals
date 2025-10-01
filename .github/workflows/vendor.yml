@@ -101,7 +101,7 @@ jobs:
               if [ "${VERSION}" == 'stable' -o "${VERSION}" == 'testing' ]; then
                 FILE="latest_${VERSION}.txt"
                 URL="https://download.mikrotik.com/routeros/NEWESTa7.${VERSION}"
-                wget -nv -O ${FILE} ${URL} || rm -f ${FILE}
+                wget -nv -t 3 -O ${FILE} ${URL} || rm -f ${FILE}
                 if [ ! -f "${FILE}" ]; then
                   echo "::error::Failed to get the latest version for the ${VERSION} channel"
                   exit 1
@@ -224,7 +224,7 @@ jobs:
         if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.key }}.tar.zst"
-          sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" .
+          sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" . && sudo chown -hR $(id -un):$(id -gn) "${FILE}"
 
       - name: Delete downloaded files from cache
         id: delete_cache
@@ -289,7 +289,6 @@ jobs:
         run: |
           FILE="${{ env.tmp }}/${{ env.dkey }}.tar.zst"
           sudo tar --zst -xf "${FILE}" -C "${{ env.box }}" && rm -f "${FILE}"
-          cd "${{ env.box }}" && sudo find * -type f > "../${{ env.tmp }}/downloaded.txt" 2>/dev/null || true
 
       - name: Checkout 'main' branch into '${{ env.app }}' directory
         id: checkout_repository
@@ -320,7 +319,7 @@ jobs:
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.key }}.tar.zst"
-          sudo tar --zst -cf "${FILE}" -X "${{ env.tmp }}/downloaded.txt" -C "${{ env.box }}" .
+          sudo tar --zst -cf "${FILE}" -x 'downloads.txt' -X "${{ env.box }}/downloads.txt" -C "${{ env.box }}" . && sudo chown -hR $(id -un):$(id -gn) "${FILE}"
 
       - name: Delete processed files from cache
         id: delete_cache

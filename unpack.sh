@@ -220,7 +220,7 @@ function unpack_bzimage {
   if [ -z "$(find ${DIR}/* -maxdepth 0 -type f -name '*.vmlinux' 2>/dev/null)" ]; then
     local SCRIPT="/tmp/extract-vmlinux.sh"
     if [ ! -s "${SCRIPT}" ]; then
-      wget -nv -O "${SCRIPT}" "https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-vmlinux" && chmod +x "${SCRIPT}" || rm -f "${SCRIPT}"
+      wget -nv -t 3 -O "${SCRIPT}" "https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-vmlinux" && chmod +x "${SCRIPT}" || rm -f "${SCRIPT}"
       if [ ! -s "${SCRIPT}" ]; then
         clean_and_exit 2 "${ME}: Script '${SCRIPT}' is missing"
       fi

@@ -27,12 +27,14 @@ LABEL='' # -l or --label: branch prefix / tag suffix indicating a source of file
 REPO='vnxme/routeros-internals' # -r or --repo: GitHub repository
 VERSION='' # -v or --version: software version
 
+declare -a DOWNLOADS
+
 function download {
   # arguments:
   # $1 - local file path
   # $2 - remote file URL
 
-  wget -nv -O "$1" "$2" || rm -f "$1"
+  wget -nv -t 3 -O "$1" "$2" && DOWNLOADS+=("$1") || rm -f "$1"
 }
 
 function download_from_branch {
@@ -149,11 +151,17 @@ URL_GITHUB_B="https://${HOST_GITHUB}/${REPO}/raw/refs/heads/${BRANCH}"
 URL_VENDOR="https://${HOST_VENDOR}/routeros/${VERSION}"
 
 # Download all files from a full release archive
+FILE_DOWNLOADS='downloads.txt'
 if [ "${IGNORE_RELEASE}" == 'false' ]; then
   FILE="routeros-${BRANCH}-full.tar.zst"
   download_from_release "${FILE}"
   if [ -f "${FILE}" ]; then
-    tar --zst -xf "${FILE}" -C . && rm -f "${FILE}" && "${MYDIR}/cleanup.sh" .
+    LIST="$(tar --zst -tf "${FILE}" | grep -x "${FILE_DOWNLOADS}")"
+    if [ -n "${LIST}" ]; then
+      tar --zst -xf "${FILE}" -C . "${LIST}" && tar --zst -xf "${FILE}" -C . -T "${LIST}" && rm -f "${FILE}"
+    else
+      tar --zst -xf "${FILE}" -C . && rm -f "${FILE}" && "${MYDIR}/cleanup.sh" . && find . -type f > ${FILE_DOWNLOADS}
+    fi
     exit 0
   fi
 fi
@@ -190,6 +198,7 @@ for ARCH in "${ARCHS[@]}"; do
       FILE="${ARCH}/all_packages-${VERSION}${SUFFIX}.zip"
       download_from_vendor "${FILE}" "all_packages-${ARCH}-${VERSION}.zip"
       if [ -f "${FILE}" ]; then
+        unset -v 'DOWNLOADS[-1]'
         unzip -o -d "${ARCH}/" "${FILE}" && rm -f "${FILE}"
         find ${ARCH}/* -maxdepth 0 -type f -name '*.npk' ! -name 'routeros*.npk' >> "${FILE_PACKAGES}"
       fi
@@ -221,3 +230,5 @@ for ARCH in "${ARCHS[@]}"; do
   download_from_branch_or_vendor "${ARCH}/netinstall-w32-${VERSION}${SUFFIX}.exe.zip" "netinstall-${VERSION}${SUFFIX}.zip"
   download_from_branch_or_vendor "${ARCH}/netinstall-w64-${VERSION}${SUFFIX}.exe.zip" "netinstall64-${VERSION}${SUFFIX}.zip"
 done
+
+printf '%s\n' "${DOWNLOADS[@]}" > ${FILE_DOWNLOADS}
