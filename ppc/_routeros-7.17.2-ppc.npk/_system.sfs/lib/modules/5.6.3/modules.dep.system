@@ -1,0 +1,135 @@
+x_tables
+x_tables
+vrf:	ipv6
+x_tables
+vfat:	fat nls_base
+nf_natnf_conntracknf_conntrack_irc
+x_tables
+mrp
+packet_hookx_tables
+ulogx_tables
+nf_conntrack
+nf_conntrackx_tables
+nf_conntrackx_tables
+vxlan2:	packet_hook udp_tunnel ip6_udp_tunnel
+snifx_tables
+mesh:	packet_hook
+bridge2ipv6
+x_tables
+nf_conntrack
+nf_conntracknf_natx_tables
+exfat:	nls_base
+nf_conntracknf_natx_tables
+gianfar:	switch packet_hook
+nf_conntrack
+x_tables
+ext4:	mbcache crc16 jbd2
+nf_natnf_conntracknf_conntrack_pptp
+x_tables
+dot1x:	packet_hook
+x_tables
+x_tables
+ksmbd:	asn1_decoder nls_base oid_registry
+nf_conntrack
+fat:	nls_base
+ipv6xfrm_algo
+x_tables
+packet_hook:	nf_conntrack ipv6 tunnel6
+x_tables
+nls_iso8859-1:	nls_base
+nls_cp437:	nls_base
+nf_conntracknf_natnf_conntrack_tftp
+ntfs3:	nls_base
+mmc_block:	mmc_core
+rb:	flash
+ip6_tablesx_tables
+packet_hookipv6switch
+x_tables
+x_tables
+snifx_tables
+x_tables
+x_tables
+des_generic:	libdes
+x_tables
+ulogx_tables
+ipv6
+x_tables
+mmc_spi:	crc7 crc-itu-t mmc_core of_mmc_spi
+arc4:	libarc4
+x_tables
+wireguard:	libblake2s libchacha20poly1305 libcurve25519-generic ipv6 udp_tunnel ip6_udp_tunnel
+nf_conntrackx_tables
+x_tables
+x_tables
+nls_utf8:	nls_base
+x_tables
+nf_natnf_conntrack_sipnf_conntrack
+x_tables
+nf_defrag_ipv6
+x_tables
+ebtables
+nf_reject_ipv4x_tables
+ebtables
+libblake2s:	libblake2s-generic
+nf_natnf_conntracknf_conntrack_ftp
+x_tables
+libata:	scsi_mod
+x_tables
+nf_conntracknf_natx_tables
+x_tables
+x_tables
+x_tables
+aths16:	flash phy_helper switch
+atl1c:	packet_hook
+nf_conntrackx_tables
+imq:	cls_fw cls_linear
+x_tables
+x_tables
+x_tables
+ip_tablesx_tables
+x_tables
+nf_conntracknf_natx_tables
+sd_mod:	scsi_mod
+nf_natx_tables
+nf_conntracknf_natx_tables
+nf_natnf_conntracknf_conntrack_rtsp
+nf_conntrack
+nf_conntrack
+nf_conntrack
+nf_conntrack
+nf_conntracknfnetlink
+x_tables
+x_tables
+ip6_tablesnf_nat
+ipv6xfrm_algo
+pata_rb_ppc:	libata
+panics:	flash
+mpls_fp:	packet_hook mpls_router ipv6
+cifs:	libarc4 libdes nls_base
+x_tables
+nf_defrag_ipv6
+libchacha20poly1305:	libchacha libpoly1305
+nf_reject_ipv6x_tables
+ipv6ip6_tablesx_tables
+switch:	packet_hook phy_helper
+ip6_tablesx_tables
+x_tables
+x_tables
+of_mmc_spi:	mmc_core
+romon:	packet_hook
+ip_tablesnf_nat
+ip_tunnel
+mpls_router
+ip_tablesx_tables
+ath8327:	flash phy_helper switch
+x_tables
+nf_conntrack
+packet_hooknf_conntrackx_tables
+ip_tablesx_tables
+traffic_gen:	packet_hook
+x_tables
+nf_conntrackx_tables
+nf_natnf_conntrack_h323nf_conntrack
+x_tables
+x_tables
+nf_conntrack

@@ -1,0 +1,11 @@
+ppp_deflate:	ppp_generic zlib_deflate zlib_inflate
+pppoefp:	packet_hook ppp_generic pppoe
+ppp_genericpacket_hook
+sstp:	ppp_generic
+ppp_async:	crc-ccitt ppp_generic
+ppp_mppe:	ppp_generic
+ovpn:	ipv6
+pppoe:	ppp_generic pppox
+packet_hookipv6ppp_generic
+pppox:	ppp_generic
+ppp_synctty:	ppp_generic

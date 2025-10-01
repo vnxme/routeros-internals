@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MikroTik File Sharing</title>
+    <script type="text/javascript">
+function setPath(path){window.location.hash=encodeURI(path);}
+function pathJoin(parts,separator='/'){var replace=new RegExp(separator+'{1,}','g');return parts.join(separator).replace(replace,separator);}
+async function loadDir(path=''){const baseurl=window.location.pathname;if(!baseurl.startsWith("/s/"))return;let url=baseurl+'?list';if(path)url=pathJoin([baseurl,`${encodeURI(path)}?list`]);let sgl=document.getElementById('sgl');let rsl=document.getElementById('rsl');let fi=document.getElementById('fi');let ft=document.getElementById('ft');let fs=document.getElementById('fs');let fd=document.getElementById('fd');let dl=document.getElementById('dl');let fl=document.getElementById('fl');let ild=document.getElementById('ild');let ilb=document.getElementById('ilb');let ttr=document.getElementById('ttr');ft.innerText="Loading files...";fs.hidden=true;fd.hidden=true;dl.hidden=true;ilb.classList.add('hide');ild.onclick=function(e){e.stopPropagation();}
+for(let i=0;i<fl.rows.length;i++){fl.rows[i].style.opacity=0;}
+let obj={'error':'Unknown error'};try{const response=await fetch(url,{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(5000)});obj=await response.json();}catch(error){obj={'error':'Request timed out'};}
+let error=obj['error']??false;if(error){fi.src='https://cdn.mt.lv/marketing/bth/missing.svg';ft.innerText=error;fs.hidden=true;fd.hidden=true;fl.innerHTML='';sgl.classList='';rsl.classList='hide';return;}
+let ident=obj['identity']??'MikroTik';if(ident=='MikroTik')ident=obj['board']??'MikroTik';let name=obj['name']??'';if(name){document.title=`${name} - ${ident} File Sharing`;}else{document.title=`${ident} File Sharing`;}
+const files=obj['files'].sort(function(a,b){let an=(a['type']=='dir'?'A':'Z')+a['path'];let bn=(b['type']=='dir'?'A':'Z')+b['path'];return an.localeCompare(bn);});if(files.length==1&&!path){const path=files[0]['path'];let name=path.split('/');name=name[name.length-1];fi.src='https://cdn.mt.lv/marketing/bth/file.svg';ft.innerText=path;fs.innerText=formatBytes(files[0]['size']);dl.href=pathJoin([baseurl,path]);dl.download=name;fs.hidden=false;fd.hidden=false;rsl.classList='hide';}else{sgl.classList='hide';rsl.classList='';ild.href=`${baseurl}?dl`;if(path){ild.href=pathJoin([baseurl,`${encodeURI(path)}?dl`]);const index=path.lastIndexOf("/");let back=index>0?path.slice(0,index):'';ilb.classList.remove('hide');ilb.href='#'+encodeURI(back);ttr.onclick=function(){setPath(back);}}
+fl.innerHTML="";for(let i=0;i<files.length;i++){let file=files[i];let row=fl.insertRow();let c1=row.insertCell();let c2=row.insertCell();let c3=row.insertCell();let c4=row.insertCell();let img=document.createElement('img');let adl=document.createElement('a');c1.append(img);row.classList="hvr";c1.classList='fi';c2.classList='ft';c3.classList='fs';c4.classList='fd';adl.onclick=function(e){e.stopPropagation();}
+let name=file['path'].split('/');name=name[name.length-1];c2.innerText=name;if(file['type']=='dir'){img.src='https://cdn.mt.lv/marketing/bth/folder.svg';c3.innerText=file['size']+' files';dl.hidden=false;adl.href=`${baseurl}/${encodeURI(file['path'])}?dl`;adl.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g style="fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:2px;"><path d="M7,11l5,5,5-5"/><path d="M12,4v12"/><path d="M20,16v2c0,1.1-.9,2-2,2H6c-1.1,0-2-.9-2-2v-2"/></g></svg>';c4.append(adl);row.onclick=function(){setPath(file['path']);}}else{img.src='https://cdn.mt.lv/marketing/bth/file.svg';c3.innerText=formatBytes(file['size']);dl.hidden=false;adl.download=name;adl.href=`${baseurl}/${encodeURI(file['path'])}`;adl.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g style="fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:2px;"><path d="M7,11l5,5,5-5"/><path d="M12,4v12"/><path d="M20,16v2c0,1.1-.9,2-2,2H6c-1.1,0-2-.9-2-2v-2"/></g></svg>';c4.append(adl);row.onclick=function(e){let newTab=document.createElement('a');newTab.href=pathJoin([baseurl,`${encodeURI(file['path'])}`]);newTab.target="_blank";newTab.click();e.stopPropagation();}}}}}
+function formatBytes(bytes){const units=[[' bytes',0],[' KB',0],[' MB',1],[' GB',1],[' TB',1]];let unit=0;while(bytes>1024&&unit<(units.length-1)){bytes/=1024;unit++;}
+return bytes.toFixed(units[unit][1])+units[unit][0];}    </script>
+    <style>
+@font-face{font-display:swap;font-family:"Manrope";font-style:normal;font-weight:400;src:url("https://cdn.mt.lv/marketing/bth/font-regular.woff2") format("woff2");} *,*:before,*:after{box-sizing:inherit;} html,body{box-sizing:border-box;font-size:16px;font-weight:300;font-weight:normal;line-height:1.25;margin:0;padding:0;height:100%;color:#ffffff;font-family:"Manrope",sans-serif;} body{background-color:#1c272e;background-size:cover;background-position:center;background-repeat:no-repeat;padding:0 0.75rem 0.75rem 0.75rem;} .container{flex-grow:1;display:flex;flex-direction:column;justify-content:center;align-items:center;width:100%;} a{text-decoration:none;color:inherit;} a:hover{text-decoration:none;color:#01ae7a;} .logo{display:flex;justify-content:center;padding:1rem;} .logo > img{height:1.5rem;} #rsl{width:100%;max-width:900px;border-radius:0.5rem;background-color:rgba(40,52,58,0.5);margin-bottom:0.875rem;} #rsl table{width:100%;border-collapse:collapse;text-align:left;border-radius:0.5rem;font-size:1rem;} #rsl tr{transition:background-color linear 0.25s;} #rsl td,#rsl th{padding:0.875rem 0.25rem;vertical-align:top;white-space:nowrap;border-bottom:1px solid #1c272e;} #rsl tr:last-child td{border-bottom:none;} #rsl td:first-child,#rsl th:first-child{padding-left:1rem;} #rsl td:last-child,#rsl th:last-child{padding-right:1rem;} #rsl .fi{width:1px;} #rsl .ft{word-wrap:anywhere;white-space:wrap;} #rsl .fi > img{width:1.25rem;height:1.25rem;} #rsl .fs{width:1px;font-size:0.875rem;padding-top:1.04rem;padding-bottom:1.04rem;text-align:right;color:#93999d;} #rsl .fd{width:1px;color:#93999d;line-height:1;} #rsl .fd > a{display:inline-block;} #rsl .fd > a > svg{width:1.25rem;height:1.25rem;} @media (min-width:600px){#rsl td.fd > a{padding:0 0.25rem;} } @media (hover:hover){#rsl tr.hvr:hover{background-color:#214847;cursor:pointer;} #rsl tr.hvr:hover td.fd > a{color:#01ae7a;} } #sgl{display:flex;flex-direction:column;gap:1rem;justify-content:center;align-items:center;padding:1.5rem;width:100%;max-width:360px;min-height:320px;overflow:hidden;border-radius:0.375rem;background-color:rgba(40,52,58,0.75);transition:background-color linear 0.25s;cursor:pointer;} @media (hover:hover){#sgl:hover .fd > a{color:#01ae7a;border-color:transparent;background-color:#214847;} } #sgl .fi > img{width:2rem;height:2rem;} #sgl .fs{font-size:0.875rem;color:#93999d;} #sgl .fd{color:#93999d;} #sgl .fd a{display:flex;justify-content:center;align-items:center;width:4rem;height:4rem;border-radius:50%;border:1px solid rgba(255,255,255,0.1);transition:border linear 0.25s,background-color linear 0.25s;} #sgl .fd svg{width:1.5rem;height:1.5rem;} #sgl.hide,#rsl.hide,#ilb.hide{display:none;} .tt{display:flex;justify-content:space-between;width:100%;align-items:center;gap:0.5rem;} .il{display:inline-flex;justify-content:flex-start;align-items:center;gap:0.5rem;font-size:0.875rem;color:#8e9396;} @media (hover:hover){.il:hover{color:white;} } .il svg{width:1.25rem;height:1.25rem;}     </style>
+  </head>
+  <body style="background-image: url('https://cdn.mt.lv/marketing/bth/bg.jpg')">
+    <div class="container">
+      <div class="logo">
+        <img src="https://cdn.mt.lv/marketing/bth/MT_White.svg" alt="" />
+      </div>
+      <div id="sgl">
+        <div id="fi" class="fi"><img src="https://cdn.mt.lv/marketing/bth/missing.svg" /></div>
+        <div id="ft" class="ft">Loading files...</div>
+        <div id="fs" class="fs" hidden></div>
+        <div id="fd" class="fd" hidden>
+          <a id="dl" class="dl" href="">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <g style="fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; stroke-width:2px;">
+                <path d="M7,11l5,5,5-5"/>
+                <path d="M12,4v12"/>
+                <path d="M20,16v2c0,1.1-.9,2-2,2H6c-1.1,0-2-.9-2-2v-2"/>
+              </g>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div id="rsl" class="hide">
+        <table>
+          <thead>
+            <tr class="ttr" id="ttr">
+              <th colspan="4">
+                <div class="tt">
+                  <div>
+                    <a class="il" href="#" id="ilb">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+                          <polyline points="10 4 6 8 10 12"/>
+                        </g>
+                      </svg>
+                      <span>Back</span>
+                    </a>
+                  </div>
+                  <div>
+                    <a class="il" href="" id="ild">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                          <path d="m14 16 5-5M14 4v12M10 4v5M4 17v2c0 .5.2 1 .6 1.4.4.4.9.6 1.4.6h12c.5 0 1-.2 1.4-.6s.6-.9.6-1.4v-2M5 11l5 5"/>
+                        </g>
+                      </svg>
+                      <span>Download all</span>
+                    </a>
+                  </div>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="fl"></tbody>
+        </table>
+      </div>
+    </div>
+</body>
+<script>
+  window.addEventListener('load', function () { 
+    let def = window.location.hash.slice(1);
+    loadDir(decodeURI(def));
+  });
+  
+  window.addEventListener('hashchange', function (e) {
+    let path = window.location.hash.slice(1);
+    loadDir(decodeURI(path));
+  });
+</script>
+</html>

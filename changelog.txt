@@ -1,0 +1,12 @@
+What's new in 7.17.2 (2025-Feb-06 11:10):
+
+*) device-mode - do not allow changing CPU frequency if "routerboard" is not allowed by device mode (introduced in v7.17);
+*) device-mode - fixed feature and mode update via power-reset on PPC devices;
+*) disk - fixed showing free space on tmpfs (introduced in v7.17);
+*) disk - improved system stability when SMB interface list is used (introduced in v7.17);
+*) dns - do not show warning messages for DNS static entries when they are not needed;
+*) hotspot - fixed an issue where extra "flash/" is added to html-directory for devices with flash folders (introduced in v7.17);
+*) sfp - improved system stability with some GPON modules for CCR2004 and CCR2116 devices;
+*) smb - fixed connection issues with clients using older SMB versions (introduced in v7.17);
+*) switch - fixed dynamic switch rules created by dot1x server (introduced in v7.17);
+*) system - fixed a potential memory leak that occurred when resetting states after an error;
