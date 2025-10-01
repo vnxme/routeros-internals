@@ -160,7 +160,7 @@ if [ "${IGNORE_RELEASE}" == 'false' ]; then
     if [ -n "${LIST}" ]; then
       tar --zst -xf "${FILE}" -C . "${LIST}" && tar --zst -xf "${FILE}" -C . -T "${LIST}" && rm -f "${FILE}"
     else
-      tar --zst -xf "${FILE}" -C . && rm -f "${FILE}" && "${MYDIR}/cleanup.sh" . && find . -type f > ${FILE_DOWNLOADS}
+      tar --zst -xf "${FILE}" -C . && rm -f "${FILE}" && "${MYDIR}/cleanup.sh" . && find * -type f > ${FILE_DOWNLOADS}
     fi
     exit 0
   fi
