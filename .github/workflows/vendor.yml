@@ -416,8 +416,10 @@ jobs:
         id: create_release
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' }}
         run: |
+          ls -al .
           EXCL='exclusions.txt'
           cd "${{ env.box }}"
+          ls -al .
           sudo find * -type f -size +32M | sort > "${EXCL}" || true
           cd -
           
