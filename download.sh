@@ -174,7 +174,7 @@ FILE_PACKAGES='packages.txt'
 USE_FILE_PACKAGES='false'
 if [ "${IGNORE_BRANCH}" == 'false' ]; then
   download_from_branch "${FILE_PACKAGES}"
-  [ -f "${FILE_PACKAGES}" ] && USE_FILE_PACKAGES='true'
+  [ -f "${FILE_PACKAGES}" ] && USE_FILE_PACKAGES='true' || { touch "${FILE_PACKAGES}" && DOWNLOADS+=("${FILE_PACKAGES}"); }
 fi
 
 # Download all packages
