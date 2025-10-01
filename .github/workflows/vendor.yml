@@ -190,10 +190,10 @@ jobs:
         id: lookup
         uses: actions/cache/restore@v4
         with:
-          key: "${{ env.key }}"
+          key: "${{ env.dkey }}"
           lookup-only: true
           path:
-            "${{ env.tmp }}/${{ env.key }}.tar.zst"
+            "${{ env.tmp }}/${{ env.dkey }}.tar.zst"
 
       - name: Make '${{ env.app }}', '${{ env.box }}' and '${{ env.tmp }}' directories
         id: make_dirs
