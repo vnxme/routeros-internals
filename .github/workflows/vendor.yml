@@ -415,12 +415,8 @@ jobs:
         id: create_release
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' }}
         run: |
-          ls -al .
           EXCL='exclusions.txt'
-          cd "${{ env.box }}"
-          ls -al .
-          sudo find * -type f -size +32M | sort | sudo tee "${EXCL}" || true
-          cd -
+          sudo -D "${{ env.box }}" find . -type f -size +32M | sort | sudo -D "${{ env.box }}" tee "${EXCL}" || true
           
           FILE="${{ env.tmp }}/routeros-${{ env.branch }}-full.tar.zst"
           sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' --exclude="${EXCL}" -C "${{ env.box }}" .
