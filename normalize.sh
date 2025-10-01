@@ -45,19 +45,19 @@ truncate -s 0 -- "${FILE_SPECIALS}"
 # Fix directory permissions
 find * -type d -not -perm 755 -printf '%p # type=%y, perm=%m(%M)\n' | while read LINE; do
   chmod 755 "${LINE%% # *}"
-  echo "${LINE}" > "${FILE_PERMISSIONS}"
+  echo "${LINE}" >> "${FILE_PERMISSIONS}"
 done
 
 # Fix file permissions
 find * -type f -not -perm 644 -printf '%p # type=%y, perm=%m(%M)\n' | while read LINE; do
   chmod 644 "${LINE%% # *}"
-  echo "${LINE}" > "${FILE_PERMISSIONS}"
+  echo "${LINE}" >> "${FILE_PERMISSIONS}"
 done
 
 # Remove block and character devices, pipes and sockets
 find * -type b -o -type c -o -type p -o -type s -printf '%p # type: %y\n' | while read LINE; do
   rm -f -- "${LINE%% # *}"
-  echo "${LINE}" > "${FILE_SPECIALS}"
+  echo "${LINE}" >> "${FILE_SPECIALS}"
 done
 
 # Put .gitignore into empty directories
