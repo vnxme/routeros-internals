@@ -184,7 +184,7 @@ jobs:
         include: ${{ fromJSON(needs.validate.outputs.matrix) }}
     runs-on: ubuntu-24.04
     env:
-      key: "${{ needs.validate.outputs.label }}-${{ matrix.version }}-download"
+      dkey: "${{ needs.validate.outputs.label }}-${{ matrix.version }}-download"
     steps:
       - name: Look up downloaded files in cache
         id: lookup
@@ -223,7 +223,7 @@ jobs:
         id: create_archive
         if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         run: |
-          FILE="${{ env.tmp }}/${{ env.key }}.tar.zst"
+          FILE="${{ env.tmp }}/${{ env.dkey }}.tar.zst"
           sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" . && sudo chown -hR $(id -un):$(id -gn) "${FILE}"
 
       - name: Delete downloaded files from cache
@@ -235,16 +235,16 @@ jobs:
           gh api --method DELETE \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/actions/caches?key=${{ env.key }}&ref=${{ github.ref }}
+            /repos/${{ github.repository }}/actions/caches?key=${{ env.dkey }}&ref=${{ github.ref }}
 
       - name: Save downloaded files from '${{ env.box }}' directory to cache
         id: save_cache
         if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v4
         with:
-          key: "${{ env.key }}"
+          key: "${{ env.dkey }}"
           path: 
-            "${{ env.tmp }}/${{ env.key }}.tar.zst"
+            "${{ env.tmp }}/${{ env.dkey }}.tar.zst"
 
   process:
     needs:
@@ -257,16 +257,16 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       dkey: "${{ needs.validate.outputs.label }}-${{ matrix.version }}-download"
-      key: "${{ needs.validate.outputs.label }}-${{ matrix.version }}-process"
+      pkey: "${{ needs.validate.outputs.label }}-${{ matrix.version }}-process"
     steps:
       - name: Look up processed files in cache
         id: lookup_processed
         uses: actions/cache/restore@v4
         with:
-          key: "${{ env.key }}"
+          key: "${{ env.pkey }}"
           lookup-only: 'true'
           path:
-            "${{ env.tmp }}/${{ env.key }}.tar.zst"
+            "${{ env.tmp }}/${{ env.pkey }}.tar.zst"
 
       - name: Make '${{ env.app }}', '${{ env.box }}' and '${{ env.tmp }}' directories
         id: make_dirs
@@ -318,7 +318,7 @@ jobs:
         id: create_archive
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         run: |
-          FILE="${{ env.tmp }}/${{ env.key }}.tar.zst"
+          FILE="${{ env.tmp }}/${{ env.pkey }}.tar.zst"
           sudo tar --zst -cf "${FILE}" --exclude='downloads.txt' -X "${{ env.box }}/downloads.txt" -C "${{ env.box }}" . && sudo chown -hR $(id -un):$(id -gn) "${FILE}"
 
       - name: Delete processed files from cache
@@ -330,16 +330,16 @@ jobs:
           gh api --method DELETE \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/actions/caches?key=${{ env.key }}&ref=${{ github.ref }}
+            /repos/${{ github.repository }}/actions/caches?key=${{ env.pkey }}&ref=${{ github.ref }}
 
       - name: Save processed files from '${{ env.box }}' directory to cache
         id: save_cache
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         uses: actions/cache/save@v4
         with:
-          key: "${{ env.key }}"
+          key: "${{ env.pkey }}"
           path:
-            "${{ env.tmp }}/${{ env.key }}.tar.zst"
+            "${{ env.tmp }}/${{ env.pkey }}.tar.zst"
 
   release:
     needs:
