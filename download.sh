@@ -200,7 +200,10 @@ for ARCH in "${ARCHS[@]}"; do
       if [ -f "${FILE}" ]; then
         unset -v 'DOWNLOADS[-1]'
         unzip -o -d "${ARCH}/" "${FILE}" && rm -f "${FILE}"
-        find ${ARCH}/* -maxdepth 0 -type f -name '*.npk' ! -name 'routeros*.npk' >> "${FILE_PACKAGES}"
+        readarray -t FILES < <(find ${ARCH}/* -maxdepth 0 -type f -name '*.npk' ! -name 'routeros*.npk' | tee -a "${FILE_PACKAGES}")
+        for FILE in ${FILES[@]}; do
+          DOWNLOADS+=("${FILE}")
+        done
       fi
     fi
   fi
