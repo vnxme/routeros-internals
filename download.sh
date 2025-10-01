@@ -174,8 +174,9 @@ FILE_PACKAGES='packages.txt'
 USE_FILE_PACKAGES='false'
 if [ "${IGNORE_BRANCH}" == 'false' ]; then
   download_from_branch "${FILE_PACKAGES}"
-  [ -f "${FILE_PACKAGES}" ] && USE_FILE_PACKAGES='true' || { touch "${FILE_PACKAGES}" && DOWNLOADS+=("${FILE_PACKAGES}"); }
+  [ -f "${FILE_PACKAGES}" ] && USE_FILE_PACKAGES='true'
 fi
+[ "${USE_FILE_PACKAGES}" == 'false' ] && touch "${FILE_PACKAGES}" && DOWNLOADS+=("${FILE_PACKAGES}")
 
 # Download all packages
 ARCHS=('arm' 'arm64' 'mipsbe' 'mmips' 'ppc' 'smips' 'tile' 'x86')
