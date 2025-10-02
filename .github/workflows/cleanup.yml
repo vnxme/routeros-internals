@@ -1,0 +1,36 @@
+name: 'Repository Cleanup Workflow'
+run-name: "Repository Cleanup: [${{ inputs.scope }}]"
+on:
+#  push:
+#    branches:
+#      - main
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Scope (e.g., actions)'
+        required: true
+        default: 'actions'
+        type: choice
+        options:
+          - 'actions'
+          - 'branches'
+          - 'releases'
+          - 'tags'
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  cleanup_actions:
+    if: inputs.scope == 'actions'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Retrieve a list of actions
+        id: list_actions
+        run: |
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/${{ github.repository }}/actions/runs?per_page=100&q=created:<$(date +%Y-%m-%d -d "7 days ago")
+            --jq '.workflow_runs.[].id'
