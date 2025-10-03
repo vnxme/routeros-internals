@@ -27,22 +27,6 @@ jobs:
     if: inputs.scope == 'all' || inputs.scope == 'runs'
     runs-on: ubuntu-24.04
     steps:
-      - name: Get a list of workflow runs mentioned in releases
-        id: runs_releases
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          URL="/repos/${{ github.repository }}/releases?per_page=100"
-          {
-            echo 'list<<EOF'
-            gh api \
-              -H "Accept: application/vnd.github+json" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "${URL}" --paginate \
-              --jq ".[].body | capture(\"/${{ github.repository }}/actions/runs/(?<id>.*?)/\") | .id" || true
-            echo EOF
-          } >> $GITHUB_OUTPUT
-
       - name: Get a list of workflow runs mentioned in branches
         id: runs_branches
         env:
@@ -56,22 +40,42 @@ jobs:
             --jq '.[] | if .name != "main" then .commit.sha else empty end' || true)"
           {
             echo 'list<<EOF'
-            for COMMIT in ${COMMITS[@]}; do
-              URL="/repos/${{ github.repository }}/commits/${COMMIT}"
-              RUN="$(gh api \
-                -H "Accept: application/vnd.github+json" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                "${URL}" \
-                --jq ".commit.message | capture(\"/${{ github.repository }}/actions/runs/(?<id>.*?)/\") | .id" || true)"
-              if [ -n "${RUN}" ]; then
-                echo "${RUN}"
-              fi
-            done
+            {
+              for COMMIT in ${COMMITS[@]}; do
+                URL="/repos/${{ github.repository }}/commits/${COMMIT}"
+                RUN="$(gh api \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  "${URL}" \
+                  --jq ".commit.message | capture(\"/${{ github.repository }}/actions/runs/(?<id>.*?)/\") | .id" || true)"
+                if [ -n "${RUN}" ]; then
+                  echo "${RUN}"
+                fi
+              done
+            } | sort -u
             echo EOF
           } >> $GITHUB_OUTPUT
 
-      - name: Get a list of all workflow runs
-        id: list_runs
+      - name: Get a list of workflow runs mentioned in releases
+        id: runs_releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          URL="/repos/${{ github.repository }}/releases?per_page=100"
+          {
+            echo 'list<<EOF'
+            {
+              gh api \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "${URL}" --paginate \
+                --jq ".[].body | capture(\"/${{ github.repository }}/actions/runs/(?<id>.*?)/\") | .id" || true
+            } | sort -u
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Get stale workflow runs not mentioned in branches or releases
+        id: runs_stale
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -80,19 +84,25 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "${URL}" --paginate \
-            --jq '.workflow_runs[].id')"
+            --jq '.workflow_runs[].id' || true)"
           RUNS_IN_BRANCHES="${{ steps.runs_branches.outputs.list }}"
           RUNS_IN_RELEASES="${{ steps.runs_releases.outputs.list }}"
-          for RUN in ${RUNS[@]}; do
-            [ -n "$(echo "${RUNS_IN_RELEASES}" | grep "${RUN}")" ] && continue
-            echo "run ${RUN}"
-          done
+          {
+            echo 'list<<EOF'
+            for RUN in ${RUNS[@]}; do
+              [ -n "$(echo "${RUNS_IN_BRANCHES}" | grep "${RUN}")" ] && continue
+              [ -n "$(echo "${RUNS_IN_RELEASES}" | grep "${RUN}")" ] && continue
+              echo "${RUN}"
+            done
+            echo EOF
+          } >> $GITHUB_OUTPUT
 
       - name: Compose a job summary
         id: compose_summary
         run: |
           {
             echo "### Outputs"
-            echo "- runs in branches:\n\`\`\`\n${{ steps.runs_branches.outputs.list }}\n\`\`\`"
-            echo "- runs in releases:\n\`\`\`\n${{ steps.runs_releases.outputs.list }}\n\`\`\`"
+            echo -e "- runs in branches:\n\`\`\`\n${{ steps.runs_branches.outputs.list }}\n\`\`\`"
+            echo -e "- runs in releases:\n\`\`\`\n${{ steps.runs_releases.outputs.list }}\n\`\`\`"
+            echo -e "- stale runs:\n\`\`\`\n${{ steps.runs_stale.outputs.list }}\n\`\`\`"
           } >> $GITHUB_STEP_SUMMARY
