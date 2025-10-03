@@ -17,9 +17,14 @@ on:
           - 'tags'
         required: true
         type: choice
+      date:
+        default: '7 days ago'
+        description: 'Keep created on or newer (e.g., now)'
+        required: true
+        type: string
       simulate:
         default: false
-        description: 'Simulate (skip deletion)'
+        description: 'Simulate (skip deletion requests)'
         required: false
         type: boolean
 
@@ -84,11 +89,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          URL="/repos/${{ github.repository }}/actions/runs?per_page=100&created=<$(date +%Y-%m-%d -d "28 days ago")"
+          URL="/repos/${{ github.repository }}/actions/runs?per_page=100"
+          DATE="$(date +%Y-%m-%d -d "${{ inputs.date }}" || date +%Y-%m-%d -d "90 days ago")"
           RUNS="$(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "${URL}" --paginate \
+            "${URL}&created=<${DATE}" --paginate \
             --jq '.workflow_runs[].id' || true)"
           RUNS_IN_BRANCHES="${{ steps.runs_branches.outputs.list }}"
           RUNS_IN_RELEASES="${{ steps.runs_releases.outputs.list }}"
