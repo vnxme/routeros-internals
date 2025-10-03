@@ -37,7 +37,7 @@ jobs:
               -H "Accept: application/vnd.github+json" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
               "${URL}" --paginate \
-              --jq ".[].body | capture(\"/${{ github.repository }}/actions/runs/(?<id>.*?)/\") | .id")" || true
+              --jq ".[].body | capture(\"/${{ github.repository }}/actions/runs/(?<id>.*?)/\") | .id" || true
             echo EOF
           } >> $GITHUB_OUTPUT
 
