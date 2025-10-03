@@ -35,6 +35,106 @@ permissions:
   contents: write
 
 jobs:
+  cleanup_tags:
+    if: (github.event_name == 'workflow_dispatch' && (inputs.scope == 'all' || inputs.scope == 'tags')) || github.event_name == 'schedule'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Compose a list of tags mentioned in branches
+        id: tags_branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          URL="/repos/${{ github.repository }}/branches?per_page=100"
+          COMMITS="$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "${URL}" --paginate \
+            --jq '.[] | if .name != "main" then .commit.sha else empty end' || true)"
+          {
+            echo 'list<<EOF'
+            {
+              for COMMIT in ${COMMITS[@]}; do
+                URL="/repos/${{ github.repository }}/commits/${COMMIT}"
+                TAG="$(gh api \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  "${URL}" \
+                  --jq ".commit.message | capture(\"/${{ github.repository }}/releases/tag/(?<name>.*?)/\") | .name" || true)"
+                if [ -n "${TAG}" ]; then
+                  echo "${TAG}"
+                fi
+              done
+            } | sort -u
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Compose a list of tags mentioned in releases
+        id: tags_releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          URL="/repos/${{ github.repository }}/releases?per_page=100"
+          {
+            echo 'list<<EOF'
+            {
+              gh api \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "${URL}" --paginate \
+                --jq ".[].tag_name" || true
+            } | sort -u
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Compose a list of stale tags not mentioned in branches or releases
+        id: tags_stale
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          URL="/repos/${{ github.repository }}/actions/tags?per_page=100"
+          TAGS="$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "${URL}" --paginate \
+            --jq '.[].name' || true)"
+          TAGS_IN_BRANCHES="${{ steps.tags_branches.outputs.list }}"
+          TAGS_IN_RELEASES="${{ steps.tags_releases.outputs.list }}"
+          {
+            echo 'list<<EOF'
+            for TAG ${TAGS[@]}; do
+              [ -n "$(echo "${TAGS_IN_BRANCHES}" | grep "${TAG}")" ] && continue
+              [ -n "$(echo "${TAGS_IN_RELEASES}" | grep "${TAG}")" ] && continue
+              echo "${TAG}"
+            done
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Delete stale tags
+        id: delete_tags
+        if: ${{ (github.event_name == 'workflow_dispatch' && !inputs.simulate) || github.event_name == 'schedule' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          URL="/repos/${{ github.repository }}/tags/"
+          TAGS="${{ steps.tags_stale.outputs.list }}"
+          for TAG in ${TAGS[@]}; do
+            gh api \
+              --method DELETE \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "${URL}${TAG}" || true
+          done
+
+      - name: Compose a job summary
+        id: compose_summary
+        run: |
+          {
+            echo "### Outputs"
+            echo -e "- Tags in branches:\n\`\`\`\n${{ steps.tags_branches.outputs.list }}\n\`\`\`"
+            echo -e "- Tags in releases:\n\`\`\`\n${{ steps.tags_releases.outputs.list }}\n\`\`\`"
+            echo -e "- Tags to delete:\n\`\`\`\n${{ steps.tags_stale.outputs.list }}\n\`\`\`"
+          } >> $GITHUB_STEP_SUMMARY
+
   cleanup_runs:
     if: (github.event_name == 'workflow_dispatch' && (inputs.scope == 'all' || inputs.scope == 'runs')) || github.event_name == 'schedule'
     runs-on: ubuntu-24.04
