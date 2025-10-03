@@ -91,7 +91,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          URL="/repos/${{ github.repository }}/actions/tags?per_page=100"
+          URL="/repos/${{ github.repository }}/tags?per_page=100"
           TAGS="$(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
