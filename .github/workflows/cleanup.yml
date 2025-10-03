@@ -101,7 +101,7 @@ jobs:
           TAGS_IN_RELEASES="${{ steps.tags_releases.outputs.list }}"
           {
             echo 'list<<EOF'
-            for TAG ${TAGS[@]}; do
+            for TAG in ${TAGS[@]}; do
               [ -n "$(echo "${TAGS_IN_BRANCHES}" | grep "${TAG}")" ] && continue
               [ -n "$(echo "${TAGS_IN_RELEASES}" | grep "${TAG}")" ] && continue
               echo "${TAG}"
