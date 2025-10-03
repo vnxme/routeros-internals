@@ -1,9 +1,11 @@
 name: 'Repository Cleanup Workflow'
-run-name: "Repository Cleanup: [${{ inputs.scope }}]"
+run-name: "Repository Cleanup: [${{ inputs.scope || github.event_name }}]"
 on:
 #  push:
 #    branches:
 #      - main
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight UTC
   workflow_dispatch:
     inputs:
       scope:
@@ -34,7 +36,7 @@ permissions:
 
 jobs:
   cleanup_runs:
-    if: inputs.scope == 'all' || inputs.scope == 'runs'
+    if: (github.event_name == 'workflow_dispatch' && (inputs.scope == 'all' || inputs.scope == 'runs')) || github.event_name == 'schedule'
     runs-on: ubuntu-24.04
     steps:
       - name: Compose a list of workflow runs mentioned in branches
@@ -90,7 +92,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           URL="/repos/${{ github.repository }}/actions/runs?per_page=100"
-          DATE="$(date +%Y-%m-%d -d "${{ inputs.date }}" || date +%Y-%m-%d -d "90 days ago")"
+          DATE="$(date +%Y-%m-%d -d "${{ inputs.date || '7 days ago' }}" || date +%Y-%m-%d -d "90 days ago")"
           RUNS="$(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
@@ -110,7 +112,7 @@ jobs:
 
       - name: Delete stale workflow runs
         id: delete_runs
-        if: ${{ !inputs.simulate }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && !inputs.simulate) || github.event_name == 'schedule' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
