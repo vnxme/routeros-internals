@@ -43,25 +43,46 @@ jobs:
             echo EOF
           } >> $GITHUB_OUTPUT
 
-      - name: Retrieve a list of workflow runs
+      - name: Get a list of workflow runs mentioned in branches
+        id: runs_branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          URL="/repos/${{ github.repository }}/branches?per_page=100"
+          COMMITS="$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "${URL}" --paginate \
+            --jq '.[] | if .name != "main" then .commit.sha else empty end' || true)"
+          {
+            echo 'list<<EOF'
+            for COMMIT in ${COMMITS[@]}; do
+              URL="/repos/${{ github.repository }}/commits/${COMMIT}"
+              RUN="$(gh api \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "${URL}" \
+                --jq ".commit.message | capture(\"/${{ github.repository }}/actions/runs/(?<id>.*?)/\") | .id" || true)"
+              if [ -n "${RUN}" ]; then
+                echo "${RUN}"
+              fi
+            done
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Get a list of all workflow runs
         id: list_runs
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          #URL="/repos/${{ github.repository }}/releases?per_page=100"
-          #RUNS_IN_RELEASES="$(gh api \
-          #  -H "Accept: application/vnd.github+json" \
-          #  -H "X-GitHub-Api-Version: 2022-11-28" \
-          #  "${URL}" --paginate \
-          #  --jq ".[].body | capture(\"https://github.com/${{ github.repository }}/actions/runs/(?<id>.*?)/\") | .id")"
-          RUNS_IN_RELEASES="${{ steps.runs_releases.outputs.list }}"
-          
           URL="/repos/${{ github.repository }}/actions/runs?per_page=100&created=<$(date +%Y-%m-%d -d "7 days ago")"
           RUNS="$(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "${URL}" --paginate \
             --jq '.workflow_runs[].id')"
+          RUNS_IN_BRANCHES="${{ steps.runs_branches.outputs.list }}"
+          RUNS_IN_RELEASES="${{ steps.runs_releases.outputs.list }}"
           for RUN in ${RUNS[@]}; do
             [ -n "$(echo "${RUNS_IN_RELEASES}" | grep "${RUN}")" ] && continue
             echo "run ${RUN}"
@@ -72,5 +93,6 @@ jobs:
         run: |
           {
             echo "### Outputs"
-            echo "- runs in releases: \`${{ steps.runs_releases.outputs.list }}\`"
+            echo "- runs in branches:\n\`\`\`\n${{ steps.runs_branches.outputs.list }}\n\`\`\`"
+            echo "- runs in releases:\n\`\`\`\n${{ steps.runs_releases.outputs.list }}\n\`\`\`"
           } >> $GITHUB_STEP_SUMMARY
