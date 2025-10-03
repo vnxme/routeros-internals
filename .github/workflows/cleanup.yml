@@ -29,6 +29,8 @@ jobs:
     steps:
       - name: Get a list of workflow runs mentioned in releases
         id: runs_releases
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           URL="/repos/${{ github.repository }}/releases?per_page=100"
           {
