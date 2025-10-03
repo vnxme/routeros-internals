@@ -7,16 +7,21 @@ on:
   workflow_dispatch:
     inputs:
       scope:
-        description: 'Scope (e.g., runs)'
-        required: true
         default: 'runs'
-        type: choice
+        description: 'Scope (e.g., runs)'
         options:
           - 'all'
           - 'branches'
           - 'releases'
           - 'runs'
           - 'tags'
+        required: true
+        type: choice
+      simulate:
+        default: false
+        description: 'Simulate (skip deletion)'
+        required: false
+        type: boolean
 
 permissions:
   actions: write
@@ -27,7 +32,7 @@ jobs:
     if: inputs.scope == 'all' || inputs.scope == 'runs'
     runs-on: ubuntu-24.04
     steps:
-      - name: Get a list of workflow runs mentioned in branches
+      - name: Compose a list of workflow runs mentioned in branches
         id: runs_branches
         env:
           GH_TOKEN: ${{ github.token }}
@@ -56,7 +61,7 @@ jobs:
             echo EOF
           } >> $GITHUB_OUTPUT
 
-      - name: Get a list of workflow runs mentioned in releases
+      - name: Compose a list of workflow runs mentioned in releases
         id: runs_releases
         env:
           GH_TOKEN: ${{ github.token }}
@@ -74,12 +79,12 @@ jobs:
             echo EOF
           } >> $GITHUB_OUTPUT
 
-      - name: Get stale workflow runs not mentioned in branches or releases
+      - name: Compose a list of stale workflow runs not mentioned in branches or releases
         id: runs_stale
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          URL="/repos/${{ github.repository }}/actions/runs?per_page=100&created=<$(date +%Y-%m-%d -d "7 days ago")"
+          URL="/repos/${{ github.repository }}/actions/runs?per_page=100&created=<$(date +%Y-%m-%d -d "28 days ago")"
           RUNS="$(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
@@ -97,12 +102,28 @@ jobs:
             echo EOF
           } >> $GITHUB_OUTPUT
 
+      - name: Delete stale workflow runs
+        id: delete_runs
+        if: ${{ !inputs.simulate }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          URL="/repos/${{ github.repository }}/actions/runs/"
+          RUNS="${{ steps.runs_stale.outputs.list }}"
+          for RUN in ${RUNS[@]}; do
+            gh api \
+              --method DELETE \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "${URL}${RUN}" || true
+          done
+
       - name: Compose a job summary
         id: compose_summary
         run: |
           {
             echo "### Outputs"
-            echo -e "- runs in branches:\n\`\`\`\n${{ steps.runs_branches.outputs.list }}\n\`\`\`"
-            echo -e "- runs in releases:\n\`\`\`\n${{ steps.runs_releases.outputs.list }}\n\`\`\`"
-            echo -e "- stale runs:\n\`\`\`\n${{ steps.runs_stale.outputs.list }}\n\`\`\`"
+            echo -e "- Runs in branches:\n\`\`\`\n${{ steps.runs_branches.outputs.list }}\n\`\`\`"
+            echo -e "- Runs in releases:\n\`\`\`\n${{ steps.runs_releases.outputs.list }}\n\`\`\`"
+            echo -e "- Runs to delete:\n\`\`\`\n${{ steps.runs_stale.outputs.list }}\n\`\`\`"
           } >> $GITHUB_STEP_SUMMARY
