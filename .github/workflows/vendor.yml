@@ -106,8 +106,8 @@ jobs:
                   echo "::error::Failed to get the latest version for the ${VERSION} channel"
                   exit 1
                 fi
-                VERSION="$(cat ${FILE} | cut -d ' ' -f1)" && rm -f "${FILE}"
-                PAIRS+=("${CHANNEL}|${VERSION}")
+                LATEST="$(cat ${FILE} | cut -d ' ' -f1)" && rm -f "${FILE}"
+                PAIRS+=("${VERSION}|${LATEST}")
               else
                 echo "::error input=version,value=${VERSION}::Invalid version value"
                 exit 1
