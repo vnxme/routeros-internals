@@ -59,7 +59,7 @@ jobs:
                   -H "Accept: application/vnd.github+json" \
                   -H "X-GitHub-Api-Version: 2022-11-28" \
                   "${URL}" \
-                  --jq ".commit.message | capture(\"/${{ github.repository }}/releases/tag/(?<name>.*)\") | .name" || true)"
+                  --jq ".commit.message | capture(\"/${{ github.repository }}/releases/tag/(?<name>v7\.[0-9]+(\.[0-9]+)?((ab|alpha|beta|rc)[0-9]+)?-[0-9a-zA-Z]+)\") | .name" || true)"
                 if [ -n "${TAG}" ]; then
                   echo "${TAG}"
                 fi
@@ -81,7 +81,7 @@ jobs:
                 -H "Accept: application/vnd.github+json" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 "${URL}" --paginate \
-                --jq ".[].tag_name" || true
+                --jq ".[].tag_name | capture(\"(?<name>v7\.[0-9]+(\.[0-9]+)?((ab|alpha|beta|rc)[0-9]+)?-[0-9a-zA-Z]+)\") | .name" || true
             } | sort -uV
             echo EOF
           } >> $GITHUB_OUTPUT
@@ -96,7 +96,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "${URL}" --paginate \
-            --jq '.[].name' || true)"
+            --jq ".[].name | capture(\"(?<name>v7\.[0-9]+(\.[0-9]+)?((ab|alpha|beta|rc)[0-9]+)?-[0-9a-zA-Z]+)\") | .name" || true)"
           TAGS_IN_BRANCHES="${{ steps.tags_branches.outputs.list }}"
           TAGS_IN_RELEASES="${{ steps.tags_releases.outputs.list }}"
           {
