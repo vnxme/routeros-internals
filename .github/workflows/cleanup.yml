@@ -59,12 +59,12 @@ jobs:
                   -H "Accept: application/vnd.github+json" \
                   -H "X-GitHub-Api-Version: 2022-11-28" \
                   "${URL}" \
-                  --jq ".commit.message | capture(\"/${{ github.repository }}/releases/tag/(?<name>.*?)\") | .name" || true)"
+                  --jq ".commit.message | capture(\"/${{ github.repository }}/releases/tag/(?<name>.*)\") | .name" || true)"
                 if [ -n "${TAG}" ]; then
                   echo "${TAG}"
                 fi
               done
-            } | sort -u | sort -V
+            } | sort -uV
             echo EOF
           } >> $GITHUB_OUTPUT
 
@@ -82,7 +82,7 @@ jobs:
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 "${URL}" --paginate \
                 --jq ".[].tag_name" || true
-            } | sort -u | sort -V
+            } | sort -uV
             echo EOF
           } >> $GITHUB_OUTPUT
 
