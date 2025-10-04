@@ -32,6 +32,62 @@ permissions:
   contents: write
 
 jobs:
+  cleanup_releases:
+    if: (github.event_name == 'workflow_dispatch' && (inputs.scope == 'all' || inputs.scope == 'tags')) || github.event_name == 'schedule'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Compose a list of stable releases
+        id: group_releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          URL="/repos/${{ github.repository }}/releases?per_page=100"
+          gh api \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "${URL}" --paginate > 'releases.json' || truncate -s 0 -- 'releases.json'
+          {
+            echo 'stable<<EOF'
+            {
+               cat 'releases.json' | jq ".[].tag_name | capture(\"(?<name>v7\\\\.[0-9]+(\\\\.[0-9]+)?-[0-9a-zA-Z]+)\") | .name" || true
+            } | sort -V
+            echo EOF
+          } >> $GITHUB_OUTPUT
+          {
+            echo 'testing<<EOF'
+            {
+               cat 'releases.json' | jq ".[].tag_name | capture(\"(?<name>v7\\\\.[0-9]+(\\\\.[0-9]+)?(ab|alpha|beta|rc)[0-9]+-[0-9a-zA-Z]+)\") | .name" || true
+            } | sort -V
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Compose a list of stale releases
+        id: releases_stale
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RELEASES_STABLE="${{ steps.group_releases.outputs.stable }}"
+          RELEASES_TESTING="${{ steps.group_releases.outputs.testing }}"
+          {
+            echo 'list<<EOF'
+            for RELEASE in ${RELEASES_TESTING[@]}; do
+              LABEL="$(echo "${RELEASE}" | sed -nr 's/v7\.[0-9]+(\.[0-9]+)?(ab|alpha|beta|rc)[0-9]+-([0-9a-zA-Z]+)/\3/p')"
+              [ -z "${LABEL}" ] && continue
+              [ -z "$({ echo "${RELEASES_STABLE}" | grep "-${LABEL}" | tail -1; echo "${RELEASE}"; } | sort -V | tail -1 | grep "${RELEASE}")" ] && echo "${RELEASE}"
+            done
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Compose a job summary
+        id: compose_summary
+        run: |
+          {
+            echo "### Outputs"
+            echo -e "- Stable releases:\n\`\`\`\n${{ steps.group_releases.outputs.stable }}\n\`\`\`"
+            echo -e "- Testing releases:\n\`\`\`\n${{ steps.group_releases.outputs.testing }}\n\`\`\`"
+            echo -e "- Releases to delete:\n\`\`\`\n${{ steps.releases_stale.outputs.list }}\n\`\`\`"
+          } >> $GITHUB_STEP_SUMMARY
+
   cleanup_tags:
     if: (github.event_name == 'workflow_dispatch' && (inputs.scope == 'all' || inputs.scope == 'tags')) || github.event_name == 'schedule'
     runs-on: ubuntu-24.04
