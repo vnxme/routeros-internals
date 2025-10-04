@@ -1,0 +1,418 @@
+-- *****************************************************************
+-- COLUBRIS-MAINTENANCE-MIB.my:  Colubris Networks Maintenance MIB file
+--
+-- November 2001
+--
+-- Copyright (c) 2001, 2002  by Colubris Networks, Inc.
+-- All rights reserved.
+-- *****************************************************************
+
+COLUBRIS-MAINTENANCE-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	MODULE-IDENTITY,
+	OBJECT-TYPE,
+	NOTIFICATION-TYPE
+		FROM SNMPv2-SMI
+	TEXTUAL-CONVENTION,
+	DisplayString
+		FROM SNMPv2-TC
+	MODULE-COMPLIANCE,
+	OBJECT-GROUP
+		FROM SNMPv2-CONF
+	colubrisMgmt
+		FROM COLUBRIS-SMI
+	systemConfigurationVersion,
+	systemFirmwareRevision
+		FROM COLUBRIS-SYSTEM-MIB;
+
+colubrisMaintenanceMIB  MODULE-IDENTITY
+	LAST-UPDATED "200111300000Z"
+	ORGANIZATION "Colubris Networks, Inc."
+	CONTACT-INFO
+		"	Colubris Networks
+			Customer Service
+
+		Postal: 420 Armand-Frappier, Suite 200
+			Laval, QC  H7V 4B4
+			CANADA
+
+		   Tel: +1 450 680-1661
+
+		E-mail: cn-snmp@colubris.com"
+	DESCRIPTION
+		"Initial version of Colubris Maintenance MIB module."
+	::= { colubrisMgmt 2 }
+
+-- colubrisMaintenanceMIB definition
+
+colubrisMaintenanceMIBObjects OBJECT IDENTIFIER ::= { colubrisMaintenanceMIB 1 }
+
+-- MIB defines the following groupings
+
+firmwareUpdate		OBJECT IDENTIFIER ::= { colubrisMaintenanceMIBObjects 1 }
+configurationUpdate	OBJECT IDENTIFIER ::= { colubrisMaintenanceMIBObjects 2 }
+certificate		OBJECT IDENTIFIER ::= { colubrisMaintenanceMIBObjects 3 }
+
+
+firmwareUpdateMode OBJECT-TYPE
+	SYNTAX		INTEGER
+	{
+		manual(1),
+		periodic(2)
+	}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies how firmware updates are performed:
+		 manually or automatically based on what is specified
+		 in firmwareUpdateDay and firmwareUpdateTime."
+	::= { firmwareUpdate 1 }
+	
+firmwareUpdateDay OBJECT-TYPE
+	SYNTAX		INTEGER
+	{
+		monday(1),
+		tuesday(2),
+		wednesday(3),
+		thursday(4),
+		friday(5),
+		saturday(6),
+		sunday(7),
+		everyday(8)
+	}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies the update interval when firmwareUpdateMode 
+		 is set to periodic."
+	::= { firmwareUpdate 2 }
+
+firmwareUpdateTime OBJECT-TYPE
+	SYNTAX		OCTET STRING (SIZE (5))
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies the update time when firmwareUpdateMode 
+		 is set to periodic. Format is HH:MM."
+	::= { firmwareUpdate 3 }
+
+firmwareUpdateLocation OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies the URL for new firmware."
+	::= { firmwareUpdate 4 }
+
+firmwareUpdateInitiate OBJECT-TYPE
+	SYNTAX		INTEGER
+	{
+		idle(0),
+		update(1)
+	}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies if the firmware found at firmwareUpdateLocation
+		 should be downloaded. When set to update, a download will be 
+		 triggered and the firmware will be installed."
+	::= { firmwareUpdate 5 }
+
+firmwareUpdateNotificationEnabled OBJECT-TYPE 
+	SYNTAX	INTEGER
+	{
+		disabled(0),
+		enabled(1)
+	}
+	MAX-ACCESS	read-write
+	STATUS	current
+	DESCRIPTION
+		"Specifies if firmwareUpdateNotification notifications will be sent."
+	DEFVAL	{ disabled }
+	::= { firmwareUpdate 6 }
+	
+firmwareUpdateInfo OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+		"Contains various information. Can be used with notifications 
+		 to provide detailled information."
+	::= { firmwareUpdate 7 }
+
+configurationUpdateMode OBJECT-TYPE
+	SYNTAX		INTEGER
+	{
+		manual(1),
+		periodic(2)
+	}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies how configuration file updates are performed:
+		 manually or automatically based on what is specified in
+		 configurationUpdateDay and configurationUpdateTime ."
+	::= { configurationUpdate 1 }
+	
+configurationUpdateDay OBJECT-TYPE
+	SYNTAX		INTEGER
+	{
+		monday(1),
+		tuesday(2),
+		wednesday(3),
+		thursday(4),
+		friday(5),
+		saturday(6),
+		sunday(7),
+		everyday(8)
+	}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies the update interval when configurationUpdateMode 
+		 is set to periodic."
+	::= { configurationUpdate 2 }
+
+configurationUpdateTime OBJECT-TYPE
+	SYNTAX		OCTET STRING (SIZE (5))
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies the update time when configurationUpdateMode 
+		 is set to periodic. Format is HH:MM."
+	::= { configurationUpdate 3 }
+
+configurationUpdateLocation OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies the URL for a new configuration file."
+	::= { configurationUpdate 4 }
+
+configurationUpdateInitiate OBJECT-TYPE
+	SYNTAX		INTEGER
+	{
+		idle(0),
+		update(1)
+	}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies if the configuration file found at 
+		 configurationUpdateLocation should be downloaded. 
+		 When set to update, a download will be triggered
+		 and the configuration file will be installed."
+	::= { configurationUpdate 5 }
+	
+configurationUpdateOperation OBJECT-TYPE
+	SYNTAX		INTEGER
+	{
+		backup(1),
+		restore(2)
+	}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies the operation that should be performed on the configuration file."
+	::= { configurationUpdate 6 }
+	
+configurationUpdateNotificationEnabled OBJECT-TYPE 
+	SYNTAX	INTEGER
+	{
+		disabled(0),
+		enabled(1)
+	}
+	MAX-ACCESS	read-write
+	STATUS	current
+	DESCRIPTION
+		"Specifies if configurationUpdateNotification notifications will be sent."
+	DEFVAL	{ disabled }
+	::= { configurationUpdate 7 }
+	
+configurationLocalUpdateNotificationEnabled OBJECT-TYPE 
+	SYNTAX	INTEGER
+	{
+		disabled(0),
+		enabled(1)
+	}
+	MAX-ACCESS	read-write
+	STATUS	current
+	DESCRIPTION
+		"Specifies if configurationLocalUpdateNotification notifications will be sent."
+	DEFVAL	{ disabled }
+	::= { configurationUpdate 8 }
+	
+configurationUpdateInfo OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+		"Contains various information. Can be used with notifications 
+		 to provide detailled information."
+	::= { configurationUpdate 9 }
+  
+certificateAboutToExpireNotificationEnabled OBJECT-TYPE 
+	SYNTAX	INTEGER
+	{
+		disabled(0),
+		enabled(1)
+	}
+	MAX-ACCESS	read-write
+	STATUS	current
+	DESCRIPTION
+		"Specifies if certificateAboutToExpireNotification notifications will be sent."
+	DEFVAL	{ enabled }
+	::= { certificate 1 }
+
+certificateExpiredNotificationEnabled OBJECT-TYPE 
+	SYNTAX	INTEGER
+	{
+		disabled(0),
+		enabled(1)
+	}
+	MAX-ACCESS	read-write
+	STATUS	current
+	DESCRIPTION
+		"Specifies if certificateExpiredNotification notifications will be sent."
+	DEFVAL	{ enabled }
+	::= { certificate 2 }
+	
+certificateExpiryDate OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"The expiry date of a certificate."
+	::= { certificate 3 }
+
+-- notifications
+				
+colubrisMaintenanceMIBNotificationPrefix OBJECT IDENTIFIER ::= { colubrisMaintenanceMIB 2 }
+colubrisMaintenanceMIBNotifications OBJECT IDENTIFIER ::= {colubrisMaintenanceMIBNotificationPrefix 0  }
+
+firmwareUpdateNotification NOTIFICATION-TYPE
+	OBJECTS
+	{
+		firmwareUpdateInfo,
+		systemFirmwareRevision
+	}
+	STATUS	current
+	DESCRIPTION
+		"Sent when a firmware update was attempted 
+		 from a remote server."
+  --#SUMMARY "Remote firmware update from revision %s: %s"
+  --#ARGUMENTS { 1, 0 }
+  --#SEVERITY INFORMATIONAL
+  --#CATEGORY "Colubris Networks Alarms"
+	::= { colubrisMaintenanceMIBNotifications 5 }
+		
+configurationUpdateNotification NOTIFICATION-TYPE
+	OBJECTS
+	{
+		configurationUpdateInfo,
+		systemConfigurationVersion
+	}
+	STATUS	current
+	DESCRIPTION
+		"Sent when a configuration update was attempted 
+		 from a remote server."
+  --#SUMMARY "Remote configuration update: %s"
+  --#ARGUMENTS { 0 }
+  --#SEVERITY INFORMATIONAL
+  --#CATEGORY "Colubris Networks Alarms"
+	::= { colubrisMaintenanceMIBNotifications 1 }
+
+configurationLocalUpdateNotification NOTIFICATION-TYPE
+	OBJECTS
+	{
+		configurationUpdateInfo
+	}
+	STATUS	current
+	DESCRIPTION
+		"Sent whenever the configuration changes."
+  --#SUMMARY "Configuration modified: %s"
+  --#ARGUMENTS { 0 }
+  --#SEVERITY INFORMATIONAL
+  --#CATEGORY "Colubris Networks Alarms"
+	::= { colubrisMaintenanceMIBNotifications 2 }
+
+certificateAboutToExpireNotification NOTIFICATION-TYPE
+	OBJECTS
+	{
+		certificateExpiryDate
+	}
+	STATUS	current
+	DESCRIPTION
+		"Sent when a certificate is about to expire."
+  --#SUMMARY "The web management tool certificate with expiry date %s will expire soon."
+  --#ARGUMENTS { 0 }
+  --#SEVERITY WARNING
+  --#CATEGORY "Colubris Networks Alarms"
+	::= { colubrisMaintenanceMIBNotifications 3 }
+	
+certificateExpiredNotification NOTIFICATION-TYPE
+	OBJECTS
+	{
+		certificateExpiryDate
+	}
+	STATUS	current
+	DESCRIPTION
+		"Sent when a certificate has expired."
+  --#SUMMARY "The web management tool certificate with expiry date %s has expired."
+  --#ARGUMENTS { 0 }
+  --#SEVERITY MAJOR
+  --#CATEGORY "Colubris Networks Alarms"
+	::= { colubrisMaintenanceMIBNotifications 4 }
+
+		
+-- conformance information
+
+colubrisMaintenanceMIBConformance OBJECT IDENTIFIER ::= { colubrisMaintenanceMIB 3 }
+colubrisMaintenanceMIBCompliances OBJECT IDENTIFIER ::= { colubrisMaintenanceMIBConformance 1 }
+colubrisMaintenanceMIBGroups      OBJECT IDENTIFIER ::= { colubrisMaintenanceMIBConformance 2 }
+
+-- compliance statements     
+
+colubrisMaintenanceMIBCompliance MODULE-COMPLIANCE
+	STATUS current
+	DESCRIPTION
+		"The compliance statement for entities which implement
+		 the Colubris Maintenance MIB."
+	MODULE
+		MANDATORY-GROUPS
+		{
+			colubrisMaintenanceMIBGroup
+		}
+	::= { colubrisMaintenanceMIBCompliances 1 }
+
+-- units of conformance
+
+colubrisMaintenanceMIBGroup OBJECT-GROUP
+    OBJECTS
+    {
+		firmwareUpdateMode,
+		firmwareUpdateDay,
+		firmwareUpdateTime,
+		firmwareUpdateLocation,
+		firmwareUpdateInitiate,
+		firmwareUpdateNotificationEnabled,
+		configurationUpdateMode,
+		configurationUpdateDay,
+		configurationUpdateTime,
+		configurationUpdateLocation,
+		configurationUpdateInitiate,
+		configurationUpdateOperation,
+		configurationUpdateNotificationEnabled,
+		configurationLocalUpdateNotificationEnabled,
+		certificateAboutToExpireNotificationEnabled,
+		certificateExpiredNotificationEnabled
+    }
+    STATUS  current
+    DESCRIPTION
+            "A collection of objects providing the Maintenance MIB capability."
+    ::= { colubrisMaintenanceMIBGroups 1 }
+    
+END
+
