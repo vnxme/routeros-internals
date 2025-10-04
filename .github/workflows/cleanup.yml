@@ -117,7 +117,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          URL="/repos/${{ github.repository }}/tags/"
+          URL="/repos/${{ github.repository }}/git/refs/tags/"
           TAGS="${{ steps.tags_stale.outputs.list }}"
           for TAG in ${TAGS[@]}; do
             gh api \
