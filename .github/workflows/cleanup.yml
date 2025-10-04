@@ -33,7 +33,7 @@ permissions:
 
 jobs:
   cleanup_releases:
-    if: (github.event_name == 'workflow_dispatch' && (inputs.scope == 'all' || inputs.scope == 'tags')) || github.event_name == 'schedule'
+    if: (github.event_name == 'workflow_dispatch' && (inputs.scope == 'all' || inputs.scope == 'releases')) || github.event_name == 'schedule'
     runs-on: ubuntu-24.04
     steps:
       - name: Compose a list of stable releases
