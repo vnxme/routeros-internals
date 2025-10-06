@@ -89,6 +89,7 @@ jobs:
           } >> $GITHUB_STEP_SUMMARY
 
   cleanup_releases:
+    needs: cleanup_branches
     if: (github.event_name == 'workflow_dispatch' && (inputs.scope == 'all' || inputs.scope == 'releases')) || github.event_name == 'schedule'
     runs-on: ubuntu-24.04
     steps:
@@ -145,6 +146,7 @@ jobs:
           } >> $GITHUB_STEP_SUMMARY
 
   cleanup_tags:
+    needs: cleanup_releases
     if: (github.event_name == 'workflow_dispatch' && (inputs.scope == 'all' || inputs.scope == 'tags')) || github.event_name == 'schedule'
     runs-on: ubuntu-24.04
     steps:
@@ -247,6 +249,7 @@ jobs:
           } >> $GITHUB_STEP_SUMMARY
 
   cleanup_runs:
+    needs: cleanup_tags
     if: (github.event_name == 'workflow_dispatch' && (inputs.scope == 'all' || inputs.scope == 'runs')) || github.event_name == 'schedule'
     runs-on: ubuntu-24.04
     steps:
