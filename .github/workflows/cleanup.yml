@@ -73,7 +73,7 @@ jobs:
             for RELEASE in ${RELEASES_TESTING[@]}; do
               LABEL="$(echo "${RELEASE}" | sed -nr 's/v7\.[0-9]+(\.[0-9]+)?(ab|alpha|beta|rc)[0-9]+-([0-9a-zA-Z]+)/\3/p')"
               [ -z "${LABEL}" ] && continue
-              [ -z "$({ echo "${RELEASES_STABLE}" | grep "-${LABEL}" | tail -1; echo "${RELEASE}"; } | sort -V | tail -1 | grep "${RELEASE}")" ] && echo "${RELEASE}"
+              [ -z "$({ echo "${RELEASES_STABLE}" | grep -- "-${LABEL}" | tail -1; echo "${RELEASE}"; } | sort -V | tail -1 | grep "${RELEASE}")" ] && echo "${RELEASE}"
             done
             echo EOF
           } >> $GITHUB_OUTPUT
