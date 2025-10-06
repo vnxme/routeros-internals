@@ -98,7 +98,6 @@ jobs:
         id: compose_summary
         run: |
           {
-            echo "### Outputs"
             echo -e "- Stable branches:\n\`\`\`\n${{ steps.group_branches.outputs.stable }}\n\`\`\`"
             echo -e "- Testing branches:\n\`\`\`\n${{ steps.group_branches.outputs.testing }}\n\`\`\`"
             echo -e "- Branches to delete:\n\`\`\`\n${{ steps.branches_stale.outputs.list }}\n\`\`\`"
@@ -179,7 +178,6 @@ jobs:
         id: compose_summary
         run: |
           {
-            echo "### Outputs"
             echo -e "- Stable releases:\n\`\`\`\n${{ steps.group_releases.outputs.stable }}\n\`\`\`"
             echo -e "- Testing releases:\n\`\`\`\n${{ steps.group_releases.outputs.testing }}\n\`\`\`"
             echo -e "- Releases to delete:\n\`\`\`\n${{ steps.releases_stale.outputs.list }}\n\`\`\`"
@@ -282,7 +280,6 @@ jobs:
         id: compose_summary
         run: |
           {
-            echo "### Outputs"
             echo -e "- Tags in branches:\n\`\`\`\n${{ steps.tags_branches.outputs.list }}\n\`\`\`"
             echo -e "- Tags in releases:\n\`\`\`\n${{ steps.tags_releases.outputs.list }}\n\`\`\`"
             echo -e "- Tags to delete:\n\`\`\`\n${{ steps.tags_stale.outputs.list }}\n\`\`\`"
@@ -384,7 +381,6 @@ jobs:
         id: compose_summary
         run: |
           {
-            echo "### Outputs"
             echo -e "- Runs in branches:\n\`\`\`\n${{ steps.runs_branches.outputs.list }}\n\`\`\`"
             echo -e "- Runs in releases:\n\`\`\`\n${{ steps.runs_releases.outputs.list }}\n\`\`\`"
             echo -e "- Runs to delete:\n\`\`\`\n${{ steps.runs_stale.outputs.list }}\n\`\`\`"
