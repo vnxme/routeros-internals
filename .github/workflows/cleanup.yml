@@ -36,7 +36,7 @@ jobs:
     if: (github.event_name == 'workflow_dispatch' && (inputs.scope == 'all' || inputs.scope == 'branches')) || github.event_name == 'schedule'
     runs-on: ubuntu-24.04
     steps:
-      - name: Compose a list of stable and testing branches
+      - name: Compose lists of stable and testing branches
         id: group_branches
         env:
           GH_TOKEN: ${{ github.token }}
@@ -62,7 +62,7 @@ jobs:
           } >> $GITHUB_OUTPUT
 
       - name: Compose a list of stale branches
-        id: branches_stale
+        id: detect_stale_branches
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -85,7 +85,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           URL="/repos/${{ github.repository }}/git/refs/heads/"
-          BRANCHES="${{ steps.branches_stale.outputs.list }}"
+          BRANCHES="${{ steps.detect_stale_branches.outputs.list }}"
           for BRANCH in ${BRANCHES[@]}; do
             gh api \
               --method DELETE \
@@ -100,7 +100,7 @@ jobs:
           {
             echo -e "- Stable branches:\n\`\`\`\n${{ steps.group_branches.outputs.stable }}\n\`\`\`"
             echo -e "- Testing branches:\n\`\`\`\n${{ steps.group_branches.outputs.testing }}\n\`\`\`"
-            echo -e "- Branches to delete:\n\`\`\`\n${{ steps.branches_stale.outputs.list }}\n\`\`\`"
+            echo -e "- Branches to delete:\n\`\`\`\n${{ steps.detect_stale_branches.outputs.list }}\n\`\`\`"
           } >> $GITHUB_STEP_SUMMARY
 
   cleanup_releases:
@@ -108,7 +108,7 @@ jobs:
     if: (github.event_name == 'workflow_dispatch' && (inputs.scope == 'all' || inputs.scope == 'releases')) || github.event_name == 'schedule'
     runs-on: ubuntu-24.04
     steps:
-      - name: Compose a list of stable and testing releases
+      - name: Compose lists of stable and testing releases
         id: group_releases
         env:
           GH_TOKEN: ${{ github.token }}
@@ -134,7 +134,7 @@ jobs:
           } >> $GITHUB_OUTPUT
 
       - name: Compose a list of stale releases
-        id: releases_stale
+        id: detect_stale_releases
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -157,7 +157,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           URL="/repos/${{ github.repository }}/releases/"
-          RELEASES="${{ steps.releases_stale.outputs.list }}"
+          RELEASES="${{ steps.detect_stale_releases.outputs.list }}"
           for RELEASE in ${RELEASES[@]}; do
             FOUND='true'
             ID="$(gh api \
@@ -180,7 +180,7 @@ jobs:
           {
             echo -e "- Stable releases:\n\`\`\`\n${{ steps.group_releases.outputs.stable }}\n\`\`\`"
             echo -e "- Testing releases:\n\`\`\`\n${{ steps.group_releases.outputs.testing }}\n\`\`\`"
-            echo -e "- Releases to delete:\n\`\`\`\n${{ steps.releases_stale.outputs.list }}\n\`\`\`"
+            echo -e "- Releases to delete:\n\`\`\`\n${{ steps.detect_stale_releases.outputs.list }}\n\`\`\`"
           } >> $GITHUB_STEP_SUMMARY
 
   cleanup_tags:
@@ -189,7 +189,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Compose a list of tags mentioned in branches
-        id: tags_branches
+        id: fetch_tags_in_branches
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -218,7 +218,7 @@ jobs:
           } >> $GITHUB_OUTPUT
 
       - name: Compose a list of tags mentioned in releases
-        id: tags_releases
+        id: fetch_tags_in_releases
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -236,7 +236,7 @@ jobs:
           } >> $GITHUB_OUTPUT
 
       - name: Compose a list of stale tags not mentioned in branches or releases
-        id: tags_stale
+        id: detect_stale_tags
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -246,8 +246,8 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "${URL}" --paginate \
             --jq ".[].name | capture(\"(?<name>v7\\\\.[0-9]+(\\\\.[0-9]+)?((ab|alpha|beta|rc)[0-9]+)?-[0-9a-zA-Z]+)\") | .name" || true)"
-          TAGS_IN_BRANCHES="${{ steps.tags_branches.outputs.list }}"
-          TAGS_IN_RELEASES="${{ steps.tags_releases.outputs.list }}"
+          TAGS_IN_BRANCHES="${{ steps.fetch_tags_in_branches.outputs.list }}"
+          TAGS_IN_RELEASES="${{ steps.fetch_tags_in_releases.outputs.list }}"
           {
             echo 'list<<EOF'
             {
@@ -267,7 +267,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           URL="/repos/${{ github.repository }}/git/refs/tags/"
-          TAGS="${{ steps.tags_stale.outputs.list }}"
+          TAGS="${{ steps.detect_stale_tags.outputs.list }}"
           for TAG in ${TAGS[@]}; do
             gh api \
               --method DELETE \
@@ -280,9 +280,9 @@ jobs:
         id: compose_summary
         run: |
           {
-            echo -e "- Tags in branches:\n\`\`\`\n${{ steps.tags_branches.outputs.list }}\n\`\`\`"
-            echo -e "- Tags in releases:\n\`\`\`\n${{ steps.tags_releases.outputs.list }}\n\`\`\`"
-            echo -e "- Tags to delete:\n\`\`\`\n${{ steps.tags_stale.outputs.list }}\n\`\`\`"
+            echo -e "- Tags in branches:\n\`\`\`\n${{ steps.fetch_tags_in_branches.outputs.list }}\n\`\`\`"
+            echo -e "- Tags in releases:\n\`\`\`\n${{ steps.fetch_tags_in_releases.outputs.list }}\n\`\`\`"
+            echo -e "- Tags to delete:\n\`\`\`\n${{ steps.detect_stale_tags.outputs.list }}\n\`\`\`"
           } >> $GITHUB_STEP_SUMMARY
 
   cleanup_runs:
@@ -291,7 +291,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Compose a list of workflow runs mentioned in branches
-        id: runs_branches
+        id: fetch_runs_in_branches
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -320,7 +320,7 @@ jobs:
           } >> $GITHUB_OUTPUT
 
       - name: Compose a list of workflow runs mentioned in releases
-        id: runs_releases
+        id: fetch_runs_in_releases
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -338,7 +338,7 @@ jobs:
           } >> $GITHUB_OUTPUT
 
       - name: Compose a list of stale workflow runs not mentioned in branches or releases
-        id: runs_stale
+        id: detect_stale_runs
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -349,8 +349,8 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "${URL}&created=<${DATE}" --paginate \
             --jq '.workflow_runs[].id' || true)"
-          RUNS_IN_BRANCHES="${{ steps.runs_branches.outputs.list }}"
-          RUNS_IN_RELEASES="${{ steps.runs_releases.outputs.list }}"
+          RUNS_IN_BRANCHES="${{ steps.fetch_runs_in_branches.outputs.list }}"
+          RUNS_IN_RELEASES="${{ steps.fetch_runs_in_releases.outputs.list }}"
           {
             echo 'list<<EOF'
             for RUN in ${RUNS[@]}; do
@@ -368,7 +368,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           URL="/repos/${{ github.repository }}/actions/runs/"
-          RUNS="${{ steps.runs_stale.outputs.list }}"
+          RUNS="${{ steps.detect_stale_runs.outputs.list }}"
           for RUN in ${RUNS[@]}; do
             gh api \
               --method DELETE \
@@ -381,7 +381,7 @@ jobs:
         id: compose_summary
         run: |
           {
-            echo -e "- Runs in branches:\n\`\`\`\n${{ steps.runs_branches.outputs.list }}\n\`\`\`"
-            echo -e "- Runs in releases:\n\`\`\`\n${{ steps.runs_releases.outputs.list }}\n\`\`\`"
-            echo -e "- Runs to delete:\n\`\`\`\n${{ steps.runs_stale.outputs.list }}\n\`\`\`"
+            echo -e "- Runs in branches:\n\`\`\`\n${{ steps.fetch_runs_in_branches.outputs.list }}\n\`\`\`"
+            echo -e "- Runs in releases:\n\`\`\`\n${{ steps.fetch_runs_in_releases.outputs.list }}\n\`\`\`"
+            echo -e "- Runs to delete:\n\`\`\`\n${{ steps.detect_stale_runs.outputs.list }}\n\`\`\`"
           } >> $GITHUB_STEP_SUMMARY
