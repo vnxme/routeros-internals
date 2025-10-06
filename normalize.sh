@@ -49,7 +49,7 @@ find * -type d -not -perm 755 -printf '%p # type=%y, perm=%m(%M)\n' | while read
 done
 
 # Fix file permissions
-find * -type f -not -perm 644 -printf '%p # type=%y, perm=%m(%M)\n' | while read LINE; do
+find * -type f -not \( -perm 755 -o -perm 644 \) -printf '%p # type=%y, perm=%m(%M)\n' | while read LINE; do
   chmod 644 "${LINE%% # *}"
   echo "${LINE}" >> "${FILE_PERMISSIONS}"
 done
