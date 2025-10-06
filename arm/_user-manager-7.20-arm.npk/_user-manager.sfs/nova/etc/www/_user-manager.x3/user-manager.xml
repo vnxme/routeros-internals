@@ -1,0 +1,8 @@
+<SERVERS>
+    <SERVER NAME="www">
+        <SERVLET TYPE="remote" PATH="/um" REMOTE="100,16"/>
+    </SERVER>
+    <SERVER NAME="www-ssl" SSL="true">
+        <SERVLET TYPE="remote" PATH="/um" REMOTE="100,16"/>
+    </SERVER>
+</SERVERS>

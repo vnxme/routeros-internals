@@ -1,0 +1,9 @@
+monitor:	umac wifi_3_0 qdf qca_ol
+qcom_q6v5_wcss:	qcom_common qcom_sysmon mdt_loader qcom_q6v5
+qdf:	cfg80211
+umac:	qdf cfg80211
+rfkill
+qca_spectral:	cfg80211 qdf umac
+qca_ol:	umac qdf cfg80211 mem_manager ipq_cnss2 qca_spectral
+qcom_q6v5_mpd:	qcom_q6v5 qcom_common qcom_sysmon mdt_loader
+wifi_3_0:	qdf qca_ol umac

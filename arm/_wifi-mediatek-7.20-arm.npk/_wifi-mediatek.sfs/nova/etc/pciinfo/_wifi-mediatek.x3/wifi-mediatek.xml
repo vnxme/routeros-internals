@@ -1,0 +1,8 @@
+<PCI>
+    <DRIVER NAME="c2glue.ko" NAME="c2.ko" NAME="rfkill.ko" NAME="libarc4.ko" NAME="arc4.ko" NAME="compat.ko" NAME="ccm.ko" NAME="cmac.ko" NAME="cfg80211.ko" NAME="mac80211.ko" NAME="mt76.ko" NAME="mt76-connac-lib.ko" NAME="mt7915e.ko">
+        <DEVICE VENDORID="0x14c3" DEVICEID="0x7906"/>
+    </DRIVER>
+    <DRIVER NAME="c2glue.ko" NAME="c2.ko" NAME="rfkill.ko" NAME="libarc4.ko" NAME="arc4.ko" NAME="compat.ko" NAME="ccm.ko" NAME="cmac.ko" NAME="cfg80211.ko" NAME="mac80211.ko" NAME="mt76.ko" NAME="mt76-connac-lib.ko" NAME="mt7996e.ko">
+        <DEVICE VENDORID="0x14c3" DEVICEID="0x7992"/>
+    </DRIVER>
+</PCI>

@@ -1,0 +1,30 @@
+nvme-tcp:	nvme-fabrics
+async_xor:	async_tx xor
+iscsi_tcp:	libiscsi scsi_transport_iscsi libiscsi_tcp scsi_mod
+linear:	md-mod
+nfsd:	sunrpc exportfs auth_rpcgss lockd grace nfsv4 nfs nfs_acl
+iscsi_target_mod:	target_core_mod
+async_pq:	async_tx async_xor raid6_pq
+raid10:	md-mod
+dm-integrity:	async_xor dm-mod dm-bufio
+nfsv3:	nfs nfs_acl lockd sunrpc
+libiscsi:	scsi_transport_iscsi scsi_mod
+nfs:	sunrpc lockd
+libiscsi_tcp:	libiscsi scsi_transport_iscsi
+raid456:	async_pq async_memcpy async_raid6_recov async_tx async_xor md-mod raid6_pq
+async_raid6_recov:	async_tx raid6_pq
+dm-bufio:	dm-mod
+nfsv4:	sunrpc nfs
+btrfs:	zstd_compress zstd_decompress raid6_pq xor zlib_deflate zlib_inflate
+nfsv2:	nfs lockd sunrpc
+lockd:	sunrpc grace
+nfs_acl:	sunrpc
+sunrpcoid_registry
+nvmet-tcp:	nvmet
+dm-crypt:	dm-mod
+async_memcpy:	async_tx
+faulty:	md-mod
+target_core_iblock:	target_core_mod
+scsi_transport_iscsi:	scsi_mod
+raid1:	md-mod
+raid0:	md-mod
