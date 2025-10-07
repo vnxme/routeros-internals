@@ -61,7 +61,7 @@ function download_from_branch_or_vendor {
   fi
 
   if [ ! -f "$1" ]; then
-    ARG_IGNORE_BRANCH='true'
+    [ "$1" == 'changelog.txt' ] && ARG_IGNORE_BRANCH='true'
     download_from_vendor "$1" "$2" "$3"
   fi
 }
