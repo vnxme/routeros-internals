@@ -18,16 +18,23 @@ MD="$(dirname -- "$(realpath -- "$0")")"
 ME="$(basename -- "$0")"
 
 # Define default flag and option values
-DIR='' # -d or --dir: working directory to save files into
-HOST_GITHUB='github.com' # --host-github: GitHub hostname
-HOST_VENDOR='download.mikrotik.com' # --host-vendor: vendor hostname
-IGNORE_BRANCH='false' # --ignore-branch: don't download files from a branch
-IGNORE_RELEASE='false' # --ignore-release: don't download files from a release
-LABEL='' # -l or --label: branch prefix / tag suffix indicating a source of files
-REPO='vnxme/routeros-internals' # -r or --repo: GitHub repository
-VERSION='' # -v or --version: software version
+DIR=''                              # -d or --dir:      working directory to save files into
+HOST_GITHUB='github.com'            # --host-github:    GitHub hostname
+HOST_VENDOR='download.mikrotik.com' # --host-vendor:    vendor hostname
+IGNORE_BRANCH='false'               # --ignore-branch:  don't download files from a branch
+IGNORE_RELEASE='false'              # --ignore-release: don't download files from a release
+LABEL=''                            # -l or --label:    branch prefix / tag suffix indicating the source of files
+REPO='vnxme/routeros-internals'     # -r or --repo:     GitHub repository
+VERSION=''                          # -v or --version:  software version
 
 declare -a DOWNLOADS
+
+function check_deps {
+  local DEPS=('wget')
+  local DEP; for DEP in ${DEPS[@]}; do
+    [ -z "$(which -- "${DEP}")" ] && { echo "${ME}: Dependency '${DEP}' can't be satisfied"; exit 1; }
+  done
+}
 
 function download {
   # arguments:
@@ -138,6 +145,8 @@ function parse_options {
     cd -- "${DIR}"
   fi
 }
+
+check_deps
 
 [ $# -gt 0 ] && { echo "${ME}: Started with $# arguments: $@"; } || { echo "${ME}: Started with no arguments"; }
 
