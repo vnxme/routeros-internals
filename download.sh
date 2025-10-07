@@ -23,7 +23,8 @@ ARG_HOST_VENDOR='download.mikrotik.com' # --host-vendor:    vendor hostname, e.g
 ARG_IGNORE_BRANCH='false'               # --ignore-branch:  don't download files from a branch
 ARG_IGNORE_RELEASE='false'              # --ignore-release: don't download files from a release
 ARG_LABEL='vendor'                      # -l or --label:    branch prefix / tag suffix, e.g. vendor
-ARG_REPO='vnxme/routeros-internals'     # -r or --repo:     GitHub repository, e.g. vnxme/routeros-internals
+ARG_PATCH=''                            # -p or --patch:    GitHub patch repository, e.g. elseif/MikroTikPatch
+ARG_REPO='vnxme/routeros-internals'     # -r or --repo:     GitHub internals repository, e.g. vnxme/routeros-internals
 ARG_VERSION=''                          # -v or --version:  software version, e.g. 7.20
 
 FILE_DOWNLOADS='downloads.txt'
@@ -51,7 +52,37 @@ function download_from_branch {
   download "$1" "${URL_GITHUB_B}/$1"
 }
 
-function download_from_branch_or_vendor {
+function download_from_patch {
+  # $1 - local file path
+  # $2 - patch file name
+
+  local ARCH="${1%%/*}"
+  local SUFFIX=''
+  if [ "$1" != "${ARCH}" ]; then
+    [ "${ARCH}" == 'x86' ] || local SUFFIX="-${ARCH}"
+  fi
+  download "$1" "${URL_GITHUB_P}${SUFFIX}/$2"
+}
+
+function download_from_patch_or_vendor {
+  # $1 - local file path
+  # $2 - vendor file name
+  # $3 - alternative vendor URL
+
+  if [ -z "${ARG_PATCH}" ]; then
+    download_from_vendor "$1" "$2" "$3"
+  else
+    download_from_patch "$1" "$2"
+  fi
+}
+
+function download_from_release {
+  # $1 - local file path
+
+  download "$1" "${URL_GITHUB_R}/$1"
+}
+
+function download_from_source {
   # $1 - local file path
   # $2 - vendor file name
   # $3 - alternative vendor URL
@@ -61,15 +92,13 @@ function download_from_branch_or_vendor {
   fi
 
   if [ ! -f "$1" ]; then
-    [ "$1" == 'changelog.txt' ] && ARG_IGNORE_BRANCH='true'
-    download_from_vendor "$1" "$2" "$3"
+    if [ "$1" == 'changelog.txt' ]; then
+      ARG_IGNORE_BRANCH='true'
+      download_from_vendor "$1" "$2" "$3"
+    else
+      download_from_patch_or_vendor "$1" "$2" "$3"
+    fi
   fi
-}
-
-function download_from_release {
-  # $1 - local file path
-
-  download "$1" "${URL_GITHUB_R}/$1"
 }
 
 function download_from_vendor {
@@ -87,8 +116,8 @@ function download_from_vendor {
 function parse_arguments {
   # $1... positional arguments
 
-  local OPTIONS_L='dir:,host-github:,host-vendor:,ignore-release,ignore-branch,label:,repo:,version:'
-  local OPTIONS_S='d:l:r:v:'
+  local OPTIONS_L='dir:,host-github:,host-vendor:,ignore-release,ignore-branch,label:,patch:,repo:,version:'
+  local OPTIONS_S='d:l:p:r:v:'
 
   local PARSED=$(getopt -o ${OPTIONS_S} -l ${OPTIONS_L} --name "${ME}" -- "$@") || exit 2
   eval set -- "$PARSED"
@@ -117,6 +146,10 @@ function parse_arguments {
         ;;
       -l|--label)
         ARG_LABEL="$2"
+        shift 2
+        ;;
+      -p|--patch)
+        ARG_PATCH="$2"
         shift 2
         ;;
       -r|--repo)
@@ -161,6 +194,7 @@ TAG="v${ARG_VERSION}-${ARG_LABEL}"
 
 URL_GITHUB_R="https://${ARG_HOST_GITHUB}/${ARG_REPO}/releases/download/${TAG}"
 URL_GITHUB_B="https://${ARG_HOST_GITHUB}/${ARG_REPO}/raw/refs/heads/${BRANCH}"
+URL_GITHUB_P="https://${ARG_HOST_GITHUB}/${ARG_PATCH}/releases/download/${ARG_VERSION}"
 URL_VENDOR="https://${ARG_HOST_VENDOR}/routeros/${ARG_VERSION}"
 
 # Download all files from a full release archive
@@ -179,7 +213,7 @@ if [ "${ARG_IGNORE_RELEASE}" == 'false' ]; then
 fi
 
 # Download a changelog
-download_from_branch_or_vendor 'changelog.txt' 'CHANGELOG'
+download_from_source 'changelog.txt' 'CHANGELOG'
 
 # Download a list of extra packages
 USE_FILE_PACKAGES='false'
@@ -197,7 +231,7 @@ for ARCH in "${ARCHS[@]}"; do
   [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
 
   for PACKAGE in "${PACKAGES[@]}"; do
-    download_from_branch_or_vendor "${ARCH}/${PACKAGE}-${ARG_VERSION}${SUFFIX}.npk" "${PACKAGE}-${ARG_VERSION}${SUFFIX}.npk"
+    download_from_source "${ARCH}/${PACKAGE}-${ARG_VERSION}${SUFFIX}.npk" "${PACKAGE}-${ARG_VERSION}${SUFFIX}.npk"
   done
 
   if [ ${#PACKAGES[@]} -eq 1 -a "${PACKAGES[0]}" == 'routeros' ]; then
@@ -208,7 +242,7 @@ for ARCH in "${ARCHS[@]}"; do
       done
     else
       FILE="${ARCH}/all_packages-${ARG_VERSION}${SUFFIX}.zip"
-      download_from_vendor "${FILE}" "all_packages-${ARCH}-${ARG_VERSION}.zip"
+      download_from_patch_or_vendor "${FILE}" "all_packages-${ARCH}-${ARG_VERSION}.zip"
       if [ -f "${FILE}" ]; then
         unset -v 'DOWNLOADS[-1]'
         unzip -o -d "${ARCH}/" "${FILE}" && rm -f "${FILE}"
@@ -227,11 +261,15 @@ for ARCH in "${ARCHS[@]}"; do
   mkdir -p "${ARCH}"
   [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
 
-  download_from_branch_or_vendor "${ARCH}/chr-${ARG_VERSION}${SUFFIX}.img.zip" "chr-${ARG_VERSION}${SUFFIX}.img.zip"
-  download_from_branch_or_vendor "${ARCH}/mikrotik-${ARG_VERSION}${SUFFIX}.iso" "mikrotik-${ARG_VERSION}${SUFFIX}.iso"
+  download_from_source "${ARCH}/chr-${ARG_VERSION}${SUFFIX}.img.zip" "chr-${ARG_VERSION}${SUFFIX}.img.zip"
+  download_from_source "${ARCH}/mikrotik-${ARG_VERSION}${SUFFIX}.iso" "mikrotik-${ARG_VERSION}${SUFFIX}.iso"
 
   if [ "${ARCH}" == 'x86' ]; then
-    download_from_branch_or_vendor "${ARCH}/install-image-${ARG_VERSION}${SUFFIX}.img.zip" "install-image-${ARG_VERSION}${SUFFIX}.zip"
+    download_from_source "${ARCH}/install-image-${ARG_VERSION}${SUFFIX}.img.zip" "install-image-${ARG_VERSION}${SUFFIX}.zip"
+
+    if [ -n "${ARG_PATCH}" ]; then
+      download_from_source "${ARCH}/chr-${ARG_VERSION}-legacy-bios${SUFFIX}.img.zip" "chr-${ARG_VERSION}-legacy-bios${SUFFIX}.img.zip"
+    fi
   fi
 done
 
@@ -241,12 +279,12 @@ for ARCH in "${ARCHS[@]}"; do
   mkdir -p "${ARCH}"
   [ "${ARCH}" == 'x86' ] && SUFFIX='' || SUFFIX="-${ARCH}"
 
-  download_from_branch_or_vendor "${ARCH}/netinstall-cli-${ARG_VERSION}${SUFFIX}.tar.gz" "netinstall-${ARG_VERSION}${SUFFIX}.tar.gz"
-  download_from_branch_or_vendor "${ARCH}/netinstall-w32-${ARG_VERSION}${SUFFIX}.exe.zip" "netinstall-${ARG_VERSION}${SUFFIX}.zip"
-  download_from_branch_or_vendor "${ARCH}/netinstall-w64-${ARG_VERSION}${SUFFIX}.exe.zip" "netinstall64-${ARG_VERSION}${SUFFIX}.zip"
+  download_from_source "${ARCH}/netinstall-cli-${ARG_VERSION}${SUFFIX}.tar.gz" "netinstall-${ARG_VERSION}${SUFFIX}.tar.gz"
+  download_from_source "${ARCH}/netinstall-w32-${ARG_VERSION}${SUFFIX}.exe.zip" "netinstall-${ARG_VERSION}${SUFFIX}.zip"
+  download_from_source "${ARCH}/netinstall-w64-${ARG_VERSION}${SUFFIX}.exe.zip" "netinstall64-${ARG_VERSION}${SUFFIX}.zip"
 done
 
 # Download other files
-download_from_branch_or_vendor 'packages.csv' 'packages.csv'
+download_from_source 'packages.csv' 'packages.csv'
 
 printf '%s\n' "${DOWNLOADS[@]}" | sort > ${FILE_DOWNLOADS}
