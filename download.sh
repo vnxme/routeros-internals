@@ -172,7 +172,7 @@ if [ "${ARG_IGNORE_RELEASE}" == 'false' ]; then
     if [ -n "${LIST}" ]; then
       tar --zst -xf "${FILE}" -C . "${LIST}" && tar --zst -xf "${FILE}" -C . -T "${LIST}" && rm -f "${FILE}"
     else
-      tar --zst -xf "${FILE}" -C . && rm -f "${FILE}" && "${MD}/cleanup.sh" . && find * -type f > ${FILE_DOWNLOADS}
+      tar --zst -xf "${FILE}" -C . && rm -f "${FILE}" && "${MD}/cleanup.sh" . && find * -type f | sort > ${FILE_DOWNLOADS}
     fi
     exit 0
   fi
@@ -250,4 +250,4 @@ done
 download_from_branch_or_vendor 'packages.csv' 'packages.csv'
 download_from_branch_or_vendor 'repo.json' 'repo.json' 'https://apps.mikrotik.com/easyapps'
 
-printf '%s\n' "${DOWNLOADS[@]}" > ${FILE_DOWNLOADS}
+printf '%s\n' "${DOWNLOADS[@]}" | sort > ${FILE_DOWNLOADS}
