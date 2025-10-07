@@ -224,7 +224,7 @@ jobs:
         if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.dkey }}.tar.zst"
-          sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" .
+          sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" -T <(cd -- "${{ env.box }}"; sudo find * .*)
           sudo chown $(id -un):$(id -gn) "${FILE}"
 
       - name: Delete downloaded files from cache
@@ -320,7 +320,7 @@ jobs:
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.pkey }}.tar.zst"
-          sudo tar --zst -cf "${FILE}" --exclude='downloads.txt' -X "${{ env.box }}/downloads.txt" -C "${{ env.box }}" .
+          sudo tar --zst -cf "${FILE}" --exclude='downloads.txt' -X "${{ env.box }}/downloads.txt" -C "${{ env.box }}" -T <(cd -- "${{ env.box }}"; sudo find * .*)
           sudo chown $(id -un):$(id -gn) "${FILE}"
 
       - name: Delete processed files from cache
@@ -421,11 +421,11 @@ jobs:
           cd "${{ env.box }}" && { sudo find * -type f -size +32M | sort | sudo tee "${EXCL}" || true; } && cd - > /dev/null
           
           FILE="${{ env.tmp }}/routeros-${{ env.branch }}-full.tar.zst"
-          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' --exclude="${EXCL}" -C "${{ env.box }}" .
+          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' --exclude="${EXCL}" -C "${{ env.box }}" -T <(cd -- "${{ env.box }}"; sudo find * .*)
           du -h "${FILE}"
           
           FILE="${{ env.tmp }}/routeros-${{ env.branch }}-light.tar.zst"
-          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' -X "${{ env.box }}/${EXCL}" -C "${{ env.box }}" .
+          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' -X "${{ env.box }}/${EXCL}" -C "${{ env.box }}" -T <(cd -- "${{ env.box }}"; sudo find * .*)
           du -h "${FILE}"
 
       - name: Delete duplicate release and tag
