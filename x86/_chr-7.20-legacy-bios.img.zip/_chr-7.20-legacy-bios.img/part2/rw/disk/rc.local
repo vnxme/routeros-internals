@@ -1,0 +1,4 @@
+#!/bin/sh
+# This script will be executed *before* RouterOS *loader* start.
+# You can put your own initialization stuff in here
+
