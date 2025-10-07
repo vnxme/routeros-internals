@@ -168,7 +168,7 @@ if [ "${ARG_IGNORE_RELEASE}" == 'false' ]; then
   FILE="routeros-${BRANCH}-full.tar.zst"
   download_from_release "${FILE}"
   if [ -f "${FILE}" ]; then
-    LIST="$(tar --zst -tf "${FILE}" | grep -x "${FILE_DOWNLOADS}")"
+    LIST="$(tar --zst -tf "${FILE}" | grep -Fx "${FILE_DOWNLOADS}")"
     if [ -n "${LIST}" ]; then
       tar --zst -xf "${FILE}" -C . "${LIST}" && tar --zst -xf "${FILE}" -C . -T "${LIST}" && rm -f "${FILE}"
     else
