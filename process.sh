@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+MD="$(dirname -- "$(realpath -- "$0")")"
 ME="$(basename -- "$0")"
-MYDIR="$(dirname -- "$(realpath -- "$0")")"
 
 FILE_HASHES='hashes.txt'
 FILE_LINKS='links.txt'
@@ -38,7 +38,7 @@ function process_files {
   # $1 - file descriptor with a null-separated list of files
   # $2 - script to call with each file as an argument
 
-  SCRIPT="${MYDIR}/$2"
+  SCRIPT="${MD}/$2"
   [ ! -f "${SCRIPT}" ] && echo "${ME}: Not found ${SCRIPT}. Exiting" && exit 1
   [ ! -x "${SCRIPT}" ] && chmod +x "${SCRIPT}"
 

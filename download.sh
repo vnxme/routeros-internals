@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+MD="$(dirname -- "$(realpath -- "$0")")"
 ME="$(basename -- "$0")"
-MYDIR="$(dirname -- "$(realpath -- "$0")")"
 
 # Define default flag and option values
 DIR='' # -d or --dir: working directory to save files into
@@ -160,7 +160,7 @@ if [ "${IGNORE_RELEASE}" == 'false' ]; then
     if [ -n "${LIST}" ]; then
       tar --zst -xf "${FILE}" -C . "${LIST}" && tar --zst -xf "${FILE}" -C . -T "${LIST}" && rm -f "${FILE}"
     else
-      tar --zst -xf "${FILE}" -C . && rm -f "${FILE}" && "${MYDIR}/cleanup.sh" . && find * -type f > ${FILE_DOWNLOADS}
+      tar --zst -xf "${FILE}" -C . && rm -f "${FILE}" && "${MD}/cleanup.sh" . && find * -type f > ${FILE_DOWNLOADS}
     fi
     exit 0
   fi
