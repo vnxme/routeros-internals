@@ -420,17 +420,18 @@ jobs:
           EXCL='exclusions.txt'
           cd "${{ env.box }}" && { sudo find * -type f -size +32M | sort | sudo tee "${EXCL}" || true; } && cd - > /dev/null
           
+          LIST="${{ env.tmp }}/files.txt"
+          { cd -- "${{ env.box }}"; sudo find * .*; cd - > /dev/null; } > "${LIST}"
+          
           FILE="${{ env.tmp }}/routeros-${{ env.branch }}-full.tar.zst"
-          sudo -s
-            tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' --exclude="${EXCL}" -C "${{ env.box }}" -T <(cd -- "${{ env.box }}"; find * .*)
-          exit
+          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' --exclude="${EXCL}" -C "${{ env.box }}" -T "${LIST}"
           du -h "${FILE}"
           
           FILE="${{ env.tmp }}/routeros-${{ env.branch }}-light.tar.zst"
-          sudo -s
-            tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' -X "${{ env.box }}/${EXCL}" -C "${{ env.box }}" -T <(cd -- "${{ env.box }}"; find * .*)
-          exit
+          sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' -X "${{ env.box }}/${EXCL}" -C "${{ env.box }}" -T "${LIST}"
           du -h "${FILE}"
+          
+          rm -- "${LIST}"
 
       - name: Delete duplicate release and tag
         id: delete_release
