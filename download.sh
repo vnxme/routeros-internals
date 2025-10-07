@@ -248,6 +248,5 @@ done
 
 # Download other files
 download_from_branch_or_vendor 'packages.csv' 'packages.csv'
-download_from_branch_or_vendor 'repo.json' 'repo.json' 'https://apps.mikrotik.com/easyapps'
 
 printf '%s\n' "${DOWNLOADS[@]}" | sort > ${FILE_DOWNLOADS}
