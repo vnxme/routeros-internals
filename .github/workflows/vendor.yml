@@ -507,7 +507,7 @@ jobs:
           body_path: "${{ env.tmp }}/description.txt"
           tag_name: "${{ env.tag }}"
           make_latest:  ${{ steps.delete_release.outputs.latest == 'true' }}
-          prerelease:  ${{ matrix.channel == 'testing' }}
+          prerelease:  ${{ needs.validate.outputs.label == 'vendor' && matrix.channel == 'testing' }}
           files: |
             ${{ env.tmp }}/*.tar.zst
 
