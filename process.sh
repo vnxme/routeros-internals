@@ -22,6 +22,7 @@ FILE_LINKS='links.txt'
 
 SCRIPT_UNPACK='unpack.sh'
 SCRIPT_UNPACK_FWF='unpack-fwf.py'
+SCRIPT_UNPACK_NETINSTALL='unpack-netinstall.py'
 SCRIPT_UNPACK_NPK='unpack-npk.py'
 SCRIPT_UNPACK_X3='unpack-x3.py'
 
@@ -99,7 +100,7 @@ process_files <(
 # Unpack EXE files
 process_files <(
   find_files_by_name '*.exe' '*/_*.exe.zip/*'
-) "${SCRIPT_UNPACK}"
+) "${SCRIPT_UNPACK_NETINSTALL}"
 
 # Unpack ISO files
 process_files <(
@@ -188,6 +189,7 @@ process_files <(
   find_files_by_name '*.vmlinux' 'x86/_*.iso/_*.img/loop/_linux.*/*'
   find_files_by_name '*.vmlinux' 'x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/*'
   find_files_by_name '*.vmlinux' 'x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/*'
+  find_files_by_name '*-kernel' '*/_*.exe.zip/_*.exe/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack Image and ELF files (2/2)
