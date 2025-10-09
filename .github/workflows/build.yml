@@ -1,5 +1,5 @@
-name: 'RouterOS 7.x Internals Workflow'
-run-name: "RouterOS 7.x: [${{ inputs.label }}]-[${{ inputs.version }}]-[${{ inputs.scope }}]"
+name: 'Repository Build Workflow'
+run-name: "Repository Build: [${{ inputs.label }}]-[${{ inputs.version }}]-[${{ inputs.scope }}]"
 on:
 #  push:
 #    branches:
