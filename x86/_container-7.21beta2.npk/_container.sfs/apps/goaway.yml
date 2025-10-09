@@ -1,0 +1,25 @@
+name: goaway
+descr: Lightweight DNS server with web interface for ad blocking and DNS filtering
+page: https://github.com/pommee/goaway
+category: networking
+default-credentials: admin:<check container logs for password>
+services:
+  goaway:
+    image: docker.io/pommee/goaway:latest
+    ports:
+      # DNS
+      - "53:53/udp:dns"
+      - "53:53/tcp:dns"
+      # Web Interface
+      - "8094:8094:web"
+      # DNS over TLS (uncomment if needed)
+      #- "853:853/tcp"
+    environment:
+      - DNS_PORT=53
+      - WEBSITE_PORT=8094
+      #- DOT_PORT=853
+    command: ["--dashboard", "true"]
+    volumes:
+      - 'config:/app/config'
+      - 'data:/app/data'
+    restart: unless-stopped

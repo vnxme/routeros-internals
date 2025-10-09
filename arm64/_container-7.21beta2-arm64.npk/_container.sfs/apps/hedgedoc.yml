@@ -1,0 +1,26 @@
+name: hedgedoc
+descr: Collaborative markdown editor with real-time collaboration
+page: https://hedgedoc.org
+category: productivity
+default-credentials: web setup
+services:
+  database:
+    image: docker.io/postgres:13.4-alpine
+    environment:
+      POSTGRES_USER: hedgedoc
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hedgedoc
+    volumes:
+      - database:/var/lib/postgresql/data
+  app:
+    image: quay.io/hedgedoc/hedgedoc:1.10.3
+    environment:
+      CMD_DB_URL: postgres://hedgedoc:password@127.0.0.1:5432/hedgedoc
+      CMD_DOMAIN: "[accessIP]:[accessPort]"
+      CMD_URL_ADDPORT: false
+      CMD_ALLOW_EMAIL_REGISTER: true
+    volumes:
+      - uploads:/hedgedoc/public/uploads
+    ports:
+      - 3012:3000:web
+    restart: unless-stopped

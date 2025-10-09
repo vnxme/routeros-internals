@@ -1,0 +1,12 @@
+arm64/_chr-7.21beta2-arm64.img.zip/chr-7.21beta2-arm64.img
+arm64/_mikrotik-7.21beta2-arm64.iso/efiboot.img
+arm64/mikrotik-7.21beta2-arm64.iso
+x86/_chr-7.21beta2-legacy-bios.img.zip/chr-7.21beta2-legacy-bios.img
+x86/_chr-7.21beta2.img.zip/chr-7.21beta2.img
+x86/_install-image-7.21beta2.img.zip/install-image-7.21beta2.img
+x86/_mikrotik-7.21beta2.iso/efiboot.img
+x86/_netinstall-w32-7.21beta2.exe.zip/netinstall.exe
+x86/chr-7.21beta2-legacy-bios.img.zip
+x86/install-image-7.21beta2.img.zip
+x86/mikrotik-7.21beta2.iso
+x86/netinstall-w32-7.21beta2.exe.zip

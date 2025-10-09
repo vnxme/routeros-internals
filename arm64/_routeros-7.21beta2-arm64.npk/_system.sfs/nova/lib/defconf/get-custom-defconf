@@ -1,0 +1,2295 @@
+#-------------------------------------------------------------------------------
+# Global vars
+
+:global strDesc "";
+:global strConf "";
+:global NL "\r\n";
+
+:global configMode "";
+:global dhcpEnabled 0
+:global lteDhcp 0
+:global wirelessEnabled 0
+:global ipv6Enabled 0
+:global isPCIneeded 0;
+:global isPPPneeded 0;
+:global needDiskSharing 0;
+:global needDhcpClient 0;
+
+:global nTemp 0;
+:global bFail 0;
+:global bDebugOn 0;  # enable this for additional debug logs
+
+#-------------------------------------------------------------------------------
+# Wait loopback before defconf generation as a sign that networking is initialized
+
+:local count 0;
+:while ([:len [/interface find where type="loopback"]] = 0 && $count < 30) do={
+    :set count ($count +1);
+    :delay 1s;
+}
+
+#-------------------------------------------------------------------------------
+# Utilities
+
+:global addCL do={
+  :global strConf;
+  :global NL;
+  :set strConf ($strConf . $1 . $NL)
+}
+
+:global addDL do={
+  :global strDesc;
+  :global NL;
+  :set strDesc ($strDesc . $1 . $NL)
+}
+
+:global addDCL do={
+  :global strConf;
+  :global NL;
+  :global bDebugOn;
+  :if ($bDebugOn=1) do={
+    :local logline (":log info \"DefConf: " . $1 . "\"")
+    :set strConf ($strConf . $logline .  $NL)
+  }
+}
+
+:global printDebug do={
+  :global bDebugOn;
+  :if ($bDebugOn=1) do={
+    :log info ("Defconf(debug): $[:tostr $1]")
+  }
+}
+
+# check if provided character is number
+:global isNum do={
+  :return ($1~"[0-9]")
+}
+
+#-------------------------------------------------------------------------------
+# function finds next section from board name
+#-------------------------------------------------------------------------------
+:global findNextSection do={
+  :local ret 0;
+  :local tmp;
+  :local ret $2
+  :do {
+    :set tmp [:pick $1 $ret]
+    :set ret ($ret+1);
+  } while=(!(($tmp~"[- +&]") || ($ret > [:len $1])))
+  #include + in return
+  :if ($tmp = "+") do={ :set $ret ($ret+1) }
+  :return $ret
+}
+
+#-------------------------------------------------------------------------------
+# try to get string describing board features from board name
+#  returns an array of (board prefix, wireless, isAp, other)
+#-------------------------------------------------------------------------------
+:global getFeatureString do={
+  :global findNextSection;
+
+  :local prefix "";
+  :local model "";
+  :local wireless "";
+  :local other "";
+  :local end 0;
+  :local tmp "";
+  :local pos 0;
+  :local oldPos 0;
+  :local isAp 0;
+  :local numSfp 0;
+  :local numSfpPlus 0;
+  :local numGig 0;
+  :local numCombo 0;
+  :local isLte 0; # if board has built-in LTE
+
+  :set pos [$findNextSection $boardStr $oldPos]
+  :set prefix [:pick $boardStr 0 ($pos-1)]
+
+  #get board model (new style)
+  :if ($prefix ~ "RouterBOARD|Cloud") do={
+    :set oldPos $pos
+    :set pos [$findNextSection $boardStr $oldPos]
+    :set model [:pick $boardStr $oldPos ($pos-1)]
+  } else={
+    # old style
+    :if ($prefix ~ "CRS") do={
+      :set prefix "CloudRouterSwitch"
+      :set model [:pick $boardStr ($oldPos+3) ($pos-1)]
+    } else={
+      :if ($prefix ~ "RB") do={
+        :set prefix "RouterBOARD"
+        :set model [:pick $boardStr ($oldPos+2) ($pos-1)]
+      } else={
+        :set prefix "RouterBOARD"
+        :set model [:pick $boardStr $oldPos ($pos-1)]
+      }
+    }
+  }
+  #special case if model ends with +
+  :if ([:pick $model ([:len $model]-1)] = "+") do={:set $pos ($pos-1)}
+  # skip G right after board name
+  :if ([:pick $boardStr $pos] = "G") do={ :set pos ($pos+1)}
+  :if ([:pick $boardStr $pos] = "A") do={ :set isAp 1; :set pos ($pos+1)}
+  #add additional check cause there may be L and LTE boards
+  :if ([:pick $boardStr $pos] = "L") do={
+    :if ([:pick $boardStr $pos ($pos+3)] = "LTE") do={
+      :set isLte 1;
+      :set pos ($pos+3);
+    } else={
+      :set other "L";
+      :set pos ($pos+1);
+    }
+  }
+
+  :local matched 0;
+  :local break 0;
+  :do {
+    :set oldPos $pos
+    :set pos [$findNextSection $boardStr $oldPos]
+    :set tmp [:pick $boardStr $oldPos ($pos-1)]
+    #special case if section ends with +, assuming that there can be only one +
+    :if ([:pick $tmp ([:len $tmp]-1)] = "+") do={:set $pos ($pos-1)}
+
+    # break parser for now if board has LTE iface
+    :if ($tmp~"LTE") do={
+      :set isLte 1;
+      :set break 1;
+    }
+
+    # ccr port count
+    :if ($tmp~"^[0-9GPBCSXQVD+RM]*\$") do={
+      :set matched 1
+      # first match uncountable port types and add to "other" string
+      :if ($tmp~"G\\+" || $tmp~"P\\+" || $tmp~"XG" || $tmp~"XP" || $tmp~"XS" || \
+           $tmp~"DS" || $tmp~"Q\\+" || $tmp~"VQ" || $tmp~"XQ" || $tmp~"DQ" || \
+           $tmp~"DDQ") do={
+        :set other ($other . [:pick $boardStr $oldPos $pos])
+      } else={
+          :if ($tmp~"B") do={
+          :set numGig [:pick $tmp 0 [:find $tmp "B"]]
+          } else={
+          :if ($tmp~"P") do={
+            :set numGig [:pick $tmp 0 [:find $tmp "P"]]
+          } else={
+            :if ($tmp~"G") do={
+              :set numGig [:pick $tmp 0 [:find $tmp "G"]]
+            } else={
+              if ($tmp~"C") do={
+                :set numCombo [:pick $tmp 0 [:find $tmp "C"]]
+              } else={
+                :if ($tmp~"S\\+") do={
+                :set numSfpPlus [:pick $tmp 0 [:find $tmp "S+"]]
+                } else={
+                  :if ($tmp~"S") do={
+                  :set numSfp [:pick $tmp 0 [:find $tmp "S"]]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } else={
+      # wireless
+      :if ($tmp~"^[0-9SHPacndyxDTQO]*\$") do={
+        :set matched 1
+        :set wireless "$wireless $[:pick $boardStr $oldPos $pos]"
+      }
+    }
+    :if ($matched = 0) do={
+      :set other ($other . [:pick $boardStr $oldPos $pos])
+    }
+    :set matched 0
+  } while=($pos < [:len $boardStr] && break = 0)
+
+  :return {
+    "prefix"=$prefix;
+    "model"=$model;
+    "wireless"=$wireless;
+    "isAp"=$isAp;
+    "numGig"=$numGig;
+    "numSfp"=$numSfp;
+    "numSfpPlus"=$numSfpPlus;
+    "numCombo"=$numCombo;
+    "isLte"=$isLte;
+    "other"=$other
+  }
+}
+
+#-------------------------------------------------------------------------------
+# parse wireless features from board name
+#  returns array of elements (band, chains, isAc, isN, frequencyMode)
+#-------------------------------------------------------------------------------
+:global parseWirelessFeatures do={
+  :global isNum
+
+  :local frequency ""
+  :local isN 0
+  :local isAc 0
+  :local isAd 0
+  :local isAy 0
+  :local isAx 0
+  :local chains "0"
+
+  :local band;
+  :local tmp 0;
+  :local pos 0;
+
+  :local cardNext 0;
+  :local outArray {"w1"="0"};
+
+  :do {
+    #settings for each card starts with frequency number
+    :set tmp [:pick $list $pos];
+    :if ([$isNum $tmp]) do={
+      :if ([$isNum [:pick $list ($pos+1)]]) do={
+        :set pos ($pos+1)
+        :set tmp ($tmp . [:pick $list $pos])
+      }
+      # set current card
+      :if ($cardNext > 0) do={
+        :set ($outArray->"w$cardNext") {
+          "chains"=$chains;
+          "isAc"=$isAc;
+          "isN"=$isN;
+          "isAd"=$isAd;
+          "isAy"=$isAy;
+          "isAx"=$isAx;
+          "frequencyMode"=$frequency
+        }
+      }
+      :set frequency [:tonum $tmp];
+      :set cardNext ($cardNext + 1);
+      :set isN 0
+      :set isAc 0
+      :set isAd 0
+      :set isAy 0
+      :set isAx 0
+      :set chains "0"
+    }
+    # ignore card power
+    :if ($tmp~"[SHP]") do={}
+
+    #get 802.11 protocol
+    :if ($tmp = "n") do={ :set isN 1;}
+    :if ($tmp = "a") do={
+      :set tmp ($tmp . [:pick $list ($pos+1)])
+      :if ($tmp = "ac") do={ :set isAc 1; :set pos ($pos+1)} else={
+        :if ($tmp = "ad") do={
+          :set isAd 1; :set pos ($pos+1)
+        } else={
+          :if ($tmp = "ay") do={
+            :set isAy 1; :set pos ($pos+1)
+          } else={
+            :if ($tmp = "ax") do={
+              :set isAx 1; :set pos ($pos+1)
+            } else={
+              :log warning "DefConf gen: Invalid 802.11 protocol, expected 'ac'";
+            }
+          }
+        }
+      }
+    }
+    #get chains
+    :if ($tmp = "D") do={ :set chains "0,1" }
+    :if ($tmp = "T") do={ :set chains "0,1,2" }
+    :if ($tmp = "Q") do={
+      :if ($isAc = 1 || $isAx = 1) do={ :set chains "0,1,2,3" } else={
+        :log warning "DefConf gen: quad chains are only for 'ac' or 'ax' boards";
+      }
+    }
+    :if ($tmp = "O") do={
+      :if ($isAx = 1) do={ :set chains "0,1,2,3,4,5,6,7" } else={
+        :log warning "DefConf gen: octa chains are only for 'ax' boards";
+      }
+    }
+    :set pos ($pos+1)
+  } while=($pos < [:len $list])
+  # add last card to the list
+  :set ($outArray->"w$cardNext") {
+    "chains"=$chains;
+    "isAc"=$isAc;
+    "isN"=$isN;
+    "isAd"=$isAd;
+    "isAy"=$isAy;
+    "isAx"=$isAx;
+    "frequencyMode"=$frequency
+  }
+  :return $outArray
+}
+
+#-------------------------------------------------------------------------------
+# set wlan config from parsed wirelss feature array
+#-------------------------------------------------------------------------------
+:global setWlan do={
+  #access to global funcs
+  :global addCL;
+  :global addDL;
+  :global addDCL;
+  :global wirelessEnabled;
+
+  :local wlanInfo;
+  :local band;
+  :local numBands 0;
+  :local bands {"b1"="0"};
+  :local txChains "0";
+  :local rxChains "0";
+  :local ifcId "";
+  :local currentName;
+
+  :local tmpChPos 0;
+  :local tmpChEndPos 0;
+
+  :local tmpChArr [:toarray ""];
+
+  :local tmpChArrPos 0;
+  :local bestChannel "";
+
+  :if ($wirelessEnabled = 1) do={
+    :if ([:len [/system package find name~"wifi" !disabled]] != 0) do={
+      :local infoCall [:parse ":local macAdd [/interface wifi get [/interface find where default-name=$ifc] radio-mac];
+                               :return [/interface wifi radio get [find where radio-mac=\$macAdd]]"]
+      :set wlanInfo [$infoCall]
+      :set rxChains [:tostr ($wlanInfo->"rx-chains")];
+      :set txChains [:tostr ($wlanInfo->"tx-chains")];
+
+      :set bands [($wlanInfo->"bands")]
+      :local banLen [:len $bands]
+      :local bestBand [($bands->($banLen - 1))]
+
+      $addCL ("  /interface wifi {")
+
+      #pick always first supported band
+      :set band [:pick $bestBand 0 [:find $bestBand ":"]]
+      :local tmpChW [:pick $bestBand ([:find $bestBand ":"] + 1) [:len $bestBand]]
+
+      :while ($tmpChPos <= [:len $tmpChW] && [:typeof $tmpChPos] != "nil") do={
+        :local pos [:find $tmpChW "," from=$tmpChPos];
+        :if ($tmpChPos!=0) do={:set tmpChPos ($tmpChPos+1)};
+        :set tmpChEndPos $pos;
+        :if ([:typeof $tmpChEndPos] = "nil") do={:set tmpChEndPos [:len $tmpChW]};
+        :local tmp [:pick $tmpChW $tmpChPos $tmpChEndPos]
+        :set ($tmpChArr -> "$tmpChArrPos") $tmp
+        :set tmpChPos $pos
+        :set tmpChArrPos ($tmpChArrPos + 1)
+      }
+
+      :if ($band = "5ghz-ax") do={
+        #use "20/40/80mhz" - the best common channel-width for all "5ghz-ax" boards
+        :set bestChannel "20/40/80mhz"
+      } else={
+        :set bestChannel [($tmpChArr -> ([:len $tmpChArr] - 1))]
+      }
+
+      $addCL (":local ifcId [/interface wifi find where default-name=$ifc]")
+      $addDL ("#| $ifc Configuration:")
+      $addDL ("#|     mode:                $mode;")
+      $addDCL ("start wireless $ifc")
+
+      :if ($mode = "disabled") do={
+        $addCL ("  disable \$ifcId")
+      } else={
+        $addDL ("#|     band:                $band;")
+        $addDL ("#|     tx-chains:           $txChains;")
+        $addDL ("#|     rx-chains:           $rxChains;")
+        $addDL ("#|     installation:        $installation;")
+
+        # do not set chains (should be set by default)
+        $addCL ("    set \$ifcId configuration.mode=$mode channel.band=$band disabled=no")
+        $addDL ("#|     ht-extension:        $bestChannel;")
+        $addCL ("    set \$ifcId channel.width=$bestChannel;")
+        :if ($frequency != "auto") do={
+          $addCL ("    set \$ifcId channel.frequency=$frequency")
+        }
+        $addCL ("    set \$ifcId channel.skip-dfs-channels=10min-cac;")
+      }
+      :if (!($pass = "" || $pass = nil)) do={
+        $addDL ("#|     wpa2:                yes;")
+        $addCL ("   set \$ifcId security.authentication-types=wpa2-psk,wpa3-psk security.passphrase=$pass security.ft=yes security.ft-over-ds=yes")
+      } else={
+        $addDL ("#|     wpa2:                no;")
+      }
+      :if (!($ssid = "" || $ssid = nil)) do={
+        $addCL ("    set \$ifcId configuration.ssid=$ssid")
+      } else={
+        :if ($mode = "ap") do={
+          $addDCL ("set ap ssid")
+          $addCL ("    :local wlanMac  [/interface get [/interface find where default-name=wifi1] mac-address];")
+          $addCL ("    :set ssid \"MikroTik-\$[:pick \$wlanMac 9 11]\$[:pick \$wlanMac 12 14]\$[:pick \$wlanMac 15 17]\"")
+          $addCL ("    set \$ifcId configuration.ssid=\$ssid")
+        }
+      }
+
+      $addCL ("  }")
+    } else={
+      #:set ifcId [/interface wireless find where default-name=$ifc]
+      # find interface by default name and run info (interfaces could be renamed in user config). Hw-info can not be fetched by interface ID
+      #:set currentName [/interface wireless get $ifcId name]
+      :local infoCall [:parse ":local ifcId [/interface wireless find where default-name=$ifc]; :local currentName [/interface wireless get \$ifcId name]; :return [/interface wireless info hw-info [/interface wireless get \$ifcId name] as-value]"]
+      :set wlanInfo [$infoCall]; #[/interface wireless info hw-info $currentName as-value];
+      # FIXME: converts from array with ;
+      :set rxChains [:tostr ($wlanInfo->"rx-chains")];
+      :set txChains [:tostr ($wlanInfo->"tx-chains")];
+
+      :foreach rangeInfo in=($wlanInfo->"ranges") do={
+        :set rangeInfo [:toarray $rangeInfo];
+        :foreach i in=$rangeInfo do={
+          :local chr "";
+          :local len 0;
+          :set len [:len $i];
+          :set chr [:pick $i 0];
+          # if is number TODO: use isNum
+          :if ( (0 <= [:tonum $chr]) && ([:tonum $chr] <= 9) ) do={
+            :set numBands ($numBands+1)
+
+            :set ($bands->"b$numBands") {
+              "freq"=$chr;
+              "isN"=0;
+              "isAc"=0;
+              "chMaxWidth"=0
+            }
+          } else={
+            :if ($len > 1) do={
+              :set chr [:pick $i 1];
+              :if ($chr = "n") do={
+                :set (($bands->"b$numBands")->"isN") 1
+              }
+              :if ($chr = "c") do={
+                :set (($bands->"b$numBands")->"isAc") 1
+              }
+            }
+            :if ([:tonum (($bands->"b$numBands")->"chMaxWidth")] <  [:tonum [:pick $i 2 $len]] ) do={
+              :set (($bands->"b$numBands")->"chMaxWidth") [:pick $i 2 $len];
+            }
+          }
+        }
+      }
+
+      $addCL ("  /interface wireless {")
+
+      #pick always first supported band
+      :if (($bands->"b1")->"freq" = 2) do={
+        :if (($bands->"b1")->"isN" = 1) do={
+          :set band "2ghz-b/g/n"
+        } else={
+          :set band "2ghz-b/g"
+        }
+      } else={
+        :if (($bands->"b1")->"isAc" = 1) do={
+          :set band "5ghz-a/n/ac"
+        } else={
+          :if (($bands->"b1")->"isN" = 1) do={
+            :set band "5ghz-a/n"
+          } else={
+            :set band "5ghz-a"
+          }
+        }
+      }
+
+      $addCL (":local ifcId [/interface wireless find where default-name=$ifc]")
+      $addCL (":local currentName [/interface wireless get \$ifcId name]")
+      $addDL ("#| $ifc Configuration:")
+      $addDL ("#|     mode:                $mode;")
+      $addDCL ("start wireless $ifc")
+
+      :if ($mode = "disabled") do={
+        $addCL ("  disable \$ifcId")
+      } else={
+        $addDL ("#|     band:                $band;")
+        $addDL ("#|     tx-chains:           $txChains;")
+        $addDL ("#|     rx-chains:           $rxChains;")
+        $addDL ("#|     installation:        $installation;")
+
+        :if (!($pass = "" || $pass = nil)) do={
+          $addDL ("#|     wpa2:          yes;")
+          $addCL ("   security-profile set default mode=dynamic-keys group-ciphers=aes-ccm unicast-ciphers=aes-ccm \\")
+          $addCL ("      authentication-types=wpa2-psk disable-pmkid=yes wpa2-pre-shared-key=$pass comment=defconf ")
+        } else={
+          $addDL ("#|     wpa2:      no;")
+        }
+
+        # do not set chains (should be set by default)
+        $addCL ("    set \$ifcId mode=$mode band=$band disabled=no wireless-protocol=$wProto \\")
+        $addCL ("       distance=$distance installation=$installation")
+
+        if (($bands->"b1")->"chMaxWidth" >= 80) do={
+          $addDL ("#|     ht-extension:        20/40/80mhz-XXXX;")
+          $addCL ("    set \$ifcId channel-width=20/40/80mhz-XXXX;")
+          # secondary channel only for AC and 80mhz
+          :if ($secChannel=1 && band="5ghz-a/n/ac") do={
+            $addDL ("#|     secondary-frequency:   auto;")
+            $addCL ("    set \$ifcId secondary-frequency=auto")
+          }
+        } else={
+          :if (($bands->"b1")->"chMaxWidth" = 40) do={
+            $addDL ("#|     ht-extension:        20/40mhz-XX;")
+            $addCL ("    set \$ifcId channel-width=20/40mhz-XX;")
+          } else={
+            $addDL ("#|     ht-extension:        20mhz;")
+            $addCL ("    set \$ifcId channel-width=20mhz;")
+          }
+        }
+        :if ($frequency != "") do={
+          $addCL ("    set \$ifcId frequency=$frequency")
+        }
+      }
+
+      :if (!($ssid = "" || $ssid = nil)) do={
+        $addCL ("    set \$ifcId ssid=$ssid")
+      } else={
+        :if ($mode = "ap-bridge" || $mode = "bridge") do={
+          $addDCL ("set ap_bridge ssid")
+          $addCL ("    :local wlanMac  [/interface wireless get wlan1 mac-address];")
+          $addCL ("    :set ssid \"MikroTik-\$[:pick \$wlanMac 9 11]\$[:pick \$wlanMac 12 14]\$[:pick \$wlanMac 15 17]\"")
+          $addCL ("    set \$ifcId ssid=\$ssid")
+        }
+      }
+      $addCL ("  }")
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+# apply configuration related to LAN (switches, bridges, dhcp server)
+#-------------------------------------------------------------------------------
+:global setLan do={
+  #access to global vars
+  :global defconfMode;
+  :global addCL;
+  :global addDL;
+  :global addDCL;
+  :global dhcpEnabled;
+
+  $addDL ("#| LAN Configuration:")
+  $addDCL ("set LAN")
+  # New style Detnet
+  :if ($useDetNet = 1) do={
+    # LAN port is always bridge when DetNet enabled
+    :set $lanPort "bridge"
+    $addDL ("#|     LAN Ports: detected automatically;")
+    $addCL (" /interface bridge")
+    $addCL ("   add name=$lanPort comment=defconf;")
+    # TODO: what mac address on bridge???? temporary use ether1
+    $addCL ("   set $lanPort auto-mac=no admin-mac=[/interface ethernet get ether1 mac-address];")
+    $addCL ("   port add bridge=$lanPort interface=LAN comment=defconf;")
+  } else={
+    :if ($lanPort = "bridge") do={
+      #bridge all interfaces that are not wan or slave ports
+      $addCL (" /interface bridge")
+      $addCL ("   add name=$lanPort disabled=no auto-mac=yes protocol-mode=rstp comment=defconf;")
+      $addCL (" :local bMACIsSet 0;")
+      $addDCL ("\$[:tostr [/interface print as-value]]")
+      :local excWlans "";
+      :if ($hasCapsMan > 0) do={
+        :set excWlans "|| name=wlan1 || name=wlan2"
+      }
+      :if ($wanPorts!="") do={
+        :local tmpWanPorts "";
+        :foreach i in=$wanPorts do={
+          :set tmpWanPorts "$tmpWanPorts || name=\"$i\"";
+        }
+        $addCL (" :foreach k in=[/interface find where !(slave=yes $excWlans $tmpWanPorts || passthrough=yes || type=loopback || name~\"$lanPort\")] do={")
+      } else={
+        $addCL (" :foreach k in=[/interface find where !(slave=yes $excWlans)] do={")
+      }
+      $addCL ("   :local tmpPortName [/interface get \$k name];")
+      $printDebug ($tmpPortName)
+      $addDCL ("add bridge port: \$tmpPortName")
+      $addCL ("   :if (\$bMACIsSet = 0) do={")
+      $addDCL ("\$[/interface get \$k type]")
+      $addCL ("     :if ([/interface get \$k type] = \"ether\") do={")
+      $addDCL ("\$[/interface get \$tmpPortName mac-address]")
+      $addCL ("       /interface bridge set \"$lanPort\" auto-mac=no admin-mac=[/interface get \$tmpPortName mac-address];")
+      $addCL ("       :set bMACIsSet 1;")
+      $addCL ("     }")
+      $addCL ("   }")
+      $addCL ("     :if (([/interface get \$k type] != \"ppp-out\") && ([/interface get \$k type] != \"lte\")) do={")
+      $addCL ("       /interface bridge port")
+      $addCL ("         add bridge=$lanPort interface=\$tmpPortName comment=defconf;")
+      $addCL ("     }")
+      $addCL ("   }")
+    }
+  }
+
+  :if ($defconfMode = "" || $defconfMode = nil) do={
+    # DHCP Modes:
+    #   0 - no dhcp configuration on lanPort
+    #   1 - dhcp server on lanPort
+    #   2 - dhcp client on lanPort
+    :if ($dhcpEnabled = 1) do={
+      $addDCL ("setting DHCP mode: $dhcpMode")
+      :if ($dhcpMode = 2) do={
+        $addDL ("#|     DHCP Client: enabled on $lanPort (LAN port);")
+        $addCL ("  /ip dhcp-client add interface=$lanPort disabled=no comment=\"defconf\";")
+      } else={
+        :if ($dhcpMode = 1) do={
+          $addDL ("#|     IP address $ipNetwork.1/24 is set on $lanPort (LAN port)")
+          $addDL "#|     DHCP Server: enabled;"
+          $addCL ("   /ip pool add name=\"default-dhcp\" ranges=$ipNetwork.10-$ipNetwork.254;")
+          $addCL ("   /ip dhcp-server")
+          $addCL ("     add name=defconf address-pool=\"default-dhcp\" interface=$lanPort disabled=no;")
+          $addCL ("   /ip dhcp-server network")
+          $addCL ("     add address=$ipNetwork.0/24 gateway=$ipNetwork.1 dns-server=$ipNetwork.1 comment=\"defconf\";")
+          $addCL ("  /ip address add address=$ipNetwork.1/24 interface=$lanPort comment=\"defconf\";")
+        } else={
+          $addCL ("  /ip address add address=$ipNetwork.1/24 interface=$lanPort comment=\"defconf\";")
+        }
+      }
+    } else={
+      $addDL ("#|     IP address $ipNetwork.1/24 is set on $lanPort (LAN port)")
+      $addCL ("  /ip address add address=$ipNetwork.1/24 interface=$lanPort comment=\"defconf\";")
+    }
+  } else={
+    # set IPs for w60G kit
+    :if ($defconfMode = "master") do={
+      $addDL ("#|     IP address $ipNetwork.2/24 is set on $lanPort ")
+      $addCL ("  /ip address add address=$ipNetwork.2/24 interface=$lanPort comment=\"defconf\";")
+    }
+    :if ($defconfMode = "slave") do={
+      $addDL ("#|     IP address $ipNetwork.3/24 is set on $lanPort ")
+      $addCL ("  /ip address add address=$ipNetwork.3/24 interface=$lanPort comment=\"defconf\";")
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+# apply configuration related to WAN protection
+#-------------------------------------------------------------------------------
+:global setWanPort do={
+  #access to global funcs
+  :global addCL;
+  :global addDL;
+  :global dhcpEnabled;
+  :global lteDhcp;
+  :global ipv6Enabled;
+
+  $addDL ("#| WAN (gateway) Configuration:")
+  # ------- use DetNet to detect WAN/LAN ports ---------------------------------
+  :if ($useDetNet = 1) do={
+    $addCL (" /interface detect-internet set detect-interface-list=all")
+    $addCL (" /interface detect-internet set lan-interface-list=LAN")
+    $addCL (" /interface detect-internet set wan-interface-list=WAN")
+    $addCL (" /interface detect-internet set internet-interface-list=WAN")
+
+    $addDL ("#|     gateway:  auto detected;")
+
+  } else={
+    # old style manual WAN/LAN port definition
+    :if ($wanPorts != "") do={
+      :local tmpWanPorts "";
+
+      :foreach i in=$wanPorts do={
+        :set tmpWanPorts ($tmpWanPorts . $i . ";");
+      }
+      # NOTE: starting from v6.41 add-default-route=yes use-peer-dns=yes is by default
+      # DHCP client is added dynamically
+      :if ( $isLte = 1) do={
+        #$addCL ("     /interface lte set [find] add-default-route=yes use-peer-dns=yes;")
+      } else={
+        :if ( $isLte = 0 || $lteDhcp = 1) do={
+          :if ( $dhcpEnabled = 1) do={
+            :if ($pppAsWAN = 1) do={
+              :foreach i in $wanPorts do={
+                :if (!($i~"ppp-out")) do={
+                  $addCL ("   /ip dhcp-client add interface=$i disabled=no comment=\"defconf\";")
+                }
+              }
+              #$addCL ("   /ip dhcp-client add interface=ether1 disabled=no comment=\"defconf\";")
+            } else={
+              :foreach i in=$wanPorts do={
+                $addCL ("   /ip dhcp-client add interface=$i disabled=no comment=\"defconf\";")
+              }
+            }
+          }
+        }
+      }
+      $addDL ("#|     gateway:       $tmpWanPorts")
+
+      $addCL (" /interface list member add list=LAN interface=$lanPort comment=\"defconf\"")
+      :foreach i in=$wanPorts do={
+        $addCL (" /interface list member add list=WAN interface=$i comment=\"defconf\"")
+      }
+    }
+  }
+
+  #--------- Set Firewall and WAN protection -----------------------------------
+  $addDL "#|     ip4 firewall:  enabled;"
+  :if ($ipv6Enabled = 1) do={
+    $addDL "#|     ip6 firewall:  enabled;"
+  }
+  $addDL "#|     NAT:   enabled;"
+  :if ( $isLte = 0 && $dhcpEnabled = 1) do={
+    $addDL "#|     DHCP Client: enabled;"
+  }
+  # add NAT
+  $addCL (" /ip firewall nat add chain=srcnat out-interface-list=WAN ipsec-policy=out,none action=masquerade comment=\"defconf: masquerade\"")
+  # protect WAN port
+  $addCL (" /ip firewall {")
+  $addCL ("   filter add chain=input action=accept connection-state=established,related,untracked comment=\"defconf: accept established,related,untracked\"")
+  $addCL ("   filter add chain=input action=drop connection-state=invalid comment=\"defconf: drop invalid\"")
+  $addCL ("   filter add chain=input action=accept protocol=icmp comment=\"defconf: accept ICMP\"")
+  $addCL ("   filter add chain=input action=accept dst-address=127.0.0.1 comment=\"defconf: accept to local loopback (for CAPsMAN)\"")
+  #$addCL ("   filter add chain=input action=accept protocol=tcp dst-port=8291 comment=\"defconf: accept WINBOX\"")
+  $addCL ("   filter add chain=input action=drop in-interface-list=!LAN comment=\"defconf: drop all not coming from LAN\"")
+
+  # add forward chain rules
+  $addCL ("   filter add chain=forward action=accept ipsec-policy=in,ipsec comment=\"defconf: accept in ipsec policy\"")
+  $addCL ("   filter add chain=forward action=accept ipsec-policy=out,ipsec comment=\"defconf: accept out ipsec policy\"")
+  $addCL ("   filter add chain=forward action=fasttrack-connection connection-state=established,related comment=\"defconf: fasttrack\"")
+  $addCL ("   filter add chain=forward action=accept connection-state=established,related,untracked comment=\"defconf: accept established,related, untracked\"")
+  $addCL ("   filter add chain=forward action=drop connection-state=invalid comment=\"defconf: drop invalid\"")
+  $addCL ("   filter add chain=forward action=drop connection-nat-state=!dstnat in-interface-list=WAN comment=\"defconf: drop all from WAN not DSTNATed\"")
+  $addCL (" }")
+
+  :if ($ipv6Enabled = 1) do={
+    # Bad address list
+    $addCL (" /ipv6 firewall {")
+    $addCL ("   address-list add list=bad_ipv6 address=::/128 comment=\"defconf: unspecified address\"")
+    $addCL ("   address-list add list=bad_ipv6 address=::1 comment=\"defconf: lo\"")
+    $addCL ("   address-list add list=bad_ipv6 address=fec0::/10 comment=\"defconf: site-local\"")
+    $addCL ("   address-list add list=bad_ipv6 address=::ffff:0:0/96 comment=\"defconf: ipv4-mapped\"")
+    $addCL ("   address-list add list=bad_ipv6 address=::/96 comment=\"defconf: ipv4 compat\"")
+    $addCL ("   address-list add list=bad_ipv6 address=100::/64 comment=\"defconf: discard only \"")
+    $addCL ("   address-list add list=bad_ipv6 address=2001:db8::/32 comment=\"defconf: documentation\"")
+    $addCL ("   address-list add list=bad_ipv6 address=2001:10::/28 comment=\"defconf: ORCHID\"")
+    $addCL ("   address-list add list=bad_ipv6 address=3ffe::/16 comment=\"defconf: 6bone\"")
+
+    # fw input
+    # can cause problems, different OSes originate packet with different ttls
+    #$addCL ("   filter add chain=input action=drop protocol=icmpv6 hop-limit=not-equal:255 dst-address=fe80::/10 comment=\"defconf: rfc4890 drop ll if hop-limit!=255\"")
+    $addCL ("   filter add chain=input action=accept connection-state=established,related,untracked comment=\"defconf: accept established,related,untracked\"")
+    $addCL ("   filter add chain=input action=drop connection-state=invalid comment=\"defconf: drop invalid\"")
+    $addCL ("   filter add chain=input action=accept protocol=icmpv6 comment=\"defconf: accept ICMPv6\"")
+    $addCL ("   filter add chain=input action=accept protocol=udp dst-port=33434-33534 comment=\"defconf: accept UDP traceroute\"")
+    $addCL ("   filter add chain=input action=accept protocol=udp dst-port=546 src-address=fe80::/10 comment=\"defconf: accept DHCPv6-Client prefix delegation.\"")
+    $addCL ("   filter add chain=input action=accept protocol=udp dst-port=500,4500 comment=\"defconf: accept IKE\"")
+    $addCL ("   filter add chain=input action=accept protocol=ipsec-ah comment=\"defconf: accept ipsec AH\"")
+    $addCL ("   filter add chain=input action=accept protocol=ipsec-esp comment=\"defconf: accept ipsec ESP\"")
+    $addCL ("   filter add chain=input action=accept ipsec-policy=in,ipsec comment=\"defconf: accept all that matches ipsec policy\"")
+    $addCL ("   filter add chain=input action=drop in-interface-list=!LAN comment=\"defconf: drop everything else not coming from LAN\"")
+
+    # fw forward
+    $addCL ("   filter add chain=forward action=fasttrack-connection connection-state=established,related comment=\"defconf: fasttrack6\"")
+    $addCL ("   filter add chain=forward action=accept connection-state=established,related,untracked comment=\"defconf: accept established,related,untracked\"")
+    $addCL ("   filter add chain=forward action=drop connection-state=invalid comment=\"defconf: drop invalid\"")
+    $addCL ("   filter add chain=forward action=drop src-address-list=bad_ipv6 comment=\"defconf: drop packets with bad src ipv6\"")
+    $addCL ("   filter add chain=forward action=drop dst-address-list=bad_ipv6 comment=\"defconf: drop packets with bad dst ipv6\"")
+    $addCL ("   filter add chain=forward action=drop protocol=icmpv6 hop-limit=equal:1 comment=\"defconf: rfc4890 drop hop-limit=1\"")
+    $addCL ("   filter add chain=forward action=accept protocol=icmpv6 comment=\"defconf: accept ICMPv6\"")
+    $addCL ("   filter add chain=forward action=accept protocol=139 comment=\"defconf: accept HIP\"")
+    $addCL ("   filter add chain=forward action=accept protocol=udp dst-port=500,4500 comment=\"defconf: accept IKE\"")
+    $addCL ("   filter add chain=forward action=accept protocol=ipsec-ah comment=\"defconf: accept ipsec AH\"")
+    $addCL ("   filter add chain=forward action=accept protocol=ipsec-esp comment=\"defconf: accept ipsec ESP\"")
+    $addCL ("   filter add chain=forward action=accept ipsec-policy=in,ipsec comment=\"defconf: accept all that matches ipsec policy\"")
+    $addCL ("   filter add chain=forward action=drop in-interface-list=!LAN comment=\"defconf: drop everything else not coming from LAN\"")
+
+    $addCL (" }")
+  }
+
+  $addCL ("   /ip neighbor discovery-settings set discover-interface-list=LAN")
+  $addCL ("   /tool mac-server set allowed-interface-list=LAN")
+  $addCL ("   /tool mac-server mac-winbox set allowed-interface-list=LAN")
+}
+
+#-------------------------------------------------------------------------------
+# enable dns remote request and staitc DNS name
+#-------------------------------------------------------------------------------
+:global allowDns do={
+  #access to global funcs
+  :global addCL;
+  :global addDL;
+
+  $addDL "#|     DNS: enabled;"
+  # allow DNS
+  $addCL (" /ip dns {")
+  $addCL ("     set allow-remote-requests=yes")
+  $addCL ("     static add name=router.lan address=$ipNetwork.1 comment=defconf")
+  $addCL (" }")
+  $addCL ("")
+}
+
+#-------------------------------------------------------------------------------
+#  set admin password if defconfPassword is set
+#-------------------------------------------------------------------------------
+:global setAdminPass do={
+  #access to global funcs
+  :global addCL;
+  :global addDL;
+
+  $addDL ("#| Login");
+  $addDL ("#|     admin user protected by password");
+  $addCL (" :if (!(\$keepUsers = \"yes\")) do={")
+  $addCL ("   :if (!(\$defconfPassword = \"\" || \$defconfPassword = nil)) do={")
+  $addCL ("     /user set admin password=\$defconfPassword")
+  $addCL ("     :delay 0.5")
+  $addCL ("     /user expire-password admin ")
+  $addCL ("   }")
+  $addCL (" }")
+}
+
+#-------------------------------------------------------------------------------
+# set w60g config from parsed wirelss feature array
+#-------------------------------------------------------------------------------
+:global setW60G do={
+  #access to global funcs
+  :global addCL;
+  :global addDL;
+  :global wirelessEnabled;
+
+  :local lanPort "bridge"
+
+  $addCL (" /interface bridge")
+  $addCL ("   add name=$lanPort disabled=no protocol-mode=rstp comment=defconf auto-mac=no admin-mac=[/interface ethernet get ether1 mac-address];")
+
+  $addCL ("   /interface bridge port")
+  $addCL ("     add bridge=$lanPort interface=ether1 comment=defconf;")
+
+  :if ($wirelessEnabled = 1) do={
+    $addDL ("#| wlan60-1 Configuration:")
+    $addCL ("  /interface w60g")
+    $addCL ("    set wlan60-1 disabled=no")
+    :if ($ssid = "" || $ssid = nil) do={
+      $addDL ("#|     ssid:          MikroTik;")
+    } else={
+      $addDL ("#|     ssid:          $ssid;")
+      $addCL ("    set wlan60-1 ssid=$ssid")
+    }
+    :if ($mode = "" || $mode = nil) do={
+      :if ($license = 4) do={
+        $addDL ("#|     mode:          ap-bridge;")
+        $addCL ("    set wlan60-1 mode=ap-bridge")
+      } else={
+        $addDL ("#|     mode:          station-bridge;")
+        $addCL ("    set wlan60-1 mode=station-bridge")
+      }
+    } else={
+      :if ($mode = "master") do={
+        $addDL ("#|     mode:          bridge;")
+        $addCL ("    set wlan60-1 mode=bridge")
+      } else={
+        $addDL ("#|     mode:          station-bridge;")
+        $addCL ("    set wlan60-1 mode=station-bridge")
+      }
+    }
+
+    :if (!($pass = "" || $pass = nil)) do={
+      $addDL ("#|     password:      yes;")
+      $addCL ("    set wlan60-1 password=\$defconfPassword")
+    } else={
+      $addDL ("#|     password:      no;")
+    }
+
+    :if ($mode = "" || $mode = nil) do={
+      :if ($license = 4) do={
+        $addCL ("    set wlan60-1 put-stations-in-bridge=$lanPort isolate-stations=no")
+      } else={
+        $addCL (" /interface bridge port")
+        $addCL ("   add bridge=$lanPort interface=wlan60-1 comment=defconf;")
+      }
+    } else={
+      :if ($mode = "master") do={
+        :if ($backup = 0 || $backup = nil) do={
+          $addCL ("    set wlan60-1 put-stations-in-bridge=$lanPort")
+        }
+      } else={
+        :if ($backup = 0 || $backup = nil) do={
+          $addCL (" /interface bridge port")
+          $addCL ("   add bridge=$lanPort interface=wlan60-1 comment=defconf;")
+        }
+      }
+    }
+  }
+
+  # set IPs for w60G kit
+    :if ($mode = "" || $mode = nil) do={
+      :if ($license = 4) do={
+        $addDL ("#|     IP address $ipNetwork.1/24 is set on $lanPort ")
+        $addCL ("  /ip address add address=$ipNetwork.1/24 interface=$lanPort comment=\"defconf\";")
+      } else={
+        $addDL ("#|     IP address $ipNetwork.1/24 is set on $lanPort ")
+        $addCL ("  /ip address add address=$ipNetwork.1/24 interface=$lanPort comment=\"defconf\";")
+      }
+    } else={
+      :if ($mode = "master") do={
+        $addDL ("#|     IP address $ipNetwork.2/24 is set on $lanPort ")
+        $addCL ("  /ip address add address=$ipNetwork.2/24 interface=$lanPort comment=\"defconf\";")
+      } else={
+        $addDL ("#|     IP address $ipNetwork.3/24 is set on $lanPort ")
+        $addCL ("  /ip address add address=$ipNetwork.3/24 interface=$lanPort comment=\"defconf\";")
+      }
+    }
+}
+
+#-------------------------------------------------------------------------------
+# set w60g config as simple access point
+#-------------------------------------------------------------------------------
+:global setW60Gap do={
+  #access to global funcs
+  :global addCL;
+  :global addDL;
+  :global wirelessEnabled;
+
+
+  :if ($wirelessEnabled = 1) do={
+    $addDL ("#| wlan60-1 Configuration:")
+    $addCL ("  /interface w60g")
+    $addCL ("    set wlan60-1 disabled=no")
+
+    $addCL ("    :local wlanMac  [get wlan60-1 mac-address];")
+    $addCL ("    :set ssid \"MikroTik-\$[:pick \$wlanMac 9 11]\$[:pick \$wlanMac 12 14]\$[:pick \$wlanMac 15 17]\"")
+    $addCL ("    set wlan60-1 ssid=\$ssid")
+
+    $addDL ("#|     mode:          ap-bridge;")
+    $addCL ("    set wlan60-1 mode=ap-bridge")
+  }
+}
+
+#-------------------------------------------------------------------------------
+#
+#-------------------------------------------------------------------------------
+:global setModeButton do={
+  :global addCL;
+  :global addDL;
+  $addCL (" /system routerboard mode-button set enabled=yes")
+  $addCL (" /system routerboard mode-button set on-event=dark-mode")
+  $addCL (" /system script add name=dark-mode comment=\"defconf\" source={")
+  $addCL ("   :if ([system leds settings get all-leds-off] = \"never\") do={")
+  $addCL ("     /system leds settings set all-leds-off=immediate ")
+  $addCL ("   } else={")
+  $addCL ("     /system leds settings set all-leds-off=never ")
+  $addCL ("   }")
+  $addCL (" }")
+}
+
+#-------------------------------------------------------------------------------
+#
+#-------------------------------------------------------------------------------
+:global setWpsButton do={
+  :global addCL;
+  :global addDL;
+  $addCL (" /system routerboard wps-button set enabled=yes")
+  $addCL (" /system routerboard wps-button set on-event=wps-accept")
+  $addCL (" /system script add name=wps-accept comment=\"defconf\" source={")
+  $addCL ("   :foreach iface in=[/interface/wifi find where (configuration.mode=\"ap\" && disabled=no)] do={")
+  $addCL ("     /interface/wifi wps-push-button \$iface;}")
+  $addCL (" }")
+}
+
+#-------------------------------------------------------------------------------
+# add interface lists
+#-------------------------------------------------------------------------------
+:global setInterfaceLists do={
+  :global addCL;
+  :global addDL;
+
+  $addCL (" /interface list add name=WAN comment=\"defconf\"")
+  $addCL (" /interface list add name=LAN comment=\"defconf\"")
+}
+
+#-------------------------------------------------------------------------------
+# set wlan3 as wps-sync
+#-------------------------------------------------------------------------------
+:global setWpsSync do={
+  :global addCL;
+  :global addDL;
+  :global wirelessEnabled;
+
+  :if ($wirelessEnabled = 1) do={
+    $addDL ("#| WPS Sync:")
+    $addDL ("#|     mode:          ap-bridge;")
+
+    $addCL ("  /interface wireless security-profiles {")
+    $addCL ("    add name=wpsSync comment=defconf ")
+    :if (!($pass = "" || $pass = nil)) do={
+      $addDL ("#|     wpa2:          yes;")
+      $addCL ("    set wpsSync mode=dynamic-keys group-ciphers=aes-ccm unicast-ciphers=aes-ccm \\")
+      $addCL ("      authentication-types=wpa2-psk disable-pmkid=yes wpa2-pre-shared-key=$pass ")
+    }
+    $addCL ("  };")
+
+    # wait wlan3 it takes 7sec slower to load than wlan1/2 on Audience
+    $addCL ("  :local count 0;")
+    $addCL ("  :while ([/interface wireless find default-name=\"wlan3\"] = \"\") do={ ")
+    $addCL ("    :if (\$count = 15) do={")
+    $addCL ("      :log warning \"DefConf: Unable to find wlan3 interface\";")
+    $addCL ("      /quit")
+    $addCL ("    }")
+    $addCL ("    :delay 1s; :set count (\$count +1);")
+    $addCL ("  };")
+
+    # TODO: set band and ext, probably use setWlan function
+    $addCL ("  /interface wireless {")
+    $addCL ("    :local wl3 [find default-name=\"wlan3\"]")
+    $addCL ("    :local wlanMac  [get \$wl3 mac-address];")
+    $addCL ("    :set ssid \"SYNC-\$[:pick \$wlanMac 9 11]\$[:pick \$wlanMac 12 14]\$[:pick \$wlanMac 15 17]\"")
+    $addCL ("    set \$wl3 disabled=no mode=ap-bridge band=5ghz-a/n/ac ssid=\$ssid security-profile=wpsSync wps-mode=push-button")
+    # set channnel width 20/40/80mhz-XXXX (russia 20/40mhz-XX)
+
+
+    # wait wlan3 it takes 7sec slower to load than wlan1/2 on Audience
+    :local count 0;
+    :while ([/interface wireless find default-name="wlan3"] = "") do={
+      :if ($count = 30) do={
+        :log warning "DefConf: Unable to find wlan3 interface";
+        /quit
+      }
+      :delay 1s; :set count ($count +1);
+    };
+
+    :local hwInfo [/interface wireless info hw-info [.. find where default-name="wlan3"] as-value];
+      $addDL ("#|     channel-width: 20/40mhz-XX;")
+      $addCL ("    set \$wl3 channel-width=20/40mhz-XX")
+    $addCL ("  };")
+  }
+}
+
+#-------------------------------------------------------------------------------
+# set set up router to be a CAPsMAN
+#-------------------------------------------------------------------------------
+:global setCapsMan do={
+  :global addCL;
+  :global addDL;
+  :global addDCL;
+  :global wirelessEnabled;
+
+  :if ($wirelessEnabled = 1) do={
+    $addDL ("#| CAPsMAN:")
+    $addDL ("#|     bands:               b/g/n, a/n, a/n/ac;")
+    $addDL ("#|     installation:        $installation;")
+    $addDL ("#|     channel-width:       20MHz;")
+    $addDL ("#|     forwarding:          local;")
+
+    $addCL ("  /caps-man security {")
+    $addCL ("    add name=capSec comment=defconf")
+    :if (!($pass = "" || $pass = nil)) do={
+      $addDL ("#|     wpa2:          yes;")
+      $addCL ("    set capSec encryption=aes-ccm group-encryption=aes-ccm \\")
+      $addCL ("      authentication-types=wpa2-psk disable-pmkid=yes passphrase=$pass")
+    } else={
+      $addDL ("#|     wpa2:      no;")
+    }
+    $addCL ("  };")
+
+    $addCL ("  /caps-man configuration {")
+    $addCL ("    add name=cfg-2ghz ssid=$ssidPrefix-2 channel.band=2ghz-b/g/n channel.control-channel-width=20mhz \\")
+    $addCL ("      channel.extension-channel=XX distance=$distance installation=$installation security=capSec \\")
+    $addCL ("      datapath.client-to-client-forwarding=yes datapath.local-forwarding=yes comment=defconf")
+
+    $addCL ("    add name=cfg-5ghz-ac ssid=$ssidPrefix-5 channel.band=5ghz-a/n/ac channel.control-channel-width=20mhz \\")
+    $addCL ("      channel.extension-channel=XXXX distance=$distance installation=$installation security=capSec \\")
+    $addCL ("      datapath.client-to-client-forwarding=yes datapath.local-forwarding=yes comment=defconf")
+
+    $addCL ("    add name=cfg-5ghz-an ssid=$ssidPrefix-5 channel.band=5ghz-a/n channel.control-channel-width=20mhz \\")
+    $addCL ("      channel.extension-channel=XX distance=$distance installation=$installation security=capSec \\")
+    $addCL ("      datapath.client-to-client-forwarding=yes datapath.local-forwarding=yes comment=defconf")
+    $addCL ("  };")
+
+    # TODO: make it more universal to support old a and b/g?????
+    $addCL ("  /caps-man provisioning {")
+    $addCL ("    add action=create-dynamic-enabled hw-supported-modes=gn master-configuration=cfg-2ghz \\")
+    $addCL ("      name-format=prefix-identity name-prefix=2ghz comment=defconf")
+    $addCL ("    add action=create-dynamic-enabled hw-supported-modes=ac master-configuration=cfg-5ghz-ac \\")
+    $addCL ("      name-format=prefix-identity name-prefix=5ghz-ac comment=defconf")
+    $addCL ("    add action=create-dynamic-enabled hw-supported-modes=an master-configuration=cfg-5ghz-an \\")
+    $addCL ("      name-format=prefix-identity name-prefix=5ghz-an comment=defconf ")
+    $addCL ("  };")
+
+    $addCL ("  /caps-man manager interface {")
+    $addCL ("    set [ find default=yes ] forbid=yes")
+    $addCL ("    add disabled=no interface=$lanPort comment=defconf")
+    $addCL ("  };")
+
+    $addCL ("  /caps-man manager set enabled=yes")
+  }
+}
+
+#-------------------------------------------------------------------------------
+# Set bonding for w60g backup
+#-------------------------------------------------------------------------------
+:global setBonding do={
+  :global addCL;
+  :global addDL;
+
+  :if (!($mode = "" || $mode = nil)) do={
+    :if ($mode = "slave") do={
+      $addCL ("  /interface bonding add name=bond1 mode=active-backup primary=wlan60-1 slaves=wlan60-1,wlan1 comment=\"defconf\"")
+    }
+    :if ($mode = "master") do={
+      $addCL ("  /interface w60g station add parent=wlan60-1 name=wlan60-station-1  remote-address=$remoteMac comment=\"defconf\"")
+      $addCL ("  /interface bonding add name=bond1 mode=active-backup primary=wlan60-station-1 slaves=wlan60-station-1,wlan1 comment=\"defconf\"")
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+# Set type=mini-PCIe for LR8/LR9 kits
+#-------------------------------------------------------------------------------
+:global setPCIType do={
+  :global addCL;
+  :global addDL;
+
+    $addDL ("#| USB:")
+    $addDL ("#|     set USB type as mini-PCIe")
+    $addCL ("  /system routerboard usb set type=mini-PCIe")
+}
+
+#-------------------------------------------------------------------------------
+# Set PPP-Out interface settings for KNOT boards
+#-------------------------------------------------------------------------------
+:global setPPPOUTVars do={
+  :global addCL;
+  :global addDL;
+
+  $addCL ("  :local count 0;")
+  $addCL ("  :while ([/interface find where type=\"ppp-out\"] = \"\") do={")
+  $addCL ("    :if (\$count = 10) do={")
+  $addCL ("      :log warning \"DefConf: Unable to find ppp interfaces\";")
+  $addCL ("      /quit;")
+  $addCL ("    }")
+  $addCL ("    :delay 1s; :set count (\$count +1); ")
+  $addCL ("  };")
+  $addCL ("  /interface ppp-client set ppp-out1 default-route-distance=2 disabled=no")
+}
+
+#-------------------------------------------------------------------------------
+# Set wired interface queue type to FQ CoDel
+#-------------------------------------------------------------------------------
+:global setFqCodelQueues do={
+  :global addCL;
+  :global addDL;
+    $addDL ("#| Queue:")
+    $addDL ("#|     set wired interface queue type to FQ CoDel")
+    $addCL ("/queue type add name=fq-codel-ethernet-default kind=fq-codel fq-codel-ecn=no")
+    $addCL ("/queue interface set [find default-queue=only-hardware-queue] queue=fq-codel-ethernet-default")
+}
+
+#-------------------------------------------------------------------------------
+# Set disk sharing
+#-------------------------------------------------------------------------------
+:global setDiskSharing do={
+  :global addCL;
+  $addCL ("/disk settings")
+  $addCL ("  set auto-smb-sharing=yes auto-media-sharing=yes auto-media-interface=$lanPort")
+}
+
+
+#-------------------------------------------------------------------------------
+# RB Configuration Variable Defs
+#-------------------------------------------------------------------------------
+:local boardName;
+:local marketingName;
+:local licenseLevel;
+
+# get board name
+:set boardName [/system routerboard get model];
+:set marketingName [/system resource get board-name];
+:set licenseLevel [/system license get nlevel];
+
+:local useDetNet 0;
+:local pppAsWAN 0;
+:local wanPorts "";
+:local lanPort "bridge";
+#------------wireless------------
+:local useWirelessAc 0;
+:local numWlans 0;
+:local numWils 0;
+# station or AP
+:local mode1 "";
+:local mode2 "";
+:local frequency "auto";
+:local distance "dynamic";
+# by default set all to outdoor to comply EU regulations
+:local installation "outdoor"
+:local wProto "any";
+:local secondaryChannel 0;
+:local secureWAN 1;
+
+:local needAdminPass 1;
+:local needWpsSync 0;
+:local addDarkMode 0;
+:local hasWpsButton 0;
+:local addCapsMan 0;
+:local ssidPrefix "MikroTik"
+:local backupLink 0;
+
+:local usingWifiPack 0;
+:local wlanPrefix "wlan";
+:local wlanMode "ap-bridge";
+
+:local ipNetwork "192.168.88";
+# for old backwards compat
+:local wpsPassName ""
+# for older boards use defconfPassword
+if ($defconfWpsPassword = "" || $defconfWpsPassword = nil) do={
+  if (!($defconfPassword = "" || $defconfPassword = nil)) do={
+    :set wpsPassName "\$defconfPassword"
+  }
+} else {
+  :set wpsPassName "\$defconfWpsPassword"
+}
+
+:local wifiPassName ""
+if ($defconfWifiPassword = "" || $defconfWifiPassword = nil) do={
+  if (!($defconfPassword = "" || $defconfPassword = nil)) do={
+    :set wifiPassName "\$defconfPassword"
+  }
+} else {
+  :set wifiPassName "\$defconfWifiPassword"
+}
+
+#Perform additional checks on installed packages
+:if ([:len [/system package find name="ipv6" !disabled]] != 0) do={
+  :set ipv6Enabled 1;
+}
+:if ([:len [/system package find name="dhcp" !disabled]] != 0) do={
+  :set dhcpEnabled 1;
+}
+:if ([:len [/system package find name="wireless" !disabled]] != 0) do={
+  :set wirelessEnabled 1;
+}
+:if ([:len [/system package find name~"wifi" !disabled]] != 0) do={
+  :set wirelessEnabled 1;
+  :set usingWifiPack 1;
+  :set wlanPrefix "wifi";
+  :set wlanMode "ap";
+}
+:if ([:pick [/system resource get version ] 0 1] = 7) do={
+  :set ipv6Enabled 1;
+  :set dhcpEnabled 1;
+}
+
+#-------------------------------------------------------------------------------
+# Match RBs
+#-------------------------------------------------------------------------------
+:local board [$getFeatureString boardStr=$boardName]
+:local wlanOpt;
+
+$printDebug ($board)
+$printDebug ("Wireless Enabled: $wirelessEnabled")
+:if ($board->"wireless" != "" && $board->"isLte" != 1 && $wirelessEnabled = 1) do={
+  :set wlanOpt [$parseWirelessFeatures list=($board->"wireless")]
+
+  $printDebug ($wlanOpt)
+
+  # determine numWils and numWlans
+  :foreach i in=$wlanOpt do={
+    :if ($i->"isAd" = 1) do={
+      :set numWils ($numWils+1);
+    } else={
+      :if ($i->"isAy" = 1) do={
+      :set numWils ($numWils+1);
+      } else={
+      :set numWlans ($numWlans+1);
+      }
+    }
+  }
+}
+
+#-------------------------------------------------------------------------------
+# RouterBoard configs
+#-------------------------------------------------------------------------------
+:if ($board->"prefix"~"RouterBOARD") do={
+
+  # get first 4 chars of SN
+  # check if it is RouterBoard
+  :local SN [/system routerboard get serial-number]
+  :set ssidPrefix "$ssidPrefix$[:pick $SN 6 12]"
+
+  #-----HOME AP
+  :if ($board->"model"~"450|750|850|miniROUTER|751|951|941|931|953|960|760|2011|3011|4011|OmniTIK|OmniTik|
+      hAP|952|962|D52|mAP|D24|D25|cAP|D53|924|5009|C53|H53|S53|L41|C52|CME|L009|E50|E60|E62|660|L14") do={
+    :if (!($board->"model"~"OmniTIK|OmniTik|953")) do={
+      :set installation "any"
+    }
+
+    :if ($board->"model"~"mAP2nD|cAP2nD") do={
+      :set numWlans 1;
+      :set wirelessEnabled 1;
+    }
+
+    :if (!($defconfLte="" || [:typeof $defconfLte]= "nothing") || $marketingName~"LTE") do={
+      :set ($board->"isLte") 1
+      :set configMode "lte_cpe_ap_router";
+      :if ($marketingName~"Audience" || $board->"model"~"D25") do={
+        :set wanPorts {"ether1";"lte1"};
+      } else={
+        :set wanPorts {"lte1"};
+      }
+    } else={
+      :set configMode "ap_router";
+      :set useDetNet 0;
+      :if ($board->"model"~"924|CME") do={
+        :set wanPorts {"ether1";"ppp-out1"};
+        :set isPPPneeded 1;
+      } else={
+      :set wanPorts {"ether1"};
+      }
+    }
+
+    :if ($board->"model"~"4011") do={
+      :set secondaryChannel 0;
+      if ($numWlans > 0 && $usingWifiPack = 1) do={
+        :set numWlans 1;
+      }
+    }
+    :if ($marketingName~"Audience" || $board->"model"~"D25") do={
+      # do not set admin pass for old boards that do not have
+      # defconfWpsPassword parameter and unset wifiPassName
+      if ((($defconfPassword = "" || $defconfPassword = nil) && !($defconfWpsPassword = "" || $defconfWpsPassword = nil)) \
+        || (!($defconfPassword = "" || $defconfPassword = nil) && ($defconfWpsPassword = "" || $defconfWpsPassword = nil))) do={
+        :set needAdminPass 0;
+        :set wifiPassName ""
+      }
+
+      :set needWpsSync 1;
+      :set addCapsMan 1;
+    }
+    :if ($board->"model"~"cAPGi|D53|C53|S53|H53") do={
+      :set addDarkMode 1;
+    }
+    :if ([/system/resource/get architecture-name] != "smips") do={
+      :set needDiskSharing 1;
+    }
+    :if ($usingWifiPack = 1 && [:len [/system routerboard wps-button get enabled]] != 0) do={
+      :set hasWpsButton 1;
+    }
+  }
+
+  :if ($board->"model"~"wAP") do={
+    :if ($numWils > 0) do={
+      :set configMode "w60g_bridge";
+      :set needAdminPass 1;
+    } else={
+      # also for old wAP LTE kit boards that do not have "defconfLte" from factorty
+      :if (!($defconfLte="" || [:typeof $defconfLte]= "nothing") || $marketingName~"LTE") do={
+        :set ($board->"isLte") 1
+        :set configMode "lte_cpe_ap_router";
+        :set wanPorts {"lte1"};
+        :set distance "indoors";
+      } else={
+        :if ($board->"model"~"wAP2nD") do={
+          :set numWlans 1;
+          :set wirelessEnabled 1;
+        }
+        :set configMode "ap_router";
+        :set wanPorts {"ether1"};
+        if ($numWlans < 2) do={
+          :set lanPort "wlan1";
+        }
+      }
+    }
+  }
+
+  :if ($board->"model"~"LtAP") do={
+  # :log info $defconfLte
+    :if (!($defconfLte="" || [:typeof $defconfLte]= "nothing")) do={
+      :set ($board->"isLte") 1
+      :set configMode "lte_cpe_ap_router";
+      :set wanPorts {"lte1"};
+    } else={
+      :set configMode "wisp_bridge";
+    }
+    :if (!($defconfLR="" || [:typeof $defconfLR]= "nothing")) do={
+      :set isPCIneeded 1;
+    }
+  }
+
+  :if ($board->"model"~"wsAP") do={
+    :set configMode "ap_router";
+    :set wanPorts {"ether1"};
+    :set installation "any"
+    if ($numWlans < 2) do={
+      :set lanPort "wlan1";
+    }
+  }
+
+  #-----CPE ..
+  :if ($board->"model"~"SXT|EC25|EG25") do={
+    # HACK for broken factory naming
+    :if ($board->"model" = "RBSXTsq5nD") do={
+      :set numWlans 1;
+    }
+    :if ($numWils > 0) do={
+      :set configMode "w60g_bridge";
+      :set needAdminPass 1;
+    } else={
+        :set configMode "cpe_router";
+        :if ($numWlans > 1) do={
+          :set wanPorts ("$"wlanPrefix"2");
+          :set mode1 "disabled";
+          :set mode2 "station";
+        } else={
+          :if (!($defconfLte="" || [:typeof $defconfLte]= "nothing") || $marketingName~"LTE") do={
+            :set ($board->"isLte") 1
+            :set wanPorts {"lte1"};
+            :set ipNetwork "192.168.188";
+          } else={
+            :set wanPorts ("$"wlanPrefix"1");
+            :set lanPort "ether1";
+          }
+        }
+     }
+  }
+
+  :if ($board->"model"~"QRT") do={
+    :set configMode "cpe_router";
+    :set wanPorts ("$"wlanPrefix"1");
+    :set lanPort "ether1";
+  }
+
+  :if ($board->"model"~"911|912|L11") do={
+    :if (!($defconfLte="" || [:typeof $defconfLte]= "nothing")) do={
+      :set ($board->"isLte") 1
+      :set configMode "lte_cpe_ap_router";
+      :set wanPorts {"lte1"};
+    } else={
+      :if ($marketingName~"^LtAP mini") do={
+        :set configMode "wisp_bridge";
+      } else={
+        :if ($licenseLevel = 3 || $marketingName~"^QRT") do={
+          :set configMode "cpe_router";
+          :set wanPorts ("$"wlanPrefix"1");
+          :set lanPort "ether1";
+        } else={ if ($licenseLevel = 4) do={
+            :set configMode "wisp_bridge";
+          }
+        }
+      }
+    }
+  }
+
+  #NetMetal
+  :if ($board->"model"~"921|922|A21|D23|D22|L23|L22") do={
+    :if ($licenseLevel = 3) do={
+      :set configMode "cpe_router";
+          :if ($numWlans > 1) do={
+          :set wanPorts ("$"wlanPrefix"2");
+          :set mode1 "disabled";
+          :set mode2 "station";
+        } else={
+          :set wanPorts ("$"wlanPrefix"1");
+          }
+    }
+    # it should be AP if license level is 4
+    :if ($licenseLevel = 4) do={
+      :set configMode "wisp_bridge";
+      }
+  }
+
+  :if ($board->"model"~"LDF") do={
+    :if (!($defconfLte="" || [:typeof $defconfLte]= "nothing")) do={
+      :set ($board->"isLte") 1
+      :set configMode "cpe_router";
+      :set wanPorts {"lte1"};
+      :set lanPort "ether1";
+      :set ipNetwork "192.168.188";
+    } else={
+    :set configMode "cpe_router";
+    :set wanPorts ("$"wlanPrefix"1");
+    :set lanPort "ether1";
+    }
+
+  }
+
+  :if ($board->"model"~"beam|Cube|CubeG") do={
+    :if ($numWils > 0) do={
+      :if ($marketingName~"SA") do={
+        :set configMode "w60g_bridge";
+        :set needAdminPass 1;
+      } else={
+        :set configMode "w60g_bridge";
+        :set backupLink 1;
+        :set needAdminPass 1;
+      }
+    }
+  }
+
+  #-----WISP BRIDGE ..
+  :if ($board->"model"~"LHG|Disc|nRAY|ATLGM|LMPGM|L00G") do={
+    :if ($numWils > 0) do={
+      :set configMode "w60g_bridge";
+      :set needAdminPass 1;
+    } else={
+      :if (!($defconfLte="" || [:typeof $defconfLte]= "nothing")) do={
+        :set ($board->"isLte") 1
+        :set configMode "cpe_router";
+        :set wanPorts {"lte1"};
+        :set lanPort "ether1";
+        :set ipNetwork "192.168.188";
+      } else={
+        :if ($numWlans > 1) do={
+          :set configMode "ptp_bridge";
+          :set mode1 "station";
+          :set mode2 "station";
+        } else={
+          :if ($numWlans = 1) do={
+            :set configMode "cpe_router";
+            :set wanPorts ("$"wlanPrefix"1");
+            :set lanPort "ether1";
+          } else={
+            # Workarround to fix LGH w/o any attachments failing defconf
+            :set configMode "";
+            :set lanPort "ether1";
+          }
+        }
+      }
+    }
+  }
+
+  :if ($board->"model"~"Groove|Metal|711") do={
+    # hack for GrooveGA naming w/o space
+    :if ($board->"model" = "GrooveGA") do={
+      :set ($board->"isAp") 1;
+    }
+    :if ($board->"isAp" = 1) do={
+      :set configMode "wisp_bridge";
+    } else={
+      :set configMode "cpe_router";
+      :set wanPorts ("$"wlanPrefix"1");
+      :set lanPort "ether1";
+    };
+  }
+
+  :if ($board->"model"~"^PL") do={
+    :set installation "any";
+    :set configMode "wisp_bridge";
+  }
+
+  :if ($board->"model"~"OmniGroove") do={
+    :set configMode "wisp_bridge";
+  }
+
+  :if ($board->"model"~"DynaDish") do={
+    :set configMode "ptp_bridge";
+    :set wanPorts {"wlan1"};
+    :set mode1 "station";
+  }
+}
+# CloudRouterSwitches
+:if ($board->"prefix"~"CloudRouterSwitch") do={
+
+  :if ($numWlans > 0) do={
+    :set configMode "ap_router";
+    :set installation "any";
+    :set wanPorts {"ether1"};
+  } else={
+    :set configMode "switch";
+  }
+}
+:if ($board->"model"~"S009") do={
+    :set configMode "switch";
+}
+# Special Case CCRs
+:if ($board->"model"~"CCR2116") do={
+  :if ($board->"numGig" = 12 && $board->"numSfpPlus" = 4) do={
+    :set lanPort "ether13";
+  }
+}
+:if ($board->"model"~"CCR2004") do={
+  :if ($marketingName~"PCIe") do={
+    :set configMode "switch";
+  }
+  :if ($board->"numGig" = 16 && $board->"numSfpPlus" = 2) do={
+    :set lanPort "ether15";
+  }
+}
+:if ($board->"model"~"RDS2216") do={
+    :set lanPort "mgmt1";
+    :set needDhcpClient 1;
+}
+
+#-------------------------------------------------------------------------------
+# Wait Wlans
+:if ($wirelessEnabled = 1) do={
+  :local count 0;
+  if ($numWils > 0) do={
+    :local cmd ":global nTemp [:len [/interface w60g find]]"
+    :execute script=$cmd
+    :delay 1s;
+    :while ($nTemp < $numWils && $bFail = 0) do={
+      :delay 1s;
+      :execute script=$cmd
+      :set count ($count +1);
+      :if ($count = 40) do={
+        :set bFail 1;
+        :log warning "DefConf gen: Unable to find w60g interface(s)";
+        :quit
+      }
+    };
+  }
+  if ($numWlans > 0 && $usingWifiPack = 1) do={
+    :delay 1s;
+    :local cmd ":global nTemp [:len [interface/wifi/radio find]]"
+    :execute script=$cmd
+    :delay 1s;
+    :while ($nTemp < $numWlans && $bFail = 0) do={
+      :delay 1s;
+      :execute script=$cmd
+      :set count ($count +1);
+      :if ($count = 40) do={
+        :set bFail 1;
+        :log warning "DefConf gen: Unable to find wifi radio data";
+        :quit
+      }
+    };
+    # ignore virtual interfaces when script is generated after upgrade
+    # on non-empty router (with custom user config).
+    :local cmd ":global nTemp [:len [/interface wifi find]]"
+    :execute script=$cmd
+    :delay 1s;
+    :while ($nTemp < $numWlans && $bFail = 0) do={
+      :delay 1s;
+      :execute script=$cmd
+      :set count ($count +1);
+      :if ($count = 40) do={
+        :set bFail 1;
+        :log warning "DefConf gen: Unable to find wifi interface(s)";
+        :quit
+      }
+    };
+  } else={
+    if ($numWlans > 0) do={
+      # ignore virtual interfaces when script is generated after upgrade
+      # on non-empty router (with custom user config).
+      :local cmd ":global nTemp [:len [/interface wireless find where interface-type!=\"virtual\"]]"
+      :execute script=$cmd
+      :delay 1s;
+      :while ($nTemp < $numWlans && $bFail = 0) do={
+        :delay 1s;
+        :execute script=$cmd
+        :set count ($count +1);
+        :if ($count = 40) do={
+          :set bFail 1;
+          :log warning "DefConf gen: Unable to find wireless interface(s)";
+          :quit
+        }
+      };
+    }
+  }
+}
+
+$addDL "#| Welcome to RouterOS!"
+$addDL "#|    1) Set a strong router password in the System > Users menu"
+$addDL "#|    2) Upgrade the software in the System > Packages menu"
+$addDL "#|    3) Enable firewall on untrusted networks"
+
+$printDebug ("Wifi password Name: $wifiPassName")
+#-------------------------------------------------------------------------------
+# Generate Config and Description
+#-------------------------------------------------------------------------------
+:if ($numWlans > 0) do={
+    $addDL "#|    4) Set a strong WiFi password in the WiFi > Security menu"
+    $addDL "#|    5) Set your country name to observe wireless regulations"
+
+    :delay 2s;
+
+    :global gain;
+    :if ($usingWifiPack = 0) do={
+    :execute script=":if ([/interface wireless get [find default-name=wlan1] antenna-gain]=0) do={:set gain true}"
+    :delay 0.5s;
+    }
+    :if ($gain) do={
+        $addDL "#|    6) Set antenna gain on wireless interface"
+    }
+    :set gain;
+
+    [$addCL ":global ssid;"]
+}
+$addDL ("#| -----------------------------------------------------------------------------")
+
+$addCL ":global defconfMode;"
+$addCL (":log info \"Starting defconf script\";")
+$addCL (\
+"#-------------------------------------------------------------------------------$NL\
+# Apply configuration.$NL\
+# these commands are executed after installation or configuration reset$NL\
+#-------------------------------------------------------------------------------")
+$addCL (":if (\$action = \"apply\") do={")
+$addCL ("  # wait for interfaces")
+$addCL ("  :local count 0;")
+$addCL ("  :while ([/interface ethernet find] = \"\") do={")
+$addCL ("    :if (\$count = 30) do={")
+$addCL ("      :log warning \"DefConf: Unable to find ethernet interfaces\";")
+$addCL ("      /quit;")
+$addCL ("    }")
+$addCL ("    :delay 1s; :set count (\$count +1); ")
+$addCL ("  };")
+
+if ($numWils > 0) do={
+  # wait wils
+  $addCL ("  :local count 0;")
+  $addCL ("  :while ([/interface w60g print count-only] < $numWils) do={ ")
+  $addCL ("    :set count (\$count +1);")
+  $addCL ("    :if (\$count = 40) do={")
+  $addCL ("      :log warning \"DefConf: Unable to find w60g interface(s)\"; ")
+  $addCL ("      /ip address add address=$ipNetwork.1/24 interface=ether1 comment=\"defconf\";")
+  $addCL ("      /quit")
+  $addCL ("    }")
+  $addCL ("    :delay 1s;")
+  $addCL ("  };")
+}
+if ($numWlans > 0 && $usingWifiPack = 1) do={
+  # wait wlans
+  $addCL ("  :local count 0;")
+  $addCL ("  :while ([/interface wifi print count-only] < $numWlans) do={ ")
+  $addCL ("    :set count (\$count +1);")
+  $addCL ("    :if (\$count = 40) do={")
+  $addCL ("      :log warning \"DefConf: Unable to find wireless interface(s)\"; ")
+  $addCL ("      /ip address add address=$ipNetwork.1/24 interface=ether1 comment=\"defconf\";")
+  $addCL ("      /quit")
+  $addCL ("    }")
+  $addCL ("    :delay 1s;")
+  $addCL ("  };")
+}
+if ($numWlans > 0 && $usingWifiPack = 0) do={
+    # wait wlans
+  $addCL ("  :local count 0;")
+  $addCL ("  :while ([/interface wireless print count-only] < $numWlans) do={ ")
+  $addCL ("    :set count (\$count +1);")
+  $addCL ("    :if (\$count = 40) do={")
+  $addCL ("      :log warning \"DefConf: Unable to find wireless interface(s)\"; ")
+  $addCL ("      /ip address add address=$ipNetwork.1/24 interface=ether1 comment=\"defconf\";")
+  $addCL ("      /quit")
+  $addCL ("    }")
+  $addCL ("    :delay 1s;")
+  $addCL ("  };")
+}
+if ($board->"isLte" = 1) do={
+  # wait lte
+  $addCL ("  :local count 0;")
+  $addCL ("  :while ([/interface lte find] = \"\") do={ ")
+  $addCL ("    :set count (\$count +1);")
+  $addCL ("    :if (\$count = 115) do={")
+  $addCL ("      :log warning \"DefConf: Unable to find LTE interface(s)\"; ")
+  $addCL ("      /ip address add address=$ipNetwork.1/24 interface=ether1 comment=\"defconf\";")
+  $addCL ("      /quit")
+  $addCL ("    }")
+  $addCL ("    :delay 1s;")
+  $addCL ("  };")
+}
+
+#-------------------------------------------------------------------------------
+# make sure that ethernet interfaces are loaded
+# (sometimes on mAP they are still not loaded at this point) if external USB
+# Ethernet adapter is plugged in
+:local count 0;
+:while ([/interface ethernet find] = "") do={
+  :if ($count = 30) do={
+    :log error "DefConf Gen: Unable to find ethernet interfaces (timeout 30sec)";
+    /quit;
+  }
+  :delay 1s;
+  :set count ($count +1);
+}
+
+#-------------apply only IP on ether1-------------------------------------------
+:if ($configMode = "") do={
+  $addDL ("#| LAN:")
+  :if ([:len [/interface ethernet find where default-name~"combo"]] = 1) do={
+    $addDL ("#|     IP on combo1:    $ipNetwork.1/24;")
+    $addCL ("/ip address add address=$ipNetwork.1/24 interface=combo1 comment=\"defconf\";")
+  } else={
+    if ($board->"numGig" = 0 && $board->"numSfp" > 0) do={
+      $addDL ("#|     IP on sfp1:    $ipNetwork.1/24;")
+      $addCL ("/ip address add address=$ipNetwork.1/24 interface=sfp1 comment=\"defconf\";")
+    } else={
+      if ($lanPort != "bridge") do={
+        $addDL ("#|     IP on $lanPort:    $ipNetwork.1/24;")
+        $addCL ("/ip address add address=$ipNetwork.1/24 interface=$lanPort comment=\"defconf\";")
+      } else={
+          $addDL ("#|     IP on ether1:    $ipNetwork.1/24;")
+          $addCL ("/ip address add address=$ipNetwork.1/24 interface=ether1 comment=\"defconf\";")
+      }
+    }
+  }
+  :if ($needDhcpClient = 1) do={
+    [$setLan lanPort=$lanPort dhcpMode=2 useDetNet=$useDetNet ipNetwork=$ipNetwork]
+  }
+  :if ($needAdminPass = 1) do={
+    [$setAdminPass]
+  }
+}
+
+#-------------LTE CPE with wireless AP -----------------------------------------
+:if ($configMode = "lte_cpe_ap_router") do={
+  $addDL (\
+  "#| LTE CPE Router with wireless AP:$NL\
+   #|  * lte interface connected to providers network (WAN port);$NL\
+   #|  * WAN port is protected by firewall and enabled DHCP client")
+  :set frequency "auto";
+  :set distance "indoors";
+  :set wProto "802.11";
+
+  # this should be before LAN bridge otherwise wlan3 might not be added as bridge port (driver not loaded yet)
+  :if ($needWpsSync = 1 && $usingWifiPack = 0) do={
+    [$setWpsSync pass=$wpsPassName]
+  }
+
+  [$setInterfaceLists]
+  [$setLan lanPort=$lanPort dhcpMode=1 wanPorts=$wanPorts useDetNet=$useDetNet hasCapsMan=$addCapsMan ipNetwork=$ipNetwork]
+  [$allowDns ipNetwork=$ipNetwork]
+
+  :if ($addCapsMan = 1 && $usingWifiPack = 0) do={
+    [$setCapsMan distance=$distance installation=$installation lanPort=$lanPort ssidPrefix=$ssidPrefix  pass=$wifiPassName]
+    :if ($numWlans > 0) do={
+      $addDL ("#| Wireless: CAP enabled on wireless interfaces")
+      :if ($numWlans > 1) do={
+        $addCL ("  /interface wireless cap set enabled=yes interfaces=wlan1,wlan2 caps-man-addresses=127.0.0.1 bridge=$lanPort")
+      } else={
+        $addCL ("  /interface wireless cap set enabled=yes interfaces=wlan1 caps-man-addresses=127.0.0.1 bridge=$lanPort")
+      }
+    }
+  } else={
+    :if ($numWlans > 0) do={
+      :if ($numWlans > 1) do={
+        [$setWlan ifc=("$"wlanPrefix"1") mode=$wlanMode frequency=$frequency wProto=$wProto distance=$distance installation=$installation pass=$wifiPassName]
+        [$setWlan ifc=("$"wlanPrefix"2") mode=$wlanMode frequency=$frequency wProto=$wProto distance=$distance installation=$installation pass=$wifiPassName]
+      } else={
+        [$setWlan ifc=("$"wlanPrefix"1") mode=$wlanMode frequency=$frequency wProto=$wProto distance=$distance installation=$installation pass=$wifiPassName]
+      }
+    }
+  }
+  [$setWanPort wanPorts=$wanPorts isLte=($board->"isLte") lanPort=$lanPort useDetNet=$useDetNet]
+
+  :if ($isPCIneeded = 1) do={
+    [$setPCIType]
+  }
+
+  :if ($needAdminPass = 1) do={
+    [$setAdminPass]
+  }
+}
+
+#-------------CPE mode two possibilities wlan CPE and LTE CPE-------------------
+:if ($configMode = "cpe_router") do={
+  $addDL (\
+  "#| CPE RouterMode:$NL\
+   #|  * wireless interface connected to providers network (WAN port);$NL\
+   #|  * WAN port is protected by firewall and enabled DHCP client")
+
+  :if ($board->"isLte" != 1) do={
+    :if ($numWlans > 1) do={
+      [$setWlan ifc=("$"wlanPrefix"1") mode=$mode1 frequency=$frequency wProto=$wProto distance=$distance installation=$installation]
+      [$setWlan ifc=("$"wlanPrefix"2") mode=$mode2 frequency=$frequency wProto=$wProto distance=$distance installation=$installation]
+    } else={
+      [$setWlan ifc=("$"wlanPrefix"1") mode="station" frequency=$frequency wProto=$wProto distance=$distance installation=$installation]
+    }
+  }
+
+  [$setInterfaceLists]
+  [$setLan lanPort=$lanPort dhcpMode=1 wanPorts=$wanPorts useDetNet=$useDetNet ipNetwork=$ipNetwork]
+  [$allowDns ipNetwork=$ipNetwork]
+  [$setWanPort wanPorts=$wanPorts isLte=($board->"isLte") lanPort=$lanPort useDetNet=$useDetNet]
+
+  :if ($needAdminPass = 1) do={
+    [$setAdminPass]
+  }
+}
+
+#-------------repeater config---------------------------------------------------
+:if ($configMode = "repeater") do={
+
+  $addDL (\
+  "#| Repeater Mode:$NL\
+   #|  * wlan1 - station-bridge, wlan2 - ap-bridge;\
+   #|  * both wireless interfaces and ether1 are bridged$NL\
+   #|  * $ipNetwork.2/24 and dhcp-client on the bridge")
+
+  $addCL ("  /interface bridge")
+  $addCL ("    add name=bridge-repeater disabled=no auto-mac=yes protocol-mode=rstp comment=defconf;")
+
+  $addCL ("  :foreach k in=[/interface wireless find] do={")
+  $addCL ("    /interface bridge port")
+  $addCL ("      add bridge=bridge-repeater interface=\$k comment=defconf;")
+  $addCL ("  }")
+
+  $addCL ("  /interface bridge port add interface=ether1 bridge=bridge-repeater comment=defconf;")
+  $addCL ("  /ip address add address=$ipNetwork.2/24 interface=bridge-repeater comment=defconf;")
+  $addCL ("  /ip dhcp-client add interface=bridge-repeater disabled=no comment=defconf;")
+  $addCL ("")
+
+  [$setWlan ifc="wlan1" mode=$mode1 frequency=$frequency wProto=$wProto distance=$distance installation=$installation]
+  [$setWlan ifc="wlan2" mode=$mode2 frequency=$frequency wProto=$wProto distance=$distance installation=$installation]
+
+  :if ($needAdminPass = 1) do={
+    [$setAdminPass]
+  }
+}
+
+#-------------WISP bridge config (AP)-------------------------------------------
+:if ($configMode = "wisp_bridge") do={
+  $addDL (\
+  "#| WISP Bridge:$NL\
+   #|  * wireless and LAN interfaces are bridged;")
+
+    :if ($numWlans > 0) do={
+      :if ($numWlans > 1) do={
+        [$setWlan ifc=("$"wlanPrefix"1") mode=$wlanMode frequency=$frequency wProto=$wProto distance=$distance installation=$installation pass=$wifiPassName]
+        [$setWlan ifc=("$"wlanPrefix"2") mode=$wlanMode frequency=$frequency wProto=$wProto distance=$distance installation=$installation pass=$wifiPassName]
+      } else={
+        [$setWlan ifc=("$"wlanPrefix"1") mode=$wlanMode frequency=$frequency wProto=$wProto distance=$distance installation=$installation pass=$wifiPassName]
+      }
+    }
+  :if ($numWils > 0) do={
+    [$setW60Gap]
+  }
+
+  # lan port is always bridge in this mode
+  [$setLan lanPort=$lanPort dhcpMode=2 useDetNet=$useDetNet ipNetwork=$ipNetwork]
+
+  :if ($needAdminPass = 1) do={
+    [$setAdminPass]
+  }
+}
+
+#-------------PTP bridge config (client, AP)------------------------------------
+:if ($configMode = "ptp_bridge") do={
+  $addDL (\
+  "#| PTP Bridge:$NL\
+   #|  * wireless and LAN interfaces are bridged;")
+
+  :if ($numWlans > 0) do={
+    :if ($numWlans > 1) do={
+        [$setWlan ifc="wlan1" mode=$mode1 frequency=$frequency wProto=$wProto distance=$distance installation=$installation]
+        [$setWlan ifc="wlan2" mode=$mode2 frequency=$frequency wProto=$wProto distance=$distance installation=$installation]
+    } else={
+        [$setWlan ifc="wlan1" mode=$mode1 frequency=$frequency wProto=$wProto distance=$distance installation=$installation]
+    }
+  }
+  # lan port is always bridge in this mode
+  [$setLan lanPort=$lanPort dhcpMode=0 useDetNet=$useDetNet ipNetwork=$ipNetwork]
+
+  :if ($needAdminPass = 1) do={
+    [$setAdminPass]
+  }
+}
+
+#-------------AP Router (dual, single)------------------------------------------
+:if ($configMode = "ap_router") do={
+  $addDL (\
+  "#| RouterMode:$NL\
+   #|  * WAN port is protected by firewall and enabled DHCP client")
+  :if ($numWlans > 0) do={
+    $addDL ("#|  * Wireless and Ethernet interfaces (except WAN port/s)")
+    $addDL ("#|    are part of LAN bridge")
+  } else={
+    $addDL ("#|  * Ethernet interfaces (except WAN port/s) are part of LAN bridge")
+  }
+  :set frequency "auto";
+  :set distance "indoors";
+  :set wProto "802.11";
+
+  # this should be before LAN bridge otherwise wlan3 might not be added as bridge port (driver not loaded yet)
+  :if ($needWpsSync = 1 && $usingWifiPack = 0) do={
+    [$setWpsSync pass=$wpsPassName]
+  }
+  [$setInterfaceLists]
+  [$setLan switchPorts=$switchPorts lanPort=$lanPort dhcpMode=1 switchPortGroups=$switchPortGroups wanPorts=$wanPorts useDetNet=$useDetNet hasCapsMan=$addCapsMan ipNetwork=$ipNetwork]
+  [$allowDns ipNetwork=$ipNetwork]
+
+  :if ($addCapsMan = 1 && $usingWifiPack = 0) do={
+    [$setCapsMan distance=$distance installation=$installation lanPort=$lanPort ssidPrefix=$ssidPrefix pass=$wifiPassName]
+    :if ($numWlans > 0) do={
+      $addDL ("#| Wireless: CAP enabled on wireless interfaces")
+      :if ($numWlans > 1) do={
+        # XXX assumes that on routers with cap config local port is always bridge
+        $addCL ("  /interface wireless cap set enabled=yes interfaces=wlan1,wlan2 caps-man-addresses=127.0.0.1 bridge=$lanPort")
+      } else={
+        $addCL ("  /interface wireless cap set enabled=yes interfaces=wlan1 caps-man-addresses=127.0.0.1 bridge=$lanPort")
+      }
+    }
+  } else={
+    :if ($numWlans > 0) do={
+      :if ($numWlans > 1) do={
+        [$setWlan ifc=("$"wlanPrefix"1") mode=$wlanMode frequency=$frequency wProto=$wProto distance=$distance secChannel=$secondaryChannel installation=$installation pass=$wifiPassName]
+        [$setWlan ifc=("$"wlanPrefix"2") mode=$wlanMode frequency=$frequency wProto=$wProto distance=$distance secChannel=$secondaryChannel installation=$installation pass=$wifiPassName]
+      } else={
+        [$setWlan ifc=("$"wlanPrefix"1") mode=$wlanMode frequency=$frequency wProto=$wProto distance=$distance secChannel=$secondaryChannel installation=$installation pass=$wifiPassName]
+      }
+    }
+  }
+  :if ($numWils > 0) do={
+      [$setW60Gap]
+  }
+  :if ($isPPPneeded > 0) do={
+    :local cmd ":global nTemp [:len [/interface find where type=\"ppp-out\"]]"
+    :execute script=$cmd
+    :delay 1s;
+    :while ($nTemp < 1 && $count <= 10) do={
+      :delay 1s;
+      :execute script=$cmd
+      :set count ($count +1);
+    }
+  }
+  :if ($isPPPneeded > 0 && [:len [/interface find where type="ppp-out" && name=ppp-out1]]) do={
+    [$setPPPOUTVars]
+    [$setWanPort wanPorts=$wanPorts isLte=($board->"isLte") lanPort=$lanPort useDetNet=$useDetNet pppAsWAN=1]
+  } else={
+    :set wanPorts {"ether1"};
+    [$setWanPort wanPorts=$wanPorts isLte=($board->"isLte") lanPort=$lanPort useDetNet=$useDetNet]
+  }
+  :if ($needAdminPass = 1) do={
+    [$setAdminPass]
+  }
+}
+
+#-------------W60G bridge with 5GHz backup link config-------------------------------------------
+:if ($configMode = "w60g_bridge") do={
+  $addDL (\
+  "#| W60G Bridge:$NL\
+   #|  * W60G and LAN interfaces are bridged;")
+
+  :if ($numWils > 0) do={
+    [$setW60G ssid=$defconfSsid mode=$defconfMode pass=$defconfPassword license=$licenseLevel backup=$backupLink ipNetwork=$ipNetwork]
+  }
+  :if ($numWlans > 0 && $backupLink = 1) do={
+    $addDL ("#|  * 5GHz interface is set as W60G backup using bonding")
+    :local mode "station-bridge"
+    :if ($defconfMode = "master") do={
+      :set mode "bridge"
+    }
+    :if ($licenseLevel = 4) do={
+      :if ($defconfMode = "master") do={
+        :set mode "bridge"
+      } else={
+          :if ($defconfMode = "slave") do={
+            :set mode "station-bridge"
+          } else={
+            :set mode "ap-bridge"
+          }
+      }
+    }
+
+    [$setWlan ifc="wlan1" mode=$mode ssid=$defconfSsid frequency=$frequency wProto=$wProto distance=$distance secChannel=$secondaryChannel installation=$installation pass=$wifiPassName]
+    [$setBonding mode=$defconfMode remoteMac=$defconfPairMac]
+
+    :if (!($defconfMode = "" || $defconfMode = nil)) do={
+      $addCL (":delay 1")
+      $addCL (" /interface bridge port")
+      $addCL ("   add bridge=bridge interface=bond1 comment=defconf;")
+    }
+  }
+
+  :if ($numWlans > 0 && $backupLink = 0) do={
+    $addDL ("#|  * 5GHz interface is set as bridged interface")
+    :local mode "station-bridge"
+    :if ($defconfMode = "master") do={
+      :set mode "bridge"
+    }
+    :if ($licenseLevel = 4) do={
+      :set mode "ap-bridge"
+    }
+
+    [$setWlan ifc="wlan1" mode=$mode ssid=$defconfSsid frequency=$frequency wProto=$wProto distance=$distance secChannel=$secondaryChannel installation=$installation pass=$wifiPassName]
+
+    $addCL (":delay 1")
+    $addCL (" /interface bridge port")
+    $addCL ("   add bridge=bridge interface=wlan1 comment=defconf;")
+  }
+
+  :if ($needAdminPass = 1) do={
+    [$setAdminPass]
+  }
+}
+
+#------------- Switch ----------------------------------------------------------
+:if ($configMode = "switch") do={
+  $addDL (\
+  "#| Switch mode:$NL\
+   #|  * all interfaces switched;")
+
+  [$setLan lanPort=$lanPort dhcpMode=0 useDetNet=$useDetNet ipNetwork=$ipNetwork]
+
+  :if ($needAdminPass = 1) do={
+    [$setAdminPass]
+  }
+}
+
+
+#-------------Mode button settings----------------------------------------------
+:if ($addDarkMode = 1) do={
+  [$setModeButton]
+}
+
+#-------------WPS button settings----------------------------------------------
+:if ($hasWpsButton = 1) do={
+  [$setWpsButton]
+}
+
+#-------------Interface queue settings----------------------------------------------
+:if (!($defconfLte="" || [:typeof $defconfLte]= "nothing") || $marketingName~"LTE") do={
+    [$setFqCodelQueues]
+}
+
+#-------------Disk sharing settings----------------------------------------------
+:if ($needDiskSharing = 1) do={
+  [$setDiskSharing lanPort=$lanPort]
+}
+
+# "apply" closing brace
+$addCL ("}")
+
+$addCL (\
+"#-------------------------------------------------------------------------------$NL\
+# Revert configuration.$NL\
+# these commands are executed if user requests to remove default configuration$NL\
+#-------------------------------------------------------------------------------")
+
+$addCL (":if (\$action = \"revert\") do={")
+
+$addCL (" :if (!(\$keepUsers = \"yes\")) do={")
+$addCL ("   /user set admin password=\"\"")
+$addCL ("   :delay 0.5")
+$addCL ("   /user expire-password admin ")
+$addCL (" }")
+
+:if ($addDarkMode = 1) do={
+$addCL (" /system routerboard mode-button set enabled=no")
+$addCL (" /system routerboard mode-button set on-event=\"\"")
+$addCL (" /system script remove [find comment~\"defconf\"]")
+}
+:if ($hasWpsButton = 1) do={
+$addCL (" /system routerboard wps-button set enabled=no")
+$addCL (" /system routerboard wps-button set on-event=\"\"")
+$addCL (" /system script remove [find comment~\"defconf\"]")
+}
+
+:if (!($defconfLte="" || [:typeof $defconfLte]= "nothing") || $marketingName~"LTE") do={
+$addCL (" /queue interface set [find default-queue=only-hardware-queue] queue=only-hardware-queue")
+$addCL (" /queue type remove [find name=fq-codel-ethernet-default]")
+}
+
+:if ($needDiskSharing = 1) do={
+$addCL (" /disk settings")
+$addCL (" set auto-smb-sharing=no auto-media-sharing=no auto-media-interface=none")
+}
+
+$addCL (" /ip firewall filter remove [find comment~\"defconf\"]")
+:if ($ipv6Enabled = 1) do={
+  $addCL (" /ipv6 firewall filter remove [find comment~\"defconf\"]")
+  $addCL (" /ipv6 firewall address-list remove [find comment~\"defconf\"]")
+}
+$addCL (" /ip firewall nat remove [find comment~\"defconf\"]")
+#NOTE: not used if detnet
+$addCL (" /interface list member remove [find comment~\"defconf\"]")
+$addCL (" /interface detect-internet set detect-interface-list=none")
+$addCL (" /interface detect-internet set lan-interface-list=none")
+$addCL (" /interface detect-internet set wan-interface-list=none")
+$addCL (" /interface detect-internet set internet-interface-list=none")
+$addCL (" /interface list remove [find comment~\"defconf\"]")
+
+$addCL (" /tool mac-server set allowed-interface-list=all")
+$addCL (" /tool mac-server mac-winbox set allowed-interface-list=all")
+
+$addCL (" /ip neighbor discovery-settings set discover-interface-list=!dynamic")
+
+#remove DHCP config
+:if ($dhcpEnabled = 1) do={
+  $addCL ("   :local o [/ip dhcp-server network find comment=\"defconf\"]")
+  $addCL ("   :if ([:len \$o] != 0) do={ /ip dhcp-server network remove \$o }")
+
+  $addCL ("   :local o [/ip dhcp-server find name=\"defconf\" !disabled]")
+  $addCL ("   :if ([:len \$o] != 0) do={ /ip dhcp-server remove \$o }")
+
+  $addCL ("   /ip pool {")
+  $addCL ("     :local o [find name=\"default-dhcp\" ranges=$ipNetwork.10-$ipNetwork.254]")
+  $addCL ("     :if ([:len \$o] != 0) do={ remove \$o }")
+  $addCL ("   }")
+
+  # NOTE: not used if DETNET
+  $addCL ("   :local o [/ip dhcp-client find comment=\"defconf\"]")
+  $addCL ("   :if ([:len \$o] != 0) do={ /ip dhcp-client remove \$o }")
+}
+
+$addCL (" /ip dns {")
+$addCL ("   set allow-remote-requests=no")
+$addCL ("   :local o [static find comment=\"defconf\"]")
+$addCL ("   :if ([:len \$o] != 0) do={ static remove \$o }")
+$addCL (" }")
+
+$addCL (" /ip address {")
+$addCL ("   :local o [find comment=\"defconf\"]")
+$addCL ("   :if ([:len \$o] != 0) do={ remove \$o }")
+$addCL (" }")
+
+# reset ethernets
+$addCL (" :foreach iface in=[/interface ethernet find] do={")
+$addCL ("   /interface ethernet set \$iface name=[get \$iface default-name]")
+$addCL (" }")
+# remove bridge
+$addCL (" /interface bridge port remove [find comment=\"defconf\"]")
+$addCL (" /interface bridge remove [find comment=\"defconf\"]")
+
+$addCL (" /interface bonding remove [find comment=\"defconf\"]")
+
+:if ($wirelessEnabled = 1 && $usingWifiPack = 1) do={
+  # reset wireless
+  :if ($numWlans > 0) do={
+    :for i from=1 to=$numWlans do={
+      $addCL (" /interface wifi reset wifi$i")
+    }
+
+    :if ($needWpsSync=1) do={
+      $addCL (" /interface wifi reset wifi3")
+    }
+  }
+  # reset WIL
+  :if ($numWils > 0) do={
+    $addCL (" /interface w60g station remove [find comment=\"defconf\"]")
+    :for i from=1 to=$numWils do={
+      $addCL (" /interface w60g reset-configuration wlan60-$i")
+    }
+  }
+} else={
+  :if ($wirelessEnabled = 1 && $usingWifiPack = 0) do={
+  $addCL (" /interface wireless cap set enabled=no interfaces=\"\" caps-man-addresses=\"\"")
+  # reset wireless
+  :if ($numWlans > 0) do={
+    :for i from=1 to=$numWlans do={
+      $addCL (" /interface wireless reset-configuration wlan$i")
+    }
+    $addCL (" /interface wireless security-profile set default mode=none\\")
+    $addCL ("      authentication-types=\"\" disable-pmkid=no wpa2-pre-shared-key=\"\" comment=\"\" ")
+
+    :if ($needWpsSync=1) do={
+      $addCL (" /interface wireless reset-configuration wlan3")
+      $addCL ("  /interface wireless security-profiles remove [find comment=\"defconf\"]")
+    }
+  }
+  # reset WIL
+  :if ($numWils > 0) do={
+    $addCL (" /interface w60g station remove [find comment=\"defconf\"]")
+    :for i from=1 to=$numWils do={
+      $addCL (" /interface w60g reset-configuration wlan60-$i")
+    }
+  }
+  # reset CAPsMAN
+  $addCL ("  /caps-man manager set enabled=no")
+  $addCL ("  /caps-man manager interface remove [find comment=\"defconf\"]")
+  $addCL ("  /caps-man manager interface set [ find default=yes ] forbid=no")
+  $addCL ("  /caps-man provisioning remove [find comment=\"defconf\"]")
+  $addCL ("  /caps-man configuration remove [find comment=\"defconf\"]")
+  $addCL ("  /caps-man security remove [find comment=\"defconf\"]")
+  }
+}
+
+$addCL ("}")
+$addCL ":log info Defconf_script_finished;"
+$addCL ":set defconfMode;"
+:if ($numWlans > 0) do={
+  $addCL ":set ssid;"
+}
+
+#-------------------------------------------------------------------------------
+# Conf and descr output
+#-------------------------------------------------------------------------------
+:if ($bFail = 0) do={
+  :put $strDesc;
+  :put $strConf;
+}
+
+#-------------------------------------------------------------------------------
+# Clear global vars
+#-------------------------------------------------------------------------------
+/system/script/environment/remove [find];

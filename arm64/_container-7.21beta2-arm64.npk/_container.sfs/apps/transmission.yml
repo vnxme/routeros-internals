@@ -1,0 +1,17 @@
+name: transmission
+descr: BitTorrent Client
+page: https://transmissionbt.com
+category: media
+icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/transmission-logo.png
+services:
+  transmission:
+    image: lscr.io/linuxserver/transmission
+    volumes:
+      - download:/downloads/complete
+      - config:/config
+    ports:
+      - '9091:9091:web'
+networks:
+  default:
+    name: lan
+    external: true

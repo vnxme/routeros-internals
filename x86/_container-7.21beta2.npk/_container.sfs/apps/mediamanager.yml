@@ -1,0 +1,26 @@
+name: mediamanager
+descr: MediaManager is modern software to manage your TV and movie library. It is designed to be a replacement for Sonarr, Radarr, Overseer, Unpackerr and Jellyseer. It supports TVDB and TMDB for metadata, supports OIDC and OAuth 2.0 for authentication and supports Prowlarr and Jackett.
+page: https://github.com/maxdorninger/MediaManager
+category: media-management
+default-credentials: admin@example.com:admin
+services:
+  db:
+    image: docker.io/postgres:17
+    environment:
+      POSTGRES_PASSWORD: MediaManager
+      POSTGRES_DB: MediaManager
+      POSTGRES_USER: MediaManager
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_INITDB_ARGS: --encoding='UTF8' --lc-collate='C' --lc-ctype='C'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  server:
+    image: ghcr.io/maxdorninger/mediamanager/mediamanager:latest
+    ports:
+      - 8003:8000:web
+    environment:
+      CONFIG_DIR: /app/config
+    volumes:
+      - data:/data
+      - config:/app/config
+      - images:/data/images

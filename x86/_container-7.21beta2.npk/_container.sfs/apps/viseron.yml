@@ -1,0 +1,18 @@
+name: viseron
+descr: Self-hosted, local only NVR and AI Computer Vision software. With features such as object detection, motion detection, face recognition and more, it gives you the power to keep an eye on your home, office or any other place you want to monitor.
+page: https://viseron.netlify.app
+category: video
+default-credentials: web setup
+services:
+  viseron:
+    image: docker.io/roflcoopter/viseron:latest
+    container_name: viseron
+    shm_size: "1024mb"
+    volumes:
+      - viseron/segments:/segments
+      - viseron/snapshots:/snapshots
+      - viseron/thumbnails:/thumbnails
+      - viseron/event_clips:/event_clips
+      - viseron/config:/config
+    ports:
+      - 8888:8888:web

@@ -1,0 +1,15 @@
+name: gitea
+descr: Self-hosted Git service with web interface
+page: https://gitea.com
+category: development
+default-credentials: web setup
+services:
+  gitea:
+    image: docker.gitea.com/gitea:1.24.5-rootless
+    ports:
+      - 3007:3000:web
+      - 2222:2222:ssh
+    volumes:
+      - data:/var/lib/gitea
+      - config:/etc/gitea
+    restart: unless-stopped

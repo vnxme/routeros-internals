@@ -1,0 +1,15 @@
+name: technitium
+descr: Technitium DNS Server is an open source authoritative as well as recursive DNS server that can be used for self hosting a DNS server for privacy & security.
+page: https://technitium.com/dns/
+category: networking
+default-credentials: web setup
+services:
+  technitium:
+    image: docker.io/technitium/dns-server
+    ports:
+      - "5380:5380:web" #DNS web console (HTTP)
+      - "53:53/udp:dns" #DNS service
+      - "53:53/tcp:dns" #DNS service
+    volumes:
+      - config:/etc/dns
+    restart: unless-stopped

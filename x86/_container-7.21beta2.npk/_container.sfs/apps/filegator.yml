@@ -1,0 +1,14 @@
+name: filegator
+descr: free, open-source, self-hosted web application for managing files and folders.
+page: https://filegator.io
+category: file-management
+default-credentials: admin:admin123
+services:
+  filegator:
+    image: docker.io/filegator/filegator:latest-multiarch
+    restart: always
+    ports:
+      - "8084:8080:web"
+    volumes:
+      - media:/var/www/filegator/repository
+      - private:/var/www/filegator/private

@@ -1,0 +1,32 @@
+name: copyparty
+descr: turn almost any device into a file server with resumable uploads/downloads using any web browser
+page: https://github.com/9001/copyparty
+category: file-management
+default-credentials: admin:securepassword
+services:
+  copyparty:
+    image: docker.io/copyparty/ac:latest
+    ports:
+      - 3923:3923:web
+    volumes:
+      - media:/media
+    environment:
+      LD_PRELOAD: /usr/lib/libmimalloc-secure.so.NOPE
+      # enable mimalloc by replacing "NOPE" with "2" for a nice speed-boost (will use twice as much ram)
+
+      PYTHONUNBUFFERED: 1
+      # ensures log-messages are not delayed (but can reduce speed a tiny bit)
+
+    configs:
+      - source: 'initcfg'
+        target: 'z/initcfg'
+    stop_grace_period: 15s  # thumbnailer is allowed to continue finishing up for 10s after the shutdown signal
+configs:
+  'initcfg':
+    content: |
+      [/media]
+        /media
+        accs:
+          rwmd: *
+      [accounts]
+        admin:securepassword

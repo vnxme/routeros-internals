@@ -1,0 +1,14 @@
+name: excalidraw
+descr: Virtual whiteboard for sketching hand-drawn like diagrams
+page: https://excalidraw.com
+category: productivity
+services:
+  excalidraw:
+    image: docker.io/excalidraw/excalidraw:latest
+    ports:
+      - 3015:80:web
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - data:/opt/node_app/app
+    restart: unless-stopped

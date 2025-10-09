@@ -1,0 +1,14 @@
+name: nzbget
+descr: Nzbget is a usenet downloader
+page: https://nzbget.com
+category: media
+icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/nzbget-logo.png
+default-credentials: nzbget:tegbzn6789
+services:
+  nzbget:
+    image: lscr.io/linuxserver/nzbget
+    ports:
+      - '6789:6789:web'
+    volumes:
+      - download:/downloads
+      - config:/config

@@ -1,0 +1,20 @@
+name: restic-server
+descr: REST server for Restic backup client with support for remote backups
+page: https://github.com/restic/rest-server
+category: storage
+default-credentials: restic:restic
+services:
+  restic-server:
+    image: docker.io/restic/rest-server:latest
+    volumes:
+      - data:/data
+    ports:
+      - 8000:8000:api
+    configs:
+      - source: 'htpasswd'
+        target: '/data/.htpasswd'
+    restart: unless-stopped
+configs:
+  'htpasswd':
+    content: |
+      restic:$2y$05$kguZFBDyN7CYzIZsy9bmuOiHIKRe9i6CH8cG6QCPZjMd1xbM4eegi

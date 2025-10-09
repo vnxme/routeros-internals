@@ -1,0 +1,21 @@
+name: firefox
+descr: free and open-source web browser developed by the Mozilla Foundation
+page: https://firefox.org
+category: networking
+default-credentials:
+services:
+  firefox:
+    image: lscr.io/linuxserver/firefox:latest
+    container_name: firefox
+    security_opt:
+      - seccomp:unconfined #optional
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - FIREFOX_CLI=https://www.mikrotik.com/
+    volumes:
+      - config:/config
+    ports:
+      - 3011:3001:web-https
+    shm_size: "1gb"
+    restart: unless-stopped

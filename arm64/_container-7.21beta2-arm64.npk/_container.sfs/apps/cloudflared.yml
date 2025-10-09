@@ -1,0 +1,11 @@
+name: cloudflared
+descr: Client for Cloudflare Tunnel, a daemon that exposes private services through the Cloudflare edge.
+category: networking
+services:
+  cloudflared:
+    image: docker.io/cloudflare/cloudflared
+    container_name: cloudflared
+    environment:
+      TUNNEL_TOKEN: YOUR_CF_TOKEN
+    command: tunnel --no-autoupdate run
+

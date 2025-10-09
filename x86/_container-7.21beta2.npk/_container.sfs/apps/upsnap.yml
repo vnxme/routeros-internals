@@ -1,0 +1,17 @@
+name: upsnap
+descr: A simple wake on lan web app written with SvelteKit, Go and PocketBase
+page: https://github.com/seriousm4x/UpSnap
+category: networking
+default-credentials: web setup
+services:
+  upsnap:
+    image: ghcr.io/seriousm4x/upsnap:5
+    volumes:
+      - data:/app/pb_data
+    restart: unless-stopped
+    ports:
+      - 8093:8090:web
+networks:
+  default:
+    name: lan
+    external: true

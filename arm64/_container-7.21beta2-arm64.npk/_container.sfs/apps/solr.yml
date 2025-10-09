@@ -1,0 +1,14 @@
+name: solr
+descr: open-source enterprise-search platform
+page: https://solr.apache.org
+category: search
+services:
+  solr:
+    image: docker.io/solr:latest
+    ports:
+     - "8983:8983:web"
+    volumes:
+      - data:/var/solr
+    command:
+      - solr-precreate
+      - gettingstarted

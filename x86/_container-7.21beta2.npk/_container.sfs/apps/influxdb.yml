@@ -1,0 +1,13 @@
+name: influxdb
+descr: InfluxDB is the time series data platform designed to handle high write and query workloads
+page: https://influxdata.com
+category: monitoring
+default-credentials: web setup
+services:
+  influxdb:
+    image: docker.io/library/influxdb
+    ports:
+      - '8086:8086:web'
+    volumes:
+      - data:/var/lib/influxdb3/data
+      - plugins:/var/lib/influxdb3/plugins

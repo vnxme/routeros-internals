@@ -1,0 +1,16 @@
+name: forgejo
+descr: Forgejo is a self-hosted lightweight software forge. Easy to install and low maintenance, it just does the job. 
+page: https://forgejo.org
+category: development
+default-credentials: web setup
+services:
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:12
+    environment:
+      SSH_PORT: 222
+      HTTP_PORT: 3001
+    volumes:
+      - data:/data
+    ports:
+      - 3001:3001:web
+      - 222:222

@@ -1,0 +1,43 @@
+name: warracker
+descr: Web application for tracking warranties and product information
+page: https://github.com/sassanix/warracker
+category: productivity
+default-credentials: web setup
+services:
+  warracker:
+    image: ghcr.io/sassanix/warracker/main:latest
+    ports:
+      - "8095:80:web"
+    volumes:
+      - uploads:/data/uploads
+    environment:
+      # Database configuration
+      - DB_HOST=warrackerdb
+      - DB_NAME=warracker
+      - DB_USER=warracker
+      - DB_PASSWORD=changeme
+      - DB_ADMIN_USER=warracker
+      - DB_ADMIN_PASSWORD=changeme
+      # Security
+      - SECRET_KEY=changeme-secret-key-here
+      - JWT_EXPIRATION_HOURS=24
+      # App configuration
+      - FLASK_ENV=production
+      - FLASK_DEBUG=false
+      - FRONTEND_URL=http://localhost:[accessPort]
+      - APP_BASE_URL=http://localhost:[accessPort]
+      # File uploads
+      - MAX_UPLOAD_MB=20
+    depends_on:
+      - warrackerdb
+    restart: unless-stopped
+
+  warrackerdb:
+    image: docker.io/postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=warracker
+      - POSTGRES_USER=warracker
+      - POSTGRES_PASSWORD=changeme
+    restart: unless-stopped
