@@ -7,46 +7,51 @@ on:
   workflow_dispatch:
     inputs:
       label:
-        description: 'Label (e.g., vendor)'
-        required: true
         default: 'vendor'
-        type: choice
+        description: 'Label (e.g., vendor)'
         options:
           - 'vendor'
           - 'elseif'
           - 'custom'
+        required: true
+        type: choice
       version:
-        description: 'Version (e.g., 7.19.4; empty means latest)'
-        required: false
         default: 'latest'
+        description: 'Version (e.g., 7.20; empty means latest)'
+        required: false
         type: string
       scope:
-        description: 'Scope of work (do jobs up to, inclusive)'
-        required: true
         default: 'release'
-        type: choice
+        description: 'Scope (do jobs up to, inclusive)'
         options:
           - 'validate'
           - 'download'
           - 'process'
           - 'release'
-      release:
-        description: 'Release files (or upload an artifact)'
-        required: false
-        default: true
-        type: boolean
-      reuse_releases:
-        default: true
-        description: 'Download: reuse released files'
+        required: true
+        type: choice
+      download_ignore_release:
+        default: false
+        description: 'Download: ignore released files'
         required: false
         type: boolean
-      reuse_commits:
+      download_ignore_branch:
+        default: false
+        description: 'Download: ignore branched files'
+        required: false
+        type: boolean
+      release_tag_or_artifact:
         default: true
-        description: 'Download: reuse committed files'
+        description: 'Release: tag (yes) or artifact (no)'
+        required: false
+        type: boolean
+      release_push_branch:
+        default: true
+        description: 'Release: push files into a branch'
         required: false
         type: boolean
       extras:
-        default: '{"custom_label":"vnxme","custom_repo":"vnxme/MikroTikPatch","force_download":"false","force_process":"false","process_ignore_files":"false","no_push":"false"}'
+        default: '{"custom_label":"vnxme","custom_patch":"vnxme/MikroTikPatch","download_force":"false","process_force":"false","process_ignore_files":"false"}'
         description: 'JSON of additional options'
         required: false
         type: string
@@ -77,6 +82,9 @@ jobs:
         id: validate_label
         run: |
           LABEL="$(echo "${{ inputs.label }}" | xargs)"
+          if [ "${LABEL}" == 'custom' ]; then
+            LABEL="$(echo "${{ fromJSON(inputs.extras).custom_label }}" | xargs)"
+          fi
           if [ -z "$(echo "${LABEL}" | grep -P '^[0-9a-zA-Z]+$')" ]; then
             echo "::error input=label,value=${LABEL}::Invalid label value"
             exit 1
@@ -171,8 +179,8 @@ jobs:
             echo "- do_download: \`${{ steps.validate_scope.outputs.download }}\`"
             echo "- do_process: \`${{ steps.validate_scope.outputs.process }}\`"
             echo "- do_release: \`${{ steps.validate_scope.outputs.release }}\`"
-            echo "- reuse_releases: \`${{ inputs.reuse_releases }}\`"
-            echo "- reuse_commits: \`${{ inputs.reuse_commits }}\`"
+            echo "- download_ignore_release: \`${{ inputs.download_ignore_release }}\`"
+            echo "- download_ignore_branch: \`${{ inputs.download_ignore_branch }}\`"
             echo "- extras: \`${{ inputs.extras }}\`"
           } >> $GITHUB_STEP_SUMMARY
 
@@ -197,32 +205,33 @@ jobs:
 
       - name: Make '${{ env.app }}', '${{ env.box }}' and '${{ env.tmp }}' directories
         id: make_dirs
-        if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        if: ${{ fromJSON(inputs.extras).download_force == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         run: |
           mkdir -p {"${{ env.app }}","${{ env.box }}","${{ env.tmp }}"}
 
       - name: Checkout 'main' branch into '${{ env.app }}' directory
         id: checkout_repository
-        if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        if: ${{ fromJSON(inputs.extras).download_force == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v5
         with:
           path: "${{ env.app }}"
 
       - name: Download files from release, branch or vendor into '${{ env.box }}' directory
         id: download_files
-        if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        if: ${{ fromJSON(inputs.extras).download_force == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         env:
           label: "${{ needs.validate.outputs.label }}"
         run: |
           CMD="sudo '${{ env.app }}/download.sh' -d '${{ env.box }}' -l '${{ env.label }}' -v '${{ matrix.version }}'"
-          [ "${{ inputs.reuse_releases }}" == 'false' ] && CMD="${CMD} --ignore-release"
-          [ "${{ inputs.reuse_commits }}" == 'false' ] && CMD="${CMD} --ignore-branch"
+          [ "${{ inputs.download_ignore_release }}" == 'true' ] && CMD="${CMD} --ignore-release"
+          [ "${{ inputs.download_ignore_branch }}" == 'true' ] && CMD="${CMD} --ignore-branch"
           [ "${{ needs.validate.outputs.label }}" == 'elseif' ] && CMD="${CMD} --patch elseif/MikroTikPatch"
+          [ "${{ inputs.label }}" == 'custom' ] && CMD="${CMD} --patch ${{ fromJSON(inputs.extras).custom_patch }}"
           eval "${CMD}"
 
       - name: Create an archive in '${{ env.tmp }}' directory with downloaded files in '${{ env.box }}' directory
         id: create_archive
-        if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        if: ${{ fromJSON(inputs.extras).download_force == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.dkey }}.tar.zst"
           (cd -- "${{ env.box }}"; sudo find * .*) | sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" -T -
@@ -230,7 +239,7 @@ jobs:
 
       - name: Delete downloaded files from cache
         id: delete_cache
-        if: ${{ fromJSON(inputs.extras).force_download == 'true' && steps.lookup.outputs.cache-hit == 'true' }}
+        if: ${{ fromJSON(inputs.extras).download_force == 'true' && steps.lookup.outputs.cache-hit == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -241,7 +250,7 @@ jobs:
 
       - name: Save downloaded files from '${{ env.box }}' directory to cache
         id: save_cache
-        if: ${{ fromJSON(inputs.extras).force_download == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
+        if: ${{ fromJSON(inputs.extras).download_force == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v4
         with:
           key: "${{ env.dkey }}"
@@ -272,13 +281,13 @@ jobs:
 
       - name: Make '${{ env.app }}', '${{ env.box }}' and '${{ env.tmp }}' directories
         id: make_dirs
-        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup_processed.outputs.cache-hit != 'true' }}
+        if: ${{ fromJSON(inputs.extras).process_force == 'true' || steps.lookup_processed.outputs.cache-hit != 'true' }}
         run: |
           mkdir -p {"${{ env.app }}","${{ env.box }}","${{ env.tmp }}"}
 
       - name: Restore an archive with downloaded files from cache into '${{ env.tmp }}' directory
         id: restore_downloaded
-        if: ${{ fromJSON(inputs.extras).force_process == 'true' || steps.lookup_processed.outputs.cache-hit != 'true' }}
+        if: ${{ fromJSON(inputs.extras).process_force == 'true' || steps.lookup_processed.outputs.cache-hit != 'true' }}
         uses: actions/cache/restore@v4
         with:
           key: "${{ env.dkey }}"
@@ -436,7 +445,7 @@ jobs:
 
       - name: Delete duplicate release and tag
         id: delete_release
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_tag_or_artifact }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -484,7 +493,7 @@ jobs:
 
       - name: Compose a release description
         id: compose_description
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_tag_or_artifact }}
         run: |
           SHA_MSG="$(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }} | head -1)"
           {
@@ -500,7 +509,7 @@ jobs:
 
       - name: Upload release files as attachments
         id: upload_attachments
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_tag_or_artifact }}
         uses: softprops/action-gh-release@v2
         with:
           name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.label }}"
@@ -513,7 +522,7 @@ jobs:
 
       - name: Upload release files as artifacts
         id: upload_artifacts
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && !inputs.release }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && !inputs.release_tag_or_artifact }}
         uses: actions/upload-artifact@v4
         with:
           compression-level: 0
@@ -523,7 +532,7 @@ jobs:
 
       - name: Normalize files
         id: normalize_files
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && fromJSON(inputs.extras).no_push != 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_push_branch == 'true' }}
         run: |
           sudo "${{ env.app }}/normalize.sh" "${{ env.box }}"
           sudo chown -hR $(id -un):$(id -gn) "${{ env.box }}"
@@ -543,7 +552,7 @@ jobs:
 
       - name: Compose a commit message
         id: compose_message
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && fromJSON(inputs.extras).no_push != 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_push_branch == 'true' }}
         run: |
           SHA_MSG="$(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }} | head -1)"
           {
@@ -558,7 +567,7 @@ jobs:
 
       - name: Add files, commit and push
         id: push_files
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && fromJSON(inputs.extras).no_push != 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_push_branch == 'true' }}
         uses: stefanzweifel/git-auto-commit-action@v6
         with:
           branch: ${{ env.branch }}
