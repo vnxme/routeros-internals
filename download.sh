@@ -253,6 +253,10 @@ for ARCH in "${ARCHS[@]}"; do
       fi
     fi
   fi
+
+  if [ -z "$(cd "${ARCH}"; find * .* -type f)" ]; then
+    rm -rf "${ARCH}"
+  fi
 done
 
 # Download images
