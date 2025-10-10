@@ -538,7 +538,7 @@ jobs:
 
       - name: Normalize files
         id: normalize_files
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_push_branch == 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_push_branch }}
         run: |
           sudo "${{ env.app }}/normalize.sh" "${{ env.box }}"
           sudo chown -hR $(id -un):$(id -gn) "${{ env.box }}"
@@ -558,7 +558,7 @@ jobs:
 
       - name: Compose a commit message
         id: compose_message
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_push_branch == 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_push_branch }}
         run: |
           SHA_MSG="$(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }} | head -1)"
           {
@@ -573,7 +573,7 @@ jobs:
 
       - name: Add files, commit and push
         id: push_files
-        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_push_branch == 'true' }}
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_push_branch }}
         uses: stefanzweifel/git-auto-commit-action@v6
         with:
           branch: ${{ env.branch }}
