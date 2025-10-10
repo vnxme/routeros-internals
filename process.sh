@@ -170,7 +170,7 @@ process_files <(
   find_files_by_name 'linux.*' 'x86/_*.iso/_*.img/loop/*'
   find_files_by_name '*.EFI' 'x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/*'
   find_files_by_name '*.EFI' 'x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/*'
-  find_files_by_name '*-x86-kernel' '*/_*.exe.zip/_*.exe/*'
+  find_files_by_name '*-x86-kernel.efi' '*/_*.exe.zip/_*.exe/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack Image and ELF files (1/2)
@@ -186,12 +186,12 @@ process_files <(
   find_files_by_name 'kernel' 'ppc/_*.npk/*.files/boot/*'
   find_files_by_name 'kernel' 'smips/_*.npk/*.files/boot/*'
   find_files_by_name 'kernel' 'tile/_*.npk/*.files/boot/*'
-  find_files_by_name '*-arm-kernel' '*/_*.exe.zip/_*.exe/*'
-  find_files_by_name '*-arm64-kernel' '*/_*.exe.zip/_*.exe/*'
-  find_files_by_name '*-mipsbe-kernel' '*/_*.exe.zip/_*.exe/*'
-  find_files_by_name '*-mmips-kernel' '*/_*.exe.zip/_*.exe/*'
-  find_files_by_name '*-ppc-*-kernel' '*/_*.exe.zip/_*.exe/*'
-  find_files_by_name '*-tile-kernel' '*/_*.exe.zip/_*.exe/*'
+  find_files_by_name '*-arm-kernel.elf' '*/_*.exe.zip/_*.exe/*'
+  find_files_by_name '*-arm64-kernel.elf' '*/_*.exe.zip/_*.exe/*'
+  find_files_by_name '*-mipsbe-kernel.elf' '*/_*.exe.zip/_*.exe/*'
+  find_files_by_name '*-mmips-kernel.elf' '*/_*.exe.zip/_*.exe/*'
+  find_files_by_name '*-ppc-*-kernel.elf' '*/_*.exe.zip/_*.exe/*'
+  find_files_by_name '*-tile-kernel.elf' '*/_*.exe.zip/_*.exe/*'
   find_files_by_name '*.vmlinux' 'x86/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/*'
   find_files_by_name '*.vmlinux' 'x86/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/*'
   find_files_by_name '*.vmlinux' 'x86/_*.img.zip/_*.img/loop/_linux/*'
@@ -201,7 +201,7 @@ process_files <(
   find_files_by_name '*.vmlinux' 'x86/_*.iso/_*.img/loop/_linux.*/*'
   find_files_by_name '*.vmlinux' 'x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/*'
   find_files_by_name '*.vmlinux' 'x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-x86-kernel/*'
+  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-x86-kernel.efi/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack Image and ELF files (2/2)
@@ -215,12 +215,12 @@ process_files <(
   find_files_by_name '*.vmlinux' 'ppc/_*.npk/*.files/boot/_kernel/*'
   find_files_by_name '*.vmlinux' 'smips/_*.npk/*.files/boot/_kernel/*'
   find_files_by_name '*.vmlinux' 'tile/_*.npk/*.files/boot/_kernel/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-arm-kernel/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-arm64-kernel/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-mipsbe-kernel/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-mmips-kernel/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-ppc-*-kernel/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-tile-kernel/*'
+  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-arm-kernel.elf/*'
+  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-arm64-kernel.elf/*'
+  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-mipsbe-kernel.elf/*'
+  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-mmips-kernel.elf/*'
+  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-ppc-*-kernel.elf/*'
+  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-tile-kernel.elf/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack RGZ files
@@ -263,19 +263,19 @@ process_files <(
   find_files_by_name '*.cpio' 'x86/_*.iso/_*.img/loop/_linux.*/_*.vmlinux/*'
   find_files_by_name '*.cpio' 'x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/*'
   find_files_by_name '*.cpio' 'x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-arm-kernel/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-arm-kernel/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-arm64-kernel/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-arm64-kernel/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-mipsbe-kernel/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-mipsbe-kernel/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-mmips-kernel/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-mmips-kernel/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-ppc-*-kernel/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-ppc-*-kernel/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-tile-kernel/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-tile-kernel/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-x86-kernel/_*.vmlinux/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-arm-kernel.elf/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-arm-kernel.elf/_*.vmlinux/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-arm64-kernel.elf/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-arm64-kernel.elf/_*.vmlinux/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-mipsbe-kernel.elf/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-mipsbe-kernel.elf/_*.vmlinux/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-mmips-kernel.elf/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-mmips-kernel.elf/_*.vmlinux/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-ppc-*-kernel.elf/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-ppc-*-kernel.elf/_*.vmlinux/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-tile-kernel.elf/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-tile-kernel.elf/_*.vmlinux/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-x86-kernel.efi/_*.vmlinux/*'
   find_files_by_name 'initrd' '*/_*.exe.zip/_*.exe/_*-initrd.rgz/*'
 ) "${SCRIPT_UNPACK}"
 
@@ -283,8 +283,8 @@ process_files <(
 process_files <(
   find_files_by_name '*.dtb' 'arm/_*.npk/*.files/boot/_kernel/_*.vmlinux/*'
   find_files_by_name '*.dtb' 'mmips/_*.npk/*.files/boot/_kernel/_*.vmlinux/*'
-  find_files_by_name '*.dtb' '*/_*.exe.zip/_*.exe/*-arm-kernel/_*.vmlinux/*'
-  find_files_by_name '*.dtb' '*/_*.exe.zip/_*.exe/*-mmips-kernel/*'
+  find_files_by_name '*.dtb' '*/_*.exe.zip/_*.exe/*-arm-kernel.elf/_*.vmlinux/*'
+  find_files_by_name '*.dtb' '*/_*.exe.zip/_*.exe/*-mmips-kernel.elf/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack FWF files

@@ -14,8 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import lief
 import os
 import pefile
+import re
 import struct
 
 ME = os.path.basename(__file__)
@@ -43,7 +45,7 @@ class Resource:
         if self.type == pefile.RESOURCE_TYPE.get('RT_RCDATA'):
             if self.reid in RCDATA:
                 rcdata = RCDATA[self.reid]
-                filename = f"{self.reid:0=3}-{rcdata['arch']}-{rcdata['alias']}"
+                filename = f"{self.reid:0=3}-{rcdata['arch']}-{rcdata['filename']}"
             else:
                 filename = f"{self.reid:0=3}-rcdata.bin"
 
@@ -54,9 +56,80 @@ class Resource:
         #     with open(os.path.join(directory, 'version.txt'), 'wb') as file: file.write(self.rawdata())
         else: return
 
-def unpack_pefile(filename: str, directory: str, verbose: bool = False):
+def unpack_elf_with_lief(binary: lief.ELF.Binary, filename:str, directory: str, verbose: bool = False):
+    if verbose: print(f"{ME}: File '{filename}' is a valid ELF file with the following resources:")
+    data, offset = bytes(binary.get_section('.text').content), 0
+    lief.logging.disable() # disable warnings shown while parsing EFI payload
+    while True:
+        match = re.search(rb'\x7fELF[\x00-\xff]{2}\x01[\x00-\xff]|MZ[\x00-\xff]{128}PE', data[offset:])
+        if match is None: break
+
+        offset += match.start()
+        payload = data[offset:]
+        try:
+            binary, skip = lief.parse(payload), False
+        except Exception as e:
+            if verbose: print(f"{ME}: Error while parsing ELF/EFI at offset {offset}: {e}. Skipping")
+            skip = True
+
+        if skip or binary is None:
+            offset += match.end() - match.start()
+            continue
+
+        if isinstance(binary, lief.ELF.Binary):
+            header: lief.ELF.Header = binary.header
+            size = header.section_header_offset + header.section_header_size * header.numberof_sections
+            arch = header.machine_type.name.lower()
+            if header.identity_data == lief.ELF.Header.ELF_DATA.LSB: # little endian
+                if header.machine_type == lief.ELF.ARCH.ARM: arch = 'arm'
+                elif header.machine_type == lief.ELF.ARCH.AARCH64: arch = 'arm64'
+                elif header.machine_type == lief.ELF.ARCH.MIPS: arch = 'mmips'
+                elif header.machine_type == lief.ELF.ARCH.TILEGX: arch = 'tile'
+            elif header.identity_data == lief.ELF.Header.ELF_DATA.MSB: # big endian
+                if header.machine_type == lief.ELF.ARCH.MIPS: arch = 'mipsbe'
+                elif header.machine_type == lief.ELF.ARCH.PPC:
+                    updates = re.search(rb'/lib/firmware/updates/\d\.\d(\.\d)?', payload[:size])
+                    if updates is not None:
+                        if payload[updates.end():][:4] == b'-440': arch = 'ppc-440'
+                        elif payload[updates.end():][:5] == b'-e500': arch = 'ppc-e500'
+                        else: arch = 'ppc-e300'
+            filename = f"{offset:x}-{arch}-kernel.elf"
+            if verbose: print(f"{ME}: - ELF at offset {offset} with size {size} for {arch}")
+        elif isinstance(binary, lief.PE.Binary):
+            header: lief.PE.Header = binary.header
+            size = binary.overlay_offset
+            arch = header.machine.name.lower()
+            if header.machine in [lief.PE.Header.MACHINE_TYPES.AMD64, lief.PE.Header.MACHINE_TYPES.I386]: arch = 'x86'
+            filename = f"{offset:x}-{arch}-kernel.efi"
+            if verbose: print(f"{ME}: - EFI at offset {offset} with size {size} for {arch}")
+        else:
+            offset += match.end() - match.start()
+            continue
+
+        payload, offset = payload[:size], offset + size
+        with open(os.path.join(directory, filename), 'wb') as file: file.write(payload)
+    lief.logging.enable()
+
+def unpack_with_lief_or_pefile(filename: str, directory: str, verbose: bool = False):
     os.makedirs(directory, exist_ok=True)
 
+    try:
+        binary = lief.parse(filename)
+    except:
+        if verbose: print(f"{ME}: File '{filename}' is not a valid executable file. Exiting")
+        return
+
+    if binary is not None:
+        if isinstance(binary, lief.PE.Binary):
+            unpack_pe_with_pefile(filename, directory, verbose)
+            return
+        elif isinstance(binary, lief.ELF.Binary) and binary.has_section('.text'):
+            unpack_elf_with_lief(binary, filename, directory, verbose)
+            return
+
+    if verbose: print(f"{ME}: File '{filename}' is not a valid PE or ELF file. Exiting")
+
+def unpack_pe_with_pefile(filename: str, directory: str, verbose: bool = False):
     try:
         pe = pefile.PE(filename)
     except pefile.PEFormatError:
@@ -85,37 +158,37 @@ def unpack_pefile(filename: str, directory: str, verbose: bool = False):
     pe.close()
 
 RCDATA = {
-    120:{'vendor-class-identifier':'',            'arch':'x86',      'alias':'linux',        'file':'Linux kernel x86 boot executable bzImage, version 3.3.5'},
-    121:{'vendor-class-identifier':'',            'arch':'x86',      'alias':'initrd.rgz',   'file':'XZ compressed data, checksum CRC32'},
-    122:{'vendor-class-identifier':'',            'arch':'x86',      'alias':'syslinux',     'file':'SYSLINUX loader (version 2.08)'},
+    120:{'vendor-class-identifier':'',            'arch':'x86',      'filename':'linux',        'contents':'Linux kernel x86 boot executable bzImage, version 3.3.5'},
+    121:{'vendor-class-identifier':'',            'arch':'x86',      'filename':'initrd.rgz',   'contents':'XZ compressed data, checksum CRC32'},
+    122:{'vendor-class-identifier':'',            'arch':'x86',      'filename':'syslinux',     'contents':'SYSLINUX loader (version 2.08)'},
     #123
-    124:{'vendor-class-identifier':'',            'arch':'x86',      'alias':'syslinux.cfg', 'file':'ASCII text', 'comment':'refers to #120 and #132'},
-    125:{'vendor-class-identifier':'PXEClient',   'arch':'x86',      'alias':'image',        'file':'data', 'comment':'refers to #120, #126 and #142'},
-    126:{'vendor-class-identifier':'',            'arch':'x86',      'alias':'pxelinux.cfg', 'file':'ASCII text'},
-    127:{'vendor-class-identifier':'Etherboot',   'arch':'x86',      'alias':'kernel',       'file':'ELF 32-bit LSB executable, Intel 80386, version 1', 'comment':'refers to #120 and #121'},
+    124:{'vendor-class-identifier':'',            'arch':'x86',      'filename':'syslinux.cfg', 'contents':'ASCII text', 'comment':'refers to #120 and #132'},
+    125:{'vendor-class-identifier':'PXEClient',   'arch':'x86',      'filename':'image',        'contents':'data', 'comment':'refers to #120, #126 and #142'},
+    126:{'vendor-class-identifier':'',            'arch':'x86',      'filename':'pxelinux.cfg', 'contents':'ASCII text'},
+    127:{'vendor-class-identifier':'Etherboot',   'arch':'x86',      'filename':'kernel.elf',   'contents':'ELF 32-bit LSB executable, Intel 80386, version 1', 'comment':'refers to #120 and #121'},
     128:{'vendor-class-identifier':'Mikroboot'},
-    129:{'vendor-class-identifier':'Powerboot',   'arch':'ppc-e300', 'alias':'kernel',       'file':'ELF 32-bit MSB executable, PowerPC or cisco 4500, version 1'},
-    130:{'vendor-class-identifier':'e500_boot',   'arch':'ppc-e500', 'alias':'kernel',       'file':'ELF 32-bit MSB executable, PowerPC or cisco 4500, version 1'},
-    131:{'vendor-class-identifier':'Mips_boot',   'arch':'mipsbe',   'alias':'kernel',       'file':'ELF 32-bit MSB executable, MIPS, MIPS32 rel2 version 1'},
-    132:{'vendor-class-identifier':'',            'arch':'x86',      'alias':'initrd.rgz',   'file':'XZ compressed data, checksum CRC32'},
+    129:{'vendor-class-identifier':'Powerboot',   'arch':'ppc-e300', 'filename':'kernel.elf',   'contents':'ELF 32-bit MSB executable, PowerPC or cisco 4500, version 1'},
+    130:{'vendor-class-identifier':'e500_boot',   'arch':'ppc-e500', 'filename':'kernel.elf',   'contents':'ELF 32-bit MSB executable, PowerPC or cisco 4500, version 1'},
+    131:{'vendor-class-identifier':'Mips_boot',   'arch':'mipsbe',   'filename':'kernel.elf',   'contents':'ELF 32-bit MSB executable, MIPS, MIPS32 rel2 version 1'},
+    132:{'vendor-class-identifier':'',            'arch':'x86',      'filename':'initrd.rgz',   'contents':'XZ compressed data, checksum CRC32'},
     #133
-    134:{'vendor-class-identifier':'',            'arch':'x86',      'alias':'syslinux.exe', 'file':'PE32 executable (console) Intel 80386'},
-    135:{'vendor-class-identifier':'440__boot',   'arch':'ppc-440',  'alias':'kernel',       'file':'ELF 32-bit MSB executable, PowerPC or cisco 4500, version 1'},
-    136:{'vendor-class-identifier':'tile_boot',   'arch':'tile',     'alias':'kernel',       'file':'ELF 64-bit LSB executable, Tilera TILE-Gx, version 1'},
-    137:{'vendor-class-identifier':'ARM__boot',   'arch':'arm',      'alias':'kernel',       'file':'ELF 32-bit LSB executable, ARM, EABI5 version 1'},
-    138:{'vendor-class-identifier':'MMipsBoot',   'arch':'mmips',    'alias':'kernel',       'file':'ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1'},
-    139:{'vendor-class-identifier':'ARM64__boot', 'arch':'arm64',    'alias':'kernel',       'file':'ELF 64-bit LSB executable, ARM aarch64, version 1'},
+    134:{'vendor-class-identifier':'',            'arch':'x86',      'filename':'syslinux.exe', 'contents':'PE32 executable (console) Intel 80386'},
+    135:{'vendor-class-identifier':'440__boot',   'arch':'ppc-440',  'filename':'kernel.elf',   'contents':'ELF 32-bit MSB executable, PowerPC or cisco 4500, version 1'},
+    136:{'vendor-class-identifier':'tile_boot',   'arch':'tile',     'filename':'kernel.elf',   'contents':'ELF 64-bit LSB executable, Tilera TILE-Gx, version 1'},
+    137:{'vendor-class-identifier':'ARM__boot',   'arch':'arm',      'filename':'kernel.elf',   'contents':'ELF 32-bit LSB executable, ARM, EABI5 version 1'},
+    138:{'vendor-class-identifier':'MMipsBoot',   'arch':'mmips',    'filename':'kernel.elf',   'contents':'ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1'},
+    139:{'vendor-class-identifier':'ARM64__boot', 'arch':'arm64',    'filename':'kernel.elf',   'contents':'ELF 64-bit LSB executable, ARM aarch64, version 1'},
     #140
     #141
-    142:{'vendor-class-identifier':'',            'arch':'x86',      'alias':'ldlinux',      'file':'ELF 32-bit LSB shared object, Intel 80386, version 1'},
-    143:{'vendor-class-identifier':'',            'arch':'x86',      'alias':'kernel',       'file':'Linux kernel x86 boot executable bzImage, version 5.6.3-64', 'comment':'used instead of #125 if client-system-arch == 00:07 (x86_64)'},
+    142:{'vendor-class-identifier':'',            'arch':'x86',      'filename':'ldlinux.elf',  'contents':'ELF 32-bit LSB shared object, Intel 80386, version 1'},
+    143:{'vendor-class-identifier':'',            'arch':'x86',      'filename':'kernel.efi',   'contents':'Linux kernel x86 boot executable bzImage, version 5.6.3-64', 'comment':'used instead of #125 if client-system-arch == 00:07 (x86_64)'},
     #144
     #145
     #146
     #147
     #148
     #149
-    150:{'vendor-class-identifier':'',            'arch':'x86',      'alias':'disk-drivers.npk', 'file':'data'},
+    150:{'vendor-class-identifier':'',            'arch':'x86',      'filename':'disk-drivers.npk', 'contents':'data'},
 }
 
 if __name__ == '__main__':
@@ -128,5 +201,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.filename is not None and os.path.exists(args.filename):
-        unpack_pefile(args.filename, os.path.join(os.path.dirname(args.filename), f"_{os.path.basename(args.filename)}")
+        unpack_with_lief_or_pefile(args.filename, os.path.join(os.path.dirname(args.filename), f"_{os.path.basename(args.filename)}")
         if args.directory is None else args.directory, args.verbose)
