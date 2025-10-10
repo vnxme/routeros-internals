@@ -1,0 +1,22 @@
+<MAPPING>
+    <RULE NAME="timer" VALUE="timer"/>
+    <RULE NAME="keyboard" VALUE="keyboard"/>
+    <RULE NAME="cascade" VALUE="APIC"/>
+    <RULE NAME="serial" VALUE="serial port"/>
+    <RULE NAME="serial(auto)" VALUE="serial port"/>
+    <RULE NAME="vga+" VALUE="VGA"/>
+    <RULE NAME="fpu" VALUE="FPU"/>
+    <RULE NAME="ide0" VALUE="IDE 1"/>
+    <RULE NAME="ide1" VALUE="IDE 2"/>
+    <RULE NAME="dma1" VALUE="DMA"/>
+    <RULE NAME="dma2" VALUE="DMA"/>
+    <RULE NAME="pic1" VALUE="APIC"/>
+    <RULE NAME="pic2" VALUE="APIC"/>
+    <RULE NAME="dma page reg" VALUE="DMA"/>
+    <RULE NAME="arlan_cs" VALUE="Aironet PCxx00"/>
+    <RULE NAME="wvlan_cs" VALUE="Wavelan 802.11"/>
+    <RULE NAME="sams_cs" VALUE="Samsung 802.11"/>
+    <RULE NAME="mxser" VALUE="Moxa C168"/>
+    <RULE NAME="mxser port" VALUE="Moxa C168"/>
+    <RULE NAME="mxser vector" VALUE="Moxa C168"/>
+</MAPPING>

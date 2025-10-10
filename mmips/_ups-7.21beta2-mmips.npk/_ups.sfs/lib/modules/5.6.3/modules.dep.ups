@@ -1,0 +1,2 @@
+hid-generic:	hid
+usbhid:	hid usbcore

@@ -1,0 +1,50 @@
+name: adventurelog
+descr: AdventureLog is a travel blog and photo journal web application
+page: https://adventurelog.app
+category: productivity
+default-credentials: admin:admin
+services:
+  postgres:
+    image: docker.io/postgres:16
+    command: >
+      bash -c "
+      apt-get update &&
+      apt-get install -y postgresql-16-postgis-3 &&
+      docker-entrypoint.sh postgres
+      "
+    environment:
+      POSTGRES_DB: database
+      POSTGRES_USER: adventure
+      POSTGRES_PASSWORD: changeme123
+    volumes:
+      - adventurelog/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+  backend:
+    image: ghcr.io/seanmorley15/adventurelog-backend:latest
+    ports:
+      - 8016:80:api
+    environment:
+      PGHOST: postgres
+      POSTGRES_DB: database
+      POSTGRES_USER: adventure
+      POSTGRES_PASSWORD: changeme123
+      SECRET_KEY: changeme123
+      DJANGO_ADMIN_USERNAME: admin
+      DJANGO_ADMIN_PASSWORD: admin
+      DJANGO_ADMIN_EMAIL: admin@example.com
+      PUBLIC_URL: http://[accessIP]:8016
+      CSRF_TRUSTED_ORIGINS: http://[accessIP]:8016,http://[accessIP]:8015,http://backend:80,http://frontend:3000
+      DEBUG: "True"
+      FRONTEND_URL: http://frontend:3000
+    volumes:
+      - adventurelog/media:/code/media
+    restart: unless-stopped
+  frontend:
+    image: ghcr.io/seanmorley15/adventurelog-frontend:latest
+    ports:
+      - 8015:3000:web
+    environment:
+      PUBLIC_SERVER_URL: http://backend:80
+      ORIGIN: http://[accessIP]:8015
+      BODY_SIZE_LIMIT: Infinity
+    restart: unless-stopped

@@ -1,0 +1,17 @@
+name: webtop
+descr: Alpine based container containing XFCE desktop environment via any modern web browser.
+page: https://github.com/linuxserver/docker-webtop
+category: productivity
+auto-update: false
+services:
+  webtop:
+    image: lscr.io/linuxserver/webtop:latest
+    container_name: webtop
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TITLE=Webtop
+    volumes:
+      - config:/config
+    ports:
+      - 3010:3001:web-https

@@ -1,0 +1,15 @@
+name: elasticsearch
+descr: open source, distributed search and analytics engine built for speed, scale, and AI applications
+page: https://elastic.co
+category: search
+default-credentials: web setup
+services:
+  elasticsearch:
+    image: docker.io/library/elasticsearch:8.17.6
+    ports:
+      - '5601:5601:web'
+      - '9200:9200:rest api'
+    volumes:
+      - data:/usr/share/elasticsearch/data
+  kibana:
+    image: docker.io/library/kibana:8.17.6

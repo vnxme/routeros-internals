@@ -1,0 +1,12 @@
+name: nocodb
+descr: No-code platform that turns any database into a collaborative workspace
+page: https://nocodb.com
+category: database
+services:
+  nocodb:
+    image: docker.io/nocodb/nocodb:latest
+    ports:
+      - 8090:8080:web
+    volumes:
+      - data:/usr/app/data
+    restart: unless-stopped

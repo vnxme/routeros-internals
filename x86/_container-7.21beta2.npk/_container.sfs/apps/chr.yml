@@ -1,0 +1,20 @@
+name: chr
+descr: Cloud Hosted Router - RouterOS Virtual Machine
+page: https://mikrotik.com/software
+category: networking
+default-credentials: admin:<empty password>
+services:
+  chr:
+    image: docker.io/mikrotik/chr
+    ports:
+      - '6790:80:web'
+    volumes:
+      - diskimage:/diskimage
+    environment:
+      CPUS: 1
+      MEM: 512m
+      DISK: 128M
+networks:
+  default:
+    name: lan
+    external: true

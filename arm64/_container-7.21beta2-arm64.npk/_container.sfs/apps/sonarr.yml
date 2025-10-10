@@ -1,0 +1,14 @@
+name: sonarr
+descr: Sonarr is a personal video recorder tailored for Usenet and BitTorrent users
+icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/sonarr-logo.png
+page: https://sonarr.tv
+category: media
+default-credentials: web setup
+services:
+  sonarr:
+    image: lscr.io/linuxserver/sonarr
+    ports:
+      - '8989:8989:web'
+    volumes:
+      - media:/media
+      - config:/config

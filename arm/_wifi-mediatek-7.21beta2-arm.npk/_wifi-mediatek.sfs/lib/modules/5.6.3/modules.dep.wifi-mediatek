@@ -1,0 +1,6 @@
+mt76-connac-lib:	mt76 cfg80211 mac80211
+mt7996e:	mt76 cfg80211 mt76-connac-lib compat mac80211
+mt76:	mac80211 cfg80211
+cfg80211:	compat c2glue rfkill
+mac80211:	cfg80211 libarc4 compat c2glue
+mt7915e:	mt76 cfg80211 mt76-connac-lib compat mac80211

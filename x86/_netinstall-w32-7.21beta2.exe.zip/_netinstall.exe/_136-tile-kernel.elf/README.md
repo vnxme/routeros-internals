@@ -1,0 +1,21 @@
+### 136-tile-kernel.elf
+#### Identification (`file <*>`):
+```
+ELF 64-bit LSB executable, Tilera TILE-Gx, version 1 (SYSV), statically linked, stripped
+```
+#### Analysis (`binwalk <*>`):
+```
+
+DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+0             0x0             ELF, 64-bit LSB executable, version 1 (SYSV)
+723277        0xB094D         bzip2 compressed data, block size = 900k
+4051453       0x3DD1FD        xz compressed data
+```
+#### Listing (`ls -AlR --time-style=full-iso <*>`):
+```
+/:
+total 2420
+-rw-r--r-- 1 root root 2526720 2025-10-10 21:55:13.865242790 +0100 3dd1fd.cpio
+```
+

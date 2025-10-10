@@ -1,0 +1,147 @@
+name: librenms
+descr: autodiscovering PHP/MySQL-based network monitoring system
+page: https://librenms.org
+category: monitoring
+default-credentials: web setup
+services:
+  db:
+    image: docker.io/mariadb:10
+    command: mysqld --innodb-file-per-table=1 --lower-case-table-names=0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MARIADB_RANDOM_ROOT_PASSWORD: yes
+      MYSQL_DATABASE: librenms
+      MYSQL_USER: librenms
+      MYSQL_PASSWORD: xMAFsyzuo5omOWTaWKAyVTSgsl6V9sYn
+  redis:
+    image: docker.io/valkey/valkey:8
+    command: /bin/sh -c 'valkey-server --appendonly yes --requirepass $VALKEY_PASSWORD'
+    environment:
+      VALKEY_PASSWORD: NCSeL5FiBoA2pXKT1ycGJVcEBV0VEqPN
+  server:
+    image: docker.io/librenms/librenms
+    ports:
+      - 8006:8000:web
+    environment:
+      MEMORY_LIMIT: 256M
+      MAX_INPUT_VARS: 1000
+      UPLOAD_MAX_SIZE: 16M
+      OPCACHE_MEM_SIZE: 128
+      REAL_IP_FROM: 0.0.0.0/32
+      REAL_IP_HEADER: X-Forwarded-For
+      LOG_IP_VAR: remote_addr
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      LIBRENMS_SNMP_COMMUNITY: librenmsdocker
+      LIBRENMS_WEATHERMAP: false
+      LIBRENMS_WEATHERMAP_SCHEDULE: "*/5 * * * *"
+      PUID: 1000
+      GUID: 1000
+      DB_HOST: 127.0.0.1
+      DB_NAME: librenms
+      DB_USER: librenms
+      DB_PASSWORD: xMAFsyzuo5omOWTaWKAyVTSgsl6V9sYn
+      DB_TIMEOUT: 60
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: NCSeL5FiBoA2pXKT1ycGJVcEBV0VEqPN
+    volumes:
+      - data:/data
+  smtpd:
+    image: docker.io/crazymax/msmtpd
+    environment:
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_TLS: on
+      SMTP_STARTTLS: on
+      SMTP_TLS_CHECKCERT: on
+      SMTP_AUTH: on
+      SMTP_USER: foo
+      SMTP_PASSWORD: bar
+      SMTP_FROM: foo@gmail.com
+  dispatcher:
+    image: docker.io/librenms/librenms
+    environment:
+      MEMORY_LIMIT: 256M
+      MAX_INPUT_VARS: 1000
+      UPLOAD_MAX_SIZE: 16M
+      OPCACHE_MEM_SIZE: 128
+      REAL_IP_FROM: 0.0.0.0/32
+      REAL_IP_HEADER: X-Forwarded-For
+      LOG_IP_VAR: remote_addr
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      LIBRENMS_SNMP_COMMUNITY: librenmsdocker
+      LIBRENMS_WEATHERMAP: false
+      LIBRENMS_WEATHERMAP_SCHEDULE: "*/5 * * * *"
+      PUID: 1000
+      GUID: 1000
+      DB_HOST: 127.0.0.1
+      DB_NAME: librenms
+      DB_USER: librenms
+      DB_PASSWORD: xMAFsyzuo5omOWTaWKAyVTSgsl6V9sYn
+      DB_TIMEOUT: 60
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: NCSeL5FiBoA2pXKT1ycGJVcEBV0VEqPN
+      DISPATCHER_NODE_ID: dispatcher1
+      SIDECAR_DISPATCHER: 1
+    volumes:
+      - data:/data
+  syslogng:
+    image: docker.io/librenms/librenms
+    environment:
+      MEMORY_LIMIT: 256M
+      MAX_INPUT_VARS: 1000
+      UPLOAD_MAX_SIZE: 16M
+      OPCACHE_MEM_SIZE: 128
+      REAL_IP_FROM: 0.0.0.0/32
+      REAL_IP_HEADER: X-Forwarded-For
+      LOG_IP_VAR: remote_addr
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      LIBRENMS_SNMP_COMMUNITY: librenmsdocker
+      LIBRENMS_WEATHERMAP: false
+      LIBRENMS_WEATHERMAP_SCHEDULE: "*/5 * * * *"
+      PUID: 1000
+      GUID: 1000
+      DB_HOST: 127.0.0.1
+      DB_NAME: librenms
+      DB_USER: librenms
+      DB_PASSWORD: xMAFsyzuo5omOWTaWKAyVTSgsl6V9sYn
+      DB_TIMEOUT: 60
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: NCSeL5FiBoA2pXKT1ycGJVcEBV0VEqPN
+      SIDECAR_SYSLOGNG: 1
+    volumes:
+      - data:/data
+  snmptrapd:
+    image: docker.io/librenms/librenms
+    environment:
+      MEMORY_LIMIT: 256M
+      MAX_INPUT_VARS: 1000
+      UPLOAD_MAX_SIZE: 16M
+      OPCACHE_MEM_SIZE: 128
+      REAL_IP_FROM: 0.0.0.0/32
+      REAL_IP_HEADER: X-Forwarded-For
+      LOG_IP_VAR: remote_addr
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      LIBRENMS_SNMP_COMMUNITY: librenmsdocker
+      LIBRENMS_WEATHERMAP: false
+      LIBRENMS_WEATHERMAP_SCHEDULE: "*/5 * * * *"
+      PUID: 1000
+      GUID: 1000
+      DB_HOST: 127.0.0.1
+      DB_NAME: librenms
+      DB_USER: librenms
+      DB_PASSWORD: xMAFsyzuo5omOWTaWKAyVTSgsl6V9sYn
+      DB_TIMEOUT: 60
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: NCSeL5FiBoA2pXKT1ycGJVcEBV0VEqPN
+      SIDECAR_SNMPTRAPD: 1
+    volumes:
+      - data:/data
+volumes:
+  data:

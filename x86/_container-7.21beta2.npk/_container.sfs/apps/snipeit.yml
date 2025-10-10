@@ -1,0 +1,87 @@
+name: snipeit
+descr: open source asset management
+page: https://snipeitapp.com
+category: monitoring
+default-credentials: web setup
+services:
+  mariadb:
+    image: docker.io/mariadb:11.4.7
+    container_name: mariadb
+    hostname: mariadb
+    environment:
+      MYSQL_DATABASE: "snipeit"
+      MYSQL_USER: "snipeit"
+      MYSQL_PASSWORD: "rKzCq4EZoC4Up90O4pNfi83dHUbE6O1w"
+      MYSQL_ROOT_PASSWORD: "Ftvo2WuJlZPlw9DGqAq0dz8fxJ7zoQIq"
+    volumes:
+      - db-data:/var/lib/mysql
+  snipeit:
+    image: docker.io/snipe/snipe-it:latest
+    container_name: snipeit
+    hostname: snipeit
+    ports:
+      - 8001:80:web
+    environment:
+      # --------------------------------------------
+      # REQUIRED: BASIC APP SETTINGS
+      # --------------------------------------------
+      APP_KEY: "base64:kCB2+lmCruToGN58cqvJom7j3kedfXIrnqKp9mvU2Mc="
+      APP_URL: "http://[accessIP]:[accessPort]"
+      APP_ENV: production
+      APP_DEBUG: false
+      # Please regenerate the APP_KEY value by calling `docker compose run --rm app php artisan key:generate --show`. Copy paste the value here
+      APP_TIMEZONE: 'UTC'
+      APP_LOCALE: en-US
+      MAX_RESULTS: 500
+
+      # --------------------------------------------
+      # REQUIRED: UPLOADED FILE STORAGE SETTINGS
+      # --------------------------------------------
+      PRIVATE_FILESYSTEM_DISK: local
+      PUBLIC_FILESYSTEM_DISK: local_public
+
+      # --------------------------------------------
+      # REQUIRED: DATABASE SETTINGS
+      # --------------------------------------------
+      DB_HOST: "127.0.0.1"
+      DB_PORT: "3306"
+      DB_CONNECTION: mysql
+      DB_SOCKET: null
+      DB_DATABASE: snipeit
+      DB_USERNAME: snipeit
+      DB_PASSWORD: rKzCq4EZoC4Up90O4pNfi83dHUbE6O1w
+      MYSQL_ROOT_PASSWORD: Ftvo2WuJlZPlw9DGqAq0dz8fxJ7zoQIq
+      DB_PREFIX: null
+      DB_DUMP_PATH: '/usr/bin'
+      DB_DUMP_SKIP_SSL: true
+      DB_CHARSET: utf8mb4
+      DB_COLLATION: utf8mb4_unicode_ci
+
+      # --------------------------------------------
+      # REQUIRED: OUTGOING MAIL SERVER SETTINGS
+      # --------------------------------------------
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      MAIL_USERNAME: null
+      MAIL_PASSWORD: null
+      MAIL_TLS_VERIFY_PEER: true
+      MAIL_FROM_ADDR: you@example.com
+      MAIL_FROM_NAME: 'Snipe-IT'
+      MAIL_REPLYTO_ADDR: you@example.com
+      MAIL_REPLYTO_NAME: 'Snipe-IT'
+      MAIL_AUTO_EMBED_METHOD: 'attachment'
+
+      # --------------------------------------------
+      # REQUIRED: DATA PROTECTION
+      # --------------------------------------------
+      ALLOW_BACKUP_DELETE: false
+      ALLOW_DATA_PURGE: false
+
+      # --------------------------------------------
+      # REQUIRED: IMAGE LIBRARY
+      # This should be gd or imagick
+      # --------------------------------------------
+      IMAGE_LIB: gd
+    volumes:
+      - config:/var/lib/snipeit

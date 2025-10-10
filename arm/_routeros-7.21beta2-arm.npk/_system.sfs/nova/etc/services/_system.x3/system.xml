@@ -1,0 +1,9 @@
+<SERVICES>
+    <SERVICE ID="0" NAME="telnet" PORT="23" PROGRAM="/nova/bin/telnet telnet" AFI="10"/>
+    <SERVICE ID="1" NAME="ftp" PORT="21" PROGRAM="/nova/bin/ftpd  /nova/bin/ftpd /var/pckg"/>
+    <SERVICE ID="2" NAME="www" PORT="80" REDIRECT="70,1"/>
+    <SERVICE ID="6" NAME="www-ssl" SSL="true" PORT="443" REDIRECT="70,1" DISABLED="true"/>
+    <SERVICE ID="7" NAME="api" PORT="8728" FORWARD="48,6"/>
+    <SERVICE ID="8" NAME="winbox" PORT="8291" REDIRECT="2"/>
+    <SERVICE ID="9" NAME="api-ssl" PORT="8729" SSL="true" FORWARD="48,6"/>
+</SERVICES>
