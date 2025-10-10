@@ -92,6 +92,11 @@ process_files <(
   find_files_by_name '*.tar.gz' '*/*'
 ) "${SCRIPT_UNPACK}"
 
+# Unpack ELF files
+process_files <(
+  find_files_by_name 'netinstall-cli' '*/_*.tar.gz/*'
+) "${SCRIPT_UNPACK_NETINSTALL}"
+
 # Unpack EXE.ZIP files
 process_files <(
   find_files_by_name '*.exe.zip' '*/*'
@@ -125,6 +130,7 @@ process_files <(
   find_files_by_name 'image' '*/_*.img.zip/_*.img/part2/var/pdb/*/*'
   find_files_by_name '*.npk' '*/_*.iso/*'
   find_files_by_name '*.npk' '*/_*.exe.zip/_*.exe/*'
+  find_files_by_name '*.npk' '*/_*.tar.gz/_netinstall-cli/*'
 ) "${SCRIPT_UNPACK_NPK}"
 
 # Unpack SFS files
@@ -134,6 +140,7 @@ process_files <(
   find_files_by_name '*.sfs' '*/_*.img.zip/_*.img/part2/var/pdb/*/_image/*'
   find_files_by_name '*.sfs' '*/_*.iso/_*.npk/*'
   find_files_by_name '*.sfs' '*/_*.exe.zip/_*.exe/_*.npk/*'
+  find_files_by_name '*.sfs' '*/_*.tar.gz/_netinstall-cli/_*.npk/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack JG.GZ files
@@ -143,6 +150,7 @@ process_files <(
   find_files_by_name '*-*.jg.gz' '*/_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/home/web/webfig/*'
   find_files_by_name '*-*.jg.gz' '*/_*.iso/_*.npk/_*.sfs/home/web/webfig/*'
   find_files_by_name '*-*.jg.gz' '*/_*.exe.zip/_*.exe/_*.npk/_*.sfs/home/web/webfig/*'
+  find_files_by_name '*-*.jg.gz' '*/_*.tar.gz/_netinstall-cli/_*.npk/_*.sfs/home/web/webfig/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack X3 files
@@ -157,6 +165,8 @@ process_files <(
   find_files_by_name '*.x3' '*/_*.iso/_*.npk/_*.sfs/bndl/*/nova/etc/*/*'
   find_files_by_name '*.x3' '*/_*.exe.zip/_*.exe/_*.npk/_*.sfs/nova/etc/*/*'
   find_files_by_name '*.x3' '*/_*.exe.zip/_*.exe/_*.npk/_*.sfs/bndl/*/nova/etc/*/*'
+  find_files_by_name '*.x3' '*/_*.tar.gz/_netinstall-cli/_*.npk/_*.sfs/nova/etc/*/*'
+  find_files_by_name '*.x3' '*/_*.tar.gz/_netinstall-cli/_*.npk/_*.sfs/bndl/*/nova/etc/*/*'
 ) "${SCRIPT_UNPACK_X3}"
 
 # Unpack bzImage files
@@ -171,6 +181,7 @@ process_files <(
   find_files_by_name '*.EFI' 'x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/*'
   find_files_by_name '*.EFI' 'x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/*'
   find_files_by_name '*-x86-kernel.efi' '*/_*.exe.zip/_*.exe/*'
+  find_files_by_name '*-x86-kernel.efi' '*/_*.tar.gz/_netinstall-cli/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack Image and ELF files (1/2)
@@ -186,12 +197,8 @@ process_files <(
   find_files_by_name 'kernel' 'ppc/_*.npk/*.files/boot/*'
   find_files_by_name 'kernel' 'smips/_*.npk/*.files/boot/*'
   find_files_by_name 'kernel' 'tile/_*.npk/*.files/boot/*'
-  find_files_by_name '*-arm-kernel.elf' '*/_*.exe.zip/_*.exe/*'
-  find_files_by_name '*-arm64-kernel.elf' '*/_*.exe.zip/_*.exe/*'
-  find_files_by_name '*-mipsbe-kernel.elf' '*/_*.exe.zip/_*.exe/*'
-  find_files_by_name '*-mmips-kernel.elf' '*/_*.exe.zip/_*.exe/*'
-  find_files_by_name '*-ppc-*-kernel.elf' '*/_*.exe.zip/_*.exe/*'
-  find_files_by_name '*-tile-kernel.elf' '*/_*.exe.zip/_*.exe/*'
+  find_files_by_name '*-kernel.elf' '*/_*.exe.zip/_*.exe/*'
+  find_files_by_name '*-kernel.elf' '*/_*.tar.gz/_netinstall-cli/*'
   find_files_by_name '*.vmlinux' 'x86/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/*'
   find_files_by_name '*.vmlinux' 'x86/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/*'
   find_files_by_name '*.vmlinux' 'x86/_*.img.zip/_*.img/loop/_linux/*'
@@ -202,6 +209,7 @@ process_files <(
   find_files_by_name '*.vmlinux' 'x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/*'
   find_files_by_name '*.vmlinux' 'x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/*'
   find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-x86-kernel.efi/*'
+  find_files_by_name '*.vmlinux' '*/_*.tar.gz/_netinstall-cli/*-x86-kernel.efi/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack Image and ELF files (2/2)
@@ -215,12 +223,8 @@ process_files <(
   find_files_by_name '*.vmlinux' 'ppc/_*.npk/*.files/boot/_kernel/*'
   find_files_by_name '*.vmlinux' 'smips/_*.npk/*.files/boot/_kernel/*'
   find_files_by_name '*.vmlinux' 'tile/_*.npk/*.files/boot/_kernel/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-arm-kernel.elf/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-arm64-kernel.elf/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-mipsbe-kernel.elf/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-mmips-kernel.elf/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-ppc-*-kernel.elf/*'
-  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-tile-kernel.elf/*'
+  find_files_by_name '*.vmlinux' '*/_*.exe.zip/_*.exe/*-kernel.elf/*'
+  find_files_by_name '*.vmlinux' '*/_*.tar.gz/_netinstall-cli/*-kernel.elf/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack RGZ files
@@ -228,6 +232,7 @@ process_files <(
   find_files_by_name 'initrd.rgz' 'tile/_*.npk/*.files/boot/*'
   find_files_by_name 'initrd.rgz' 'tile/_*.npk/_*.sfs/boot/*'
   find_files_by_name '*-initrd.rgz' '*/_*.exe.zip/_*.exe/*'
+  find_files_by_name '*-initrd.rgz' '*/_*.tar.gz/_netinstall-cli/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack CPIO files
@@ -263,20 +268,14 @@ process_files <(
   find_files_by_name '*.cpio' 'x86/_*.iso/_*.img/loop/_linux.*/_*.vmlinux/*'
   find_files_by_name '*.cpio' 'x86/_*.iso/_*.npk/*.files/boot/EFI/BOOT/_*.EFI/_*.vmlinux/*'
   find_files_by_name '*.cpio' 'x86/_*.iso/_*.npk/_*.sfs/boot/EFI/BOOT/_*.EFI/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-arm-kernel.elf/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-arm-kernel.elf/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-arm64-kernel.elf/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-arm64-kernel.elf/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-mipsbe-kernel.elf/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-mipsbe-kernel.elf/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-mmips-kernel.elf/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-mmips-kernel.elf/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-ppc-*-kernel.elf/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-ppc-*-kernel.elf/_*.vmlinux/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-tile-kernel.elf/*'
-  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-tile-kernel.elf/_*.vmlinux/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-kernel.elf/*'
+  find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-kernel.elf/_*.vmlinux/*'
   find_files_by_name '*.cpio' '*/_*.exe.zip/_*.exe/*-x86-kernel.efi/_*.vmlinux/*'
   find_files_by_name 'initrd' '*/_*.exe.zip/_*.exe/_*-initrd.rgz/*'
+  find_files_by_name '*.cpio' '*/_*.tar.gz/_netinstall-cli/*-kernel.elf/*'
+  find_files_by_name '*.cpio' '*/_*.tar.gz/_netinstall-cli/*-kernel.elf/_*.vmlinux/*'
+  find_files_by_name '*.cpio' '*/_*.tar.gz/_netinstall-cli/*-x86-kernel.efi/_*.vmlinux/*'
+  find_files_by_name 'initrd' '*/_*.tar.gz/_netinstall-cli/_*-initrd.rgz/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack DTB files
@@ -285,6 +284,8 @@ process_files <(
   find_files_by_name '*.dtb' 'mmips/_*.npk/*.files/boot/_kernel/_*.vmlinux/*'
   find_files_by_name '*.dtb' '*/_*.exe.zip/_*.exe/*-arm-kernel.elf/_*.vmlinux/*'
   find_files_by_name '*.dtb' '*/_*.exe.zip/_*.exe/*-mmips-kernel.elf/*'
+  find_files_by_name '*.dtb' '*/_*.tar.gz/_netinstall-cli/*-arm-kernel.elf/_*.vmlinux/*'
+  find_files_by_name '*.dtb' '*/_*.tar.gz/_netinstall-cli/*-mmips-kernel.elf/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack FWF files
@@ -293,4 +294,5 @@ process_files <(
   find_files_by_name '*.fwf' '*/_*.img.zip/_*.img/part2/var/pdb/*/_image/_*.sfs/etc/*'
   find_files_by_name '*.fwf' '*/_*.iso/_*.npk/_*.sfs/etc/*'
   find_files_by_name '*.fwf' '*/_*.exe.zip/_*.exe/_*.npk/_*.sfs/etc/*'
+  find_files_by_name '*.fwf' '*/_*.tar.gz/_netinstall-cli/_*.npk/_*.sfs/etc/*'
 ) "${SCRIPT_UNPACK_FWF}"
