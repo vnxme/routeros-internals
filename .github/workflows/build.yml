@@ -308,14 +308,20 @@ jobs:
         with:
           path: "${{ env.app }}"
 
-      - name: Install requirements leveraging cache
-        id: install_requirements
+      - name: Install required binaries leveraging cache
+        id: install_binaries
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           execute_install_scripts: true
           packages: binutils-common binwalk bzip2 device-tree-compiler genisoimage gzip lz4 lzma lzop qemu-utils rsync xz-utils zip zstd
           version: 1.0
+
+      - name: Install required Python packages
+        id: install_packages
+        if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
+        run: |
+          pip install -r "${{ env.app }}/requirements.txt"
 
       - name: Process files in '${{ env.box }}' directory
         id: process_files
