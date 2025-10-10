@@ -284,7 +284,7 @@ process_files <(
   find_files_by_name '*.dtb' 'arm/_*.npk/*.files/boot/_kernel/_*.vmlinux/*'
   find_files_by_name '*.dtb' 'mmips/_*.npk/*.files/boot/_kernel/_*.vmlinux/*'
   find_files_by_name '*.dtb' '*/_*.exe.zip/_*.exe/*-arm-kernel/_*.vmlinux/*'
-  find_files_by_name '*.dtb' '*/_*.exe.zip/_*.exe/*-mmips-kernel/_*.vmlinux/*'
+  find_files_by_name '*.dtb' '*/_*.exe.zip/_*.exe/*-mmips-kernel/*'
 ) "${SCRIPT_UNPACK}"
 
 # Unpack FWF files
