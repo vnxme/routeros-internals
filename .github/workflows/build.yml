@@ -321,7 +321,7 @@ jobs:
         id: install_packages
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         run: |
-          pip install -r "${{ env.app }}/requirements.txt"
+          sudo pip install -r "${{ env.app }}/requirements.txt"
 
       - name: Process files in '${{ env.box }}' directory
         id: process_files
