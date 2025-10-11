@@ -1,0 +1,12 @@
+arm64/_chr-7.20.1-arm64.img.zip/chr-7.20.1-arm64.img
+arm64/_mikrotik-7.20.1-arm64.iso/efiboot.img
+arm64/mikrotik-7.20.1-arm64.iso
+x86/_chr-7.20.1-legacy-bios.img.zip/chr-7.20.1-legacy-bios.img
+x86/_chr-7.20.1.img.zip/chr-7.20.1.img
+x86/_install-image-7.20.1.img.zip/install-image-7.20.1.img
+x86/_mikrotik-7.20.1.iso/efiboot.img
+x86/_netinstall-w32-7.20.1.exe.zip/netinstall.exe
+x86/chr-7.20.1-legacy-bios.img.zip
+x86/install-image-7.20.1.img.zip
+x86/mikrotik-7.20.1.iso
+x86/netinstall-w32-7.20.1.exe.zip
