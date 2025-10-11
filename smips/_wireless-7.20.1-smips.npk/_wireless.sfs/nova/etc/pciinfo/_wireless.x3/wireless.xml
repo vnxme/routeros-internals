@@ -1,0 +1,8 @@
+<PCI>
+    <DRIVER NAME="a5212_ahb">
+        <DEVICE MODALIAS="cr-wlan" PLATFORM="true"/>
+    </DRIVER>
+    <DRIVER NAME="a9300_ahb">
+        <DEVICE MODALIAS="rb750-wlan" PLATFORM="true"/>
+    </DRIVER>
+</PCI>

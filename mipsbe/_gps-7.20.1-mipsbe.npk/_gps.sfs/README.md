@@ -1,0 +1,44 @@
+### gps.sfs
+#### Identification (`file <*>`):
+```
+Squashfs filesystem, little endian, version 4.0, xz compressed, 16478 bytes, 13 inodes, blocksize: 262144 bytes, created: Fri Oct 10 09:36:08 2025
+```
+#### Listing (`ls -AlR --time-style=full-iso <*>`):
+```
+/:
+total 8
+drwxr-xr-x 3 root root 4096 2025-10-10 10:36:04.000000000 +0100 home
+drwxr-xr-x 4 root root 4096 2025-10-10 10:36:01.000000000 +0100 nova
+
+/home:
+total 4
+drwxr-xr-x 3 root root 4096 2025-10-10 10:36:04.000000000 +0100 web
+
+/home/web:
+total 4
+drwxr-xr-x 2 root root 4096 2025-10-10 10:36:04.000000000 +0100 webfig
+
+/home/web/webfig:
+total 8
+-rw-r--r-- 1 root root 611 2025-10-10 10:36:04.000000000 +0100 gps-9d0f7d1217bc.jg.gz
+-rwxr-xr-x 1 root root  96 2025-10-10 10:36:04.000000000 +0100 gps.info
+lrwxrwxrwx 1 root root  22 2025-10-10 10:36:04.000000000 +0100 gps.jg.gz -> gps-9d0f7d1217bc.jg.gz
+
+/nova:
+total 8
+drwxr-xr-x 2 root root 4096 2025-10-10 10:35:49.000000000 +0100 bin
+drwxr-xr-x 3 root root 4096 2025-10-10 10:36:01.000000000 +0100 lib
+
+/nova/bin:
+total 32
+-rwxr-xr-x 1 root root 31392 2025-10-10 10:35:49.000000000 +0100 gps
+
+/nova/lib:
+total 4
+drwxr-xr-x 2 root root 4096 2025-10-10 10:36:01.000000000 +0100 console
+
+/nova/lib/console:
+total 12
+-rwxr-xr-x 1 root root 12063 2025-10-10 10:36:01.000000000 +0100 1170210816.mem
+```
+

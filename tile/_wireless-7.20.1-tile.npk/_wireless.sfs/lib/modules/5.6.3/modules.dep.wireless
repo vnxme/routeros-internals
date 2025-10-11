@@ -1,0 +1,13 @@
+a9300:	wlan ath flash
+wlan:	c2glue packet_hook
+a5211_pci:	a5211
+a5212_pci:	a5212
+a5212:	wlan ath
+qca9984_pci:	wlan ath flash
+ar9888_pci:	wlan ath
+a9300_pci:	a9300
+capsman:	c2glue packet_hook
+a5416:	wlan ath flash
+a5416_pci:	a5416
+a5211:	ath wlan
+ath:	wlan packet_hook

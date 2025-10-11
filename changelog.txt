@@ -1,0 +1,24 @@
+What's new in 7.20.1 (2025-Oct-10 11:49):
+
+*) bgp - added output.network-blackhole setting;
+*) bgp - do not auto-generate blackhole routes by default (introduced in v7.20);
+*) bgp - fixed inactive flag in GUI after instance disable/enable;
+*) console - fixed ".id" printing when using "group-by" (introduced in v7.20);
+*) console - fixed relative path printing (introduced in v7.20);
+*) ike1 - fixed an issue where policies could be released too early before re-acquisition;
+*) ipsec - improved driver stability;
+*) ipv6,ra - fixed prefix unlinking from interface on configuration change and stop deprecating prefixes when the validity lifetime expires;
+*) lte - fixed issue with firmware update for FG621-EA modem;
+*) ppp - added support for KNOT BG77 modem firmware upgrade to version BG77LAR02A04_A0.301.A0.301;
+*) qos-hw - always use qos-hw-offloading=yes for CRS812 device;
+*) quickset - fixed issue where routes set by QuickSet did not appear in export;
+*) route - improved stability;
+*) routerboard - fixed non-running interfaces for CRS310-8G+2S+IN after booting to SwOS ("/system routerboard upgrade" required) (introduced in v7.20);
+*) sfp - improved interface link speed configuration for CRS812;
+*) snmp - fixed SNMP trap messages being corrupted when sent to multiple targets;
+*) switch - fixed "failure: cpu flow control not supported" (introduced in v7.20);
+*) webfig - fixed form closing with saving when pressing Enter key (introduced in v7.20);
+*) webfig - fixed interface settings and graphs (introduced in v7.20);
+*) webfig - improved container form loading performance when router has a lot of files;
+*) winbox - fixed WinBox 3 application failure when opening IPv6/Firewall/Connection entry (introduced in v7.20);
+*) www - improved stability (CVE-2025-10948);

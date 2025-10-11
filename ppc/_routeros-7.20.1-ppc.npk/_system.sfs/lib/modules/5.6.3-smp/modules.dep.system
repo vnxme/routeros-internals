@@ -1,0 +1,126 @@
+x_tables
+x_tables
+ip_tunnel
+nls_utf8:	nls_base
+packet_hookx_tables
+mpls_router
+ip6_tablesx_tables
+rb:	flash
+x_tables
+x_tables
+snifx_tables
+x_tables
+ulogx_tables
+nf_natx_tables
+romon:	packet_hook
+nls_cp437:	nls_base
+ulogx_tables
+nf_natnf_conntrack_rtsp
+mesh:	packet_hook
+x_tables
+x_tables
+x_tables
+panics:	flash
+gianfar:	switch packet_hook
+x_tables
+nf_natx_tables
+virtio_net:	net_failover
+arc4:	libarc4
+dot1x:	packet_hook
+aths16:	flash phy_helper switch
+x_tables
+caamalg_desc:	error
+nls_iso8859-1:	nls_base
+nf_reject_ipv6x_tables
+x_tables
+ip6_tablesx_tables
+libchacha20poly1305:	libchacha libpoly1305
+imq:	cls_fw cls_linear
+x_tables
+cifs:	libarc4 libdes nls_base
+atl1c:	packet_hook
+x_tables
+x_tables
+x_tables
+nfnetlink
+vfat:	fat nls_base
+fat:	nls_base
+x_tables
+x_tables
+packet_hookx_tables
+rsa_generic:	asn1_decoder mpi
+x_tables
+des_generic:	libdes
+ath8327:	flash phy_helper switch
+x_tables
+wireguard:	libblake2s libchacha20poly1305 libcurve25519-generic udp_tunnel ip6_udp_tunnel
+x_tables
+x_tables
+x_tables
+x_tables
+xfrm_algo
+talitos:	libdes
+x_tables
+x_tables
+x_tables
+x_tables
+mrp
+nf_natnf_conntrack_tftp
+ebtables
+ebtables
+ksmbd:	asn1_decoder nls_base oid_registry
+nf_natx_tables
+x_tables
+nf_natx_tables
+net_failover:	failover
+of_mmc_spi:	mmc_core
+nf_natnf_conntrack_sip
+nf_natnf_conntrack_irc
+mmc_spi:	crc7 crc-itu-t mmc_core of_mmc_spi
+switch:	packet_hook phy_helper
+mmc_block:	mmc_core
+x_tables
+x_tables
+x_tables
+mpls_fp:	packet_hook mpls_router
+caam_jr:	caam error caamalg_desc caamhash_desc libdes rsa_generic
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+ntfs3:	nls_base
+exfat:	nls_base
+packet_hookswitch
+xfrm_algo
+x_tables
+x_tables
+x_tables
+caamhash_desc:	error
+ip6_tablesx_tables
+ip6_tablesnf_nat
+nf_natx_tables
+dpa:	switch phy_helper
+x_tables
+x_tables
+bridge2
+libblake2s:	libblake2s-generic
+ip_tablesx_tables
+nf_natnf_conntrack_ftp
+traffic_gen:	packet_hook
+ext4:	mbcache jbd2
+nf_reject_ipv4x_tables
+x_tables
+nf_natnf_conntrack_pptp
+nf_natnf_conntrack_h323
+ip_tablesx_tables
+nf_natx_tables
+snifx_tables
+ip_tablesx_tables
+ip_tablesnf_nat
+caam:	error
+vxlan2:	packet_hook udp_tunnel ip6_udp_tunnel

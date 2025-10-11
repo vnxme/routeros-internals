@@ -1,0 +1,67 @@
+-- *****************************************************************
+-- COLUBRIS-SMI.my:  Colubris Networks Enterprise Structure of Management
+--                   Information
+--
+-- November 2001
+--
+-- Copyright (c) 2000, 2001, 2002  by Colubris Networks, Inc.
+-- All rights reserved.
+-- 
+-- *****************************************************************
+--
+
+COLUBRIS-SMI DEFINITIONS ::= BEGIN
+
+IMPORTS
+	MODULE-IDENTITY,
+	OBJECT-IDENTITY,
+	enterprises
+		FROM SNMPv2-SMI;
+
+colubris MODULE-IDENTITY
+	LAST-UPDATED "200111090000Z"
+	ORGANIZATION "Colubris Networks, Inc."
+	CONTACT-INFO
+		"	Colubris Networks
+
+		Postal: 420 Armand-Frappier, Suite 200
+			Laval, QC  H7V 4B4
+			CANADA
+
+		   Tel: +1 450 680-1661
+
+		E-mail: cn-snmp@colubris.com"
+	DESCRIPTION
+		"Initial version of this MIB module."
+	::= { enterprises 8744 }	-- assigned by IANA
+
+
+colubrisProducts OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION
+		"colubrisProducts is the root OBJECT IDENTIFIER from
+		which sysObjectID values are assigned. Actual
+		values are defined in COLUBRIS-PRODUCTS-MIB."
+	::= { colubris 1 }
+
+colubrisMgmt OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION
+		"colubrisMgmt is the main subtree for new mib development."
+	::= { colubris 2 }
+
+colubrisExperiment OBJECT-IDENTITY
+	STATUS	current
+	DESCRIPTION
+		"colubrisExperiment is the main subtree for experimental mib
+		development."
+	::= { colubris 3 }
+
+colubrisModules OBJECT-IDENTITY
+        STATUS  current
+        DESCRIPTION
+                "colubrisModules provides a root object identifier
+                from which MODULE-IDENTITY values may be assigned."
+        ::= { colubris 4 }
+	
+END
