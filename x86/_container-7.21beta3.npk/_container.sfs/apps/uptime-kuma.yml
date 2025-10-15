@@ -1,0 +1,13 @@
+descr: A self-hosted monitoring tool
+page: https://uptime.kuma.pet
+category: monitoring
+default-credentials: web setup
+services:
+  uptime-kuma:
+    image: docker.io/louislam/uptime-kuma:1
+    volumes:
+      - data:/app/data
+    ports:
+      # <Host Port>:<Container Port>
+      - 3002:3001:web
+    restart: unless-stopped

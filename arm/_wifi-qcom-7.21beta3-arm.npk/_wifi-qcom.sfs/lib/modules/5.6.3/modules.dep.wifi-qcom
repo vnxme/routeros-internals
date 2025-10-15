@@ -1,0 +1,7 @@
+monitor:	umac wifi_3_0 qdf qca_ol
+rfkill
+qca_spectral:	cfg80211 qdf umac
+qca_ol:	umac qdf cfg80211 mem_manager c2glue ipq_cnss2 qca_spectral
+qdf:	cfg80211
+wifi_3_0:	qdf qca_ol umac
+umac:	qdf cfg80211 c2glue

@@ -1,0 +1,12 @@
+name: fossil
+descr: simple, high-reliability, distributed SCM (Software Configuration Management) system
+page: https://fossil-scm.org
+category: productivity
+default-credentials: addmin:<check logs for default password>
+services:
+  fossil:
+    image: docker.io/tangentsoft/fossil
+    volumes:
+      - museum:/museum
+    ports:
+      - "9999:8080:web"

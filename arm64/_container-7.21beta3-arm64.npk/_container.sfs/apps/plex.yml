@@ -1,0 +1,21 @@
+name: plex
+descr: Plex organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices
+page: https://plex.tv
+category: media
+url-path: /web
+icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/plex-logo.png
+default-credentials: web setup
+services:
+  plex:
+    image: lscr.io/linuxserver/plex
+    ports:
+      - '32400:32400:web'
+    volumes:
+      - media:/media
+      - config:/config
+    environment:
+      PLEX_CLAIM: go to https://account.plex.tv/claim to get your claim token and paste it here
+networks:
+  default:
+    name: lan
+    external: true

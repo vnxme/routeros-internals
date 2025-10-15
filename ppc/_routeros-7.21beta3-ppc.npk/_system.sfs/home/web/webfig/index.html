@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RouterOS</title>
+<link href="/assets/style-ae67df160dad.css" rel="stylesheet">
+<link href="/favicon.png" rel="icon">
+<link href="/favicon.svg" rel="icon">
+<script>
+  if (location.pathname.endsWith("/webfig")) location.href = "/webfig/";
+</script>
+<script src="curve255-541e54a862be.js"></script>
+</head>
+<div id="startup" class="startup">Loading</div>
+
+<div id="page" class="grid">
+
+<header>
+  <button id="MenuSwitch" type="button"
+          class="btn btn-icon btn-outline btn-MenuSwitch"
+          title="Minimize side menu" aria-pressed="false">
+    <span class="icon icon-sm icon-ChevronSmall_12x12"></span>
+  </button>
+  <div id="identity" class="identity"></div>
+  <div role="status" aria-live="off" class="traffic" id="status" style="width:9em"></div>
+  <!--safe & apps-->
+  <div class="d-none d-lg-block">
+    <div class="d-inline-flex align-items-center gap-inner-base">
+      <ul id="undo-redo" role="toolbar" aria-label="Reverting" class="d-flex gap-inner-xxs focus-flash">
+        <li><button id="undo-button" class="btn btn-outline btn-icon"><span class="icon icon-Undo"></span></button></li>
+        <li><button id="redo-button" class="btn btn-outline btn-icon"><span class="icon icon-Redo"></span></button></li>
+      </ul>
+      <div aria-label="Guardrail" class="check-group">
+        <div class="check">
+          <input id="safe-mode" class="switch" type="checkbox" role="switch">
+          <label for="safe-mode"><b>Safe Mode</b></label>
+        </div>
+      </div>
+      <nav class="btn-switch-group focus-flash" role="menubar" aria-label="Applications">
+        <a role="menuitemradio" tabindex="-1" class="btn btn-white btn-icon-txt" aria-checked="false" href="#Quick_Set" id="id_Quick_Set">
+          <span class="icon icon-Quick_Set"></span><span data-name="Quick Set">Quick Set</span>
+        </a>
+        <a role="menuitemradio" tabindex="-1" class="btn btn-white btn-icon-txt" aria-checked="false" href="#WebFig" id="id_WebFig">
+          <span class="icon icon-Advanced"></span><span data-name="Advanced">Advanced</span>
+        </a>
+        <a role="menuitemradio" tabindex="-1" class="btn btn-white btn-icon-txt" aria-checked="false" href="#Terminal" id="id_Terminal">
+          <span class="icon icon-Terminal"></span><span data-name="Terminal">Terminal</span>
+        </a>
+      </nav>
+    </div>
+  </div>
+  <!--notification & more-->
+  <div class="d-flex gap-inner-sm">
+    <!-- <button class="btn btn-notification btn-icon"><span class="icon icon-Bell"></span></button> -->
+    <div class="btn-select-wrap btn-select-clean">
+      <button id="genMenuButton" class="btn btn-outline btn-icon btn-select" aria-expanded="false"
+              title="General menu" aria-haspopup="true" aria-controls="genMenu">
+        <span class="icon icon-Threedots"></span>
+      </button>
+      <div class="btn-select-drop" style="left: auto; right: 0" role="menu" aria-labelledby="genMenuButton">
+        <ul role="presentation" id="genMenu">
+          <li class="d-lg-none">
+            <button role="menuitem" class="btn btn-icon-txt" id="undo-item" tabindex="-1"><span class="icon icon-Undo"></span>Undo</button>
+          </li>
+          <li class="d-lg-none">
+            <button role="menuitem" class="btn btn-icon-txt" id="redo-item" tabindex="-1"><span class="icon icon-Redo"></span>Redo</button>
+          </li>
+          <li class="sep d-lg-none"></li>
+          <li>
+            <a role="menuitem" class="btn btn-icon-txt" href="#SkinDesigner" id="design-skin" tabindex="-1">
+              <span class="icon icon-Design_Skin"></span>Design Skin</a>
+          </li>
+          <li class="d-lg-none">
+            <label for="safe-mode-2">
+              <span class="btn btn-icon-txt">
+                <span class="icon icon-Safe_Mode"></span>
+                <span>Safe Mode</span>
+                <input role="switch" id="safe-mode-2" class="switch" type="checkbox" tabindex="-1">
+              </span>
+            </label>
+          </li>
+          <li class="sep"></li>
+          <li>
+            <label for="show-passwords">
+              <span class="btn btn-icon-txt">
+                <span class="icon icon-Password"></span>
+                <span>Show Passwords</span>
+                <input id="show-passwords" class="switch" type="checkbox" tabindex="-1">
+              </span>
+            </label>
+          </li>
+          <li class="sep"></li>
+          <li>
+            <a role="menuitem" class="btn btn-icon-txt" href="https://help.mikrotik.com"
+               target="_blank" id="help" tabindex="-1">
+              <span class="icon icon-Help"></span>Help Center</a>
+          </li>
+          <li>
+            <a role="menuitem" class="btn btn-icon-txt" href="https://mt.lv/apps"
+               target="_blank" id="winbox" tabindex="-1">
+              <span class="icon icon-Software"></span>Get Apps</a>
+          </li>
+          <li class="sep"></li>
+          <li>
+            <a role="menuitem" class="btn btn-icon-txt" href="#About" id="about" tabindex="-1">
+              <span class="icon icon-About"></span>About</a>
+          </li>
+          <li>
+            <a role="menuitem" class="btn btn-icon-txt" id="reboot" href="#System:Reboot" tabindex="-1">
+              <span class="icon icon-Reboot"></span>Reboot</a>
+          </li>
+          <li class="sep"></li>
+          <li>
+            <button role="menuitem" class="btn btn-icon-txt" id="logout" tabindex="-1">
+              <span class="icon icon-Exit"></span>Logout</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!--skin toolbar-->
+  <div id="skin-toolbar"></div>
+</header>
+
+
+<nav class="sidenav">
+  <!--burger menu-->
+  <div class="burger">
+    <button id="Burger" class="btn btn-white btn-icon btn-BurgerSwitch"
+            aria-haspopup="true" aria-controls="app-nav" title="Feature menu"
+            aria-pressed="false">
+      <span class="icon"></span>
+    </button>
+  </div>
+  <!--menu-->
+
+  <img id="logo" src="/logo.png" alt="" class="logo">
+  <div id="mobile-nav" class="menu-wrap">
+    <nav id="nav-menu" class="menu focus-flash" role="menu" aria-label="Features">
+      <ul role="presentation" id="nav-menu-list" class="level-1">
+        <li>
+          <span class="group">
+            <button role="menuitem" id="search-button" title="Ctrl + K" tabindex="-1">
+              <span class="icon icon-Find"></span>
+              <span class="text" data-name="Search">Search</span>
+            </button>
+          </span>
+        </li>
+      </ul>
+    </nav>
+    <nav role="menubar" class="w-100" aria-label="Applications" id="app-nav">
+      <ul role="presentation" class="dock">
+        <li>
+          <span class="icon icon-Quick_Set"></span>
+          <a role="menuitemradio" href="#Quick_Set" id="id_Quick_Set_alt" aria-checked="false">QuickSet</a>
+        </li>
+        <li class="active">
+          <span class="icon icon-Advanced"></span>
+          <a role="menuitemradio" href="#WebFig" id="id_WebFig_alt" aria-checked="false">Advanced</a>
+        </li>
+        <li>
+          <span class="icon icon-Terminal"></span>
+          <a role="menuitemradio" href="#Terminal" id="id_Terminal_alt" aria-checked="false">Terminal</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</nav>
+
+<main>
+</main>
+
+<div id="notification-area" class="notifications"></div>
+<dialog id="search-dialog" class="modal modal-search">
+  <header class="bg-bright">
+    <form autocomplete="off" role="search" class="search-input grow-1">
+      <span class="icon icon-Find"></span>
+      <input id="menu-search-input" type="search" value="" placeholder="Search configuration" autofocus>
+    </form>
+    <div class="flex-none">
+      <button tabindex="1" class="btn btn-icon btn-white" onclick="this.closest('dialog').close()"
+              title="Esc"><span class="icon icon-xs icon-Close_12x12"></span></button>
+    </div>
+  </header>
+  <nav class="hide-empty">
+    <h2>Search results</h2>
+    <ul id="menu-search-results"></ul>
+  </nav>
+  <nav class="hide-empty">
+    <h2>Pinned</h2>
+    <ul id="menu-pinned-list"></ul>
+  </nav>
+</dialog>
+</div>
+<dialog id="exclusive-popup" class="modal">
+  <header>
+    <div class="grow-1"><h2></h2></div>
+    <div class="flex-none">
+      <button class="btn btn-icon btn-white" onclick="this.closest('dialog').close()" title="Esc">
+        <span class="icon icon-xs icon-Close_12x12"></span>
+      </button>
+    </div>
+  </header>
+  <section></section>
+</dialog>
+
+
+<template id="side-menu-item-lvl1">
+  <li>
+    <span class="group">
+      <a role="menuitem" tabindex="-1">
+        <span class="icon"></span>
+        <span class="text"></span>
+      </a>
+    </span>
+  </li>
+</template>
+<template id="side-menu-item-lvl2">
+  <li class="parent">
+    <span class="group">
+      <button role="menuitem" aria-expanded="false" aria-haspopup="true">
+        <span class="icon"></span>
+        <span class="text"></span>
+      </button>
+      <ul role="menu" class="level-2"></ul>
+    </span>
+  </li>
+</template>
+<template id="side-menu-subitem-lvl2">
+  <li role="presentation">
+    <a role="menuitem" tabindex="-1"></a>
+  </li>
+</template>
+
+<!-- CONTAINER TEMPLATES
+  Types of containers:
+* map: table and it's items
+* item: e.g. clock
+* action: bandwith test, speed test
+* query: like action, but with table output
+* selector: quickset
+* doit: reboot, chagne pwd
+* terminal
+* alias: probly looks up another container
+* status: skin produced status page
+* setup: wizzard, IP:DHCP_Server.DHCP_Setup and Hotspot Setup
+-->
+
+<!--container for the map type table view-->
+<template id="table-container">
+  <!--window-->
+  <div class="wndw">
+    <!--titlebar-->
+    <div id="titlebar" class="wndw--titlebar bg-medium">
+      <div class="d-flex gap-inner-sm align-items-center min-w-0 grow-1">
+        <div class="d-inline-flex align-items-center">
+          <div id="title-icon" class="wndw--titlebar--icon icon"></div>
+          <h1 id="title" class="wndw--titlebar--title"></h1>
+        </div>
+        <div id="tab-container" class="min-w-0">
+          <nav class="tabs-nav d-none d-lg-block">
+            <ul id="tabs" class="tabs" role="tablist" aria-labelledby="title"></ul>
+          </nav>
+          <div class="btn-select-wrap d-lg-none">
+            <button id="tablist" class="btn btn-white btn-select" aria-controls="dropdown-tabs" aria-expanded="false"></button>
+            <nav class="btn-select-drop">
+              <ul id="dropdown-tabs" role="tablist" aria-labelledby="title" aria-orientation="vertical" aria-></ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+      <div>
+        <button id="container-pin" class="btn btn-icon btn-extra flex-none" title="Pin to search results">
+          <span class="icon icon-sm icon-Pin_12x12 unpinned"></span>
+        </button>
+      </div>
+    </div>
+    <!--table-tools-->
+    <div class="wndw--tools">
+      <ul id="controls" role="toolbar" aria-label="Table tools" class="f-row focus-flash">
+        <li id="new-button"></li>
+        <li>
+          <button id="enable-btn" class="btn btn-icon-txt" disabled hidden>
+            <span class="icon-bg bg-green" title="Enable">
+              <span class="icon icon-xs icon-Play_12x12-rev"></span>
+            </span>
+            Enable
+          </button>
+        <li>
+        </li>
+          <button id="disable-btn" class="btn btn-icon-txt" disabled hidden>
+            <span class="icon-bg bg-dark" title="Disable">
+              <span class="icon icon-xs icon-Pause_12x12-rev"></span>
+            </span>
+            Disable
+          </button>
+        <li>
+        </li>
+          <button id="remove-btn" class="btn btn-icon-txt" disabled hidden>
+            <span class="icon-bg bg-red" title="Remove">
+              <span class="icon icon-xs icon-Close_12x12-rev"></span>
+            </span>
+            Remove
+          </button>
+        <li>
+        </li>
+          <button id="move-btn" class="btn btn-icon-txt" disabled hidden>
+            <span class="icon icon-xs icon-MoveVertical"></span>
+            Move
+          </button>
+        </li>
+      </ul>
+      <div class="d-flex gap-inner-sm align-items-center grow-1">
+        <div id="statusbar" class="statusbar"></div>
+        <div class="quick-filter">
+          <select id="quick-filter"></select>
+        </div>
+      </div>
+    </div>
+    <div id="c-m-toolbar"></div>
+    <!--table-->
+    <div id="content" class="content" role="tabpanel">
+      <!--table-tools-->
+      <div role="none" class="panel">
+        <table id="main-table" class="table focus-flash" role="grid">
+          <thead><tr id="main-table-head"></tr></thead>
+        </table>
+      </div>
+      <!--container-toolbar goes here-->
+      <div id="c-toolbar"></div>
+    </div>
+  </div>
+</template>
+<template id="service-tab">
+<li role="presentation">
+  <a class="btn btn-white" role="tab" aria-selected="false" tabindex="-1"></a>
+</li>
+</template>
+<!--container for the form views-->
+<template id="item-container">
+  <!--window-->
+  <div class="form--item-width">
+    <!--titlebar-->
+    <div class="form--titlebar">
+      <div id="title-icon" class="wndw--titlebar--icon icon"></div>
+      <ul class="breadcrumbs">
+        <li><h1 id="title"></h1></li>
+        <li id="itemname"></li>
+      </ul>
+      <div id="adv-placeholder"></div>
+      <button id="container-pin" class="btn btn-icon btn-extra flex-none" title="Pin to search results">
+        <span class="icon icon-sm icon-Pin_12x12 unpinned"></span>
+      </button>
+      <button class="btn btn-icon btn-FormSwitch" onclick="expandForm()" title="Expand form">
+        <span class="icon"></span>
+      </button>
+    </div>
+    <div id="c-m-toolbar"></div>
+    <div id="alert" class="alert"></div>
+    <div class="content">
+      <form class="panel" autocapitalize="off" autocorrect="off">
+        <div id="content" class="form--panel-scroll custom-scrollbar" autocomplete="off">
+          <!--form:statusbar-->
+          <div class="d-flex gap-inner-base align-items-center">
+            <div id="statusbar" class="form--statusbar"></div>
+          </div>
+          <div class="form--items">
+            <!--acc-list-->
+            <div id="itemList" class="acc-list"></div>
+          </div>
+          <!--form:confirm-->
+          <div id="query-output"></div>
+        </div>
+        <div id="control-buttons"></div>
+      </form>
+      <!--container-toolbar goes here-->
+      <div id="c-toolbar"></div>
+    </div>
+  </div>
+</template>
+
+<template id="terminal-container">
+  <h1 id="title" style="opacity: 0; max-height: 0;"></h1>
+  <div id="terminal" class="terminal" contenteditable="true"
+       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+       aria-description="Consider using a dedicated terminal client for a screenreader support">
+  </div>
+  <div class="statusbar">Press Shift + Tab to leave the terminal</div>
+</template>
+
+<template id="skin-designer-container">
+  <div id="content" class="designcontent">
+    <div class="designheader">
+      <h1 id="title">Skin Designer</h1>
+      <p>This is where you hide elements from the users, translate interface and more.</p>
+      <div>
+        <div class="designtools">
+          Skin: <select id="baseline" size="1"></select>
+          Name: <input id="name" type="text" value="default">
+          <button id="reset" class="btn btn-gray">Clear</button>
+          <button id="save" class="btn btn-wide btn-dark-green">Save</button>
+        </div>
+      </div>
+    </div>
+    <div class="designtable">
+      <table id="designTable">
+        <thead>
+          <tr>
+            <th>Name
+            <th>Type
+            <th>Title
+            <th>Read-only
+            <th>Note
+            <th>Limit
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</template>
+
+<template id="container-toolbar">
+  <div class="toolbar d-none d-lg-block hide-empty">
+    <!--sidetools-mobile-switch-->
+    <section class="hide-empty">
+      <div class="d-flex gap-inner-xs align-items-center">
+        <span class="icon icon-Action"></span><h2 id="action-heading">Actions</h2>
+      </div>
+      <div class="focus-flash">
+        <ul id="action" role="toolbar" aria-labelledby="action-heading" aria-orientation="vertical"></ul>
+      </div>
+    </section>
+    <section class="hide-empty">
+      <div class="d-flex gap-inner-xs align-items-center">
+        <span class="icon icon-Configuration"></span><h2 id="config-heading">Configuration</h2>
+      </div>
+      <div class="focus-flash">
+        <ul id="config" role="toolbar" aria-labelledby="config-heading" aria-orientation="vertical"></ul>
+      </div>
+    </section>
+  </div>
+</template>
+<template id="container-compact-toolbar">
+  <div class="wndw--tools d-lg-none hide-empty">
+    <div class="select-wrap hide-empty">
+      <select id="m-action" tabindex="-1" aria-labelledby="m-action-button"></select>
+      <button type="button" class="btn btn-icon-txt" id="m-action-button" aria-controls="m-action">
+        <span class="icon icon-Action"></span>Actions
+      </button>
+    </div>
+    <div class="select-wrap hide-empty">
+      <select id="m-config" tabindex="-1" aria-labelledby="m-config-button"></select>
+      <button type="button" class="btn btn-icon-txt" id="m-config-button" aria-controls="m-config">
+        <span class="icon icon-Configuration"></span>Configuration
+      </button>
+    </div>
+  </div>
+</template>
+<template id="container-item-controls">
+  <div id="confirmButtons" class="form--confirm shadow-panel-top">
+    <div>
+      <button type="button" id="CloseButton" class="btn btn-red btn-md">Cancel</button>
+    </div>
+    <div>
+      <button type="submit" id="ApplyButton" class="btn btn-light-green btn-wide">Apply</button>
+      <button type="button" id="OkButton" class="btn btn-dark-green btn-wide">OK</button>
+    </div>
+    <div id="errorField" class="errorMessage"></div>
+  </div>
+</template>
+<template id="container-doit-controls">
+  <div id="confirmButtons" class="form--confirm shadow-panel-top">
+    <div>
+      <button type="button" id="CloseButton" class="btn btn-red btn-md">Cancel</button>
+    </div>
+    <div>
+      <button type="submit" id="DoButton" class="btn btn-dark-green btn-wide">OK</button>
+    </div>
+    <div id="errorField" class="errorMessage"></div>
+  </div>
+</template>
+<template id="container-single-controls">
+  <div id="confirmButtons" class="form--confirm shadow-panel-top">
+    <div></div>
+    <div>
+      <button type="submit" id="ApplyButton" class="btn btn-dark-green btn-wide">Apply</button>
+    </div>
+    <div id="errorField" class="errorMessage"></div>
+  </div>
+</template>
+<template id="container-setup-controls">
+  <div id="confirmButtons" class="form--confirm shadow-panel-top">
+    <div>
+      <button type="button" id="CloseButton" class="btn btn-red btn-md">Cancel</button>
+    </div>
+    <div>
+      <button type="button" id="BackButton" class="btn btn-light-green btn-wide">Back</button>
+      <button type="submit" id="NextButton" class="btn btn-dark-green btn-wide">Next</button>
+    </div>
+    <div id="errorField" class="errorMessage"></div>
+  </div>
+</template>
+<template id="container-action-controls">
+  <div id="confirmButtons" class="form--confirm shadow-panel-top">
+    <div>
+      <button type="button" id="CloseButton" class="btn btn-red btn-md">Back</button>
+    </div>
+    <div>
+      <button type="submit" id="StartButton" class="btn btn-dark-green btn-wide">Start</button>
+    </div>
+    <div id="errorField" class="errorMessage"></div>
+  </div>
+</template>
+<template id="container-query-output">
+  <div class="acc-list">
+    <div class="acc">
+      <h2 class="acc-title">
+        <button type="button" id="output-tab" aria-expanded="true">Output</button>
+      </h2>
+      <div class="acc-cont" role="region">
+        <div id="statusbar"></div>
+        <table id="main-table" class="table focus-flash" role="grid">
+          <thead><tr id="main-table-head"></tr></thead>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+<template id="item-tab-block">
+  <section class="acc">
+    <h2 class="acc-title">
+      <button type="button" aria-expanded="true"></button>
+    </h2>
+    <div class="acc-cont"></div>
+  </section>
+</template>
+
+<template id="button-icon-txt">
+  <button type="button" class="btn btn-icon-txt"><span class="icon"></span></button>
+</template>
+<template id="link-icon-txt">
+  <a class="btn btn-icon-txt"><span class="icon"></span></a>
+</template>
+<template id="button-icon-menu">
+  <div class="select-wrap">
+    <select></select>
+    <button type="button" class="btn btn-icon-txt"><span class="icon"></span></button>
+  </div>
+</template>
+
+<!-- widgets -->
+<template id="form-combobox">
+  <div class="combobox">
+    <div class="combobox-input-group">
+      <input type="text" autocomplete="off" aria-autocomplete="none" aria-expanded="false"
+             role="combobox" aria-haspopup="listbox">
+      <button type="button" class="btn btn-input" tabindex="-1"
+              aria-label="Presets" aria-expanded="false"></button>
+    </div>
+    <ul id="cb-dropdown-" role="listbox" aria-label="Presets" tabindex="-1" hidden></ul>
+  </div>
+</template>
+<template id="form-switch">
+  <div class="check">
+    <input class="switch" type="checkbox">
+    <label></label>
+  </div>
+</template>
+<template id="form-secret">
+  <div class="f-row">
+    <!-- seret field placeholder -->
+    <div class="f-row check-group">
+      <input type="checkbox" class="check" checked>
+      <label>Hide</label>
+    </div>
+  </div>
+</template>
+<template id="notification-card">
+  <div role="status" class="message animate-fadeinup">
+    <div class="message-body">
+      <div class="message-header"></div>
+    </div>
+    <div class="message-close">
+      <button class="btn btn-icon btn-sm btn-darken-15" title="Remove">
+        <span class="icon icon-xs icon-Close_12x12-rev"></span>
+      </button>
+    </div>
+  </div>
+</template>
+<template id="splash">
+  <div class="splash">
+    <div class="splash-content">
+      <p><span class="icon"></span></p>
+    </div>
+  </div>
+</template>
+<template id="search-result-item">
+  <li>
+    <a class="btn btn-icon-txt grow-1" href="">
+      <span class="icon flex-none"></span>
+      <span class="grow-1 search-link"></span>
+      <button class="btn btn-icon btn-extra flex-none" tabindex="-1" title="Pin to search results">
+        <span class="icon icon-xs icon-Pin_12x12"></span>
+      </button>
+    </a>
+  </li>
+</template>
+
+<script>
+  function expandForm() {document.body.classList.toggle("serve--form-full")};
+</script>
+<script src="master-3be2f4ce2a96.js"></script>

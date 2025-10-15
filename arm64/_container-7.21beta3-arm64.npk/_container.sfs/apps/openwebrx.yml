@@ -1,0 +1,16 @@
+name: openwebrx
+descr: a simple web-based software defined radio receiver
+page: https://github.com/jketterl/openwebrx
+category: radio
+default-credentials: admin:password
+services:
+  openwebrx:
+    image: docker.io/jketterl/openwebrx-full:latest
+    ports:
+      - 8073:8073:web
+    environment:
+      OPENWEBRX_ADMIN_USER: admin
+      OPENWEBRX_ADMIN_PASSWORD: password
+      S6_KEEP_ENV: 1
+    volumes:
+      - data:/var/lib/openwebrx

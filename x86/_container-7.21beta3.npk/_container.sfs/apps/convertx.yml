@@ -1,0 +1,16 @@
+name: convertx
+descr: ConvertX is a self-hosted online file converter
+page: https://github.com/c4illin/convertx
+category: productivity
+default-credentials: web setup
+services:
+  convertx:
+    image: ghcr.io/c4illin/convertx
+    ports:
+      - 3008:3000:web
+    environment:
+      JWT_SECRET: aLongAndSecretStringUsedToSignTheJSONWebToken4234
+      HTTP_ALLOWED: true
+    volumes:
+      - convertx/data:/app/data
+    restart: unless-stopped

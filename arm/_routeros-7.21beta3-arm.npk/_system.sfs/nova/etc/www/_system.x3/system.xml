@@ -1,0 +1,30 @@
+<SERVERS>
+    <SERVER NAME="www-ssl" SSL="true">
+        <SERVLET TYPE="index" PATH="/" FILE="true" DEPEND_ON="/apps,/assets/"/>
+        <SERVLET TYPE="jsproxy" PATH="/jsproxy"/>
+        <SERVLET TYPE="dir" PATH="/" DIR="/home/web"/>
+        <SERVLET TYPE="dir" PATH="/assets/" DIR="/home/web/assets" CACHE="true"/>
+        <SERVLET TYPE="dir" PATH="/webfig/list" DIR="/home/web/webfig/list"/>
+        <SERVLET TYPE="dir" PATH="/webfig/" DIR="/home/web/webfig" CACHE="true" DEPEND_ON="/,/assets/,/webfig/list,/jsproxy"/>
+        <SERVLET TYPE="rest" PATH="/rest"/>
+        <SERVLET TYPE="remote" PATH="/graphs" REMOTE="25,100" DEPEND_ON="/,/assets/"/>
+        <SERVLET TYPE="remote" PATH="/apps" REMOTE="159,4"/>
+    </SERVER>
+    <SERVER NAME="www">
+        <SERVLET TYPE="index" PATH="/" FILE="true" DEPEND_ON="/apps,/assets/"/>
+        <SERVLET TYPE="jsproxy" PATH="/jsproxy"/>
+        <SERVLET TYPE="dir" PATH="/" DIR="/home/web"/>
+        <SERVLET TYPE="dir" PATH="/assets/" DIR="/home/web/assets" CACHE="true"/>
+        <SERVLET TYPE="dir" PATH="/webfig/list" DIR="/home/web/webfig/list"/>
+        <SERVLET TYPE="dir" PATH="/webfig/" DIR="/home/web/webfig" CACHE="true" DEPEND_ON="/,/assets/,/webfig/list,/jsproxy"/>
+        <SERVLET TYPE="dir" PATH="/crl" DIR="/rw/cm/ca_crl"/>
+        <SERVLET TYPE="rest" PATH="/rest"/>
+        <SERVLET TYPE="remote" PATH="/graphs" REMOTE="25,100" DEPEND_ON="/,/assets/"/>
+        <SERVLET TYPE="remote" PATH="/scep" REMOTE="19,14"/>
+        <SERVLET TYPE="remote" PATH="/apps" REMOTE="159,4"/>
+        <SERVLET TYPE="remote" PATH="/.well-known/acme-challenge" REMOTE="147,2"/>
+    </SERVER>
+    <SERVER NAME="fileshare-www-ssl" SSL="true">
+        <SERVLET TYPE="remote" PATH="/" REMOTE="156,3"/>
+    </SERVER>
+</SERVERS>

@@ -1,0 +1,14 @@
+name: victoria-logs
+descr: fast, cost-effective, and easy-to-use log database by VictoriaMetrics. A simple, powerful solution
+page: https://victoriametrics.com
+category: monitoring
+services:
+  victoria-logs:
+    image: docker.io/victoriametrics/victoria-logs:latest
+    environment:
+    volumes:
+      - data:/victoria-logs-data
+    ports:
+      - 9428:9428:web
+      - 514:514/udp:syslog
+    command: -syslog.listenAddr.udp=:514 -syslog.useRemoteIP.udp=true

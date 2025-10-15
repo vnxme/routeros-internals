@@ -1,0 +1,21 @@
+name: code-server
+descr: Code-server is VS Code running on a remote server, accessible through the browser.
+page: https://coder.com
+category: development
+icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/code-server-logo.png
+default-credentials: <no_username>:password
+services:
+  code-server:
+    image: lscr.io/linuxserver/code-server:latest
+    container_name: code-server
+    user: "0:0"
+    environment:
+      PUID: 0
+      PGID: 0
+      PASSWORD: password
+      PWA_APPNAME: code-server
+    volumes:
+      - config:/config
+      - media:/data/media
+    ports:
+      - 8443:8443:web

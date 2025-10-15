@@ -1,0 +1,111 @@
+libchacha20poly1305:	libchacha libpoly1305
+mesh:	packet_hook
+nf_natnf_conntrack_ftp
+x_tables
+x_tables
+imq:	cls_fw cls_linear
+nf_natnf_conntrack_sip
+x_tables
+nf_reject_ipv6x_tables
+nf_natnf_conntrack_tftp
+romon:	packet_hook
+nls_utf8:	nls_base
+ip_tablesx_tables
+x_tables
+x_tables
+x_tables
+x_tables
+mrp
+traffic_gen:	packet_hook
+arc4:	libarc4
+wireguard:	libblake2s libchacha20poly1305 libcurve25519-generic udp_tunnel ip6_udp_tunnel
+atl1c:	packet_hook
+x_tables
+x_tables
+x_tables
+ip_tablesnf_nat
+nf_natnf_conntrack_rtsp
+x_tables
+x_tables
+x_tables
+nf_natx_tables
+ulogx_tables
+fat:	nls_base
+nf_natnf_conntrack_h323
+aths16:	flash phy_helper switch
+packet_hookx_tables
+x_tables
+packet_hookx_tables
+cifs:	libarc4 libdes nls_base
+nls_iso8859-1:	nls_base
+x_tables
+bridge2
+ulogx_tables
+ntfs3:	nls_base
+exfat:	nls_base
+snifx_tables
+vfat:	fat nls_base
+ext4:	mbcache crc16 jbd2
+rb:	flash
+nf_natx_tables
+ksmbd:	asn1_decoder nls_base oid_registry
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+nls_cp437:	nls_base
+x_tables
+x_tables
+xfrm_algo
+nf_natnf_conntrack_irc
+vxlan2:	packet_hook udp_tunnel ip6_udp_tunnel
+snifx_tables
+x_tables
+x_tables
+ath8327:	flash phy_helper switch
+x_tables
+ebtables
+ebtables
+panics:	flash
+x_tables
+nf_natx_tables
+x_tables
+nf_natx_tables
+x_tables
+ibm_newemac:	switch packet_hook
+x_tables
+x_tables
+ip6_tablesx_tables
+ip6_tablesx_tables
+x_tables
+x_tables
+packet_hookswitch
+nf_reject_ipv4x_tables
+libblake2s:	libblake2s-generic
+x_tables
+x_tables
+x_tables
+x_tables
+x_tables
+nf_natx_tables
+x_tables
+ip6_tablesnf_nat
+x_tables
+x_tables
+x_tables
+x_tables
+nf_natnf_conntrack_pptp
+ip_tablesx_tables
+dot1x:	packet_hook
+x_tables
+xfrm_algo
+nf_natx_tables
+ip6_tablesx_tables
+nfnetlink
+des_generic:	libdes
+x_tables
+x_tables
+switch:	packet_hook phy_helper
+ip_tablesx_tables

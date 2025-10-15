@@ -1,0 +1,381 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <0x02>;
+	#size-cells = <0x02>;
+	model = "RB4011";
+	compatible = "annapurna-labs,alpine";
+	mac-address = [00 00 00 00 00 00];
+
+	memory {
+		device_type = "memory";
+		reg = <0x00 0x00 0x00 0x40000000>;
+	};
+
+	aliases {
+		spi1 = "/spi1";
+	};
+
+	cpus {
+		#address-cells = <0x01>;
+		#size-cells = <0x00>;
+		enable-method = "al,alpine-smp";
+
+		cpu@0 {
+			compatible = "arm,cortex-a15";
+			device_type = "cpu";
+			reg = <0x00>;
+			clock-frequency = <0x6553f100>;
+		};
+
+		cpu@1 {
+			compatible = "arm,cortex-a15";
+			device_type = "cpu";
+			reg = <0x01>;
+			clock-frequency = <0x6553f100>;
+		};
+
+		cpu@2 {
+			compatible = "arm,cortex-a15";
+			device_type = "cpu";
+			reg = <0x02>;
+			clock-frequency = <0x6553f100>;
+		};
+
+		cpu@3 {
+			compatible = "arm,cortex-a15";
+			device_type = "cpu";
+			reg = <0x03>;
+			clock-frequency = <0x6553f100>;
+		};
+	};
+
+	soc {
+		#address-cells = <0x02>;
+		#size-cells = <0x02>;
+		compatible = "simple-bus";
+		interrupt-parent = <0x01>;
+		ranges;
+
+		sbclk {
+			#address-cells = <0x01>;
+			#size-cells = <0x00>;
+			#clock-cells = <0x00>;
+			compatible = "fixed-clock";
+			clock-frequency = <0x165a0bc0>;
+			phandle = <0x02>;
+		};
+
+		arch-timer {
+			compatible = "arm,cortex-a15-timer\0arm,armv7-timer";
+			interrupts = <0x01 0x0d 0xf08 0x01 0x0e 0xf08 0x01 0x0b 0xf08 0x01 0x0a 0xf08>;
+			clock-frequency = <0x2faf080>;
+		};
+
+		gic@fb001000 {
+			compatible = "arm,cortex-a15-gic";
+			#interrupt-cells = <0x03>;
+			#size-cells = <0x00>;
+			#address-cells = <0x00>;
+			interrupt-controller;
+			reg = <0x00 0xfb001000 0x00 0x1000 0x00 0xfb002000 0x00 0x2000 0x00 0xfb004000 0x00 0x1000 0x00 0xfb006000 0x00 0x2000>;
+			interrupts = <0x01 0x09 0xf04>;
+			phandle = <0x01>;
+		};
+
+		timer1 {
+			compatible = "arm,sp804\0arm,primecell";
+			reg = <0x00 0xfd891000 0x00 0x1000>;
+			interrupts = <0x00 0x0a 0x04>;
+			clocks = <0x02>;
+			clock-names = "apb_pclk";
+		};
+
+		wdt0 {
+			compatible = "arm,sp805\0arm,primecell";
+			reg = <0x00 0xfd88c000 0x00 0x1000>;
+			interrupts = <0x00 0x0d 0x04>;
+			clocks = <0x02>;
+			clock-names = "apb_pclk";
+		};
+
+		cpu-resume@fbff5ec0 {
+			compatible = "al,alpine-cpu-resume";
+			reg = <0x00 0xfbff5ec0 0x00 0x30>;
+		};
+
+		sysfabric-service@fb070000 {
+			compatible = "al,alpine-sysfabric-service\0syscon";
+			reg = <0x00 0xfb070000 0x00 0x10000>;
+		};
+
+		ccu {
+			compatible = "al,alpine-ccu";
+			reg = <0x00 0xfb090000 0x00 0x10000>;
+			io_coherency = <0x01>;
+		};
+
+		pmu {
+			compatible = "arm,cortex-a15-pmu";
+			interrupts = <0x00 0x44 0x04 0x00 0x45 0x04 0x00 0x46 0x04 0x00 0x47 0x04>;
+		};
+
+		pbs {
+			compatible = "al,alpine-pbs";
+			reg = <0x00 0xfd8a8000 0x00 0x1000>;
+		};
+
+		uart@fd883000 {
+			compatible = "ns16550a";
+			reg = <0x00 0xfd883000 0x00 0x1000>;
+			clock-frequency = <0x165a0bc0>;
+			interrupts = <0x00 0x11 0x04>;
+			reg-shift = <0x02>;
+			reg-io-width = <0x04>;
+		};
+
+		uart@0xfd884000 {
+			compatible = "ns16550a";
+			reg = <0x00 0xfd884000 0x00 0x1000>;
+			clock-frequency = <0x165a0bc0>;
+			interrupts = <0x00 0x12 0x04>;
+			reg-shift = <0x02>;
+			reg-io-width = <0x04>;
+		};
+
+		gpio0 {
+			#gpio-cells = <0x02>;
+			compatible = "arm,pl061\0arm,primecell";
+			gpio-controller;
+			reg = <0x00 0xfd887000 0x00 0x1000>;
+			interrupts = <0x00 0x02 0x04>;
+			clocks = <0x02>;
+			clock-names = "apb_pclk";
+			phandle = <0x05>;
+		};
+
+		gpio1 {
+			#gpio-cells = <0x02>;
+			compatible = "arm,pl061\0arm,primecell";
+			gpio-controller;
+			reg = <0x00 0xfd888000 0x00 0x1000>;
+			interrupts = <0x00 0x03 0x04>;
+			clocks = <0x02>;
+			clock-names = "apb_pclk";
+		};
+
+		gpio2 {
+			#gpio-cells = <0x02>;
+			compatible = "arm,pl061\0arm,primecell";
+			gpio-controller;
+			reg = <0x00 0xfd889000 0x00 0x1000>;
+			interrupts = <0x00 0x04 0x04>;
+			clocks = <0x02>;
+			clock-names = "apb_pclk";
+		};
+
+		gpio3 {
+			#gpio-cells = <0x02>;
+			compatible = "arm,pl061\0arm,primecell";
+			gpio-controller;
+			reg = <0x00 0xfd88a000 0x00 0x1000>;
+			interrupts = <0x00 0x05 0x04>;
+			clocks = <0x02>;
+			clock-names = "apb_pclk";
+			phandle = <0x04>;
+		};
+
+		gpio4 {
+			#gpio-cells = <0x02>;
+			compatible = "arm,pl061\0arm,primecell";
+			gpio-controller;
+			reg = <0x00 0xfd88b000 0x00 0x1000>;
+			interrupts = <0x00 0x06 0x04>;
+			clocks = <0x02>;
+			clock-names = "apb_pclk";
+			phandle = <0x07>;
+		};
+
+		gpio5 {
+			#gpio-cells = <0x02>;
+			compatible = "arm,pl061\0arm,primecell";
+			gpio-controller;
+			reg = <0x00 0xfd897000 0x00 0x1000>;
+			interrupts = <0x00 0x07 0x04>;
+			clocks = <0x02>;
+			clock-names = "apb_pclk";
+			phandle = <0x06>;
+		};
+
+		nand-flash {
+			compatible = "al,alpine-nand";
+			reg = <0x00 0xfa100000 0x00 0x202000>;
+			interrupts = <0x00 0x01 0x04>;
+		};
+
+		spi {
+			compatible = "amazon,alpine-dw-apb-ssi";
+			#address-cells = <0x01>;
+			#size-cells = <0x00>;
+			reg = <0x00 0xfd882000 0x00 0x1000>;
+			interrupts = <0x00 0x17 0x04>;
+			clocks = <0x02>;
+
+			spiflash@0 {
+				#address-cells = <0x01>;
+				#size-cells = <0x01>;
+				compatible = "jedec,spi-nor";
+				spi-max-frequency = <0x17d7840>;
+				reg = <0x00>;
+
+				partition@2 {
+					reg = <0x40000 0x40000>;
+					label = "RouterBoot";
+				};
+			};
+		};
+
+		pcie-internal@0xfbc00000 {
+			compatible = "pci-host-ecam-generic";
+			device_type = "pci";
+			dma-coherent;
+			#size-cells = <0x02>;
+			#address-cells = <0x03>;
+			#interrupt-cells = <0x01>;
+			reg = <0x00 0xfbc00000 0x00 0x100000>;
+			interrupt-map-mask = <0xf800 0x00 0x00 0x07>;
+			interrupt-map = <0x4000 0x00 0x00 0x01 0x01 0x00 0x2b 0x04 0x4800 0x00 0x00 0x01 0x01 0x00 0x2c 0x04>;
+			ranges = <0x2000000 0x00 0xfe000000 0x00 0xfe000000 0x00 0x1000000>;
+			bus-range = <0x00 0x00>;
+			msi-parent = <0x03>;
+		};
+
+		pcie-external0@0xfb600000 {
+			compatible = "pci-host-ecam-alpine-external";
+			device_type = "pci";
+			#size-cells = <0x02>;
+			#address-cells = <0x03>;
+			#interrupt-cells = <0x01>;
+			reg = <0x00 0xfb600000 0x00 0x200000>;
+			interrupt-map-mask = <0x00 0x00 0x00 0x07>;
+			interrupt-map = <0x00 0x00 0x00 0x01 0x01 0x00 0x28 0x04>;
+			ranges = <0x2000000 0x00 0xe0010000 0x00 0xe0010000 0x00 0x7ff0000>;
+			bus-range = <0x00 0x02>;
+			msi-parent = <0x03>;
+		};
+
+		pcie-external1@0xfb800000 {
+			compatible = "pci-host-ecam-alpine-external";
+			device_type = "pci";
+			#size-cells = <0x02>;
+			#address-cells = <0x03>;
+			#interrupt-cells = <0x01>;
+			reg = <0x00 0xfb800000 0x00 0x200000>;
+			interrupt-map-mask = <0x00 0x00 0x00 0x07>;
+			interrupt-map = <0x00 0x00 0x00 0x01 0x01 0x00 0x29 0x04>;
+			ranges = <0x2000000 0x00 0xe8010000 0x00 0xe8010000 0x00 0x3ff0000>;
+			bus-range = <0x00 0x02>;
+			msi-parent = <0x03>;
+		};
+
+		pcie-external2@0xfba00000 {
+			compatible = "pci-host-ecam-alpine-external";
+			device_type = "pci";
+			dma-coherent;
+			#size-cells = <0x02>;
+			#address-cells = <0x03>;
+			#interrupt-cells = <0x01>;
+			reg = <0x00 0xfba00000 0x00 0x200000>;
+			interrupt-map-mask = <0x00 0x00 0x00 0x07>;
+			interrupt-map = <0x00 0x00 0x00 0x01 0x01 0x00 0x2a 0x04>;
+			ranges = <0x2000000 0x00 0xec010000 0x00 0xec010000 0x00 0x3ff0000>;
+			bus-range = <0x00 0x02>;
+			msi-parent = <0x03>;
+		};
+
+		msix@fbe00000 {
+			compatible = "al,alpine-msix";
+			reg = <0x00 0xfbe00000 0x00 0x100000>;
+			interrupt-controller;
+			msi-controller;
+			al,msi-base-spi = <0x60>;
+			al,msi-num-spis = <0x40>;
+			phandle = <0x03>;
+		};
+
+		poe-simple {
+			compatible = "rb,poe-out-simple";
+			ether_port = <0x0a>;
+			gpo_on = <0x04 0x03 0x00>;
+			gpi_status = <0x04 0x02 0x00>;
+		};
+	};
+
+	leds {
+		compatible = "leds-rb";
+
+		psu1-state {
+			gpios = <0x05 0x02 0x00>;
+			default-state = "input";
+		};
+
+		psu2-state {
+			gpios = <0x05 0x04 0x00>;
+			default-state = "input";
+		};
+
+		user-led {
+			gpios = <0x04 0x04 0x00>;
+		};
+
+		button {
+			gpios = <0x06 0x03 0x01>;
+			default-state = "input";
+		};
+	};
+
+	gpios {
+		sfp-tx-fault = <0x04 0x05 0x00>;
+		sfp-rate-sel = <0x07 0x04 0x00>;
+		sfp-tx-disable = <0x07 0x05 0x00>;
+		sfp-mod-det = <0x07 0x06 0x00>;
+		sfp-rx-lose = <0x07 0x07 0x00>;
+	};
+
+	i2c {
+		compatible = "i2c-gpio";
+		sda-gpios = <0x04 0x07 0x06>;
+		scl-gpios = <0x04 0x06 0x06>;
+	};
+
+	spi1 {
+		compatible = "spi-gpio";
+		#address-cells = <0x01>;
+		#size-cells = <0x00>;
+		gpio-sck = <0x07 0x00 0x00>;
+		gpio-mosi = <0x07 0x02 0x00>;
+		gpio-miso = <0x07 0x03 0x00>;
+		num-chipselects = <0x01>;
+		cs-gpios = <0x07 0x01 0x00>;
+
+		ts@0 {
+			compatible = "rb-spi-ts";
+			reg = <0x00>;
+			spi-max-frequency = <0xf4240>;
+		};
+	};
+
+	wlan-data {
+		compatible = "wlan-data-rb";
+
+		wlan1 {
+			pci-domain-nr = <0x01>;
+			caldata-instance = <0x01>;
+		};
+	};
+
+	serdes {
+		compatible = "annapurna-labs,al-serdes";
+		reg = <0x00 0xfd8c0000 0x00 0x1000>;
+	};
+};

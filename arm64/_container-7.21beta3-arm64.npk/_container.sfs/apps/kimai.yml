@@ -1,0 +1,29 @@
+name: kimai
+descr: Kimai is a free & open source timetracker designed for freelancers, agencies and companies
+page: https://kimai.org
+category: productivity
+default-credentials: admin@kimai.local:changeme123
+services:
+  mysql:
+    image: docker.io/mysql:8.3
+    environment:
+      MYSQL_DATABASE: kimai
+      MYSQL_USER: kimaiuser
+      MYSQL_PASSWORD: kimaipassword
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - kimai/mysql:/var/lib/mysql
+    command: --default-storage-engine innodb
+    restart: unless-stopped
+  kimai:
+    image: docker.io/kimai/kimai2:apache
+    ports:
+      - 8004:8001:web
+    environment:
+      ADMINMAIL: admin@kimai.local
+      ADMINPASS: changeme123
+      DATABASE_URL: mysql://kimaiuser:kimaipassword@127.0.0.1/kimai?charset=utf8mb4&serverVersion=8.3.0
+    volumes:
+      - kimai/data:/opt/kimai/var/data
+      - kimai/plugins:/opt/kimai/var/plugins
+    restart: unless-stopped

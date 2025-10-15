@@ -1,0 +1,15 @@
+arm64/_chr-7.21beta3-arm64.img.zip/chr-7.21beta3-arm64.img
+arm64/_mikrotik-7.21beta3-arm64.iso/efiboot.img
+arm64/_switch-marvell-7.21beta3-arm64.npk/_switch-marvell.sfs/lib/libcpss.so
+arm64/mikrotik-7.21beta3-arm64.iso
+x86/_chr-7.21beta3.img.zip/chr-7.21beta3.img
+x86/_install-image-7.21beta3.img.zip/install-image-7.21beta3.img
+x86/_mikrotik-7.21beta3.iso/efiboot.img
+x86/_netinstall-cli-7.21beta3.tar.gz/netinstall-cli
+x86/_netinstall-w32-7.21beta3.exe.zip/netinstall.exe
+x86/_netinstall-w64-7.21beta3.exe.zip/netinstall64.exe
+x86/chr-7.21beta3.img.zip
+x86/mikrotik-7.21beta3.iso
+x86/netinstall-cli-7.21beta3.tar.gz
+x86/netinstall-w32-7.21beta3.exe.zip
+x86/netinstall-w64-7.21beta3.exe.zip

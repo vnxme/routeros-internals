@@ -1,0 +1,14 @@
+name: librespeed
+descr: Free and Open Source Speed Test. No Flash, No Java, No Websocket, No Bullshit.
+page: https://librespeed.org
+category: monitoring
+services:
+  librespeed:
+    image: lscr.io/linuxserver/librespeed:latest
+    container_name: librespeed
+    environment:
+      PASSWORD: yiDEkFuerBHc9ZXG
+    volumes:
+      - config:/config
+    ports:
+      - 3004:80:web

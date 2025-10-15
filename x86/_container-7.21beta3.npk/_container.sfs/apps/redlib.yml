@@ -1,0 +1,10 @@
+name: redlib
+descr: Private front-end for Reddit written in Rust
+page: https://github.com/redlib-org/redlib
+category: communication
+services:
+  redlib:
+    image: quay.io/redlib/redlib:latest
+    ports:
+      - 8087:8080:web
+    restart: unless-stopped

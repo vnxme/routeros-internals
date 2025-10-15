@@ -1,0 +1,26 @@
+name: mosquitto
+descr: Eclipse Mosquitto MQTT message broker
+page: https://mosquitto.org
+category: messaging
+services:
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    ports:
+      - 1883:1883:mqtt
+      - 9001:9001:websockets
+    volumes:
+      - data:/mosquitto/data
+      - log:/mosquitto/log
+    configs:
+      - source: 'mosquitto_conf'
+        target: '/mosquitto/config/mosquitto.conf'
+    restart: unless-stopped
+configs:
+  'mosquitto_conf':
+    content: |
+      listener 1883
+      allow_anonymous true
+      
+      listener 9001
+      protocol websockets
+      allow_anonymous true

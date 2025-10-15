@@ -1,0 +1,14 @@
+name: urbackup-client
+descr: UrBackup client for backing up data to UrBackup server
+page: https://www.urbackup.org
+category: storage
+services:
+  urbackup-client:
+    image: docker.io/uroni/urbackup-client:latest
+    environment:
+      - URBACKUP_SERVER_NAME=example.com
+      - URBACKUP_CLIENT_NAME=exampleclientname
+      - URBACKUP_CLIENT_AUTHKEY=secretkey
+    volumes:
+      - backup:/backup
+    restart: unless-stopped

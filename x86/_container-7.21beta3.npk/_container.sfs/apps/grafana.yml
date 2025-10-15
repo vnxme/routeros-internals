@@ -1,0 +1,15 @@
+name: grafana
+descr: open source analytics and interactive visualization web application
+page: https://grafana.com
+category: monitoring
+default-credentials: admin:admin
+services:
+  grafana:
+    image: docker.io/grafana/grafana-enterprise
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: admin
+    ports:
+      - '3000:3000:web'
+    volumes:
+      - data:/var/lib/grafana

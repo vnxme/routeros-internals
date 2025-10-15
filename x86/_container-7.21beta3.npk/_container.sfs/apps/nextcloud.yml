@@ -1,0 +1,40 @@
+name: nextcloud
+descr: Self-hosted productivity platform which provides private and secure functions for file sharing, collaborative work, and more
+page: https://nextcloud.com
+category: file-management
+default-credentials: admin:admin
+services:
+  db:
+    image: docker.io/postgres:17
+    environment:
+      POSTGRES_PASSWORD: sCK6yhkJhMWIHKU8G6si25L5PYhQj42s
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_INITDB_ARGS: --encoding='UTF8' --lc-collate='C' --lc-ctype='C'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  redis:
+    image: docker.io/valkey/valkey
+    command: /bin/sh -c 'valkey-server --port 6379 --appendonly yes --requirepass $VALKEY_PASSWORD'
+    environment:
+      VALKEY_PASSWORD: NCSeL5FiBoA2pXKT1ycGJVcEBV0VEqPN
+    volumes:
+      - redis-data:/data
+  server:
+    image: docker.io/nextcloud:apache
+    ports:
+      - 8088:80:web
+    environment:
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: sCK6yhkJhMWIHKU8G6si25L5PYhQj42s
+      POSTGRES_HOST: 127.0.0.1
+      REDIS_HOST: 127.0.0.1
+      REDIS_HOST_PORT: 6379
+      REDIS_HOST_PASSWORD: NCSeL5FiBoA2pXKT1ycGJVcEBV0VEqPN
+      NEXTCLOUD_ADMIN_USER: admin
+      NEXTCLOUD_ADMIN_PASSWORD: admin
+      NEXTCLOUD_TRUSTED_DOMAINS: "[accessIP]"
+    volumes:
+      - data:/var/www/html

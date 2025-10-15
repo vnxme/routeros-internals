@@ -1,0 +1,325 @@
+name: pmacct-netflow
+descr: pmacct based netflow collector with db and sample grafana dashboard visualization
+page: https://pmacct.net
+category: networking
+option: true
+default-credentials: admin:admin
+services:
+  nfacctd:
+    image: docker.io/pmacct/nfacctd:bleeding-edge
+    ports:
+      - 2055:2055/udp:netflow
+    configs:
+      - source: 'nfacctd.conf'
+        target: '/etc/pmacct/nfacctd.conf'
+      - source: 'schema.pgsql'
+        target: '/etc/pmacct/schema.pgsql'
+    stop_grace_period: 0
+  nfdb:
+    image: docker.io/postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=pmacct
+      - POSTGRES_USER=pmacct
+      - POSTGRES_PASSWORD=arealsmartpwd
+  grafana:
+    image: docker.io/grafana/grafana
+    ports:
+      - 3009:3000:web
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: admin
+    configs:
+      - source: 'grafana-datasources.yml'
+        target: '/etc/grafana/provisioning/datasources/datasources.yml'
+      - source: 'grafana-dashboards.yml'
+        target: '/etc/grafana/provisioning/dashboards/dashboards.yml'
+      - source: 'grafana-netflow-dashboard.json'
+        target: '/etc/grafana/provisioning/dashboards/default/netflow-dashboard.json'
+    volumes:
+      - grafana_data:/var/lib/grafana
+configs:
+  'nfacctd.conf':
+    content: |
+      !
+      ! General configs
+      !
+      ! debug: true
+      daemonize: false
+      !
+      ! NetFlow/IPFIX daemon configs
+      !
+      nfacctd_port: 2055
+      nfacctd_time_new: true
+      !
+      ! Plugins definitions
+      !
+      plugins: pgsql
+      !
+      ! Database connection definitions
+      !
+      sql_host: nfdb
+      sql_db: pmacct
+      sql_user: pmacct
+      sql_passwd: arealsmartpwd
+      !
+      ! Plugin configuration
+      !
+      aggregate: tag,class,src_mac,dst_mac,vlan,src_as,dst_as,src_host,dst_host,src_port,dst_port,tcpflags,proto,tos,flows
+      sql_table_version: 9
+      sql_refresh_time: 60
+      sql_history: 1m
+      sql_history_roundoff: mh
+      sql_table: acct_v9_%m%Y
+      sql_table_schema: /etc/pmacct/schema.pgsql
+  'schema.pgsql':
+    content: |
+      CREATE TABLE IF NOT EXISTS acct_v9_%m%Y (
+          tag BIGINT NOT NULL DEFAULT 0,
+          class_id CHAR(16) NOT NULL DEFAULT ' ',
+          mac_src macaddr NOT NULL DEFAULT '0:0:0:0:0:0',
+          mac_dst macaddr NOT NULL DEFAULT '0:0:0:0:0:0',
+          vlan INT NOT NULL DEFAULT 0,
+          as_src BIGINT NOT NULL DEFAULT 0,
+          as_dst BIGINT NOT NULL DEFAULT 0,
+          ip_src inet NOT NULL DEFAULT '0.0.0.0',
+          ip_dst inet NOT NULL DEFAULT '0.0.0.0',
+          port_src INT NOT NULL DEFAULT 0,
+          port_dst INT NOT NULL DEFAULT 0,
+          tcp_flags SMALLINT NOT NULL DEFAULT 0,
+          ip_proto SMALLINT NOT NULL DEFAULT 0,
+          tos INT NOT NULL DEFAULT 0,
+          packets INT NOT NULL,
+          bytes BIGINT NOT NULL,
+          flows INT NOT NULL DEFAULT 0,
+          stamp_inserted timestamp without time zone NOT NULL DEFAULT '0001-01-01 00:00:00',
+          stamp_updated timestamp without time zone,
+          PRIMARY KEY (tag, class_id, mac_src, mac_dst, vlan, as_src, as_dst, ip_src, ip_dst, port_src, port_dst, ip_proto, tos, stamp_inserted)
+      );
+      
+      CREATE TABLE IF NOT EXISTS proto (
+          num SMALLINT NOT NULL,
+          description CHAR(20),
+          PRIMARY KEY (num)
+      );
+      
+      INSERT INTO proto (num, description) VALUES
+      (0, 'ip'), (1, 'icmp'), (2, 'igmp'), (3, 'ggp'), (4, 'ipencap'), (5, 'st'),
+      (6, 'tcp'), (8, 'egp'), (9, 'igp'), (17, 'udp'), (18, 'mux'), (27, 'rdp'),
+      (29, 'iso-tp4'), (30, 'netblt'), (37, 'ddp'), (39, 'idpr-cmtp'), (41, 'ipv6'),
+      (43, 'ipv6-route'), (44, 'ipv6-frag'), (46, 'rsvp'), (47, 'gre'), (50, 'ipv6-crypt'),
+      (51, 'ipv6-auth'), (55, 'mobile'), (56, 'tlsp'), (58, 'ipv6-icmp'), (59, 'ipv6-nonxt'),
+      (60, 'ipv6-opts'), (80, 'iso-ip'), (83, 'vines'), (88, 'eigrp'), (89, 'ospf'),
+      (90, 'sprite-rpc'), (93, 'ax-25'), (94, 'ipip'), (98, 'encap'), (102, 'pnni'),
+      (108, 'IPcomp'), (111, 'ipx-in-ip'), (112, 'vrrp'), (115, 'l2tp'), (124, 'isis'),
+      (132, 'sctp'), (133, 'fc')
+      ON CONFLICT (num) DO NOTHING;
+      
+      GRANT SELECT, INSERT, UPDATE, DELETE ON acct_v9_%m%Y TO pmacct;
+      GRANT SELECT, INSERT, UPDATE, DELETE ON proto TO pmacct;
+  'grafana-datasources.yml':
+    content: |
+      apiVersion: 1
+      datasources:
+        - name: postgres-netflow
+          type: grafana-postgresql-datasource
+          access: proxy
+          orgId: 1
+          url: nfdb
+          database: pmacct
+          user: pmacct
+          secureJsonData:
+            password: "arealsmartpwd"
+          jsonData:
+            sslmode: "disable"
+            timescaledb: false
+  'grafana-dashboards.yml':
+    content: |
+      - name: 'default'
+        org_id: 1
+        folder: ''
+        type: file
+        options:
+          folder: '/etc/grafana/provisioning/dashboards/default'
+  'grafana-netflow-dashboard.json':
+    content: |
+      {
+        "annotations": {
+          "list": [
+            {
+              "builtIn": 1,
+              "datasource": {
+                "type": "grafana",
+                "uid": "-- Grafana --"
+              },
+              "enable": true,
+              "hide": true,
+              "iconColor": "rgba(0, 211, 255, 1)",
+              "name": "Annotations & Alerts",
+              "type": "dashboard"
+            }
+          ]
+        },
+        "editable": true,
+        "fiscalYearStartMonth": 0,
+        "graphTooltip": 0,
+        "id": 1,
+        "links": [],
+        "panels": [
+          {
+            "datasource": {
+              "type": "grafana-postgresql-datasource",
+              "name": "postgres-netflow"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "custom": {
+                  "align": "auto",
+                  "cellOptions": {
+                    "type": "auto"
+                  },
+                  "inspect": false
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 32,
+              "w": 24,
+              "x": 0,
+              "y": 0
+            },
+            "id": 1,
+            "options": {
+              "cellHeight": "sm",
+              "footer": {
+                "countRows": false,
+                "fields": "",
+                "reducer": [
+                  "sum"
+                ],
+                "show": false
+              },
+              "showHeader": true
+            },
+            "pluginVersion": "12.1.1",
+            "targets": [
+              {
+                "datasource": {
+                  "type": "grafana-postgresql-datasource",
+                  "name": "postgres-netflow"
+                },
+                "editorMode": "code",
+                "format": "table",
+                "rawQuery": true,
+                "rawSql": "SELECT ip_src, port_src, ip_dst, port_dst, stamp_inserted FROM \"$acct_table\"",
+                "refId": "A",
+                "sql": {
+                  "columns": [
+                    {
+                      "parameters": [
+                        {
+                          "name": "ip_src",
+                          "type": "functionParameter"
+                        }
+                      ],
+                      "type": "function"
+                    },
+                    {
+                      "parameters": [
+                        {
+                          "name": "port_src",
+                          "type": "functionParameter"
+                        }
+                      ],
+                      "type": "function"
+                    },
+                    {
+                      "parameters": [
+                        {
+                          "name": "ip_dst",
+                          "type": "functionParameter"
+                        }
+                      ],
+                      "type": "function"
+                    },
+                    {
+                      "parameters": [
+                        {
+                          "name": "port_dst",
+                          "type": "functionParameter"
+                        }
+                      ],
+                      "type": "function"
+                    },
+                    {
+                      "parameters": [
+                        {
+                          "name": "stamp_inserted",
+                          "type": "functionParameter"
+                        }
+                      ],
+                      "type": "function"
+                    }
+                  ],
+                  "groupBy": [
+                    {
+                      "property": {
+                        "type": "string"
+                      },
+                      "type": "groupBy"
+                    }
+                  ],
+                  "limit": 50
+                }
+              }
+            ],
+            "title": "Source -> Destination",
+            "type": "table"
+          }
+        ],
+        "preload": false,
+        "schemaVersion": 41,
+        "tags": [],
+        "templating": {
+          "list": [
+            {
+              "definition": "SELECT table_name FROM information_schema.tables \nWHERE table_schema = 'public' AND table_name LIKE 'acct_v9_%'\nORDER BY table_name",
+              "includeAll": false,
+              "label": "Table",
+              "name": "acct_table",
+              "options": [],
+              "query": "SELECT table_name FROM information_schema.tables \nWHERE table_schema = 'public' AND table_name LIKE 'acct_v9_%'\nORDER BY table_name",
+              "refresh": 1,
+              "regex": "",
+              "type": "query"
+            }
+          ]
+        },
+        "time": {
+          "from": "now-6h",
+          "to": "now"
+        },
+        "timepicker": {},
+        "timezone": "browser",
+        "title": "Netflow",
+        "version": 14
+      }

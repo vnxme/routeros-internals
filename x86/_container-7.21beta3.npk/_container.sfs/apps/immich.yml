@@ -1,0 +1,46 @@
+name: immich
+descr: Immich is a high performance self-hosted photo and video backup solution
+page: https://immich.app
+category: media
+default-credentials: web setup
+services:
+  immich:
+    image: ghcr.io/imagegenius/immich:latest
+    container_name: immich
+    environment:
+      PUID: 1000
+      PGID: 1000
+      DB_HOSTNAME: 127.0.0.1
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE_NAME: immich
+      REDIS_HOSTNAME: 127.0.0.1
+      DB_PORT: 5432
+      REDIS_PORT: 6379
+      REDIS_PASSWORD:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      MACHINE_LEARNING_HOST: 0.0.0.0
+      MACHINE_LEARNING_PORT: 3003
+      MACHINE_LEARNING_WORKERS: 1
+      MACHINE_LEARNING_WORKER_TIMEOUT: 120
+    volumes:
+      - immich/config:/config
+      - immich/photos:/photos
+      - immich/libraries:/libraries
+    ports:
+      - 8080:8080:web
+    restart: unless-stopped
+  valkey:
+    image: docker.io/valkey/valkey:8-bookworm
+    container_name: valkey
+  postgres14:
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
+    container_name: postgres14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: immich
+      DB_STORAGE_TYPE: 'SSD'
+    volumes:
+      - immich/db:/var/lib/postgresql/data

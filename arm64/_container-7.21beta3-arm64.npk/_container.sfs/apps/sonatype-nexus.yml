@@ -1,0 +1,15 @@
+name: sonatype-nexus
+descr: single source of truth for all your internal and third-party binaries, components, packages, and AI models
+page: https://www.sonatype.com/products/sonatype-nexus-repository
+category: development
+default-credentials: file /apps/sonatype-nexus/data/admin.password
+services:
+  nexus:
+    image: docker.io/sonatype/nexus3:latest
+    container_name: nexus
+    hostname: nexus
+    ports:
+      - 8083:8081:web
+    volumes:
+      - data:/nexus-data
+    restart: unless-stopped

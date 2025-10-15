@@ -1,0 +1,17 @@
+name: jackett
+descr: API Support for your favorite torrent trackers
+page: https://github.com/Jackett/Jackett
+category: media-management
+services:
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    ports:
+      - 9117:9117:web
+    environment:
+      PUID: 1000
+      PGID: 1000
+      AUTO_UPDATE: true
+    volumes:
+      - config:/config
+      - download:/downloads
+    restart: unless-stopped

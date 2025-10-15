@@ -1,0 +1,11 @@
+page: https://github.com/gatispei/speedketchup
+descr: Run periodic internet speed test, store, display results with builtin web server
+category: monitoring
+services:
+    speedketchup:
+      image: docker.io/antonsmt/speedketchup
+      volumes:
+        - results:/results
+      ports:
+        - '8087:8080:web'
+      command: -a 0.0.0.0 -f /results/speedketchup-results.csv

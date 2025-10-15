@@ -1,0 +1,27 @@
+name: wordpress
+descr: Content management system for websites and blogs
+page: https://wordpress.org
+category: productivity
+default-credentials: web setup
+services:
+  db:
+    image: docker.io/mariadb:10.6.4-focal
+    command: '--default-authentication-plugin=mysql_native_password'
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: somewordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+  server:
+    image: docker.io/wordpress:latest
+    ports:
+      - 8091:80:web
+    restart: unless-stopped
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress

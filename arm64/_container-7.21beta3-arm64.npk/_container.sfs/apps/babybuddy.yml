@@ -1,0 +1,16 @@
+name: babybuddy
+descr: A buddy for babies! Helps caregivers track sleep, feedings, diaper changes, and tummy time to learn about and predict baby's needs without (as much) guess work
+page: https://github.com/babybuddy/babybuddy
+category: productivity
+default-credentials: admin:admin
+services:
+  babybuddy:
+    image: lscr.io/linuxserver/babybuddy:latest
+    ports:
+      - 8005:8000:web
+    environment:
+      PUID: 1000
+      PGID: 1000
+    volumes:
+      - config:/config
+    restart: unless-stopped
