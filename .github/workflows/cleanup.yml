@@ -52,14 +52,14 @@ jobs:
                cat 'branches.json' | jq ".[] | if .name != \"main\" then .name else empty end | capture(\"(?<name>^[0-9a-zA-Z]+-7\\\\.[0-9]+(\\\\.[0-9]+)?)$\") | .name" || true
             } | sort -V
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
           {
             echo 'testing<<EOF'
             {
                cat 'branches.json' | jq ".[] | if .name != \"main\" then .name else empty end | capture(\"(?<name>^[0-9a-zA-Z]+-7\\\\.[0-9]+(\\\\.[0-9]+)?(ab|alpha|beta|rc)[0-9]+)$\") | .name" || true
             } | sort -V
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Compose a list of stale branches
         id: detect_stale_branches
@@ -70,13 +70,13 @@ jobs:
           BRANCHES_TESTING="${{ steps.group_branches.outputs.testing }}"
           {
             echo 'list<<EOF'
-            for BRANCH in ${BRANCHES_TESTING[@]}; do
+            for BRANCH in "${BRANCHES_TESTING[@]}"; do
               LABEL="$(echo "${BRANCH}" | sed -nr 's/([0-9a-zA-Z]+)-7\.[0-9]+(\.[0-9]+)?(ab|alpha|beta|rc)[0-9]+/\1/p')"
               [ -z "${LABEL}" ] && continue
-              [ -z "$({ echo "${BRANCHES_STABLE}" | grep -- "${LABEL}-" | tail -1 | awk '{print $1 "-x"}'; echo "${BRANCH}-x"; } | sort -V | tail -1 | grep "${BRANCH}-x")" ] && echo "${BRANCH}"
+              if ! { echo "${BRANCHES_STABLE}" | grep -- "${LABEL}-" | tail -1 | awk '{print $1 "-x"}'; echo "${BRANCH}-x"; } | sort -V | tail -1 | grep -q "${BRANCH}-x"; then echo "${BRANCH}"; fi
             done
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Delete stale branches
         id: delete_branches
@@ -86,7 +86,7 @@ jobs:
         run: |
           URL="/repos/${{ github.repository }}/git/refs/heads/"
           BRANCHES="${{ steps.detect_stale_branches.outputs.list }}"
-          for BRANCH in ${BRANCHES[@]}; do
+          for BRANCH in "${BRANCHES[@]}"; do
             gh api \
               --method DELETE \
               -H "Accept: application/vnd.github+json" \
@@ -101,7 +101,7 @@ jobs:
             echo -e "- Stable branches:\n\`\`\`\n${{ steps.group_branches.outputs.stable }}\n\`\`\`"
             echo -e "- Testing branches:\n\`\`\`\n${{ steps.group_branches.outputs.testing }}\n\`\`\`"
             echo -e "- Branches to delete:\n\`\`\`\n${{ steps.detect_stale_branches.outputs.list }}\n\`\`\`"
-          } >> $GITHUB_STEP_SUMMARY
+          } >> "$GITHUB_STEP_SUMMARY"
 
   cleanup_releases:
     needs: cleanup_branches
@@ -124,14 +124,14 @@ jobs:
                cat 'releases.json' | jq ".[].tag_name | capture(\"(?<name>^v7\\\\.[0-9]+(\\\\.[0-9]+)?-[0-9a-zA-Z]+)$\") | .name" || true
             } | sort -V
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
           {
             echo 'testing<<EOF'
             {
                cat 'releases.json' | jq ".[].tag_name | capture(\"(?<name>^v7\\\\.[0-9]+(\\\\.[0-9]+)?(ab|alpha|beta|rc)[0-9]+-[0-9a-zA-Z]+)$\") | .name" || true
             } | sort -V
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Compose a list of stale releases
         id: detect_stale_releases
@@ -142,13 +142,13 @@ jobs:
           RELEASES_TESTING="${{ steps.group_releases.outputs.testing }}"
           {
             echo 'list<<EOF'
-            for RELEASE in ${RELEASES_TESTING[@]}; do
+            for RELEASE in "${RELEASES_TESTING[@]}"; do
               LABEL="$(echo "${RELEASE}" | sed -nr 's/v7\.[0-9]+(\.[0-9]+)?(ab|alpha|beta|rc)[0-9]+-([0-9a-zA-Z]+)/\3/p')"
               [ -z "${LABEL}" ] && continue
-              [ -z "$({ echo "${RELEASES_STABLE}" | grep -- "-${LABEL}" | tail -1; echo "${RELEASE}"; } | sort -V | tail -1 | grep "${RELEASE}")" ] && echo "${RELEASE}"
+              if ! { echo "${RELEASES_STABLE}" | grep -- "-${LABEL}" | tail -1; echo "${RELEASE}"; } | sort -V | tail -1 | grep -q "${RELEASE}"; then echo "${RELEASE}"; fi
             done
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Delete stale releases
         id: delete_releases
@@ -158,14 +158,14 @@ jobs:
         run: |
           URL="/repos/${{ github.repository }}/releases/"
           RELEASES="${{ steps.detect_stale_releases.outputs.list }}"
-          for RELEASE in ${RELEASES[@]}; do
+          for RELEASE in "${RELEASES[@]}"; do
             FOUND='true'
             ID="$(gh api \
               -H "Accept: application/vnd.github+json" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
               "${URL}tags/${RELEASE}" \
               --jq '.id')" || FOUND='false'
-            if [ -n "${ID}" -a "${FOUND}" == 'true' ]; then
+            if [ -n "${ID}" ] && [ "${FOUND}" == 'true' ]; then
               gh api \
                 --method DELETE \
                 -H "Accept: application/vnd.github+json" \
@@ -181,7 +181,7 @@ jobs:
             echo -e "- Stable releases:\n\`\`\`\n${{ steps.group_releases.outputs.stable }}\n\`\`\`"
             echo -e "- Testing releases:\n\`\`\`\n${{ steps.group_releases.outputs.testing }}\n\`\`\`"
             echo -e "- Releases to delete:\n\`\`\`\n${{ steps.detect_stale_releases.outputs.list }}\n\`\`\`"
-          } >> $GITHUB_STEP_SUMMARY
+          } >> "$GITHUB_STEP_SUMMARY"
 
   cleanup_tags:
     needs: cleanup_releases
@@ -202,7 +202,7 @@ jobs:
           {
             echo 'list<<EOF'
             {
-              for COMMIT in ${COMMITS[@]}; do
+              for COMMIT in "${COMMITS[@]}"; do
                 URL="/repos/${{ github.repository }}/commits/${COMMIT}"
                 TAG="$(gh api \
                   -H "Accept: application/vnd.github+json" \
@@ -215,7 +215,7 @@ jobs:
               done
             } | sort -uV
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Compose a list of tags mentioned in releases
         id: fetch_tags_in_releases
@@ -233,7 +233,7 @@ jobs:
                 --jq ".[].tag_name | capture(\"(?<name>v7\\\\.[0-9]+(\\\\.[0-9]+)?((ab|alpha|beta|rc)[0-9]+)?-[0-9a-zA-Z]+)\") | .name" || true
             } | sort -uV
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Compose a list of stale tags not mentioned in branches or releases
         id: detect_stale_tags
@@ -251,14 +251,14 @@ jobs:
           {
             echo 'list<<EOF'
             {
-              for TAG in ${TAGS[@]}; do
-                [ -n "$(echo "${TAGS_IN_BRANCHES}" | grep "${TAG}")" ] && continue
-                [ -n "$(echo "${TAGS_IN_RELEASES}" | grep "${TAG}")" ] && continue
+              for TAG in "${TAGS[@]}"; do
+                echo "${TAGS_IN_BRANCHES}" | grep -q "${TAG}" && continue
+                echo "${TAGS_IN_RELEASES}" | grep -q "${TAG}" && continue
                 echo "${TAG}"
               done
             } | sort -V
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Delete stale tags
         id: delete_tags
@@ -268,7 +268,7 @@ jobs:
         run: |
           URL="/repos/${{ github.repository }}/git/refs/tags/"
           TAGS="${{ steps.detect_stale_tags.outputs.list }}"
-          for TAG in ${TAGS[@]}; do
+          for TAG in "${TAGS[@]}"; do
             gh api \
               --method DELETE \
               -H "Accept: application/vnd.github+json" \
@@ -283,7 +283,7 @@ jobs:
             echo -e "- Tags in branches:\n\`\`\`\n${{ steps.fetch_tags_in_branches.outputs.list }}\n\`\`\`"
             echo -e "- Tags in releases:\n\`\`\`\n${{ steps.fetch_tags_in_releases.outputs.list }}\n\`\`\`"
             echo -e "- Tags to delete:\n\`\`\`\n${{ steps.detect_stale_tags.outputs.list }}\n\`\`\`"
-          } >> $GITHUB_STEP_SUMMARY
+          } >> "$GITHUB_STEP_SUMMARY"
 
   cleanup_runs:
     needs: cleanup_tags
@@ -304,7 +304,7 @@ jobs:
           {
             echo 'list<<EOF'
             {
-              for COMMIT in ${COMMITS[@]}; do
+              for COMMIT in "${COMMITS[@]}"; do
                 URL="/repos/${{ github.repository }}/commits/${COMMIT}"
                 RUN="$(gh api \
                   -H "Accept: application/vnd.github+json" \
@@ -317,7 +317,7 @@ jobs:
               done
             } | sort -u
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Compose a list of workflow runs mentioned in releases
         id: fetch_runs_in_releases
@@ -335,7 +335,7 @@ jobs:
                 --jq ".[].body | capture(\"/${{ github.repository }}/actions/runs/(?<id>.*?)/\") | .id" || true
             } | sort -u
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Compose a list of stale workflow runs not mentioned in branches or releases
         id: detect_stale_runs
@@ -353,13 +353,13 @@ jobs:
           RUNS_IN_RELEASES="${{ steps.fetch_runs_in_releases.outputs.list }}"
           {
             echo 'list<<EOF'
-            for RUN in ${RUNS[@]}; do
-              [ -n "$(echo "${RUNS_IN_BRANCHES}" | grep "${RUN}")" ] && continue
-              [ -n "$(echo "${RUNS_IN_RELEASES}" | grep "${RUN}")" ] && continue
+            for RUN in "${RUNS[@]}"; do
+              echo "${RUNS_IN_BRANCHES}" | grep -q "${RUN}" && continue
+              echo "${RUNS_IN_RELEASES}" | grep -q "${RUN}" && continue
               echo "${RUN}"
             done
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Delete stale workflow runs
         id: delete_runs
@@ -369,7 +369,7 @@ jobs:
         run: |
           URL="/repos/${{ github.repository }}/actions/runs/"
           RUNS="${{ steps.detect_stale_runs.outputs.list }}"
-          for RUN in ${RUNS[@]}; do
+          for RUN in "${RUNS[@]}"; do
             gh api \
               --method DELETE \
               -H "Accept: application/vnd.github+json" \
@@ -384,4 +384,4 @@ jobs:
             echo -e "- Runs in branches:\n\`\`\`\n${{ steps.fetch_runs_in_branches.outputs.list }}\n\`\`\`"
             echo -e "- Runs in releases:\n\`\`\`\n${{ steps.fetch_runs_in_releases.outputs.list }}\n\`\`\`"
             echo -e "- Runs to delete:\n\`\`\`\n${{ steps.detect_stale_runs.outputs.list }}\n\`\`\`"
-          } >> $GITHUB_STEP_SUMMARY
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -85,11 +85,11 @@ jobs:
           if [ "${LABEL}" == 'custom' ]; then
             LABEL="$(echo "${{ fromJSON(inputs.extras).custom_label }}" | xargs)"
           fi
-          if [ -z "$(echo "${LABEL}" | grep -P '^[0-9a-zA-Z]+$')" ]; then
+          if ! echo "${LABEL}" | grep -q -P '^[0-9a-zA-Z]+$'; then
             echo "::error input=label,value=${LABEL}::Invalid label value"
             exit 1
           fi
-          echo "label=${LABEL}" >> $GITHUB_OUTPUT
+          echo "label=${LABEL}" >> "$GITHUB_OUTPUT"
 
       - name: Validate version value and generate matrix
         id: validate_version
@@ -99,22 +99,22 @@ jobs:
           
           declare -a PAIRS # format: channel|version
           readarray -d ',' -t VERSIONS < <(printf '%s' "${VERSION,,}") # converts to lower case
-          for VERSION in ${VERSIONS[@]}; do
-            if [ -n "$(echo "${VERSION}" | grep -P '^7\.[0-9]+(\.[0-9]+)?$')" ]; then
+          for VERSION in "${VERSIONS[@]}"; do
+            if echo "${VERSION}" | grep -q -P '^7\.[0-9]+(\.[0-9]+)?$'; then
               PAIRS+=("stable|${VERSION}")
-            elif [ -n "$(echo "${VERSION}" | grep -P '^7\.[0-9]+(\.[0-9]+)?(ab|alpha|beta|rc)[0-9]+$')" ]; then
+            elif echo "${VERSION}" | grep -q -P '^7\.[0-9]+(\.[0-9]+)?(ab|alpha|beta|rc)[0-9]+$'; then
               PAIRS+=("testing|${VERSION}")
             else
               [ "${VERSION}" == 'latest' ] && VERSION='stable'
-              if [ "${VERSION}" == 'stable' -o "${VERSION}" == 'testing' ]; then
+              if [ "${VERSION}" == 'stable' ] || [ "${VERSION}" == 'testing' ]; then
                 FILE="latest_${VERSION}.txt"
                 URL="https://download.mikrotik.com/routeros/NEWESTa7.${VERSION}"
-                wget -nv -t 3 -O ${FILE} ${URL} || rm -f ${FILE}
+                wget -nv -t 3 -O "${FILE}" "${URL}" || rm -f "${FILE}"
                 if [ ! -f "${FILE}" ]; then
                   echo "::error::Failed to get the latest version for the ${VERSION} channel"
                   exit 1
                 fi
-                LATEST="$(cat ${FILE} | cut -d ' ' -f1)" && rm -f "${FILE}"
+                LATEST="$(cat "${FILE}" | cut -d ' ' -f1)" && rm -f "${FILE}"
                 PAIRS+=("${VERSION}|${LATEST}")
               else
                 echo "::error input=version,value=${VERSION}::Invalid version value"
@@ -125,8 +125,8 @@ jobs:
           
           JSON=""
           unset VERSIONS; declare -a VERSIONS
-          PAIRS=($(printf '%s\n' "${PAIRS[@]}" | sort -u))
-          for PAIR in ${PAIRS[@]}; do
+          mapfile -t PAIRS < <(printf '%s\n' "${PAIRS[@]}" | sort -u)
+          for PAIR in "${PAIRS[@]}"; do
             CHANNEL="$(echo "${PAIR}" | cut -d '|' -f1)"
             VERSION="$(echo "${PAIR}" | cut -d '|' -f2)"
             [ ${#JSON} -ne 0 ] && JSON="${JSON},"
@@ -135,8 +135,8 @@ jobs:
           done
           JSON="[${JSON}]"
           printf -v VERSION '%s,' "${VERSIONS[@]}"
-          echo "matrix=${JSON}" >> $GITHUB_OUTPUT
-          echo "version=${VERSION%,}" >> $GITHUB_OUTPUT
+          echo "matrix=${JSON}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION%,}" >> "$GITHUB_OUTPUT"
 
       - name: Validate scope value
         id: validate_scope
@@ -162,10 +162,12 @@ jobs:
             echo "::error input=scope,value=${SCOPE}::Invalid scope value"
             exit 1
           fi
-          echo "scope=${SCOPE}" >> $GITHUB_OUTPUT
-          echo "download=${DOWNLOAD}" >> $GITHUB_OUTPUT
-          echo "process=${PROCESS}" >> $GITHUB_OUTPUT
-          echo "release=${RELEASE}" >> $GITHUB_OUTPUT
+          {
+            echo "scope=${SCOPE}"
+            echo "download=${DOWNLOAD}"
+            echo "process=${PROCESS}"
+            echo "release=${RELEASE}"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Compose a step summary
         id: compose_summary
@@ -182,7 +184,7 @@ jobs:
             echo "- download_ignore_release: \`${{ inputs.download_ignore_release }}\`"
             echo "- download_ignore_branch: \`${{ inputs.download_ignore_branch }}\`"
             echo "- extras: \`${{ inputs.extras }}\`"
-          } >> $GITHUB_STEP_SUMMARY
+          } >> "$GITHUB_STEP_SUMMARY"
 
   download:
     needs: validate
@@ -234,8 +236,8 @@ jobs:
         if: ${{ fromJSON(inputs.extras).download_force == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.dkey }}.tar.zst"
-          (cd -- "${{ env.box }}"; sudo find * .*) | sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" -T -
-          sudo chown $(id -un):$(id -gn) "${FILE}"
+          (cd -- "${{ env.box }}" || true; sudo find -- * .*) | sudo tar --zst -cf "${FILE}" -C "${{ env.box }}" -T -
+          sudo chown "$(id -un)":"$(id -gn)" "${FILE}"
 
       - name: Delete downloaded files from cache
         id: delete_cache
@@ -246,7 +248,7 @@ jobs:
           gh api --method DELETE \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/actions/caches?key=${{ env.dkey }}&ref=${{ github.ref }}
+            "/repos/${{ github.repository }}/actions/caches?key=${{ env.dkey }}&ref=${{ github.ref }}"
 
       - name: Save downloaded files from '${{ env.box }}' directory to cache
         id: save_cache
@@ -336,8 +338,8 @@ jobs:
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
         run: |
           FILE="${{ env.tmp }}/${{ env.pkey }}.tar.zst"
-          (cd -- "${{ env.box }}"; sudo find * .*) | sudo tar --zst -cf "${FILE}" --exclude='downloads.txt' -X "${{ env.box }}/downloads.txt" -C "${{ env.box }}" -T -
-          sudo chown $(id -un):$(id -gn) "${FILE}"
+          (cd -- "${{ env.box }}" || true; sudo find -- * .*) | sudo tar --zst -cf "${FILE}" --exclude='downloads.txt' -X "${{ env.box }}/downloads.txt" -C "${{ env.box }}" -T -
+          sudo chown "$(id -un)":"$(id -gn)" "${FILE}"
 
       - name: Delete processed files from cache
         id: delete_cache
@@ -348,7 +350,7 @@ jobs:
           gh api --method DELETE \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/actions/caches?key=${{ env.pkey }}&ref=${{ github.ref }}
+            "/repos/${{ github.repository }}/actions/caches?key=${{ env.pkey }}&ref=${{ github.ref }}"
 
       - name: Save processed files from '${{ env.box }}' directory to cache
         id: save_cache
@@ -434,10 +436,10 @@ jobs:
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' }}
         run: |
           EXCL='exclusions.txt'
-          cd "${{ env.box }}" && { sudo find * -type f -size +32M | sort | sudo tee "${EXCL}" || true; } && cd - > /dev/null
+          cd -- "${{ env.box }}" && { sudo find -- * -type f -size +32M | sort | sudo tee "${EXCL}" || true; } && cd - > /dev/null
           
           LIST="${{ env.tmp }}/files.txt"
-          { cd -- "${{ env.box }}"; sudo find * .*; cd - > /dev/null; } > "${LIST}"
+          { cd -- "${{ env.box }}" || true; sudo find -- * .*; cd - > /dev/null; } > "${LIST}"
           
           FILE="${{ env.tmp }}/routeros-${{ env.branch }}-full.tar.zst"
           sudo tar --zst -cf "${FILE}" --owner=0 --group=0 --exclude='.git' --exclude="${EXCL}" -C "${{ env.box }}" -T "${LIST}"
@@ -459,49 +461,49 @@ jobs:
           ID="$(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/releases/tags/${{ env.tag }} \
+            "/repos/${{ github.repository }}/releases/tags/${{ env.tag }}" \
             --jq '.id')" || FOUND='false'
-          if [ -n "${ID}" -a "${FOUND}" == 'true' ]; then
+          if [ -n "${ID}" ] && [ "${FOUND}" == 'true' ]; then
             gh api --method DELETE \
               -H "Accept: application/vnd.github+json" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
-              /repos/${{ github.repository }}/releases/${ID} || echo 'warning: Failed to delete an existing release'
+              "/repos/${{ github.repository }}/releases/${ID}" || echo 'warning: Failed to delete an existing release'
           fi
           
           FOUND='true'
           REF="$(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/git/ref/tags/${{ env.tag }} \
+            "/repos/${{ github.repository }}/git/ref/tags/${{ env.tag }}" \
             --jq '.ref')" || FOUND='false'
-          if [ -n "${REF}" -a "${FOUND}" == 'true' ]; then
+          if [ -n "${REF}" ] && [ "${FOUND}" == 'true' ]; then
             gh api --method DELETE \
               -H "Accept: application/vnd.github+json" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
-              /repos/${{ github.repository }}/git/refs/tags/${{ env.tag }} || echo 'warning: Failed to delete an existing tag'
+              "/repos/${{ github.repository }}/git/refs/tags/${{ env.tag }}" || echo 'warning: Failed to delete an existing tag'
           fi
           
-          if [ "${{ needs.validate.outputs.label }}" == 'vendor' -a "${{ matrix.channel }}" == 'stable' ]; then 
+          if [ "${{ needs.validate.outputs.label }}" == 'vendor' ] && [ "${{ matrix.channel }}" == 'stable' ]; then 
             TAGS="$(gh api \
               -H "Accept: application/vnd.github+json" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
-              /repos/${{ github.repository }}/git/matching-refs/tags/ \
+              "/repos/${{ github.repository }}/git/matching-refs/tags/" \
               --jq '.[].ref' 2>/dev/null || true)"
-            LATEST="$({ echo "${TAGS}" | cut -d '/' -f 3 | grep -P '^v7\.[0-9]+(\.[0-9]+)?-${{ needs.validate.outputs.label }}$'; echo "${{ env.tag }}"; } | sort -V | tail -1)"
+            LATEST="$({ echo "${TAGS}" | cut -d '/' -f 3 | grep -P "^v7\.[0-9]+(\.[0-9]+)?-${{ needs.validate.outputs.label }}$"; echo "${{ env.tag }}"; } | sort -V | tail -1)"
             if [ "${LATEST}" == "${{ env.tag }}" ]; then
-              echo "latest=true" >> $GITHUB_OUTPUT
+              echo "latest=true" >> "$GITHUB_OUTPUT"
             else
-              echo "latest=false" >> $GITHUB_OUTPUT
+              echo "latest=false" >> "$GITHUB_OUTPUT"
             fi
           else
-            echo "latest=false" >> $GITHUB_OUTPUT
+            echo "latest=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Compose a release description
         id: compose_description
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_tag_or_artifact }}
         run: |
-          SHA_MSG="$(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }} | head -1)"
+          SHA_MSG="$(cd "${{ env.box }}" && git log -1 --pretty=%B "${{ github.sha }}" | head -1)"
           {
             #echo 'description<<EOF'
             echo -e "Automatic release ([${SHA_MSG}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})):"
@@ -541,9 +543,9 @@ jobs:
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_push_branch }}
         run: |
           sudo "${{ env.app }}/normalize.sh" "${{ env.box }}"
-          sudo chown -hR $(id -un):$(id -gn) "${{ env.box }}"
-          cd "${{ env.box }}"
-          find * -type f -o -type d \! -readable -exec bash -c 'echo "warning: {} is still not readable"' \;
+          sudo chown -hR "$(id -un)":"$(id -gn)" "${{ env.box }}"
+          cd -- "${{ env.box }}" || true
+          find -- * -type f -o -type d \! -readable -exec bash -c 'echo "warning: {} is still not readable"' \;
           {
             echo '# This branch contains an unpacked routeros-...-light.tar.zst archive.'
             echo '# Unlike routeros-...-full.tar.zst, it excludes relatively large files.'
@@ -554,13 +556,13 @@ jobs:
             echo '# Block and character devices, pipes and sockets cannot be committed by git,'
             echo '# so they are only present in the archives mentioned above.'
           } > '.gitignore'
-          cd -
+          cd - || true
 
       - name: Compose a commit message
         id: compose_message
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_push_branch }}
         run: |
-          SHA_MSG="$(cd "${{ env.box }}" && git log -1 --pretty=%B ${{ github.sha }} | head -1)"
+          SHA_MSG="$(cd "${{ env.box }}" && git log -1 --pretty=%B "${{ github.sha }}" | head -1)"
           {
             echo 'message<<EOF'
             echo -e "Automatic commit (${SHA_MSG})\n"
@@ -569,7 +571,7 @@ jobs:
             echo -e "Job https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}"
             echo -e "Tag https://github.com/${{ github.repository }}/releases/tag/${{ env.tag }}"
             echo EOF
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Add files, commit and push
         id: push_files
