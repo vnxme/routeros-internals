@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2025 VNXME
 #
@@ -34,7 +34,7 @@ declare -a DOWNLOADS
 
 function check_deps {
   local DEPS=('wget')
-  local DEP; for DEP in ${DEPS[@]}; do
+  local DEP; for DEP in "${DEPS[@]}"; do
     [ -z "$(which -- "${DEP}")" ] && { echo "${ME}: Dependency '${DEP}' can't be satisfied. Exiting"; exit 1; }
   done
 }
@@ -43,7 +43,7 @@ function download {
   # $1 - local file path
   # $2 - remote file URL
 
-  wget -nv -t 3 -O "$1" "$2" && DOWNLOADS+=("$1") || rm -f "$1"
+  if wget -nv -t 3 -O "$1" "$2"; then DOWNLOADS+=("$1"); else rm -f "$1"; fi
 }
 
 function download_from_branch {
@@ -119,7 +119,7 @@ function parse_arguments {
   local OPTIONS_L='dir:,host-github:,host-vendor:,ignore-release,ignore-branch,label:,patch:,repo:,version:'
   local OPTIONS_S='d:l:p:r:v:'
 
-  local PARSED=$(getopt -o ${OPTIONS_S} -l ${OPTIONS_L} --name "${ME}" -- "$@") || exit 2
+  local PARSED; PARSED=$(getopt -o ${OPTIONS_S} -l ${OPTIONS_L} --name "${ME}" -- "$@") || exit 2
   eval set -- "$PARSED"
 
   while true; do
@@ -174,18 +174,18 @@ function parse_arguments {
   [ -z "${ARG_VERSION}" ] && { echo "${ME}: Version is required, but missing. Use -v or --version. Exiting"; exit 1; }
   [ -z "${ARG_LABEL}" ] && { echo "${ME}: Label is required, but missing. Use -l or --label. Exiting"; exit 1; }
 
-  [ -z "${ARG_DIR}" -a $# -gt 0 ] && { ARG_DIR="$1"; shift; }
+  if [ -z "${ARG_DIR}" ] && [ $# -gt 0 ]; then { ARG_DIR="$1"; shift; } fi
   [ $# -gt 0 ] && { echo "${ME}: Got an unknown positional argument. Exiting"; exit 1; }
 
   if [ -n "${ARG_DIR}" ]; then
     [ ! -d "${ARG_DIR}" ] && { echo "${ME}: Not found directory ${ARG_DIR} ($(realpath -- "${ARG_DIR}")). Exiting"; exit 1; }
-    cd -- "${ARG_DIR}"
+    cd -- "${ARG_DIR}" || true
   fi
 }
 
 check_deps
 
-[ $# -gt 0 ] && { echo "${ME}: Started with $# arguments: $@"; } || { echo "${ME}: Started with no arguments"; }
+if [ $# -gt 0 ]; then echo "${ME}: Started with $# arguments: $*"; else echo "${ME}: Started with no arguments"; fi
 
 parse_arguments "$@"
 
@@ -206,7 +206,7 @@ if [ "${ARG_IGNORE_RELEASE}" == 'false' ]; then
     if [ -n "${LIST}" ]; then
       tar --zst -xf "${FILE}" -C . "${LIST}" && tar --zst -xf "${FILE}" -C . -T "${LIST}" && rm -f "${FILE}"
     else
-      tar --zst -xf "${FILE}" -C . && rm -f "${FILE}" && "${MD}/cleanup.sh" . && find * -type f | sort > ${FILE_DOWNLOADS}
+      tar --zst -xf "${FILE}" -C . && rm -f "${FILE}" && "${MD}/cleanup.sh" . && find -- * -type f | sort > ${FILE_DOWNLOADS}
     fi
     exit 0
   fi
@@ -234,7 +234,7 @@ for ARCH in "${ARCHS[@]}"; do
     download_from_source "${ARCH}/${PACKAGE}-${ARG_VERSION}${SUFFIX}.npk" "${PACKAGE}-${ARG_VERSION}${SUFFIX}.npk"
   done
 
-  if [ ${#PACKAGES[@]} -eq 1 -a "${PACKAGES[0]}" == 'routeros' ]; then
+  if [ ${#PACKAGES[@]} -eq 1 ] && [ "${PACKAGES[0]}" == 'routeros' ]; then
     if [ "${USE_FILE_PACKAGES}" == 'true' ]; then
       readarray -t PACKAGES_ < <(cat "${FILE_PACKAGES}" | grep "${ARCH}/")
       for PACKAGE in "${PACKAGES_[@]}"; do
@@ -246,15 +246,15 @@ for ARCH in "${ARCHS[@]}"; do
       if [ -f "${FILE}" ]; then
         unset -v 'DOWNLOADS[-1]'
         unzip -o -d "${ARCH}/" "${FILE}" && rm -f "${FILE}"
-        readarray -t FILES < <(find ${ARCH}/* -maxdepth 0 -type f -name '*.npk' ! -name 'routeros*.npk' | tee -a "${FILE_PACKAGES}")
-        for FILE in ${FILES[@]}; do
+        readarray -t FILES < <(find -- "${ARCH}"/* -maxdepth 0 -type f -name '*.npk' ! -name 'routeros*.npk' | tee -a "${FILE_PACKAGES}")
+        for FILE in "${FILES[@]}"; do
           DOWNLOADS+=("${FILE}")
         done
       fi
     fi
   fi
 
-  if [ -z "$(cd "${ARCH}"; find * .* -type f)" ]; then
+  if [ -z "$(cd "${ARCH}"; find -- * .* -type f)" ]; then
     rm -rf "${ARCH}"
   fi
 done

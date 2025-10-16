@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2025 VNXME
 #
@@ -23,21 +23,21 @@ if [ "${EUID:-$(id -u)}" -ne 0 ]; then
     exit $?
   else
     echo "${ME}: Root permissions are required. Using su -c to run as root"
-    su - root -c "cd \"${PWD}; bash -- \"$(realpath -- "$0")\" \"$@\""
+    su - root -c "cd \"${PWD}; bash -- \"$(realpath -- "$0")\" \"$*\""
     exit $?
   fi
 fi
 
-[ $# -gt 0 ] && { echo "${ME}: Started with $# arguments: $@"; } || { echo "${ME}: Started with no arguments"; }
+if [ $# -gt 0 ]; then echo "${ME}: Started with $# arguments: $*"; else echo "${ME}: Started with no arguments"; fi
 
 if [ -n "$1" ]; then
   [ ! -d "$1" ] && { echo "${ME}: Not found directory $1 ($(realpath -- "$1")). Exiting"; exit 1; }
-  cd -- "$1"
+  cd -- "$1" || true
 fi
 
 # Remove unpacked subdirectories
 readarray -d '' -t FILES < <(
-  find * -type f -print0 2>/dev/null || true
+  find -- * -type f -print0 2>/dev/null || true
 )
 for FILE in "${FILES[@]}"; do
   DIR="$(dirname -- "${FILE}")/_$(basename -- "${FILE}")"

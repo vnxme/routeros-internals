@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2025 VNXME
 #
@@ -30,8 +30,8 @@ function clean_and_exit {
   # $1 - exit code, integer
   # $2 - error message, string
   [ "${RM}" = true ] && rm -rf "${DIR}"
-  [ -n "$2" ] && echo $2 >&2
-  exit $1
+  [ -n "$2" ] && echo "$2" >&2
+  exit "$1"
 }
 
 function compose_readme {
@@ -41,7 +41,7 @@ function compose_readme {
   # $3 - helpers array name, string
 
   local -n HREF="$3"
-  local TEXT="### $(basename "$1")\n"
+  local TEXT; TEXT="### $(basename "$1")\n"
   local README="$2/README.md"
 
   local BD="${HREF['blockdev']}"
@@ -81,31 +81,31 @@ function detect_filetype {
   # $1 - file output, string
   if [ -z "$1" ]; then
     echo "unknown"
-  elif [ -n "$(echo "$1" | grep -E '^ISO 9660 CD-ROM filesystem data.*$')" ]; then
+  elif echo "$1" | grep -q -E '^ISO 9660 CD-ROM filesystem data.*$'; then
     echo "iso"
-  elif [ -n "$(echo "$1" | grep -E '^DOS/MBR boot sector.*$')" ]; then
+  elif echo "$1" | grep -q -E '^DOS/MBR boot sector.*$'; then
     echo "img"
-  elif [ -n "$(echo "$1" | grep -E '^Linux kernel (.*) boot executable bzImage.*$')" ]; then
+  elif echo "$1" | grep -q -E '^Linux kernel (.*) boot executable bzImage.*$'; then
     echo "bzimage" # Linux bzImage (could be named as *.efi or linux.*)
-  elif [ -n "$(echo "$1" | grep -E '^Linux kernel (.*) boot executable Image.*$')" ]; then
+  elif echo "$1" | grep -q -E '^Linux kernel (.*) boot executable Image.*$'; then
     echo "image" # Linux Image (could be named as *.efi, but resembles a Linux executable)
-  elif [ -n "$(echo "$1" | grep -E '^ELF (.*) executable.*$')" ]; then
+  elif echo "$1" | grep -q -E '^ELF (.*) executable.*$'; then
     echo "elf" # Linux executable (could be named as kernel)
-  elif [ -n "$(echo "$1" | grep -E '^XZ compressed data.*$')" ]; then
+  elif echo "$1" | grep -q -E '^XZ compressed data.*$'; then
     echo "xz"
-  elif [ -n "$(echo "$1" | grep -E '^(ASCII )?cpio archive.*$')" ]; then
+  elif echo "$1" | grep -q -E '^(ASCII )?cpio archive.*$'; then
     echo "cpio"
-  elif [ -n "$(echo "$1" | grep -E '^Squashfs filesystem.*$')" ]; then
+  elif echo "$1" | grep -q -E '^Squashfs filesystem.*$'; then
     echo "sfs"
-  elif [ -n "$(echo "$1" | grep -E '^gzip compressed data.*$')" ]; then
+  elif echo "$1" | grep -q -E '^gzip compressed data.*$'; then
     echo "gz"
-  elif [ -n "$(echo "$1" | grep -E '^Zip archive data.*$')" ]; then
+  elif echo "$1" | grep -q -E '^Zip archive data.*$'; then
     echo "zip"
-  elif [ -n "$(echo "$1" | grep -E '^Device Tree Blob.*$')" ]; then
+  elif echo "$1" | grep -q -E '^Device Tree Blob.*$'; then
     echo "dtb"
-  elif [ -n "$(echo "$1" | grep -E '^Applesoft BASIC program data.*$')" ]; then
+  elif echo "$1" | grep -q -E '^Applesoft BASIC program data.*$'; then
     echo "data"
-  elif [ -n "$(echo "$1" | grep -E '^data$')" ]; then
+  elif echo "$1" | grep -q -E '^data$'; then
     # TODO: implement additional checks
     echo "data"
   else
@@ -121,12 +121,12 @@ function extract_cpio_elements {
 
   local -n HREF="$3"
   local BW="${HREF['binwalk']}"
-  local CPIO_ENDS=$(echo "${BW}" | grep -E 'cpio archive(.*)TRAILER!!!' | gawk '{print $1}' | tail -1)
+  local CPIO_ENDS; CPIO_ENDS=$(echo "${BW}" | grep -E 'cpio archive(.*)TRAILER!!!' | gawk '{print $1}' | tail -1)
   local CPIO_END; for CPIO_END in ${CPIO_ENDS}; do
-    local CPIO_START="$(echo "${BW}" | grep 'cpio archive' | gawk '{print $1}' | head -1)"
+    local CPIO_START; CPIO_START="$(echo "${BW}" | grep 'cpio archive' | gawk '{print $1}' | head -1)"
     if [ -n "${CPIO_START}" ] && [ -n "${CPIO_END}" ] && [ "${CPIO_START}" -lt "${CPIO_END}" ]; then
-      local CPIO_SIZE=$((${CPIO_END}-${CPIO_START}+136)) # 136 is the end pattern length
-      local CPIO_FILE="$2/$(printf "%x" "${CPIO_START}").cpio"
+      local CPIO_SIZE=$((CPIO_END-CPIO_START+136)) # 136 is the end pattern length
+      local CPIO_FILE; CPIO_FILE="$2/$(printf "%x" "${CPIO_START}").cpio"
       dd if="$1" bs=1 skip="${CPIO_START}" count="${CPIO_SIZE}" of="${CPIO_FILE}" > /dev/null 2>&1 || true
     fi
   done
@@ -137,12 +137,12 @@ function extract_dtb_elements {
   # $1 - source filepath, string
   # $2 - destination directory, string
 
-  local DTB_STARTS=$(LC_ALL=C grep -aboP '\xd0\x0d\xfe\xed' "$1" | cut -f 1 -d ':')
+  local DTB_STARTS; DTB_STARTS=$(LC_ALL=C grep -aboP '\xd0\x0d\xfe\xed' "$1" | cut -f 1 -d ':')
   local DTB_START; for DTB_START in ${DTB_STARTS}; do
-    local DTB_SIZE=$(($(dd if="$1" bs=1 skip="$((${DTB_START}+4))" count=4 2>/dev/null | od -t d4 --endian=big | awk '{print $2}')+8))
-    local DTB_VERSION=$(dd if="$1" bs=1 skip="$((${DTB_START}+20))" count=4 2>/dev/null | od -t d4 --endian=big | awk '{print $2}')
+    local DTB_SIZE; DTB_SIZE=$(($(dd if="$1" bs=1 skip="$((DTB_START+4))" count=4 2>/dev/null | od -t d4 --endian=big | awk '{print $2}')+8))
+    local DTB_VERSION; DTB_VERSION=$(dd if="$1" bs=1 skip="$((DTB_START+20))" count=4 2>/dev/null | od -t d4 --endian=big | awk '{print $2}')
     if [ -n "${DTB_START}" ] && [ -n "${DTB_SIZE}" ] && [ "${DTB_SIZE}" -gt 0 ] && [ "${DTB_VERSION}" = "17" ]; then
-      local DTB_FILE="$2/$(printf "%x" "${DTB_START}").dtb"
+      local DTB_FILE; DTB_FILE="$2/$(printf "%x" "${DTB_START}").dtb"
       dd if="$1" bs=1 skip="${DTB_START}" count="${DTB_SIZE}" of="${DTB_FILE}" > /dev/null 2>&1 || true
     fi
   done
@@ -155,15 +155,15 @@ function extract_xz_elements {
 
   # credits to @elseif for binary patterns
   # ref: https://github.com/elseif/MikroTikPatch/blob/main/patch.py
-  local XZ_ENDS=$(LC_ALL=C grep -aboP '\x00\x00\x00\x00\x01\x59\x5A' "$1" | cut -f 1 -d ':' | head -1)
+  local XZ_ENDS; XZ_ENDS=$(LC_ALL=C grep -aboP '\x00\x00\x00\x00\x01\x59\x5A' "$1" | cut -f 1 -d ':' | head -1)
   local XZ_END; for XZ_END in ${XZ_ENDS}; do
-    local XZ_START=$(head -c ${XZ_END} "$1" | LC_ALL=C grep -aboP '\xFD7zXZ\x00\x00\x01' - | cut -f 1 -d ':' | tail -1)
+    local XZ_START; XZ_START=$(head -c "${XZ_END}" "$1" | LC_ALL=C grep -aboP '\xFD7zXZ\x00\x00\x01' - | cut -f 1 -d ':' | tail -1)
     if [ -n "${XZ_START}" ] && [ -n "${XZ_END}" ] && [ "${XZ_START}" -lt "${XZ_END}" ]; then
-      local XZ_SIZE=$((${XZ_END}-${XZ_START}+7)) # 7 is the end pattern length
-      local UNK_FILE="$2/$(printf "%x" "${XZ_START}").unknown"
+      local XZ_SIZE; XZ_SIZE=$((XZ_END-XZ_START+7)) # 7 is the end pattern length
+      local UNK_FILE; UNK_FILE="$2/$(printf "%x" "${XZ_START}").unknown"
       local XZ_FILE="${UNK_FILE}.xz"
       dd if="$1" bs=1 skip="${XZ_START}" count="${XZ_SIZE}" of="${XZ_FILE}" > /dev/null 2>&1 || true
-      if [ -s "${XZ_FILE}" -a -z "$(xz -t "${XZ_FILE}")" ]; then
+      if [ -s "${XZ_FILE}" ] && [ -z "$(xz -t "${XZ_FILE}")" ]; then
         unxz -q "${XZ_FILE}" || true
         if [ -s "${UNK_FILE}" ]; then
           case "$(detect_filetype "$(render_file "${UNK_FILE}")")" in
@@ -211,16 +211,16 @@ function unpack_bzimage {
   # $3 - helpers array name, string
 
   local -n HREF="$3"
-  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).efi"
+  local DIR; DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).efi"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   extract_xz_elements "$1" "${DIR}"
 
   # unless bzImage has an XZ-compressed vmlinux inside, use a universal script
-  if [ -z "$(find ${DIR}/* -maxdepth 0 -type f -name '*.vmlinux' 2>/dev/null)" ]; then
+  if [ -z "$(find -- "${DIR}"/* -maxdepth 0 -type f -name '*.vmlinux' 2>/dev/null)" ]; then
     local SCRIPT="/tmp/extract-vmlinux.sh"
     if [ ! -s "${SCRIPT}" ]; then
-      wget -nv -t 3 -O "${SCRIPT}" "https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-vmlinux" && chmod +x "${SCRIPT}" || rm -f "${SCRIPT}"
+      if wget -nv -t 3 -O "${SCRIPT}" "https://raw.githubusercontent.com/torvalds/linux/master/scripts/extract-vmlinux"; then chmod +x "${SCRIPT}"; else rm -f "${SCRIPT}"; fi
       if [ ! -s "${SCRIPT}" ]; then
         clean_and_exit 2 "${ME}: Script '${SCRIPT}' is missing"
       fi
@@ -246,7 +246,7 @@ function unpack_cpio {
   # $3 - helpers array name, string
 
   local -n HREF="$3"
-  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).cpio"
+  local DIR; DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).cpio"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   cpio --quiet --no-preserve-owner -idm -D "${DIR}" < "$1" || true
@@ -262,15 +262,15 @@ function unpack_dtb {
   # $3 - helpers array name, string
 
   local -n HREF="$3"
-  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).dtb"
+  local DIR; DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).dtb"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  local BASE="$(basename "$1")"
+  local BASE; BASE="$(basename "$1")"
   local TMP="${DIR}/${BASE%.*}.dts"
   dtc -q -I dtb -O dts -o "${TMP}" "$1" || true
 
   if [ -s "${TMP}" ]; then
-    local MODEL="$(sed -n -E 's,.*model = "(.*)";,\1,p' "${TMP}")"
+    local MODEL; MODEL="$(sed -n -E 's,.*model = "(.*)";,\1,p' "${TMP}")"
     if [ -n "${MODEL}" ]; then
       mv "${TMP}" "${DIR}/${MODEL}.dts"
     else
@@ -290,7 +290,7 @@ function unpack_elf {
   # $3 - helpers array name, string
 
   local -n HREF="$3"
-  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).elf"
+  local DIR; DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).elf"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   extract_cpio_elements "$1" "${DIR}" "$3"
@@ -309,14 +309,14 @@ function unpack_gz {
   # $3 - helpers array name, string
 
   local -n HREF="$3"
-  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).gz"
+  local DIR; DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).gz"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  local TMP="${DIR}/$(basename "$1" .gz)"
-  if [ -z "$(gunzip -t "$1")"]; then
+  local TMP; TMP="${DIR}/$(basename "$1" .gz)"
+  if [ -z "$(gunzip -t "$1")" ]; then
     HREF['gzinfo']="$(gzip -lv "$1")"
     gunzip -cq "$1" > "${TMP}" || rm "${TMP}"
-    if [ -z "$((tar -tf "${TMP}" 3>&2 2>&1 1>&3-) 2> /dev/null)" ]; then
+    if [ -z "$( (tar -tf "${TMP}" 3>&2 2>&1 1>&3-) 2> /dev/null )" ]; then
       HREF['tarinfo']="$(tar -tvf "${TMP}")"
       tar -xf "${TMP}" -C "${DIR}" && rm "${TMP}" || true
     fi
@@ -334,18 +334,18 @@ function unpack_img {
   # $3 - helpers array name, string
 
   local -n HREF="$3"
-  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).img"
+  local DIR; DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).img"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  [ -z "$(lsmod | grep 'nbd')" ] && modprobe nbd && sleep 0.25
+  if ! lsmod | grep -q 'nbd'; then modprobe nbd && sleep 0.25; fi
 
-  local NBD="/dev/$(lsblk | grep -e "nbd.*0B.*disk" | head -1 | cut -d ' ' -f1)"
+  local NBD; NBD="/dev/$(lsblk | grep -e "nbd.*0B.*disk" | head -1 | cut -d ' ' -f1)"
   if [ -b "${NBD}" ]; then
     qemu-nbd -c "${NBD}" -f raw "$1" && sleep 0.25
 
-    local BI="$(blkid | grep "${NBD}" | sort)"
-    local GD="$(echo 2 | gdisk -l "${NBD}")"
-    local PA="$(parted "${NBD}" print)"
+    local BI; BI="$(blkid | grep "${NBD}" | sort)"
+    local GD; GD="$(echo 2 | gdisk -l "${NBD}")"
+    local PA; PA="$(parted "${NBD}" print)"
 
     HREF['blockdev']="$(blockdev --report "${NBD}")"
     HREF['blkid']="${BI}"
@@ -353,28 +353,28 @@ function unpack_img {
     HREF['gdisk']="${GD}"
     HREF['parted']="${PA}"
 
-    local SS="$(blockdev --getss "${NBD}")"
+    local SS; SS="$(blockdev --getss "${NBD}")"
     dd if="${NBD}" of="${DIR}/mbr.bin" bs="${SS}" count=1 2>/dev/null
-    if [ -n "$(echo "${GD}" | grep 'GPT: present')" ]; then
-      local SZ="$(blockdev --getsz "${NBD}")"
+    if echo "${GD}" | grep -q 'GPT: present'; then
+      local SZ; SZ="$(blockdev --getsz "${NBD}")"
       dd if="${DIR}/mbr.bin" of="${DIR}/gpt.bin" bs="${SS}" count=1 seek=0 2>/dev/null
       dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count=1 skip=1 seek=1 2>/dev/null
-      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count=1 skip="$((${SZ} - 1))" seek=2 2>/dev/null
+      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count=1 skip="$((SZ - 1))" seek=2 2>/dev/null
 
-      local PT="$(echo "${GD}" | grep 'Main partition table')"
-      local PB="$(echo "${PT}" | cut -d ' ' -f7)"
-      local PE="$(echo "${PT}" | cut -d ' ' -f12)"
-      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count="$((${PE} - ${PB} + 1))" skip="${PB}" seek=3 2>/dev/null
+      local PT; PT="$(echo "${GD}" | grep 'Main partition table')"
+      local PB; PB="$(echo "${PT}" | cut -d ' ' -f7)"
+      local PE; PE="$(echo "${PT}" | cut -d ' ' -f12)"
+      dd if="${NBD}" of="${DIR}/gpt.bin" bs="${SS}" count="$((PE - PB + 1))" skip="${PB}" seek=3 2>/dev/null
     fi
 
-    if [ -n "$(echo "${PA}" | grep 'Partition Table: loop')" ]; then
+    if echo "${PA}" | grep -q 'Partition Table: loop'; then
       local PDIR="${DIR}/loop"
       mkdir -p "${PDIR}"
-      mount -o loop,ro "${NBD}" "${PDIR}" && sleep 0.25 && unset HREF['fdisk'] && unset HREF['gdisk']
+      mount -o loop,ro "${NBD}" "${PDIR}" && sleep 0.25 && unset "HREF['fdisk']" && unset "HREF['gdisk']"
     else
-      local PARTS="$(echo "${BI}" | cut -d ':' -f1)"
+      local PARTS; PARTS="$(echo "${BI}" | cut -d ':' -f1)"
       local PART; for PART in ${PARTS}; do
-        local PNUM="$(echo "${PART}" | sed -e "s,${NBD}p,,g")"
+        local PNUM; PNUM="$(echo "${PART}" | sed -e "s,${NBD}p,,g")"
         local PDIR="${DIR}/part${PNUM}"
         mkdir -p "${PDIR}"
         mount -o ro "${PART}" "${PDIR}" && sleep 0.25
@@ -384,7 +384,7 @@ function unpack_img {
     rsync -rltgoD "${DIR}/" "$2/"
     HREF['ls']="$(render_ls "${DIR}")"
 
-    local MOUNTS="$(mount | grep "${NBD}" | cut -d ' ' -f3)"
+    local MOUNTS; MOUNTS="$(mount | grep "${NBD}" | cut -d ' ' -f3)"
     local MOUNT; for MOUNT in ${MOUNTS}; do
       umount "${MOUNT}" && sleep 0.25
     done
@@ -401,7 +401,7 @@ function unpack_iso {
   # $3 - helpers array name, string
 
   local -n HREF="$3"
-  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).iso"
+  local DIR; DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).iso"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   mount -o loop,ro "$1" "${DIR}" && sleep 0.25
@@ -418,7 +418,7 @@ function unpack_sfs {
   # $3 - helpers array name, string
 
   local -n HREF="$3"
-  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).sfs"
+  local DIR; DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).sfs"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   if [ -n "$(unsquashfs -ll "$1")" ]; then
@@ -437,14 +437,14 @@ function unpack_xz {
   # $3 - helpers array name, string
 
   local -n HREF="$3"
-  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).xz"
+  local DIR; DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).xz"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
-  local TMP="${DIR}/$(echo "$(basename "$1")" | sed -r 's,\.(rgz|xz)$,,g')"
-  if [ -z "$(xz -t "$1")"]; then
+  local TMP; TMP="${DIR}/$(basename "$1" | sed -r 's,\.(rgz|xz)$,,g')"
+  if [ -z "$(xz -t "$1")" ]; then
     HREF['xzinfo']="$(xz -lv "$1")"
     unxz -cq "$1" > "${TMP}" || rm "${TMP}"
-    if [ -z "$((tar -tf "${TMP}" 3>&2 2>&1 1>&3-) 2> /dev/null)" ]; then
+    if [ -z "$( (tar -tf "${TMP}" 3>&2 2>&1 1>&3-) 2> /dev/null )" ]; then
       HREF['tarinfo']="$(tar -tvf "${TMP}")"
       tar -xf "${TMP}" -C "${DIR}" && rm "${TMP}" || true
     fi
@@ -462,7 +462,7 @@ function unpack_zip {
   # $3 - helpers array name, string
 
   local -n HREF="$3"
-  local DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).zip"
+  local DIR; DIR="/tmp/$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 16).zip"
   local RM=false; [ ! -d "${DIR}" ] && mkdir -p "${DIR}" && RM=true
 
   if [ -z "$(zip -T -q "$1")" ]; then
@@ -482,7 +482,7 @@ if [ "${EUID:-$(id -u)}" -ne 0 ]; then
     exit $?
   else
     echo "${ME}: Root permissions are required. Using su -c to run as root"
-    su - root -c "cd \"${PWD}; bash -- \"$(realpath -- "$0")\" \"$@\""
+    su - root -c "cd \"${PWD}; bash -- \"$(realpath -- "$0")\" \"$*\""
     exit $?
   fi
 fi
@@ -490,20 +490,20 @@ fi
 check_path "/sbin" "/usr/sbin" "/usr/local/sbin"
 
 DEPS=(binwalk blockdev blkid cpio dtc fdisk file gdisk gunzip qemu-nbd parted rsync tar unsquashfs unxz)
-for DEP in ${DEPS[@]}; do
+for DEP in "${DEPS[@]}"; do
   if [ -z "$(which "${DEP}")" ]; then
     clean_and_exit 2 "${ME}: Dependency '${DEP}' can't be satisfied"
   fi
 done
 
-[ $# -gt 0 ] && { echo "${ME}: Started with $# arguments: $@"; } || { echo "${ME}: Started with no arguments"; }
+if [ $# -gt 0 ]; then echo "${ME}: Started with $# arguments: $*"; else echo "${ME}: Started with no arguments"; fi
 
 FILE="$1"
-if [ "$#" -ne 1 -o ! -s "${FILE}" ]; then
+if [ "$#" -ne 1 ] || [ ! -s "${FILE}" ]; then
   clean_and_exit 2 "${ME}: The only argument must be a path to a non-empty file"
 fi
 
-DIR="$(dirname ${FILE})/_$(basename ${FILE})"
+DIR="$(dirname -- "${FILE}")/_$(basename -- "${FILE}")"
 if [ ! -d "${DIR}" ]; then
   mkdir -p "${DIR}" && RM=true
 elif [ -n "$(ls -A "${DIR}")" ]; then
@@ -562,6 +562,8 @@ case "$(detect_filetype "${FI}")" in
     ;;
 
 esac
+
+if false; then echo "${!HELPERS}"; fi # prevents shellcheck warning that HELPERS are unused
 
 compose_readme "${FILE}" "${DIR}" "HELPERS"
 [ -n "$(ls -A "${DIR}")" ] && RM=false

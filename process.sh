@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2025 VNXME
 #
@@ -31,7 +31,7 @@ function find_files_by_name {
   # $1 - name filter
   # $2 - glob path
 
-  find $2 -maxdepth 0 -type f -name "$1" -print0 2>/dev/null || true
+  find -- $2 -maxdepth 0 -type f -name "$1" -print0 2>/dev/null || true
 }
 
 function process_files {
@@ -71,16 +71,16 @@ if [ "${EUID:-$(id -u)}" -ne 0 ]; then
     exit $?
   else
     echo "${ME}: Root permissions are required. Using su -c to run as root"
-    su - root -c "cd \"${PWD}; bash -- \"$(realpath -- "$0")\" \"$@\""
+    su - root -c "cd \"${PWD}; bash -- \"$(realpath -- "$0")\" \"$*\""
     exit $?
   fi
 fi
 
-[ $# -gt 0 ] && { echo "${ME}: Started with $# arguments: $@"; } || { echo "${ME}: Started with no arguments"; }
+if [ $# -gt 0 ]; then echo "${ME}: Started with $# arguments: $*"; else echo "${ME}: Started with no arguments"; fi
 
 if [ -n "$1" ]; then
   [ ! -d "$1" ] && { echo "${ME}: Not found directory $1 ($(realpath -- "$1")). Exiting"; exit 1; }
-  cd -- "$1"
+  cd -- "$1" || true
 fi
 
 # Clear contents of support files
