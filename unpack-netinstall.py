@@ -195,22 +195,27 @@ def unpack_pe_with_lief(binary: lief.PE.Binary, filename:str, directory: str, ve
             payload = bytes(data.content[4:][:size])
             target = f"{offset}-unknown.bin"
 
-            binary = None
-            if size >= 2 * 1024 * 1024 and (re.match(PATTERN_ELF, payload[:8]) or re.match(PATTERN_PE, payload[:132])):
-                lief.logging.disable()  # disable warnings shown while parsing EFI payload
-                binary = lief.parse(payload)
-                lief.logging.enable()   # enable warnings
-
-            if isinstance(binary, lief.ELF.Binary):
-                arch = guess_arch_of_routeros_kernel_elf(binary)
-                target = f"{offset}-{arch}-kernel.elf"
-                if verbose: print(f"{ME}: - ELF at offset {offset} ({offset:x}) with size {size} for {arch}")
-            elif isinstance(binary, lief.PE.Binary):
-                arch = guess_arch_of_routeros_kernel_pe(binary)
-                target = f"{offset}-{arch}-kernel.efi"
-                if verbose: print(f"{ME}: - EFI at offset {offset} ({offset:x}) with size {size} for {arch}")
+            if res_node.id in RCDATA:
+                arch = RCDATA[res_node.id]['arch']
+                target = f"{offset}-{arch}-{RCDATA[res_node.id]['filename']}"
+                if verbose: print(f"{ME}: - ID {res_node.id} at offset {offset} ({offset:x}) with size {size} for {arch}")
             else:
-                if verbose: print(f"{ME}: - ID {res_node.id} at offset {offset} ({offset:x}) with size {size}")
+                binary = None
+                if size >= 2 * 1024 * 1024 and (re.match(PATTERN_ELF, payload[:8]) or re.match(PATTERN_PE, payload[:132])):
+                    lief.logging.disable()  # disable warnings shown while parsing EFI payload
+                    binary = lief.parse(payload)
+                    lief.logging.enable()   # enable warnings
+
+                if isinstance(binary, lief.ELF.Binary):
+                    arch = guess_arch_of_routeros_kernel_elf(binary)
+                    target = f"{offset}-{arch}-kernel.elf"
+                    if verbose: print(f"{ME}: - ELF at offset {offset} ({offset:x}) with size {size} for {arch}")
+                elif isinstance(binary, lief.PE.Binary):
+                    arch = guess_arch_of_routeros_kernel_pe(binary)
+                    target = f"{offset}-{arch}-kernel.efi"
+                    if verbose: print(f"{ME}: - EFI at offset {offset} ({offset:x}) with size {size} for {arch}")
+                else:
+                    if verbose: print(f"{ME}: - ID {res_node.id} at offset {offset} ({offset:x}) with size {size}")
 
             with open(os.path.join(directory, target), 'wb') as file: file.write(payload)
 
