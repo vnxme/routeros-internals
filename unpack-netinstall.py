@@ -16,7 +16,6 @@
 
 import lief
 import os
-import pefile
 import re
 import struct
 import typing
@@ -61,40 +60,6 @@ RCDATA = {
     #149
     150:{'vendor-class-identifier':'',            'arch':'x86',      'filename':'disk-drivers.npk', 'contents':'data'},
 }
-
-class Resource:
-    file: pefile.PE
-    lang: int
-    offset: int
-    size: int
-    type: int
-    reid: int
-
-    def __init__(self, f: pefile.PE, t: int, r: int, l: int, o: int, s: int):
-        self.file, self.type, self.reid, self.lang, self.offset, self.size = f, t, r, l, o, s
-
-    def rawdata(self):
-        return self.file.get_memory_mapped_image()[self.offset:self.offset + self.size]
-
-    def resdata(self):
-        data = self.rawdata()
-        length, = struct.unpack('<I', data[:4])
-        return data[4:][:length] if length + 4 <= self.size else data[4:]
-
-    def save(self, directory: str):
-        if self.type == pefile.RESOURCE_TYPE.get('RT_RCDATA'):
-            if self.reid in RCDATA:
-                rcdata = RCDATA[self.reid]
-                filename = f"{self.reid:0=3}-{rcdata['arch']}-{rcdata['filename']}"
-            else:
-                filename = f"{self.reid:0=3}-rcdata.bin"
-
-            with open(os.path.join(directory, filename), 'wb') as file: file.write(self.resdata())
-        # elif self.type == pefile.RESOURCE_TYPE.get('RT_MANIFEST'):
-        #     with open(os.path.join(directory, 'manifest.xml'), 'wb') as file: file.write(self.rawdata())
-        # elif self.type == pefile.RESOURCE_TYPE.get('RT_VERSION'):
-        #     with open(os.path.join(directory, 'version.txt'), 'wb') as file: file.write(self.rawdata())
-        else: return
 
 def guess_arch_of_routeros_kernel_elf(binary: lief.ELF.Binary) -> str:
     header: lief.ELF.Header = binary.header
@@ -222,6 +187,8 @@ def unpack_pe_with_lief(binary: lief.PE.Binary, filename:str, directory: str, ve
             with open(os.path.join(directory, target), 'wb') as file: file.write(payload)
 
 def unpack_pe_with_pefile(filename: str, directory: str, verbose: bool = False):
+    import pefile
+
     try:
         pe = pefile.PE(filename)
     except pefile.PEFormatError:
@@ -245,21 +212,36 @@ def unpack_pe_with_pefile(filename: str, directory: str, verbose: bool = False):
                                   f"Sublang: {pefile.get_sublang_name_for_lang(l.id & 0x00FF, (l.id & 0xFF00) >> 10)}")
 
                 if not hasattr(l, 'data') or not hasattr(l.data, 'struct'): continue
-                Resource(pe, t.id, r.id, l.id, l.data.struct.OffsetToData, l.data.struct.Size).save(directory)
+
+                if t.id == pefile.RESOURCE_TYPE.get('RT_RCDATA'):
+                    if r.id in RCDATA:
+                        rcdata = RCDATA[r.id]
+                        target = f"{r.id:0=3}-{rcdata['arch']}-{rcdata['filename']}"
+                    else:
+                        target = f"{r.id:0=3}-unknown.bin"
+
+                    data = pe.get_memory_mapped_image()[l.data.struct.OffsetToData:][:l.data.struct.Size]
+                    size, = struct.unpack('<I', data[:4])
+                    if size + 4 > l.data.struct.Size: continue
+                    payload = data[4:][:size]
+
+                    with open(os.path.join(directory, target), 'wb') as file: file.write(payload)
 
     pe.close()
 
-def unpack_with_lief_or_pefile(filename: str, directory: str, verbose: bool = False):
+def unpack_with_lief_or_pefile(filename: str, directory: str, verbose: bool = False, use_pefile: bool = False):
     os.makedirs(directory, exist_ok=True)
 
-    binary = lief.parse(filename)
-    if isinstance(binary, lief.PE.Binary):
-        unpack_pe_with_lief(binary, filename, directory, verbose)
-        # unpack_pe_with_pefile(filename, directory, verbose)
-    elif isinstance(binary, lief.ELF.Binary) and binary.has_section('.text'):
-        unpack_elf_with_lief(binary, filename, directory, verbose)
+    if use_pefile:
+        unpack_pe_with_pefile(filename, directory, verbose)
     else:
-        if verbose: print(f"{ME}: File '{filename}' is not a valid ELF or PE file. Exiting")
+        binary = lief.parse(filename)
+        if isinstance(binary, lief.PE.Binary):
+            unpack_pe_with_lief(binary, filename, directory, verbose)
+        elif isinstance(binary, lief.ELF.Binary) and binary.has_section('.text'):
+            unpack_elf_with_lief(binary, filename, directory, verbose)
+        else:
+            if verbose: print(f"{ME}: File '{filename}' is not a valid ELF or PE file. Exiting")
 
 if __name__ == '__main__':
     import argparse
@@ -267,9 +249,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='unpack netinstall executable')
     parser.add_argument('filename', type=str, help='netinstall executable filename')
     parser.add_argument('--directory', type=str, help='directory to unpack netinstall executable into')
+    parser.add_argument('--use-pefile', action='store_true', help='use pefile instead of lief to unpack a PE file')
     parser.add_argument('--verbose', action='store_true', help='verbose output')
     args = parser.parse_args()
 
     if args.filename is not None and os.path.exists(args.filename):
         unpack_with_lief_or_pefile(args.filename, os.path.join(os.path.dirname(args.filename), f"_{os.path.basename(args.filename)}")
-        if args.directory is None else args.directory, args.verbose)
+        if args.directory is None else args.directory, args.verbose, args.use_pefile)
