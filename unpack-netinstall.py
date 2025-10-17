@@ -23,6 +23,8 @@ import typing
 
 ME = os.path.basename(__file__)
 
+MINSIZE_KERNEL = 2 * 1024 * 1024
+
 PATTERN_ELF = rb'\x7fELF[\x00-\xff]{2}\x01[\x00-\xff]'
 PATTERN_PE = rb'MZ[\x00-\xff]{128}PE'
 
@@ -143,7 +145,7 @@ def unpack_elf_with_lief(binary: lief.ELF.Binary, filename:str, directory: str, 
         payload = data[offset:]
 
         binary = None
-        if len(payload) >= 2 * 1024 * 1024:
+        if len(payload) >= MINSIZE_KERNEL:
             lief.logging.disable()  # disable warnings shown while parsing EFI payload
             binary = lief.parse(payload)
             lief.logging.enable()   # enable warnings
@@ -160,7 +162,7 @@ def unpack_elf_with_lief(binary: lief.ELF.Binary, filename:str, directory: str, 
             target = f"{offset}-{arch}-kernel.efi"
             if verbose: print(f"{ME}: - EFI at offset {offset} ({offset:x}) with size {size} for {arch}")
         else:
-            if len(payload) < 2 * 1024 * 1024:
+            if len(payload) < MINSIZE_KERNEL:
                 if verbose: print(
                     f"{ME}: Too small ELF/EFI at offset {offset} ({offset:x}) starting with {payload[:16]:x}. Skipping")
             else:
@@ -201,7 +203,7 @@ def unpack_pe_with_lief(binary: lief.PE.Binary, filename:str, directory: str, ve
                 if verbose: print(f"{ME}: - ID {res_node.id} at offset {offset} ({offset:x}) with size {size} for {arch}")
             else:
                 binary = None
-                if size >= 2 * 1024 * 1024 and (re.match(PATTERN_ELF, payload[:8]) or re.match(PATTERN_PE, payload[:132])):
+                if size >= MINSIZE_KERNEL and (re.match(PATTERN_ELF, payload[:8]) or re.match(PATTERN_PE, payload[:132])):
                     lief.logging.disable()  # disable warnings shown while parsing EFI payload
                     binary = lief.parse(payload)
                     lief.logging.enable()   # enable warnings
