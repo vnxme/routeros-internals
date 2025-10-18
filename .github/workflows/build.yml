@@ -576,7 +576,7 @@ jobs:
       - name: Add files, commit and push
         id: push_files
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_push_branch }}
-        uses: stefanzweifel/git-auto-commit-action@v6
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           branch: ${{ env.branch }}
           commit_message: ${{ steps.compose_message.outputs.message }}
