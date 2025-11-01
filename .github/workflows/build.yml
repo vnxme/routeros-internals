@@ -531,7 +531,7 @@ jobs:
       - name: Upload release files as artifacts
         id: upload_artifacts
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && !inputs.release_tag_or_artifact }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           compression-level: 0
           name: "${{ env.branch }}"
