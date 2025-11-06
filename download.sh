@@ -254,7 +254,7 @@ for ARCH in "${ARCHS[@]}"; do
     fi
   fi
 
-  if [ -z "$(cd "${ARCH}"; find -- * .* -type f)" ]; then
+  if [ -z "$(cd "${ARCH}"; find -- * .* -type f 2>/dev/null || true)" ]; then
     rm -rf "${ARCH}"
   fi
 done
