@@ -214,7 +214,7 @@ jobs:
       - name: Checkout 'main' branch into '${{ env.app }}' directory
         id: checkout_repository
         if: ${{ fromJSON(inputs.extras).download_force == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: "${{ env.app }}"
 
@@ -306,7 +306,7 @@ jobs:
       - name: Checkout 'main' branch into '${{ env.app }}' directory
         id: checkout_repository
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: "${{ env.app }}"
 
@@ -384,7 +384,7 @@ jobs:
 
       - name: Checkout 'main' branch into '${{ env.box }}' directory
         id: checkout_repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: "${{ env.box }}"
 
@@ -395,7 +395,7 @@ jobs:
 
 #      - name: Checkout '${{ env.branch }}' branch into '${{ env.box }}' directory
 #        id: checkout_repository
-#        uses: actions/checkout@v5
+#        uses: actions/checkout@v6
 #        with:
 #          path: "${{ env.box }}"
 #          ref: "${{ env.branch }}"
