@@ -1,0 +1,585 @@
+-- Nexus common mib definitions
+-- SB3210
+-- smartBridges Pte Ltd (c) 1999-2004
+--
+
+NEXUS-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    enterprises, mgmt, NetworkAddress, IpAddress, Counter, Gauge, TimeTicks
+	FROM RFC1155-SMI
+    OBJECT-TYPE
+	FROM RFC-1212
+    TRAP-TYPE
+    	FROM RFC-1215
+    DisplayString
+        FROM SNMPv2-TC
+	mib-2
+        FROM RFC1213-MIB;
+
+
+-- --------------------------------------------
+--           MIB group definitions.
+-- --------------------------------------------
+-- MIB Base
+-- smartbridges mib base definition
+
+smartbridges OBJECT IDENTIFIER ::= { enterprises 14882 }
+
+-- --------------
+-- Groups per mib
+-- --------------
+
+-- Groups in smartbridges
+-- Device Group
+sbdevice	OBJECT IDENTIFIER ::= { smartbridges 1 }
+-- Networking basic group
+sbnet		OBJECT IDENTIFIER ::= { smartbridges 2 }
+-- System Group
+sbsys 		OBJECT IDENTIFIER ::= { smartbridges 3 }
+--Wireless
+wireless	OBJECT IDENTIFIER ::= { smartbridges 4 }
+
+privacyGRP      OBJECT IDENTIFIER ::= { wireless 21 }
+-- ---------------------------------------------------------
+-- ---------------------------------------------------------
+--
+--     Specific nested nodes per group
+--
+-- ---------------------------------------------------------
+-- 	IP Features Module
+-- ---------------------------------------------------------
+operipsettings OBJECT IDENTIFIER ::= { sbnet 1 }
+
+operIPAddress OBJECT-TYPE
+		SYNTAX IpAddress
+		ACCESS read-write
+		STATUS mandatory
+		DESCRIPTION
+		"The IP address of the device."
+		::= { operipsettings 1 }
+
+operIPMask OBJECT-TYPE
+	    SYNTAX  IpAddress
+	    ACCESS  read-write
+	    STATUS  mandatory
+	    DESCRIPTION
+	    "The IP Network mask used by the IP entity when accessing
+	    devices through any of its LAN Ports."
+	    ::= { operipsettings 2 }
+
+operGateway OBJECT-TYPE
+		SYNTAX IpAddress
+		ACCESS read-write
+		STATUS mandatory
+		DESCRIPTION
+		"Gateway default IP address."
+		::= { operipsettings 3 }
+
+operDHCP OBJECT-TYPE
+		SYNTAX	INTEGER {enable(1),disable(2)}
+		ACCESS read-write
+		STATUS mandatory
+		DESCRIPTION
+		"When setting this attribute to enable(1), the system will
+		enable DHCP protocol."
+		::= { operipsettings 4 }
+
+operEthernetAddress OBJECT-TYPE
+	    SYNTAX  OCTET STRING (SIZE (6))
+	    ACCESS  read-write
+	    STATUS  mandatory
+	    DESCRIPTION
+	    "The MAC Address of the Ethernet interface."
+	    ::= { operipsettings 5 }
+
+operInterfaceName OBJECT-TYPE
+     SYNTAX  OCTET STRING (SIZE (32))
+     ACCESS  read-write
+     STATUS  mandatory
+     DESCRIPTION
+     "The interface name (eth0, ixp0 etc)."
+     ::= { operipsettings 7 }
+
+operMTU OBJECT-TYPE
+     SYNTAX  INTEGER 
+     ACCESS  read-write
+     STATUS  mandatory
+     DESCRIPTION
+     "Used to set the MTU (maximum transfer unit) for the interface.After changing this value,
+     user must set sbResetNetwork to 1 to make the values effective."
+     ::= { operipsettings 8 }
+
+operSaveIP OBJECT-TYPE
+		SYNTAX	INTEGER {enable(1),disable(0)}
+		ACCESS read-write
+		STATUS mandatory
+		DESCRIPTION
+		"When setting this attribute to enable(1), the IP values will be saved to the
+		configuration file."
+		::= { operipsettings 6 }
+
+
+-- ---------------------------------------------------------
+-- 	Bridge Features Module
+-- ---------------------------------------------------------
+
+operBridgeStpEnable OBJECT-TYPE
+	SYNTAX INTEGER {enable(1),disable(0)}
+	ACCESS read-write
+	STATUS mandatory
+	DESCRIPTION
+	"When enabled STP protocol will be enabled on the bridge."
+	::= {operipsettings 10}
+
+-- --------------------------------------
+--       SNMP Access Filters
+-- --------------------------------------
+
+operSNMPFilters  OBJECT IDENTIFIER ::= { operipsettings 12 }
+
+operSNMPAccessFilterTable OBJECT-TYPE
+     SYNTAX SEQUENCE OF SNMPAccessFilterEntry
+     ACCESS not-accessible
+     STATUS mandatory
+     DESCRIPTION
+     "The access list filter table."
+     ::= { operSNMPFilters 1 }
+
+operSNMPAccessFilterEntry OBJECT-TYPE
+     SYNTAX SNMPAccessFilterEntry
+     ACCESS not-accessible
+     STATUS mandatory
+     DESCRIPTION
+    "One row of the SNMP Access Filter Table."
+     INDEX  { operSNMPAccessFilterIndex }
+
+    ::= { operSNMPAccessFilterTable 1 }
+
+SNMPAccessFilterEntry ::=
+     SEQUENCE
+     	{ 	operSNMPAccessFilterIndex
+     	INTEGER,
+    	    	operSNMPAccessFilterIPMask
+     	OCTET STRING,
+	        operSNMPAccessFilterCommunity
+	OCTET STRING
+
+      }
+
+operSNMPAccessFilterIndex OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+   "An index for the table. Values( 1,2,3 ...)"
+    ::= {  operSNMPAccessFilterEntry 1 }
+
+operSNMPAccessFilterIPMask OBJECT-TYPE
+    SYNTAX OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "The IP/Mask entry of the access list. It is in the form 10.0.3.0/24."
+    ::= { operSNMPAccessFilterEntry 2 }
+
+operSNMPAccessFilterCommunity OBJECT-TYPE
+    SYNTAX OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "The community name to be used with this filter.Currently not used.Set to a
+     default value 'nexus'/'public'."
+    ::= { operSNMPAccessFilterEntry 3 }
+
+operSNMPAccessFilterSet OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    " Setting this value will save the SNMP Access Filters to the
+    	ipradio.conf(Nexus configuration file)."
+    ::= { operSNMPFilters 2 }
+
+operSNMPAccessFilterEnable OBJECT-TYPE
+    SYNTAX  INTEGER { Enable(1), Disable(0) }
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    " Setting this value will enable the SNMP Access Filters. The values
+      set in the ipradio.conf will be used to update the snmpd.conf.Restart
+      the snmpd with the new snmpd.conf file."
+    ::= { operSNMPFilters 3 }
+
+-- -------------------------------------
+-- Community Name
+-- -------------------------------------
+operSNMPCommunity OBJECT-TYPE
+    SYNTAX OCTET STRING
+    ACCESS  write-only
+    STATUS  mandatory
+    DESCRIPTION
+    "The community name to be used with SNMP (read)."
+    ::= { sbnet 3}
+
+
+-- -------------------------
+-- General Nexus Mgmt
+-- -------------------------
+restartNexus OBJECT-TYPE
+    SYNTAX INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "When it is set to a value 1 the Nexus device is restarted."
+    ::= { sbdevice 1 }
+
+nexusTrap OBJECT IDENTIFIER ::= { sbdevice 2 }
+
+nexusTrapIp OBJECT-TYPE
+    SYNTAX IpAddress
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "It specifies the destination to which trap should be send."
+    ::= { nexusTrap 1 }
+
+restoreDefaults OBJECT-TYPE
+    SYNTAX INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "When it is set to a value 1 the default ipradio.conf.default is loaded and the device is restarted."
+    ::= { sbdevice 6 }
+
+
+remoteMgmtMode OBJECT-TYPE
+    SYNTAX INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "It specifies whether the device is being managed remotely from the wireless (1) or wired (2) side.
+    It has effect on IP address settings when switching between Client(Route/Bridge) to Root-Bridge."
+    ::= { sbdevice 17 }
+
+restartAPDaemon OBJECT-TYPE
+    SYNTAX INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "When it is set to a value 1 the AP daemons are restarted - this is required when we update the ACL
+    ( Access Control List) of MACs."
+    ::= { sbdevice 13 }
+
+sbRadioUp OBJECT-TYPE
+    SYNTAX INTEGER {down(0),up(1)}
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "It returns a value indicating whether the radio is up or not."
+    ::= { sbdevice 18 }
+   
+sbResetNetwork OBJECT-TYPE
+    SYNTAX INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "It resets the network settings on the device - ( bring down the interfaces and then bring them up)."
+    ::= { sbdevice 19 }
+
+systemDescription OBJECT IDENTIFIER ::= { sbdevice 10 }
+
+deviceDescription OBJECT-TYPE
+     SYNTAX OCTET STRING
+     ACCESS read-only
+     STATUS mandatory
+     DESCRIPTION
+     " A description for the device. It affects the SLA ( Bandwidth Management).
+       AirHaul_SB3010 : Only 1 Bandwidth Class allowed. Filters and QoS disabled.
+       AirHaul_AP     : Maximum of 16 Bandwidth Classes allowed. IP filters disabled.
+                        Maximum of 8 MAC filter allowed."
+
+     ::= { systemDescription 1 }
+
+systemDescr OBJECT-TYPE
+     SYNTAX OCTET STRING
+     ACCESS read-write
+     STATUS mandatory
+     DESCRIPTION
+     "A system description specific to the device and editable."
+    ::= { systemDescription 2 }
+
+--  <  Profile Management >
+--
+sbProfiles  OBJECT IDENTIFIER ::= { sbsys 1 }
+
+sbProfilesTable OBJECT-TYPE
+     SYNTAX SEQUENCE OF ProfileEntry
+     ACCESS not-accessible
+     STATUS mandatory
+     DESCRIPTION
+     "The profiles table. Each profile corresponds to a set of configuration files."
+     ::= { sbProfiles 1 }
+
+sbProfileEntry OBJECT-TYPE
+     SYNTAX ProfileEntry
+     ACCESS not-accessible
+     STATUS mandatory
+     DESCRIPTION
+    "One row of the Profile Table."
+     INDEX  { sbProfileIndex }
+    ::= {  sbProfilesTable 1 }
+
+
+ProfileEntry ::=
+     SEQUENCE
+     	{ 	sbProfileIndex
+     	INTEGER,
+    	    	sbProfileDescription
+	OCTET STRING
+      }
+sbProfileIndex OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+   "An index for the table. Values( 1,2,3 ...). It also determines the configuration set of files
+    to be used (Profile1, Profile2 ..) when this profile is activated.The maximum number of profiles
+    currently supported is 4.The first profile is fixed to be the installation profile and is named as ipradio.conf.install. Profiles 2 onwards are in direcotory /SBConfig/sbProfile2... "
+    ::= {  sbProfileEntry 1 }
+
+sbProfileDescription OBJECT-TYPE
+    SYNTAX OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "A description for the particular profile identified by this row. Setting this  value effectively copies
+    the current configuration to Profile1, etc."
+    ::= { sbProfileEntry 2 }
+
+sbCurrentProfile OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    " The value of the current profile. It is mapped to the index of the profileTable to get the
+      description. An index value of 1 is mapped to the installation profile."
+::= { sbProfiles 2 }
+
+-- < LED >
+
+sbLED OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    " The value determines the behaviour of the LED."
+::= { sbdevice 3 }
+
+-- < cable length >
+sbCableLength OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    " The cable length used."
+::= { sbdevice 4 }
+
+
+-- < syslog >
+sbSyslog OBJECT IDENTIFIER ::= { sbsys 2 }
+
+sbSyslogIP OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    " The IP address where the syslog messages will be send."
+     ::= { sbSyslog 1 }
+
+sbSyslogLevel OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    " The level of debugging to be used with syslog. The current supported levels are 1-7"
+    ::= { sbSyslog 2 }
+
+
+-- < Version >
+
+sbVersion OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    " The version string for different modules delimited by /.The sequence is kernel-v/rootfs/sbapps"
+    ::= { sbsys 3 }
+
+-- < Installation >
+
+sbInstallation OBJECT IDENTIFIER ::= { sbdevice 5 }
+
+sbInstallMode OBJECT-TYPE
+    SYNTAX  INTEGER {enable(1),disable(0)}
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "Used to read the installation mode from the configuration file."
+::= { sbInstallation 1 }
+
+sbThroughput OBJECT-TYPE
+    SYNTAX  INTEGER { Disable(0),Up(1),Down(2)}
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    " Enables thoughput upstream / downstream in installation mode."
+::= { sbInstallation 2 }
+
+sbPing OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    " Enables / Disables ping in installation mode."
+::= { sbInstallation 3 }
+
+-- < Setting time on Nexus  >
+
+sbTimeSettings OBJECT IDENTIFIER ::= { sbdevice 7 }
+
+sbNTPServer OBJECT-TYPE
+	SYNTAX IpAddress
+	ACCESS read-write
+	STATUS  mandatory
+    	DESCRIPTION
+	" Specifies the IP address of the NTP server according to
+	  which the device's time will be set/ synchronized with. The time returned by
+	  NTP server is UTC"
+	::= { sbTimeSettings  1 }
+
+sbTimeZone OBJECT-TYPE
+	SYNTAX OCTET STRING
+	ACCESS read-write
+	STATUS  mandatory
+    	DESCRIPTION
+	" Specifies the zone according to which time will be set on the device.If no
+	  zone is specified then by default UTC/GMT is assumed."
+	::= { sbTimeSettings  2 }
+
+sbCurrentTime OBJECT-TYPE
+	SYNTAX OCTET STRING
+	ACCESS read-write
+	STATUS  mandatory
+    	DESCRIPTION
+	" Reads the current time set on the device.It is of the form dd:mm:yyyy:hh:mm:ss."
+	::= { sbTimeSettings  3 }
+
+-- < delayed reset of the device >
+
+sbDelayedReset OBJECT IDENTIFIER ::= { sbdevice 8 }
+
+sbDelayedResetTime OBJECT-TYPE
+	SYNTAX OCTET STRING
+	ACCESS read-write
+	STATUS  mandatory
+    	DESCRIPTION
+	" The time at which the device will be reset. It is of the form dd:mm:yyyy:hh:mm:ss.
+	Incase we want to disable/stop reset timer, set value to  00. Incase of sbDelayedResetTag
+	set to daily/weekly/monthly this value indicates the next scheduled reset date-time.
+	Setting a valid value triggers the reset daemon."
+	::= { sbDelayedReset 1 }
+
+sbDelayedResetTag OBJECT-TYPE
+        SYNTAX INTEGER { once(0), daily(1), weekly(2), monthly(3) }
+        ACCESS read-write
+        STATUS  mandatory
+        DESCRIPTION
+	" This tag describes whether the reset of the device should take place daily, monthly
+	  weekly or just once. The date mentioned in sbDelayedResetTime is assumed to
+	  be the start date and the following dates are calulated taking that as the base.
+	  But setting its value does not start the daemon. So to make it effective we need to set 	    sbDelayedResetTime also to a valid value."
+	::= { sbDelayedReset 2 }
+
+sbResetProfile OBJECT-TYPE
+        SYNTAX INTEGER
+	ACCESS read-write
+	STATUS mandatory
+	DESCRIPTION
+	"When this value is set to 0, the above values will result in a restart of the board with
+	the current profile. If set to N (=2,3,4) , the device will be reset at the defined time
+	with ProfileN configuration. Value 1 is not allowed as that profile corresponds to 
+	Installation profile. "
+	::= { sbDelayedReset 3 }
+
+
+sbMyOID OBJECT-TYPE
+	SYNTAX  INTEGER { Disable(0),Up(1),Down(2)}
+	ACCESS  read-write
+	STATUS  mandatory
+	DESCRIPTION
+	"Dummy oid for personal use "
+	::= { sbInstallation 5 }
+
+operServiceClass OBJECT-TYPE
+	SYNTAX INTEGER { disable-both(0), BWC-INTERNAL(1), BWC-EXTERNAL(2)}
+	ACCESS read-write
+	STATUS  mandatory
+	DESCRIPTION
+	" This is used to enable/disable or choose the type of bandwidth control."
+	::= { sbsys 7 }
+
+-- < Authentication and Radius/WPA >
+
+sbAuthentication OBJECT IDENTIFIER ::= { sbnet 6 }
+
+sbAuthenticationSave OBJECT-TYPE
+	SYNTAX INTEGER 
+	ACCESS read-write
+	STATUS  mandatory
+	DESCRIPTION
+	" Valid value is 1. This is used to save all the radius values to the files.
+	This OID checks for the validity of all the values and then saves to the file. 
+	Incase of error it returns 0."
+	::= { sbAuthentication 1 }
+
+sbSharedKey OBJECT-TYPE
+	SYNTAX OCTET STRING 
+	ACCESS read-write
+	STATUS  mandatory
+	DESCRIPTION
+	"This will be a hex value used when sbAuthenticationType = (2,3,4,5)."
+	::= { sbAuthentication 2 }
+	
+sbRadiusPrimary OBJECT-TYPE
+	SYNTAX OCTET STRING
+	ACCESS read-write
+	STATUS  mandatory
+	DESCRIPTION
+	"This will be the IP address along with port number of the primary radius server. 
+	 It is of the format -> IP:port-number. Eg: 192.168.1.1:1000 .
+	 This OID can only be used when sbAuthenticationType = (2,3,4). "
+	::= { sbAuthentication 3 }
+
+sbRadiusSecondary OBJECT-TYPE
+	SYNTAX OCTET STRING
+	ACCESS read-write
+	STATUS  mandatory
+	DESCRIPTION
+	"This will be the IP address along with port number of the secondary radius server. 
+	 It is of the format -> IP:port-number. Eg: 192.168.1.1:1000 .
+	 This OID can only be used when sbAuthenticationType = (2,3,4). "
+	::= { sbAuthentication 4 }
+
+sbReAuthTimer OBJECT-TYPE
+	SYNTAX INTEGER 
+	ACCESS read-write
+	STATUS  mandatory
+	DESCRIPTION
+	"This timer is the default time in which each client will be re-authenticated.
+	However if there is a timer value set on the radius for a particular client , 
+	during re-authenticate, this timer value is communicated to the paed and henceforth this 
+	timer value takes effect for the particular client. The default time (sbReAuthTimer) takes effect as 
+	soon as paed is started/restarted.  ."
+	::= { sbAuthentication 5 }
+END

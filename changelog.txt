@@ -1,0 +1,22 @@
+What's new in 7.20.7 (2026-Jan-08 11:40):
+
+*) bgp - fixed l2vpn-cisco decoding (introduced in v7.20);
+*) bgp - fixed occasional corruption of MPLS labels in BGP VPN update messages;
+*) bridge - fixed dynamic switch-cpu VLAN creation (introduced in v7.20);
+*) bridge - improved system stability when forwarding traffic with fast-path and bridged interface gets removed or disabled (introduced in v7.20);
+*) bth - make user private-key sensitive;
+*) console - fixed empty output in route menus when using "print where gateway";
+*) console - updated copyright notice;
+*) firewall - clear relevant masqueraded connection tracking entries on IP address change;
+*) ipv6 - initialize RA receiving when enabled and without any other IPv6 configuration;
+*) log - fixed memory leak;
+*) lte - fixed LTE interface IPv6 address generation to use EUI-64 (introduced in v7.20);
+*) lte - fixed no re-connection after cellular network requested APN deactivation on Chateau 5G ax R17;
+*) ovpn - fixed OVPN server handling on reboot (introduced in v7.20);
+*) ovpn - improved system stability when using cipher=blowfish128;
+*) sfp - fixed "sfp-tx-fault" state indication for CRS520-4XS-16XQ;
+*) sfp - fixed missing link up/down notifies;
+*) switch - fixed non-IP multicast packet receive on 98DX8208, 98DX8216, 98DX8212, 98DX8332, 98DX3257, 98DX4310, 98DX8525, 98DX3255, 98CX8410 switches;
+*) system - detect policy mismatch sooner if script is executed internally by some other service;
+*) ups - fixed board hibernation shutdown;
+*) wifi-mediatek - added Superchannel regulatory profile;

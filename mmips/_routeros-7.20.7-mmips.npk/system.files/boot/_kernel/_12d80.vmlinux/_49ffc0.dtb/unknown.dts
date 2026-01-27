@@ -1,0 +1,656 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <0x01>;
+	#size-cells = <0x01>;
+	compatible = "mediatek,mtk7621-soc";
+
+	cpus {
+
+		cpu@0 {
+			compatible = "mips,mips1004Kc";
+		};
+
+		cpu@1 {
+			compatible = "mips,mips1004Kc";
+		};
+	};
+
+	cpuintc@0 {
+		#address-cells = <0x00>;
+		#interrupt-cells = <0x01>;
+		interrupt-controller;
+		compatible = "mti,cpu-interrupt-controller";
+		phandle = <0x08>;
+	};
+
+	cpuclock@0 {
+		#clock-cells = <0x00>;
+		compatible = "fixed-clock";
+		phandle = <0x09>;
+	};
+
+	hclk@0 {
+		#clock-cells = <0x00>;
+		compatible = "fixed-clock";
+		clock-frequency = <0xd1cef00>;
+		phandle = <0x06>;
+	};
+
+	sysclock@0 {
+		#clock-cells = <0x00>;
+		compatible = "fixed-clock";
+		clock-frequency = <0x2faf080>;
+		phandle = <0x03>;
+	};
+
+	rb750gr3-leds {
+		status = "disabled";
+		compatible = "leds-rb";
+
+		user_led {
+			label = "user-led";
+			gpios = <0x01 0x00 0x00>;
+		};
+
+		usb_power_off {
+			label = "usb-power-off";
+			gpios = <0x01 0x0c 0x01>;
+		};
+
+		power_led {
+			label = "power-led";
+			gpios = <0x01 0x10 0x00>;
+			default-state = "on";
+		};
+
+		button {
+			label = "button";
+			gpios = <0x01 0x12 0x01>;
+			default-state = "input";
+		};
+
+		mode_button {
+			label = "mode-button";
+			gpios = <0x01 0x0d 0x01>;
+			default-state = "input";
+		};
+	};
+
+	rb760-leds {
+		status = "disabled";
+		compatible = "leds-rb";
+
+		sfp_led {
+			label = "sfp-led";
+			gpios = <0x01 0x09 0x00>;
+		};
+
+		usb_power_off {
+			label = "usb-power-off";
+			gpios = <0x01 0x0c 0x01>;
+		};
+
+		power_led {
+			label = "power-led";
+			gpios = <0x01 0x10 0x00>;
+			default-state = "on";
+		};
+
+		button {
+			label = "button";
+			gpios = <0x01 0x12 0x01>;
+			default-state = "input";
+		};
+
+		mode_button {
+			label = "mode-button";
+			gpios = <0x01 0x0d 0x01>;
+			default-state = "input";
+		};
+	};
+
+	m33-leds {
+		status = "disabled";
+		compatible = "leds-rb";
+
+		user_led {
+			label = "user-led";
+			gpios = <0x01 0x00 0x00>;
+		};
+
+		ext_pin3 {
+			label = "ext-pin3";
+			gpios = <0x01 0x03 0x00>;
+			default-state = "input";
+		};
+
+		ext_pin5 {
+			label = "ext-pin5";
+			gpios = <0x01 0x04 0x00>;
+			default-state = "input";
+		};
+
+		pcie_power_off {
+			label = "mpcie-power-off";
+			gpios = <0x01 0x09 0x01>;
+		};
+
+		pcie2_power_off {
+			label = "mpcie2-power-off";
+			gpios = <0x01 0x0a 0x01>;
+		};
+
+		usb_power_off {
+			label = "usb-power-off";
+			gpios = <0x01 0x0c 0x01>;
+		};
+
+		button {
+			label = "button";
+			gpios = <0x01 0x12 0x01>;
+			default-state = "input";
+		};
+	};
+
+	leds-from-uart2 {
+		status = "disabled";
+		compatible = "leds-rb";
+
+		ext_pin16 {
+			label = "ext-pin16";
+			gpios = <0x01 0x05 0x00>;
+			default-state = "input";
+		};
+
+		ext_pin15 {
+			label = "ext-pin15";
+			gpios = <0x01 0x06 0x00>;
+			default-state = "input";
+		};
+
+		ext_pin13 {
+			label = "ext-pin13";
+			gpios = <0x01 0x07 0x00>;
+			default-state = "input";
+		};
+
+		ext_pin12 {
+			label = "ext-pin12";
+			gpios = <0x01 0x08 0x00>;
+			default-state = "input";
+		};
+	};
+
+	m11-leds {
+		status = "disabled";
+		compatible = "leds-rb";
+
+		user_led {
+			label = "user-led";
+			gpios = <0x01 0x00 0x00>;
+		};
+
+		pcie_power_off {
+			label = "mpcie-power-off";
+			gpios = <0x01 0x09 0x01>;
+		};
+
+		button {
+			label = "button";
+			gpios = <0x01 0x12 0x01>;
+			default-state = "input";
+		};
+
+		led1 {
+			label = "led1";
+			gpios = <0x01 0x1a 0x01>;
+		};
+
+		led2 {
+			label = "led2";
+			gpios = <0x01 0x19 0x01>;
+		};
+
+		led3 {
+			label = "led3";
+			gpios = <0x01 0x18 0x01>;
+		};
+
+		led4 {
+			label = "led4";
+			gpios = <0x01 0x17 0x01>;
+		};
+
+		led5 {
+			label = "led5";
+			gpios = <0x01 0x16 0x01>;
+		};
+	};
+
+	ltap-leds {
+		status = "disabled";
+		compatible = "leds-rb";
+
+		user_led {
+			label = "user-led";
+			gpios = <0x01 0x00 0x00>;
+		};
+
+		pcie_power_off {
+			label = "mpcie-power-off";
+			gpios = <0x01 0x0a 0x01>;
+		};
+
+		pcie2_power_off {
+			label = "mpcie2-power-off";
+			gpios = <0x01 0x0b 0x01>;
+		};
+
+		usb_power_off {
+			label = "usb-power-off";
+			gpios = <0x01 0x0c 0x01>;
+		};
+
+		gps_reset {
+			label = "gps-reset";
+			gpios = <0x01 0x0d 0x00>;
+			default-state = "keep";
+		};
+
+		gps_pps {
+			label = "gps-pps";
+			gpios = <0x01 0x0e 0x00>;
+		};
+
+		control {
+			label = "control";
+			gpios = <0x01 0x0f 0x00>;
+			default-state = "on";
+		};
+
+		gps_timer {
+			label = "gps-timer";
+			gpios = <0x01 0x10 0x00>;
+		};
+
+		button {
+			label = "button";
+			gpios = <0x01 0x12 0x01>;
+			default-state = "input";
+		};
+
+		power_led {
+			label = "power-led";
+			gpios = <0x01 0x17 0x00>;
+			default-state = "on";
+		};
+
+		mode_button {
+			label = "mode-button";
+			gpios = <0x01 0x18 0x01>;
+			default-state = "input";
+		};
+
+		sim_select {
+			label = "sim-select";
+			gpios = <0x01 0x19 0x01>;
+		};
+
+		gps_ant_select {
+			label = "gps-ant-select";
+			gpios = <0x01 0x1b 0x00>;
+		};
+
+		gps_led {
+			label = "gps-led";
+			gpios = <0x01 0x1c 0x01>;
+		};
+
+		lte_reset {
+			label = "lte-reset";
+			gpios = <0x01 0x1d 0x01>;
+		};
+
+		led1 {
+			label = "led1";
+			gpios = <0x01 0x00 0x00>;
+			type = "wifi";
+		};
+
+		led2 {
+			label = "led2";
+			gpios = <0x01 0x01 0x00>;
+			type = "wifi";
+		};
+
+		led3 {
+			label = "led3";
+			gpios = <0x01 0x02 0x00>;
+			type = "wifi";
+		};
+
+		led4 {
+			label = "led4";
+			gpios = <0x01 0x03 0x00>;
+			type = "wifi";
+		};
+
+		led5 {
+			label = "led5";
+			gpios = <0x01 0x04 0x00>;
+			type = "wifi";
+		};
+	};
+
+	beeper {
+		status = "disabled";
+		compatible = "rb,gpio-beep";
+		gpios = <0x01 0x0f 0x01>;
+	};
+
+	poe-simple {
+		status = "disabled";
+		compatible = "rb,poe-out-simple";
+		ether_port = <0x05>;
+		has_low_current_sense = <0x01>;
+		gpi_status = <0x01 0x07 0x00>;
+		gpo_on = <0x01 0x11 0x00>;
+	};
+
+	palmbus@1e000000 {
+		compatible = "palmbus";
+		reg = <0x1e000000 0x100000>;
+		ranges = <0x00 0x1e000000 0xfffff>;
+		#address-cells = <0x01>;
+		#size-cells = <0x01>;
+
+		sysc@0 {
+			compatible = "mtk,mt7621-sysc";
+			reg = <0x00 0x100>;
+		};
+
+		wdt@100 {
+			compatible = "mtk,mt7621-wdt";
+			reg = <0x100 0x100>;
+		};
+
+		gpio@600 {
+			#gpio-cells = <0x02>;
+			#interrupt-cells = <0x02>;
+			compatible = "mediatek,mt7621-gpio";
+			gpio-controller;
+			interrupt-controller;
+			reg = <0x600 0x100>;
+			interrupt-parent = <0x02>;
+			interrupts = <0x00 0x0c 0x04>;
+			phandle = <0x01>;
+		};
+
+		i2c@900 {
+			compatible = "mediatek,mt7621-i2c";
+			reg = <0x900 0x100>;
+			clocks = <0x03>;
+			resets = <0x04 0x10>;
+			reset-names = "i2c";
+			#address-cells = <0x01>;
+			#size-cells = <0x00>;
+			status = "disabled";
+			pinctrl-names = "default";
+			pinctrl-0 = <0x05>;
+		};
+
+		memc@5000 {
+			compatible = "mtk,mt7621-memc";
+			reg = <0x300 0x100>;
+		};
+
+		cpc@1fbf0000 {
+			compatible = "mtk,mt7621-cpc";
+			reg = <0x1fbf0000 0x8000>;
+		};
+
+		mc@1fbf8000 {
+			compatible = "mtk,mt7621-mc";
+			reg = <0x1fbf8000 0x8000>;
+		};
+
+		uartlite@c00 {
+			status = "disabled";
+			compatible = "ns16550a";
+			reg = <0xc00 0x100>;
+			clocks = <0x03>;
+			interrupt-parent = <0x02>;
+			interrupts = <0x00 0x1a 0x04>;
+			reg-shift = <0x02>;
+			reg-io-width = <0x04>;
+			no-loopback-test;
+		};
+
+		uartlite@e00 {
+			status = "disabled";
+			compatible = "ns16550a";
+			reg = <0xe00 0x100>;
+			clocks = <0x03>;
+			interrupt-parent = <0x02>;
+			interrupts = <0x00 0x1c 0x04>;
+			reg-shift = <0x02>;
+			reg-io-width = <0x04>;
+			no-loopback-test;
+		};
+
+		spi@b00 {
+			status = "okay";
+			compatible = "ralink,mt7621-spi";
+			reg = <0xb00 0x100>;
+			clocks = <0x06>;
+			resets = <0x04 0x12>;
+			reset-names = "spi";
+			#address-cells = <0x01>;
+			#size-cells = <0x00>;
+
+			m25p80@0 {
+				#address-cells = <0x01>;
+				#size-cells = <0x01>;
+				status = "disabled";
+				compatible = "jedec,spi-nor";
+				reg = <0x00>;
+				spi-max-frequency = <0x1c9c380>;
+				m25p,chunked-io = <0x20>;
+
+				partition@40000 {
+					label = "RouterOS";
+					reg = <0x40000 0xfc0000>;
+				};
+
+				partition@0 {
+					label = "RouterBoot";
+					reg = <0x00 0x40000>;
+				};
+			};
+
+			m25p80@1 {
+				#address-cells = <0x01>;
+				#size-cells = <0x01>;
+				status = "disabled";
+				compatible = "jedec,spi-nor";
+				reg = <0x01>;
+				spi-max-frequency = <0x1c9c380>;
+				m25p,chunked-io = <0x20>;
+
+				partition@40000 {
+					label = "RouterOS";
+					reg = <0x40000 0xfc0000>;
+				};
+
+				partition@0 {
+					label = "RouterBootFake";
+					reg = <0x00 0x40000>;
+				};
+			};
+
+			m25p80_boot@0 {
+				#address-cells = <0x01>;
+				#size-cells = <0x01>;
+				status = "disabled";
+				compatible = "jedec,spi-nor";
+				reg = <0x00>;
+				spi-max-frequency = <0x1c9c380>;
+				m25p,chunked-io = <0x20>;
+
+				partition@0 {
+					label = "RouterBoot";
+					reg = <0x00 0x40000>;
+				};
+			};
+
+			ts@1 {
+				status = "disabled";
+				compatible = "rb-spi-ts";
+				reg = <0x01>;
+				spi-max-frequency = <0x1e8480>;
+			};
+		};
+	};
+
+	pinctrl {
+		compatible = "ralink,rt2880-pinmux";
+		pinctrl-names = "default";
+		pinctrl-0 = <0x07>;
+		status = "disabled";
+
+		pinctrl0 {
+			phandle = <0x07>;
+		};
+
+		i2c0 {
+			phandle = <0x05>;
+
+			i2c0 {
+				groups = "i2c";
+				function = "i2c";
+			};
+		};
+	};
+
+	rstctrl {
+		compatible = "ralink,rt2880-reset";
+		#reset-cells = <0x01>;
+		phandle = <0x04>;
+	};
+
+	sdhci@1e130000 {
+		status = "disabled";
+		compatible = "ralink,mt7620-sdhci";
+		reg = <0x1e130000 0x4000>;
+		interrupt-parent = <0x02>;
+		interrupts = <0x00 0x14 0x04>;
+	};
+
+	xhci@1e1c0000 {
+		status = "disabled";
+		compatible = "mediatek,mt8173-xhci";
+		reg = <0x1e1c0000 0x1000 0x1e1d0700 0x100>;
+		reg-names = "mac\0ippc";
+		clocks = <0x03>;
+		clock-names = "sys_ck";
+		interrupt-parent = <0x02>;
+		interrupts = <0x00 0x16 0x04>;
+	};
+
+	crypto@1e004000 {
+		compatible = "mediatek,mt7621-crypto";
+		reg = <0x1e004000 0x1000>;
+		interrupt-parent = <0x02>;
+		interrupts = <0x00 0x13 0x04>;
+	};
+
+	interrupt-controller@1fbc0000 {
+		compatible = "mti,gic";
+		reg = <0x1fbc0000 0x80>;
+		interrupt-controller;
+		#interrupt-cells = <0x03>;
+		mti,reserved-cpu-vectors = <0x07>;
+		interrupt-parent = <0x08>;
+		phandle = <0x02>;
+
+		timer {
+			compatible = "mti,gic-timer";
+			interrupts = <0x01 0x01 0x00>;
+			clocks = <0x09>;
+		};
+	};
+
+	ethernet@1e100000 {
+		compatible = "ralink,mt7621-eth";
+		reg = <0x1e100000 0x2710>;
+		#address-cells = <0x01>;
+		#size-cells = <0x00>;
+		resets = <0x04 0x06 0x04 0x17>;
+		reset-names = "fe\0eth";
+		interrupt-parent = <0x02>;
+		interrupts = <0x00 0x03 0x04>;
+
+		mdio-bus {
+			#address-cells = <0x01>;
+			#size-cells = <0x00>;
+
+			ethernet-phy@1f {
+				reg = <0x1f>;
+				phy-mode = "rgmii";
+			};
+		};
+	};
+
+	gsw@1e110000 {
+		compatible = "ralink,mt7620a-gsw";
+		reg = <0x1e110000 0x1f40>;
+	};
+
+	i2c_gpio@0 {
+		compatible = "i2c-gpio";
+		sda-gpios = <0x01 0x03 0x06>;
+		scl-gpios = <0x01 0x04 0x06>;
+		i2c-gpio,delay-us = <0x05>;
+		i2c-gpio,timeout-ms = <0x01>;
+		i2c-gpio,scl-output-only = <0x00>;
+		status = "disabled";
+	};
+
+	pcie@1e140000 {
+		status = "disabled";
+		compatible = "mediatek,mt7621-pci";
+		reg = <0x1e140000 0x100 0x1e142000 0x100>;
+		#address-cells = <0x03>;
+		#size-cells = <0x02>;
+		device_type = "pci";
+		bus-range = <0x00 0xff>;
+		ranges = <0x2000000 0x00 0x00 0x60000000 0x00 0x10000000 0x1000000 0x00 0x00 0x1e160000 0x00 0x10000>;
+		interrupt-parent = <0x02>;
+		interrupts = <0x00 0x04 0x04 0x00 0x18 0x04 0x00 0x19 0x04>;
+
+		pcie@0,0 {
+			reg = <0x00 0x00 0x00 0x00 0x00>;
+			#address-cells = <0x03>;
+			#size-cells = <0x02>;
+			ranges;
+			bus-range = <0x00 0xff>;
+		};
+
+		pcie@1,0 {
+			reg = <0x800 0x00 0x00 0x00 0x00>;
+			#address-cells = <0x03>;
+			#size-cells = <0x02>;
+			ranges;
+			bus-range = <0x00 0xff>;
+		};
+
+		pcie@2,0 {
+			reg = <0x1000 0x00 0x00 0x00 0x00>;
+			#address-cells = <0x03>;
+			#size-cells = <0x02>;
+			ranges;
+			bus-range = <0x00 0xff>;
+		};
+	};
+};
