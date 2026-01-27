@@ -198,7 +198,7 @@ jobs:
     steps:
       - name: Look up downloaded files in cache
         id: lookup
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           key: "${{ env.dkey }}"
           lookup-only: true
@@ -253,7 +253,7 @@ jobs:
       - name: Save downloaded files from '${{ env.box }}' directory to cache
         id: save_cache
         if: ${{ fromJSON(inputs.extras).download_force == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           key: "${{ env.dkey }}"
           path: 
@@ -274,7 +274,7 @@ jobs:
     steps:
       - name: Look up processed files in cache
         id: lookup_processed
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           key: "${{ env.pkey }}"
           lookup-only: 'true'
@@ -290,7 +290,7 @@ jobs:
       - name: Restore an archive with downloaded files from cache into '${{ env.tmp }}' directory
         id: restore_downloaded
         if: ${{ fromJSON(inputs.extras).process_force == 'true' || steps.lookup_processed.outputs.cache-hit != 'true' }}
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           key: "${{ env.dkey }}"
           path:
@@ -355,7 +355,7 @@ jobs:
       - name: Save processed files from '${{ env.box }}' directory to cache
         id: save_cache
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           key: "${{ env.pkey }}"
           path:
@@ -407,7 +407,7 @@ jobs:
 
       - name: Restore an archive with downloaded files from cache into '${{ env.tmp }}' directory
         id: restore_downloaded
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           key: "${{ env.dkey }}"
           path:
@@ -415,7 +415,7 @@ jobs:
 
       - name: Restore an archive with processed files from cache into '${{ env.tmp }}' directory
         id: restore_processed
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           key: "${{ env.pkey }}"
           path:
@@ -531,7 +531,7 @@ jobs:
       - name: Upload release files as artifacts
         id: upload_artifacts
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && !inputs.release_tag_or_artifact }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           compression-level: 0
           name: "${{ env.branch }}"
