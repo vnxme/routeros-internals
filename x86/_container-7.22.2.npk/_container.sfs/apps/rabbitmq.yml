@@ -1,0 +1,24 @@
+name: rabbitmq
+descr: Open source multi-protocol messaging broker with AMQP and MQTT support
+page: https://rabbitmq.com
+category: monitoring
+default-credentials: guest:guest
+services:
+  rabbitmq:
+    image: docker.io/rabbitmq:4-management
+    ports:
+      - 5672:5672:amqp
+      - 15672:15672:web
+      - 1883:1883:mqtt
+      - 8883:8883:mqtts
+      - 15675:15675:mqtt-ws
+    environment:
+      RABBITMQ_ENABLED_PLUGINS_FILE: /etc/rabbitmq/enabled_plugins
+    configs:
+      - source: 'rabbitmq_plugins'
+        target: '/etc/rabbitmq/enabled_plugins'
+    restart: unless-stopped
+configs:
+  'rabbitmq_plugins':
+    content: |
+      [rabbitmq_management,rabbitmq_mqtt,rabbitmq_web_mqtt].

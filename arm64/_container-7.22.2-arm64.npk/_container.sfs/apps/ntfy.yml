@@ -1,0 +1,14 @@
+name: ntfy
+descr: ntfy lets you send push notifications to your phone or desktop via scripts from any computer, using simple HTTP PUT or POST requests
+page: https://ntfy.sh
+category: monitoring
+services:
+  ntfy:
+    image: docker.io/binwiederhier/ntfy
+    container_name: ntfy
+    command: serve
+    ports:
+      - 3005:80:web
+    volumes:
+      - /var/cache/ntfy:/var/cache/ntfy
+      - /etc/ntfy:/etc/ntfy

@@ -1,0 +1,57 @@
+name: zabbix
+descr: Enterprise-Class Open Source Network Monitoring
+page: https://zabbix.com
+category: monitoring
+default-credentials: Admin:zabbix
+services:
+  mariadb:
+    image: docker.io/library/mariadb:10-ubi9
+    environment:
+      MARIADB_ROOT_PASSWORD: rF88b5H7loz59U5Du2c4CfeCOsQbkl25
+    volumes:
+      - dbdata:/var/lib/mysql
+  server:
+    image: docker.io/zabbix/zabbix-server-mysql
+    environment:
+      DB_SERVER_HOST: 127.0.0.1
+      DB_SERVER_PORT: 3306
+      MYSQL_DATABASE: zabbix
+      MYSQL_PASSWORD: NamkrJw1jZQdO3HMNcobg6AjFrHl0zXT
+      MYSQL_USER: zabbix
+      MYSQL_ROOT_PASSWORD: rF88b5H7loz59U5Du2c4CfeCOsQbkl25
+    ports:
+      - '8081:8080:web'
+      - '10050:10050:agent'
+      - '10051:10051:server'
+    volumes:
+      - server-alertscripts:/usr/lib/zabbix/alertscripts
+      - server-externalscripts:/usr/lib/zabbix/externalscripts
+      - server-modules:/usr/lib/zabbix/modules
+      - server-enc:/usr/lib/zabbix/enc
+      - server-ssl-certs:/usr/lib/zabbix/ssl/certs
+      - server-ssl-keys:/usr/lib/zabbix/ssl/keys
+      - server-ssl-ca:/usr/lib/zabbix/ssl/ssl_ca
+      - server-snmptraps:/usr/lib/zabbix/snmptraps
+      - server-mibs:/usr/lib/zabbix/mibs
+  web:
+    image: docker.io/zabbix/zabbix-web-apache-mysql
+    environment:
+      DB_SERVER_HOST: 127.0.0.1
+      DB_SERVER_PORT: 3306
+      MYSQL_DATABASE: zabbix
+      MYSQL_PASSWORD: NamkrJw1jZQdO3HMNcobg6AjFrHl0zXT
+      MYSQL_USER: zabbix
+      MYSQL_ROOT_PASSWORD: rF88b5H7loz59U5Du2c4CfeCOsQbkl25
+      ZBX_SERVER_HOST: 127.0.0.1
+      ZBX_SERVER_PORT: 10051
+    volumes:
+      - web-certs:/etc/ssl/apache2
+  agent:
+    image: docker.io/zabbix/zabbix-agent
+    environment:
+      ZBX_SERVER_HOST: 127.0.0.1
+      ZBX_SERVER_PORT: 10051
+    volumes:
+      - agent-conf:/etc/zabbix/zabbix_agentd.d
+      - agent-modules:/var/lib/zabbix/modules
+      - agent-enc:/var/lib/zabbix/enc

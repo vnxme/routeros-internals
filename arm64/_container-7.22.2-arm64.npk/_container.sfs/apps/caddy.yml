@@ -1,0 +1,15 @@
+name: caddy
+descr: Caddy 2 is a powerful, enterprise-ready, open source web server with automatic HTTPS written in Go.
+page: https://caddyserver.com
+category: networking
+services:
+  caddy:
+    image: docker.io/caddy:2
+    volumes:
+      - caddy/conf:/etc/caddy
+      - caddy/site:/srv
+      - caddy/data:/data
+      - caddy/config:/config
+    ports:
+      - 80:80:web
+      - 443:443

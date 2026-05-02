@@ -1,0 +1,14 @@
+name: lidarr
+descr: Lidarr is a music collection manager for Usenet and BitTorrent users.
+page: https://lidarr.audio
+category: media
+icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/lidarr-logo.png
+default-credentials: web setup
+services:
+  lidarr:
+    image: lscr.io/linuxserver/lidarr
+    ports:
+      - '8686:8686:web'
+    volumes:
+      - media:/media
+      - config:/config

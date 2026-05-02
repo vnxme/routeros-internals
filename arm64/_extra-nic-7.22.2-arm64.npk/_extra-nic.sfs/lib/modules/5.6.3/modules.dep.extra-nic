@@ -1,0 +1,8 @@
+ice:	intel_auxiliary
+mlx4_en:	mlx4_core
+iavf:	intel_auxiliary
+bnx2x:	mdio zlib_inflate
+cxgb3:	mdio
+i40e:	intel_auxiliary
+cxgb4:	zlib_deflate
+b44:	ssb

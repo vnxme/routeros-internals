@@ -1,0 +1,13 @@
+name: jupyter-notebook
+descr: Web-based interactive development environment for notebooks, code, and data
+page: https://jupyter.org
+category: development
+services:
+  jupyter:
+    image: quay.io/jupyter/base-notebook:latest
+    command: start-notebook.py --NotebookApp.token='' --NotebookApp.password=''
+    volumes:
+      - data:/home/jovyan/work
+    ports:
+      - 8889:8888:web
+    restart: unless-stopped

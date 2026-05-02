@@ -1,0 +1,4 @@
+ecdh_genericrfkill
+nrf52:	bluetooth
+ecdh_generic:	ecc
+nrf52_usb:	bluetooth usbcore

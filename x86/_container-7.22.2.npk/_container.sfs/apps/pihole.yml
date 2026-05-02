@@ -1,0 +1,30 @@
+name: pihole
+descr: Network-wide Ad Blocking
+page: https://pi-hole.net
+category: networking
+default-credentials: <no username>:password
+url-path: /admin
+services:
+  pihole:
+    image: docker.io/pihole/pihole:latest
+    ports:
+      # DNS Ports
+      - "53:53/tcp:dns"
+      - "53:53/udp:dns"
+      # Default HTTP Port
+      - "8085:80:web"
+      # Default HTTPs Port. FTL will generate a self-signed certificate
+#      - "443:443/tcp"
+      # Uncomment the below if using Pi-hole as your DHCP Server
+      #- "67:67/udp"
+      # Uncomment the line below if you are using Pi-hole as your NTP server
+      #- "123:123/udp"
+    environment:
+      # Set a password to access the web interface. Not setting one will result in a random password being assigned
+      FTLCONF_webserver_api_password: 'password'
+      # If using Docker's default `bridge` network setting the dns listening mode should be set to 'all'
+      FTLCONF_dns_listeningMode: 'all'
+    volumes:
+      # For persisting Pi-hole's databases and common configuration file
+      - 'config:/etc/pihole'
+    restart: unless-stopped

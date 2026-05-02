@@ -1,0 +1,66 @@
+### mikrotik-7.22.2.iso
+#### Identification (`file <*>`):
+```
+ISO 9660 CD-ROM filesystem data 'MikroTik' (bootable)
+```
+#### Description (`isoinfo -d -i <*>`):
+```
+CD-ROM is in ISO 9660 format
+System id: 
+Volume id: MikroTik
+Volume set id: 
+Publisher id: WWW.MIKROTIK.COM
+Data preparer id: MIKROTIK
+Application id: MIKROTIK_ROUTER
+Copyright File id: 
+Abstract File id: 
+Bibliographic File id: 
+Volume set size is: 1
+Volume set sequence number is: 1
+Logical block size is: 2048
+Volume size is: 34541
+El Torito VD version 1 found, boot catalog is in sector 33
+NO Joliet present
+Rock Ridge signatures version 1 found
+Eltorito validation header:
+    Hid 1
+    Arch 0 (x86)
+    ID ''
+    Key 55 AA
+    Eltorito defaultboot header:
+        Bootid 88 (bootable)
+        Boot media 0 (No Emulation Boot)
+        Load segment 0
+        Sys type 0
+        Nsect 4
+        Bootoff 22 34
+```
+#### Listing (`ls -AlR --time-style=full-iso <*>`):
+```
+/:
+total 64757
+-r--r--r-- 1 root root   130743 2026-04-22 09:33:40.000000000 +0100 LICENSE.txt
+-r--r--r-- 1 root root    24721 2026-04-22 09:24:20.000000000 +0100 calea-7.22.2.npk
+-r--r--r-- 1 root root   893073 2026-04-22 09:25:28.000000000 +0100 container-7.22.2.npk
+-r--r--r-- 1 root root       48 2026-04-22 09:33:40.000000000 +0100 defpacks
+-r--r--r-- 1 root root  1425553 2026-04-22 09:32:34.000000000 +0100 dude-7.22.2.npk
+-r--r--r-- 1 root root 35651584 2026-04-22 09:33:40.000000000 +0100 efiboot.img
+-r--r--r-- 1 root root    24721 2026-04-22 09:24:24.000000000 +0100 gps-7.22.2.npk
+-r--r--r-- 1 root root   569489 2026-04-22 09:27:04.000000000 +0100 iot-7.22.2.npk
+dr-xr-xr-x 1 root root     2048 2026-04-22 09:33:40.000000000 +0100 isolinux
+-r--r--r-- 1 root root    82065 2026-04-22 09:26:13.000000000 +0100 openflow-7.22.2.npk
+-r--r--r-- 1 root root  4993169 2026-04-22 09:30:40.000000000 +0100 rose-storage-7.22.2.npk
+-r--r--r-- 1 root root 20706188 2026-04-22 09:33:40.000000000 +0100 routeros-7.22.2.npk
+-r--r--r-- 1 root root   163985 2026-04-22 09:26:24.000000000 +0100 tr069-client-7.22.2.npk
+-r--r--r-- 1 root root    37009 2026-04-22 09:24:48.000000000 +0100 ups-7.22.2.npk
+-r--r--r-- 1 root root   422033 2026-04-22 09:26:59.000000000 +0100 user-manager-7.22.2.npk
+-r--r--r-- 1 root root  1179793 2026-04-22 09:31:01.000000000 +0100 wireless-7.22.2.npk
+
+/isolinux:
+total 3939
+-r--r--r-- 1 root root    2048 2026-04-22 09:33:40.000000000 +0100 boot.cat
+-r--r--r-- 1 root root    9652 2026-01-08 09:06:00.000000000 +0000 isolinux.bin
+-r-xr-xr-x 1 root root      97 2026-01-08 09:06:00.000000000 +0000 isolinux.cfg
+-r--r--r-- 1 root root 4020448 2026-04-22 09:33:40.000000000 +0100 linux
+```
+

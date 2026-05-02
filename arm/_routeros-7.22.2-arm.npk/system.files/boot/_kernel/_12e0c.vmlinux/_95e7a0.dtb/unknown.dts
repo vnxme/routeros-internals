@@ -1,0 +1,462 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <0x01>;
+	#size-cells = <0x01>;
+
+	testcase-data {
+		security-password = "password";
+		duplicate-name = "duplicate";
+		#address-cells = <0x01>;
+		#size-cells = <0x01>;
+		ranges;
+		phandle = <0x0b>;
+
+		changeset {
+			prop-update = "hello";
+			prop-remove = "world";
+
+			node-remove {
+			};
+		};
+
+		duplicate-name {
+		};
+
+		phandle-tests {
+
+			provider0 {
+				#phandle-cells = <0x00>;
+				phandle = <0x02>;
+			};
+
+			provider1 {
+				#phandle-cells = <0x01>;
+				phandle = <0x01>;
+			};
+
+			provider2 {
+				#phandle-cells = <0x02>;
+				phandle = <0x04>;
+			};
+
+			provider3 {
+				#phandle-cells = <0x03>;
+				phandle = <0x03>;
+			};
+
+			provider4 {
+				#phandle-cells = <0x02>;
+				phandle-map = <0x00 0x01 0x01 0x03 0x04 0x00 0x02 0x10 0x05 0x03 0x03 0x05 0x00 0xc8 0x08 0x04 0x17 0x06 0x13 0x00 0x04 0x0f 0x00 0x02 0x03 0x03 0x02 0x05 0x03>;
+				phandle-map-mask = <0xff 0x0f>;
+				phandle-map-pass-thru = <0x00 0xf0>;
+				phandle = <0x05>;
+			};
+
+			consumer-a {
+				phandle-list = <0x01 0x01 0x04 0x02 0x00 0x00 0x03 0x04 0x04 0x03 0x04 0x05 0x64 0x02 0x01 0x07>;
+				phandle-list-names = "first\0second\0third";
+				phandle-list-bad-phandle = <0xbc614e 0x00 0x00>;
+				phandle-list-bad-args = <0x04 0x01 0x00 0x03 0x00>;
+				empty-property;
+				string-property = "foobar";
+				unterminated-string = <0x40414243>;
+				unterminated-string-list = [66 69 72 73 74 00 73 65 63 6f 6e 64 00 40 41 42 43];
+			};
+
+			consumer-b {
+				phandle-list = <0x01 0x01 0x05 0x02 0x03 0x00 0x05 0x04 0x100 0x05 0x00 0x61 0x02 0x05 0x13 0x20>;
+				phandle-list-bad-phandle = <0xbc614e 0x00 0x00>;
+				phandle-list-bad-args = <0x04 0x01 0x00 0x05 0x00>;
+			};
+		};
+
+		interrupts {
+			#address-cells = <0x01>;
+			#size-cells = <0x01>;
+
+			intc0 {
+				interrupt-controller;
+				#interrupt-cells = <0x01>;
+				phandle = <0x06>;
+			};
+
+			intc1 {
+				interrupt-controller;
+				#interrupt-cells = <0x03>;
+				phandle = <0x07>;
+			};
+
+			intc2 {
+				interrupt-controller;
+				#interrupt-cells = <0x02>;
+				phandle = <0x08>;
+			};
+
+			intmap0 {
+				#interrupt-cells = <0x01>;
+				#address-cells = <0x00>;
+				interrupt-map = <0x01 0x06 0x09 0x02 0x07 0x0a 0x0b 0x0c 0x03 0x08 0x0d 0x0e 0x04 0x08 0x0f 0x10>;
+				phandle = <0x09>;
+			};
+
+			intmap1 {
+				#interrupt-cells = <0x02>;
+				interrupt-map = <0x5000 0x01 0x02 0x06 0x0f>;
+				phandle = <0x0a>;
+			};
+
+			interrupts0 {
+				interrupt-parent = <0x06>;
+				interrupts = <0x01 0x02 0x03 0x04>;
+			};
+
+			interrupts1 {
+				interrupt-parent = <0x09>;
+				interrupts = <0x01 0x02 0x03 0x04>;
+			};
+
+			interrupts-extended0 {
+				reg = <0x5000 0x100>;
+				interrupts-extended = <0x06 0x01 0x07 0x02 0x03 0x04 0x08 0x05 0x06 0x09 0x01 0x09 0x02 0x09 0x03 0x0a 0x01 0x02>;
+			};
+		};
+
+		testcase-device1 {
+			compatible = "testcase-device";
+			interrupt-parent = <0x06>;
+			interrupts = <0x01>;
+		};
+
+		testcase-device2 {
+			compatible = "testcase-device";
+			interrupt-parent = <0x08>;
+			interrupts = <0x01>;
+		};
+
+		match-node {
+
+			name0 {
+			};
+
+			name1 {
+				device_type = "type1";
+			};
+
+			a {
+
+				name2 {
+					device_type = "type1";
+				};
+			};
+
+			b {
+
+				name2 {
+				};
+			};
+
+			c {
+
+				name2 {
+					device_type = "type2";
+				};
+			};
+
+			name3 {
+				compatible = "compat3";
+			};
+
+			name4 {
+				compatible = "compat2\0compat3";
+			};
+
+			name5 {
+				compatible = "compat2\0compat3";
+			};
+
+			name6 {
+				compatible = "compat1\0compat2\0compat3";
+			};
+
+			name7 {
+				compatible = "compat2";
+				device_type = "type1";
+			};
+
+			name8 {
+				compatible = "compat2";
+				device_type = "type1";
+			};
+
+			name9 {
+				compatible = "compat2";
+			};
+		};
+
+		address-tests {
+			#address-cells = <0x01>;
+			#size-cells = <0x01>;
+			ranges = <0x70000000 0x70000000 0x40000000 0x00 0xd0000000 0x20000000>;
+			dma-ranges = <0x00 0x20000000 0x40000000>;
+
+			device@70000000 {
+				reg = <0x70000000 0x1000>;
+			};
+
+			bus@80000000 {
+				#address-cells = <0x01>;
+				#size-cells = <0x01>;
+				ranges = <0x00 0x80000000 0x100000>;
+				dma-ranges = <0x10000000 0x00 0x40000000>;
+
+				device@1000 {
+					reg = <0x1000 0x1000>;
+				};
+			};
+
+			pci@90000000 {
+				device_type = "pci";
+				#address-cells = <0x03>;
+				#size-cells = <0x02>;
+				reg = <0x90000000 0x1000>;
+				ranges = <0x42000000 0x00 0x40000000 0x40000000 0x00 0x10000000>;
+				dma-ranges = <0x42000000 0x00 0x80000000 0x00 0x00 0x10000000 0x42000000 0x00 0xc0000000 0x20000000 0x00 0x10000000>;
+			};
+		};
+
+		platform-tests {
+			#address-cells = <0x01>;
+			#size-cells = <0x00>;
+
+			test-device@0 {
+				compatible = "test-device";
+				reg = <0x00>;
+				#address-cells = <0x01>;
+				#size-cells = <0x00>;
+
+				dev@100 {
+					compatible = "test-sub-device";
+					reg = <0x100>;
+				};
+			};
+
+			test-device@1 {
+				compatible = "test-device";
+				reg = <0x01>;
+				#address-cells = <0x01>;
+				#size-cells = <0x00>;
+
+				dev@100 {
+					compatible = "test-sub-device\0test-compat2\0test-compat3";
+					reg = <0x100>;
+				};
+			};
+		};
+
+		overlay-node {
+
+			test-bus {
+				compatible = "simple-bus";
+				#address-cells = <0x01>;
+				#size-cells = <0x00>;
+				phandle = <0x0c>;
+
+				test-unittest100 {
+					compatible = "unittest";
+					status = "okay";
+					reg = <0x64>;
+					phandle = <0x0d>;
+				};
+
+				test-unittest101 {
+					compatible = "unittest";
+					status = "disabled";
+					reg = <0x65>;
+					phandle = <0x0e>;
+				};
+
+				test-unittest0 {
+					compatible = "unittest";
+					status = "disabled";
+					reg = <0x00>;
+					phandle = <0x0f>;
+				};
+
+				test-unittest1 {
+					compatible = "unittest";
+					status = "okay";
+					reg = <0x01>;
+					phandle = <0x10>;
+				};
+
+				test-unittest2 {
+					compatible = "unittest";
+					status = "disabled";
+					reg = <0x02>;
+					phandle = <0x11>;
+				};
+
+				test-unittest3 {
+					compatible = "unittest";
+					status = "okay";
+					reg = <0x03>;
+					phandle = <0x12>;
+				};
+
+				test-unittest5 {
+					compatible = "unittest";
+					status = "disabled";
+					reg = <0x05>;
+					phandle = <0x13>;
+				};
+
+				test-unittest6 {
+					compatible = "unittest";
+					status = "disabled";
+					reg = <0x06>;
+					phandle = <0x14>;
+				};
+
+				test-unittest7 {
+					compatible = "unittest";
+					status = "disabled";
+					reg = <0x07>;
+					phandle = <0x15>;
+				};
+
+				test-unittest8 {
+					compatible = "unittest";
+					status = "disabled";
+					reg = <0x08>;
+					phandle = <0x16>;
+				};
+
+				i2c-test-bus {
+					compatible = "unittest-i2c-bus";
+					status = "okay";
+					reg = <0x32>;
+					#address-cells = <0x01>;
+					#size-cells = <0x00>;
+					phandle = <0x17>;
+
+					test-unittest12 {
+						reg = <0x08>;
+						compatible = "unittest-i2c-dev";
+						status = "disabled";
+					};
+
+					test-unittest13 {
+						reg = <0x09>;
+						compatible = "unittest-i2c-dev";
+						status = "okay";
+					};
+
+					test-unittest14 {
+						reg = <0x0a>;
+						compatible = "unittest-i2c-mux";
+						status = "okay";
+						#address-cells = <0x01>;
+						#size-cells = <0x00>;
+
+						i2c@0 {
+							#address-cells = <0x01>;
+							#size-cells = <0x00>;
+							reg = <0x00>;
+
+							test-mux-dev@20 {
+								reg = <0x20>;
+								compatible = "unittest-i2c-dev";
+								status = "okay";
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+
+	aliases {
+		testcase-alias = "/testcase-data";
+	};
+
+	__symbols__ {
+		testcase = "/testcase-data";
+		provider0 = "/testcase-data/phandle-tests/provider0";
+		provider1 = "/testcase-data/phandle-tests/provider1";
+		provider2 = "/testcase-data/phandle-tests/provider2";
+		provider3 = "/testcase-data/phandle-tests/provider3";
+		provider4 = "/testcase-data/phandle-tests/provider4";
+		test_intc0 = "/testcase-data/interrupts/intc0";
+		test_intc1 = "/testcase-data/interrupts/intc1";
+		test_intc2 = "/testcase-data/interrupts/intc2";
+		test_intmap0 = "/testcase-data/interrupts/intmap0";
+		test_intmap1 = "/testcase-data/interrupts/intmap1";
+		unittest_test_bus = "/testcase-data/overlay-node/test-bus";
+		unittest100 = "/testcase-data/overlay-node/test-bus/test-unittest100";
+		unittest101 = "/testcase-data/overlay-node/test-bus/test-unittest101";
+		unittest0 = "/testcase-data/overlay-node/test-bus/test-unittest0";
+		unittest1 = "/testcase-data/overlay-node/test-bus/test-unittest1";
+		unittest2 = "/testcase-data/overlay-node/test-bus/test-unittest2";
+		unittest3 = "/testcase-data/overlay-node/test-bus/test-unittest3";
+		unittest5 = "/testcase-data/overlay-node/test-bus/test-unittest5";
+		unittest6 = "/testcase-data/overlay-node/test-bus/test-unittest6";
+		unittest7 = "/testcase-data/overlay-node/test-bus/test-unittest7";
+		unittest8 = "/testcase-data/overlay-node/test-bus/test-unittest8";
+		unittest_i2c_test_bus = "/testcase-data/overlay-node/test-bus/i2c-test-bus";
+	};
+
+	__local_fixups__ {
+
+		testcase-data {
+
+			phandle-tests {
+
+				provider4 {
+					phandle-map = <0x08 0x18 0x24 0x3c 0x50 0x64>;
+				};
+
+				consumer-a {
+					phandle-list = <0x00 0x08 0x18 0x28 0x34 0x38>;
+					phandle-list-bad-args = <0x00 0x0c>;
+				};
+
+				consumer-b {
+					phandle-list = <0x00 0x08 0x18 0x24 0x30 0x34>;
+					phandle-list-bad-args = <0x00 0x0c>;
+				};
+			};
+
+			interrupts {
+
+				intmap0 {
+					interrupt-map = <0x04 0x10 0x24 0x34>;
+				};
+
+				intmap1 {
+					interrupt-map = <0x0c>;
+				};
+
+				interrupts0 {
+					interrupt-parent = <0x00>;
+				};
+
+				interrupts1 {
+					interrupt-parent = <0x00>;
+				};
+
+				interrupts-extended0 {
+					interrupts-extended = <0x00 0x08 0x18 0x24 0x2c 0x34 0x3c>;
+				};
+			};
+
+			testcase-device1 {
+				interrupt-parent = <0x00>;
+			};
+
+			testcase-device2 {
+				interrupt-parent = <0x00>;
+			};
+		};
+	};
+};

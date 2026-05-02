@@ -1,0 +1,8 @@
+xfrm_algo
+blowfish_generic:	blowfish_common
+chacha_generic:	libchacha
+xfrm_algo
+poly1305_generic:	libpoly1305
+twofish_generic:	twofish_common
+xfrm_algo
+xfrm_algo

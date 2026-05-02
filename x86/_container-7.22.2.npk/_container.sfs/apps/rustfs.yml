@@ -1,0 +1,13 @@
+name: rustfs
+descr: High-performance object storage server compatible with Amazon S3
+page: https://github.com/rustfs
+category: storage
+default-credentials: rustfsadmin:rustfsadmin
+services:
+  rustfs:
+    image: docker.io/rustfs/rustfs
+    ports:
+      - 9000:9000:api
+      - 9001:9001:web
+    volumes:
+      - data:/data

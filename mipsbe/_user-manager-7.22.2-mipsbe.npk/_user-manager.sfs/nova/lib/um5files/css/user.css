@@ -1,0 +1,203 @@
+html {
+    font-family: "Helvetica Neue", Helvetica, sans-serif;
+    overflow-y: scroll;
+}
+/*
+=================
+    MENU STUFF
+=================
+*/
+/*Strip the ul of padding and list styling*/
+ul.hmenu {
+    list-style-type:none;
+    margin: 0px 0px 0px 20px;
+    padding:0;
+    display: block;
+    float: right;
+}
+
+/*Create a horizontal list with spacing*/
+.hmenu li {
+    display:inline-block;
+    float: left;
+    margin-right: 1px;
+}
+
+/*Style for menu links*/
+.hmenu li a {
+    display:block;
+    min-width:100px;
+    height: 50px;
+    text-align: center;
+    line-height: 50px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #fff;
+    background: #762824;
+    text-decoration: none;
+}
+
+/*Hover state for top level links*/
+.hmenu li:hover a {
+    background: #904c49;
+}
+
+/*Style for dropdown links*/
+.hmenu li:hover ul a {
+    background: #f3f3f3;
+    color: #2f3036;
+    height: 40px;
+    line-height: 40px;
+}
+
+/*Hover state for dropdown links*/
+.hmenu li:hover ul a:hover {
+    background: #19c589;
+    color: #fff;
+}
+
+/*Hide dropdown links until they are needed*/
+.hmenu li ul {
+    display: none;
+}
+
+/*Make dropdown links vertical*/
+.hmenu li ul li {
+    display: block;
+    float: none;
+}
+
+/*Prevent text wrapping*/
+.hmenu li ul li a {
+    width: auto;
+    min-width: 100px;
+    padding: 0 20px;
+}
+
+/*Display the dropdown on hover*/
+ul.hmenu li a:hover + .hidden, .hidden:hover {
+    display: block;
+}
+
+/*Style 'show menu' label button and hide it by default*/
+.show-menu {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-decoration: none;
+    color: #fff;
+    background: #762824;
+    text-align: center;
+    padding: 10px 0;
+    height: 30px;
+    display: none;
+    line-height: 26px;
+    border-bottom: 1px solid #fff;
+    float: right;
+    width: 150px;
+    cursor: pointer;
+}
+
+/*Hide checkbox*/
+#header input[type=checkbox]{
+    display: none;
+}
+
+/*Show menu when invisible checkbox is checked*/
+#header input[type=checkbox]:checked ~ #menu{
+    display: block;
+}
+
+/*Responsive Styles*/
+
+@media screen and (max-width : 740px){
+    /*Make dropdown links appear inline*/
+    ul.hmenu {
+        position: static;
+        display: none;
+        width: 100%;
+        margin: 0;
+    }
+    /*Create vertical spacing*/
+    .hmenu li {
+        margin-bottom: 1px;
+    }
+    /*Make all menu links full width*/
+    ul.hmenu li, li a {
+        width: 100%;
+    }
+    /*Display 'show menu' link*/
+    .show-menu {
+        display:block;
+    }
+}
+
+/*
+=================
+    END MENU STUFF
+=================
+*/
+
+a.link {
+    color: rgb(111, 111, 111);
+}
+
+a.link:hover {
+    color: #904c49;
+}
+
+#header {
+    max-width: 800px;
+    margin: 0 auto;
+}
+#container {
+    clear: both;
+    padding: 10px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+div.container-view {
+    display: none;
+}
+
+h4 {
+    border-bottom: 2px solid #762824;
+}
+
+table.flat-table {
+    margin: 0 auto;
+    font-family: sans-serif;
+    overflow: auto;
+    width: auto;
+}
+.flat-table th {
+    background-color: #904c49;
+    color: white;
+    font-weight: normal;
+    padding: 5px 10px;
+    text-align: center;
+}
+.flat-table td {
+    background-color: rgb(238, 238, 238);
+    color: rgb(111, 111, 111);
+    padding: 5px 10px;
+}
+
+table.keyval {
+    margin: 0 auto;
+}
+.keyval td {
+    padding: 5px;
+}
+
+button {
+    height: 30px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #904c49;
+    border-radius: 15px;
+    border: 1px solid #762824;
+    cursor: pointer;
+}
+
+button:hover{
+    background-color: #FFF;
+}

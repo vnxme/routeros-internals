@@ -1,0 +1,12 @@
+<PCI>
+    <DRIVER PROG="/pckg/wifi-qcom-be/nova/bin/qcom-be-setup" NAME="michael_mic.ko" NAME="mdt_loader.ko" NAME="libarc4" NAME="arc4" NAME="compat.ko" NAME="mhi.ko" NAME="mhi_pci_generic.ko" NAME="qcom_smd.ko" NAME="qcom_glink.ko" NAME="qcom_glink_smem.ko" NAME="remoteproc.ko" NAME="qcom_pil_info.ko" NAME="qcom_common.ko" NAME="qcom_sysmon.ko" NAME="qcom_q6v5.ko" NAME="qcom_q6v5_upd.ko" NAME="qcom_q6v5_wcss_sec.ko" NAME="qcom_q6v5_mpd.ko" NAME="qrtr-smd_bp.ko" NAME="qrtr-mhi_bp.ko" NAME="rfkill" NAME="cfg80211.ko" NAME="mac80211.ko" NAME="ath.ko" NAME="ath_debug.ko" NAME="ath12k.ko" NAME="ath12k_wifi7.ko">
+        <DEVICE MODALIAS="wifi" OF="true" COMPATIBLE="qcom,cnss-qca5332" DEPEND_ON="alder_eth" TIMEOUT="200"/>
+        <DEVICE MODALIAS="wifi1" OF="true" COMPATIBLE="qcom,cnss-qcn6432" DEPEND_ON="alder_eth" TIMEOUT="200"/>
+        <DEVICE MODALIAS="wifi1" OF="true" COMPATIBLE="qcom,qcn6432-wifi" DEPEND_ON="alder_eth" TIMEOUT="200"/>
+        <DEVICE MODALIAS="wifi2" OF="true" COMPATIBLE="qcom,cnss-qcn6432" DEPEND_ON="alder_eth" TIMEOUT="200"/>
+        <DEVICE MODALIAS="wifi2" OF="true" COMPATIBLE="qcom,qcn6432-wifi" DEPEND_ON="alder_eth" TIMEOUT="200"/>
+        <DEVICE MODALIAS="wifi3" OF="true" COMPATIBLE="qcom,cnss-qcn9224" DEPEND_ON="alder_eth" TIMEOUT="200"/>
+        <DEVICE MODALIAS="wifi4" OF="true" COMPATIBLE="qcom,cnss-qcn9224" DEPEND_ON="alder_eth" TIMEOUT="200"/>
+        <DEVICE MODALIAS="wifi5" OF="true" COMPATIBLE="qcom,cnss-qcn9160" DEPEND_ON="alder_eth" TIMEOUT="200"/>
+    </DRIVER>
+</PCI>

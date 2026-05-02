@@ -1,0 +1,36 @@
+What's new in 7.22.2 (2026-Apr-22 11:03):
+
+*) app - fixed uptime-kuma and jupyter-notebook;
+*) bgp - fixed stability issue when non-existent output select-chain was specified;
+*) bridge - fixed missing dynamic "switch-cpu" VLAN entry in WiFi setup;
+*) bridge - synchronize only local bridge MAC addresses for MLAG (introduced in v7.22);
+*) console - rename "cpu-used-per-cpu" to "cpe-used-per-core" in "/system/resource/monitor";
+*) container - fixed losing container after reboot;
+*) ethernet - fixed false excessive broadcast warning (introduced in v7.20);
+*) firewall - improved system stability;
+*) ipsec - fixed expired SA handling to prevent “no such item” errors during listing;
+*) ipv6,ra - use received prefix when RA on-link flag is 0 (introduced in v7.22);
+*) isis - improved stability with fragmented CSNP;
+*) leds - fixed default LED configuration for CCR2004-1G-12S+2XS;
+*) leds - fixed LED dark mode for RB5009;
+*) lte - fixed missing automatic redial when cellular connectivity is lost for R11e-LTE;
+*) ospf - improved stability on configuration change;
+*) ovpn - fixed OVPN push routes;
+*) poe-out - firmware update for 802.3at capable boards (the update will cause a brief power interruption to poe-out interfaces);
+*) poe-out - fixed occasional detection issue when using auto-on mode;
+*) ptp - allow manual domain configuration for 802.1AS profile;
+*) ptp - set DSCP (EF) for the default profile when using IPv4;
+*) route - improved service stability when removing routes;
+*) routerboard - fixed applying settings via WinBox on devices with fixed CPU frequency;
+*) system - added FCC Part 15 Compliance label to "System/Regulatory" menu;
+*) system - improved stability for internal RouterOS service communication;
+*) system - improved system stability;
+*) system - included full certificate chain to Windows executables;
+*) usb - fixed crash when using Ethernet adapter (introduced in v7.22);
+*) vrrp - fixed packet drop in CHR (introduced in v7.22);
+*) wifi - improved authentication stability for WiFi 7 access points;
+*) wifi-mediatek - fixed communication issues on 802.11ax access points with Intel clients;
+*) wifi-mediatek - fixed HE capabilities IE on 2GHz band;
+*) wifi-qcom-be - fixed forwarding of 4-address data from station to station;
+*) winbox - added option to configure built-in trust store for all services;
+*) www - improved service stability when cancelling REST API sessions;

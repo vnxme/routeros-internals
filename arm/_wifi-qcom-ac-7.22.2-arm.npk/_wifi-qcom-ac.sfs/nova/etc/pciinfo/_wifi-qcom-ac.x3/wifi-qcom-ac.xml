@@ -1,0 +1,7 @@
+<PCI>
+    <DRIVER PROG="/pckg/wifi-qcom-ac/nova/bin/qcawificfg" NAME="rfkill.ko" NAME="cfg80211.ko" NAME="wifi_2_0.ko">
+        <DEVICE MODALIAS="wifi" OF="true" COMPATIBLE="qca,wifi-ipq40xx"/>
+        <DEVICE VENDORID="0x168c" DEVICEID="0x0046"/>
+        <DEVICE VENDORID="0x168c" DEVICEID="0x0056"/>
+    </DRIVER>
+</PCI>

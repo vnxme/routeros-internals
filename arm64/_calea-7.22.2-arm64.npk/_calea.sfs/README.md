@@ -1,0 +1,29 @@
+### calea.sfs
+#### Identification (`file <*>`):
+```
+Squashfs filesystem, little endian, version 4.0, xz compressed, 16428 bytes, 7 inodes, blocksize: 524288 bytes, created: Wed Apr 22 08:24:21 2026
+```
+#### Listing (`ls -AlR --time-style=full-iso <*>`):
+```
+/:
+total 4
+drwxr-xr-x 4 root root 4096 2026-04-22 09:24:21.000000000 +0100 nova
+
+/nova:
+total 8
+drwxr-xr-x 2 root root 4096 2026-04-22 09:24:21.000000000 +0100 bin
+drwxr-xr-x 3 root root 4096 2026-04-22 09:24:21.000000000 +0100 lib
+
+/nova/bin:
+total 36
+-rwxr-xr-x 1 root root 34664 2026-04-22 09:24:17.000000000 +0100 calea
+
+/nova/lib:
+total 4
+drwxr-xr-x 2 root root 4096 2026-04-22 09:24:21.000000000 +0100 console
+
+/nova/lib/console:
+total 16
+-rwxr-xr-x 1 root root 12559 2026-04-22 09:24:11.000000000 +0100 1216348160.mem
+```
+

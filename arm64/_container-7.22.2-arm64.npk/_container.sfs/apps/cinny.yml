@@ -1,0 +1,12 @@
+name: cinny
+descr: Matrix client focusing primarily on simple, elegant and secure interface
+page: https://cinny.in/
+category: communication
+services:
+  cinny:
+    image: ghcr.io/cinnyapp/cinny:latest
+    ports:
+      - 8094:80:web
+    volumes:
+      - config:/usr/share/nginx/html/config.json
+    restart: unless-stopped
