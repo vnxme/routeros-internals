@@ -1,0 +1,17 @@
+name: home-assistant
+descr: Home automation software
+page: https://home-assistant.io
+category: home-automation
+icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/homeassistant-logo.png
+default-credentials: web setup
+services:
+  home-assistant:
+    image: lscr.io/linuxserver/homeassistant
+    ports:
+      - '8123:8123:web'
+    volumes:
+      - config:/config
+networks:
+  default:
+    name: lan
+    external: true

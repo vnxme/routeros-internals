@@ -1,0 +1,225 @@
+-- *****************************************************************
+-- COLUBRIS-AAA-CLIENT-MIB.my:  Colubris Networks AAA Client MIB file
+--
+-- November 2001
+--
+-- Copyright (c) 2001, 2002  by Colubris Networks, Inc.
+-- All rights reserved.
+-- *****************************************************************
+
+COLUBRIS-AAA-CLIENT-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	MODULE-IDENTITY,
+	OBJECT-TYPE
+		FROM SNMPv2-SMI
+	TEXTUAL-CONVENTION,
+		FROM SNMPv2-TC
+	MODULE-COMPLIANCE,
+	OBJECT-GROUP
+		FROM SNMPv2-CONF
+	colubrisMgmt
+		FROM COLUBRIS-SMI;
+
+colubrisAAAClientMIB  MODULE-IDENTITY
+	LAST-UPDATED "200111300000Z"
+	ORGANIZATION "Colubris Networks, Inc."
+	CONTACT-INFO
+		"	Colubris Networks
+			Customer Service
+
+		Postal: 420 Armand-Frappier, Suite 200
+			Laval, QC  H7V 4B4
+			CANADA
+
+		   Tel: +1 450 680-1661
+
+		E-mail: cn-snmp@colubris.com"
+	DESCRIPTION
+		"Initial version of Colubris Networks AAAClient MIB module."
+	::= { colubrisMgmt 5 }
+
+-- colubrisAAAClientMIB definition
+
+colubrisAAAServerTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF ColubrisAAAServerEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+		"A table of the AAA client servers currently configured
+		 in the device."
+	::= { colubrisAAAClientMIB 1 }
+
+colubrisAAAServerEntry OBJECT-TYPE
+	SYNTAX	ColubrisAAAServerEntry
+	MAX-ACCESS	not-accessible
+	STATUS	current
+	DESCRIPTION
+		"An AAA client server configured in the device."
+	INDEX { colubrisAAAServerIndex }
+	::=   { colubrisAAAServerTable 1 }
+
+ColubrisAAAServerEntry ::= SEQUENCE
+{
+	colubrisAAAServerIndex INTEGER,
+	colubrisAAAAuthenProtocol INTEGER,
+	colubrisAAAAuthenMethod INTEGER,
+	colubrisAAAServerName OCTET STRING,
+	colubrisAAASharedSecret OCTET STRING,
+	colubrisAAAAuthenticationPort INTEGER,
+	colubrisAAAAccountingPort INTEGER,	
+	colubrisAAATimeout INTEGER,
+	colubrisAAANASId OCTET STRING,
+	colubrisAAA802dot1xCapable INTEGER
+}
+
+colubrisAAAServerIndex OBJECT-TYPE
+	SYNTAX INTEGER
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Specifies the index of the AAA Server."
+	::= { colubrisAAAServerEntry 1 }
+
+colubrisAAAAuthenProtocol OBJECT-TYPE
+	SYNTAX INTEGER
+	{
+		radius(1)
+	}
+	MAX-ACCESS	read-write
+	STATUS current
+	DESCRIPTION
+        	"Specifies the protocol used by the AAA client
+        	 to communicate with the AAA server."
+	::= { colubrisAAAServerEntry 2 }
+
+colubrisAAAAuthenMethod OBJECT-TYPE
+	SYNTAX INTEGER
+	{
+		pap(1),
+		chap(2),
+		mschap(3),
+		mschapv2(4),
+		eap-md5(5)
+	}
+	MAX-ACCESS	read-write
+	STATUS current
+	DESCRIPTION
+		"Specifies the authentication method used by the AAA client
+		 to authenticate users via the AAA server."
+	::= { colubrisAAAServerEntry 3 }
+
+colubrisAAAServerName OBJECT-TYPE
+	SYNTAX		OCTET STRING
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies the DNS name or IP address of the AAA server."
+	::= { colubrisAAAServerEntry 4 }
+			
+
+colubrisAAASharedSecret OBJECT-TYPE
+	SYNTAX		OCTET STRING
+	MAX-ACCESS	write-only
+	STATUS		current
+	DESCRIPTION
+		"Specifies the shared secret used by the AAA client and 
+		 the AAA server. This should only be set if AAA traffic between
+		 AAA client and server is sent through a VPN tunnel."
+	::= { colubrisAAAServerEntry 5 }
+
+colubrisAAAAuthenticationPort OBJECT-TYPE
+	SYNTAX		INTEGER (1..65535)
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies the port number used by the AAA client to
+		 authenticate users via the AAA server."
+	::= { colubrisAAAServerEntry 6 }
+
+
+colubrisAAAAccountingPort OBJECT-TYPE
+	SYNTAX		INTEGER (1..65535)
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies the port number used by the AAA client to
+		 send accounting information to the AAA server."
+	::= { colubrisAAAServerEntry 7 }
+			
+
+colubrisAAATimeout OBJECT-TYPE
+	SYNTAX		INTEGER (3..100)
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies the number of seconds the AAA client will
+		 wait for an answer to its authentication request."
+	::= { colubrisAAAServerEntry 8 }
+			
+colubrisAAANASId OBJECT-TYPE
+	SYNTAX		OCTET STRING
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		"Specifies the name of the NAS to be sent by the
+		 AAA client in each authentication request sent to 
+		 the AAA server."
+	::= { colubrisAAAServerEntry 9 }
+
+colubrisAAA802dot1xCapable OBJECT-TYPE
+	SYNTAX		INTEGER (0..1)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Determines if the server is used for authenticating IEEE802dot1x users."
+	::= { colubrisAAAServerEntry 10 }
+
+-- notifications
+
+colubrisAAAClientMIBNotificationPrefix OBJECT IDENTIFIER ::= { colubrisAAAClientMIB 2 }
+colubrisAAAClientMIBNotifications OBJECT IDENTIFIER ::= { colubrisAAAClientMIBNotificationPrefix 0 }
+
+-- conformance information
+
+colubrisAAAClientMIBConformance	OBJECT IDENTIFIER ::= { colubrisAAAClientMIB 3 }
+colubrisAAAClientMIBCompliances	OBJECT IDENTIFIER ::= { colubrisAAAClientMIBConformance 1 }
+colubrisAAAClientMIBGroups		OBJECT IDENTIFIER ::= { colubrisAAAClientMIBConformance 2 }
+
+-- compliance statements     
+
+colubrisAAAClientMIBCompliance MODULE-COMPLIANCE
+	STATUS current
+	DESCRIPTION
+		"The compliance statement for entities which implement
+		 the Colubris Networks AAA client MIB."
+	MODULE
+		MANDATORY-GROUPS
+		{
+			colubrisAAAClientMIBGroup
+		}
+	::= { colubrisAAAClientMIBCompliances 1 }
+	
+	
+-- units of conformance
+
+colubrisAAAClientMIBGroup OBJECT-GROUP
+	OBJECTS
+	{
+		colubrisAAAAuthenProtocol,
+		colubrisAAAAuthenMethod,
+		colubrisAAAServerName,
+		colubrisAAASharedSecret,
+		colubrisAAAAuthenticationPort,
+		colubrisAAAAccountingPort,
+		colubrisAAATimeout,
+		colubrisAAANASId,
+		colubrisAAA802dot1xCapable
+	}
+	STATUS current
+	DESCRIPTION
+		"A collection of objects providing the AAA client MIB capability."
+	::= { colubrisAAAClientMIBGroups 1 }
+
+END	
+

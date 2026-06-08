@@ -1,0 +1,15 @@
+<NETREMOTE>
+    <REMOTE TYPE="19" PATH="27,1" DEFQUEUE="0" USTRING="ppp-in" STATUS="false"/>
+    <REMOTE TYPE="20" PATH="27,2" DEFQUEUE="0" USTRING="ppp-out" STATUS="false"/>
+    <REMOTE TYPE="10" PATH="27,21" DEFQUEUE="0" USTRING="pptp-in" STATUS="false"/>
+    <REMOTE TYPE="11" PATH="27,22" DEFQUEUE="0" USTRING="pptp-out" STATUS="false"/>
+    <REMOTE TYPE="33" PATH="27,31" DEFQUEUE="0" USTRING="l2tp-in" STATUS="false"/>
+    <REMOTE TYPE="34" PATH="27,32" DEFQUEUE="0" USTRING="l2tp-out" STATUS="false"/>
+    <REMOTE TYPE="16" PATH="27,14" DEFQUEUE="0" USTRING="pppoe-in" STATUS="false"/>
+    <REMOTE TYPE="18" PATH="27,11" DEFQUEUE="0" USTRING="pppoe-out" STATUS="false"/>
+    <REMOTE TYPE="45" PATH="27,51" DEFQUEUE="0xfffffffc" USTRING="ovpn-in" STATUS="false"/>
+    <REMOTE TYPE="44" PATH="27,52" DEFQUEUE="0xfffffffc" USTRING="ovpn-out" STATUS="false"/>
+    <REMOTE TYPE="51" PATH="27,61" DEFQUEUE="0" USTRING="sstp-in" STATUS="false"/>
+    <REMOTE TYPE="52" PATH="27,62" DEFQUEUE="0" USTRING="sstp-out" STATUS="false"/>
+    <REMOTE TYPE="73" PATH="27,34" DEFQUEUE="0" USTRING="l2tp-ether" STATUS="false"/>
+</NETREMOTE>

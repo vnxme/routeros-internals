@@ -1,0 +1,59 @@
+NEXUS-MANUFACTURE-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+ smartbridges, sbdevice
+	FROM NEXUS-MIB
+sbRadioBase ,sbRadioBase1
+	FROM RADIO-MIB
+  DisplayString
+	        FROM SNMPv2-TC
+ OBJECT-TYPE
+         FROM RFC-1212;
+
+-- < start FactoryServer >
+sbStartFactoryServer OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    " When this OID is set to 1 , the FactoryServer binary is executed on the device."
+::= { sbdevice 11 }
+
+
+sbStartTftpd OBJECT-TYPE
+	SYNTAX  INTEGER
+    	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	" When this OID is set to 1 , the tftpd daemon is started on the device."
+::= { sbdevice 12 }
+
+sbStartDummy OBJECT-TYPE
+	SYNTAX  INTEGER
+    	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	" When this OID is set to 1 , the tftpd daemon is started on the device."
+::= { sbdevice 15 }
+
+sbGetRadio OBJECT IDENTIFIER ::= { sbRadioBase1  50 }
+
+sbGetRates OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    " Retrieves the rates from the radio and returns in form of a string RATE;STATUS;RATE;STATUS.."
+     ::= { sbGetRadio 1 }
+
+sbGetExtRates OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    " Retrieves the extended rates from the radio and returns in form of a string RATE;STATUS;RATE;STATUS.."
+     ::= { sbGetRadio 2 }
+
+
+
+END

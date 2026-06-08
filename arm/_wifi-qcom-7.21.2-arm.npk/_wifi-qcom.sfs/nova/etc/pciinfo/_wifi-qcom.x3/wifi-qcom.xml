@@ -1,0 +1,11 @@
+<PCI>
+    <DRIVER PROG="/pckg/wifi-qcom/nova/bin/qcawificfg" NAME="pcie-qcom.ko" NAME="rfkill.ko" NAME="cfg80211.ko" NAME="rpmsg_char.ko" NAME="qcom_sysmon.ko" NAME="qcom_common.ko" NAME="qcom_q6v5.ko" NAME="mdt_loader.ko" NAME="qcom_q6v5_wcss.ko" NAME="qcom_q6v5_mpd.ko" NAME="qrtr-smd.ko" NAME="qrtr-mhi.ko" NAME="qca_ol.ko" NAME="wifi_3_0.ko">
+        <DEVICE MODALIAS="wifi" OF="true" COMPATIBLE="qcom,cnss-qca8074"/>
+        <DEVICE MODALIAS="wifi1" OF="true" COMPATIBLE="qcom,cnss-qca8074v2"/>
+        <DEVICE MODALIAS="wifiCP" OF="true" COMPATIBLE="qcom,cnss-qca6018"/>
+        <DEVICE MODALIAS="wifiMP" OF="true" COMPATIBLE="qcom,cnss-qca5018"/>
+        <DEVICE MODALIAS="wifi1" OF="true" COMPATIBLE="qcom,cnss-qcn6122"/>
+        <DEVICE MODALIAS="wifi2" OF="true" COMPATIBLE="qcom,cnss-qcn6122"/>
+        <DEVICE VENDORID="0x17cb" DEVICEID="0x1104"/>
+    </DRIVER>
+</PCI>

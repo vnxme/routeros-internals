@@ -1,0 +1,12 @@
+name: victoria-metrics
+descr: a fast, cost-effective, scalable TSDB in one easy-to-deploy binary.
+page: https://victoriametrics.com
+category: monitoring
+services:
+  victoria-metrics:
+    image: docker.io/victoriametrics/victoria-metrics:latest
+    environment:
+    volumes:
+      - data:/victoria-metrics-data
+    ports:
+      - 8428:8428:web

@@ -1,0 +1,17 @@
+<PCI>
+    <DRIVER NAME="sram" NAME="aths16" NAME="ath8327" NAME="music_switch" NAME="ag7240">
+        <DEVICE MODALIAS="ag7240" PLATFORM="true"/>
+    </DRIVER>
+    <DRIVER NAME="virtio_net">
+        <DEVICE VENDORID="0x1" VIRTIO="true"/>
+    </DRIVER>
+    <DRIVER NAME="vmxnet3">
+        <DEVICE VENDORID="0x15ad" DEVICEID="0x07b0"/>
+    </DRIVER>
+    <DRIVER NAME="ena">
+        <DEVICE VENDORID="0x1d0f" DEVICEID="0x0ec2"/>
+        <DEVICE VENDORID="0x1d0f" DEVICEID="0x1ec2"/>
+        <DEVICE VENDORID="0x1d0f" DEVICEID="0xec20"/>
+        <DEVICE VENDORID="0x1d0f" DEVICEID="0xec21"/>
+    </DRIVER>
+</PCI>

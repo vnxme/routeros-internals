@@ -1,0 +1,112 @@
+#| WPS-Sync Configuration
+#|
+#|    * Wireless and Ethernet interfaces are bridged.
+#|    * wlan1 and wlan2 are Access Points.
+#|    * wlan3 is WPS-Sync repeater.
+#|
+#| Wireless: CAP enabled on wlan1, wlan2;
+#| WPS Sync:
+#|     mode:          repeater;
+#| LAN Configuration:
+#|     DHCP client:   enabled;
+
+:global action;
+
+# bridge port name
+:global brName  "bridgeLocal";
+:global logPref "defconf:";
+:local usingWifiPack [:len [/system package find name~"wifi" !disabled]];
+
+:if ($usingWifiPack) do={
+    :log warning "$logPref WPS-Sync is not supported with Wifi package";
+    /ip address add address=192.168.88.1/24 interface=ether1 comment="defconf";
+    /quit
+}
+
+:if ($action = "apply") do={
+
+  # wait for ethernet interfaces
+  :local count 0;
+  :while ([/interface ethernet find] = "") do={
+    :if ($count = 30) do={
+      :log warning "$logPref Unable to find ethernet interfaces";
+      /quit;
+    }
+    :delay 1s; :set count ($count + 1);
+  }
+
+  :local macSet 0;
+  :local tmpMac "";
+
+  :foreach k in=[/interface ethernet find] do={
+    # first ethernet is found; add bridge and set mac address of the ethernet port
+    :if ($macSet = 0) do={
+      :set tmpMac [/interface ethernet get $k mac-address];
+      /interface bridge add name=$brName auto-mac=no admin-mac=$tmpMac comment="defconf";
+      :set macSet 1;
+    }
+    # add ethernet bridge ports
+    /interface bridge port add bridge=$brName interface=$k comment="defconf"
+  }
+
+  # add dhcp client on bridge interface (may fail if already exist)
+  :do {
+    /ip dhcp-client add interface=$brName disabled=no comment="defconf"
+  } on-error={ :log warning "$logPref Unable to add dhcp client";}
+
+  # configure WPS-Sync (may fail if specified interfaces are missing)
+  :local findWireless [:parse ":local count 0;
+  :while ([/interface wireless print count-only] < 3) do={
+    :set count ($count +1);
+    :if ($count = 40) do={
+      :log warning \"$logPref Unable to find wireless interfaces\";
+      /ip address add address=192.168.88.1/24 interface=ether1 comment=\"defconf\";
+      /quit
+    }
+      :delay 1s;
+      :set count (\$count + 1)
+  }"]
+  [$findWireless]
+
+  :do {
+    :local setWPSsync ""
+    :set setWPSsync [:parse ":foreach k in=[/interface wireless find] do={
+    # add wireless bridge ports
+    /interface bridge port add bridge=\$brName interface=\$k comment=\"defconf\"
+    }
+
+    :local hwInfo [/interface wireless info hw-info [.. find where default-name=\"wlan3\"] as-value];
+    # :if ((\$hwInfo->\"locked-countries\")~\"russia\") do={
+      /interface wireless set [find where default-name=\"wlan3\"] channel-width=20/40mhz-XX band=5ghz-a/n/ac
+    # } else={
+    #  /interface wireless set [find where default-name=\"wlan3\"] channel-width=20/40/80mhz-XXXX band=5ghz-a/n/ac
+    # }
+
+    /interface wireless cap
+      set discovery-interfaces=bridgeLocal enabled=yes interfaces=wlan1,wlan2
+    /interface wireless
+      setup-repeater wlan3 duration=1m55s"]
+  [$setWPSsync]
+  } on-error={ :log warning "$logPref Unable to configure WPS-Sync";}
+}
+
+:if ($action = "revert") do={
+  :local o [/ip dhcp-client find comment="defconf"]
+  :if ([:len $o] != 0) do={ /ip dhcp-client remove $o }
+
+  /interface bridge port remove [find comment="defconf"]
+  /interface bridge remove [find comment="defconf"]
+
+  :do {
+    :local removeWPSsync ""
+    :set removeWPSsync [:parse "/interface wireless cap set enabled=no interfaces=\"\" discovery-interfaces=\"\"
+	  /interface wireless reset-configuration wlan1
+	  /interface wireless reset-configuration wlan2
+	  /interface wireless reset-configuration wlan3"]
+    [$removeWPSsync]
+  } on-error={ :log warning "$logPref Unable to unset WPS-Sync";}
+}
+
+:set brName;
+:set logPref;
+

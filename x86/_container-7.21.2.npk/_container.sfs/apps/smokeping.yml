@@ -1,0 +1,18 @@
+name: smokeping
+descr: SmokePing is a deluxe latency measurement tool. It can measure, store and display latency, latency distribution and packet loss.
+page: https://oss.oetiker.ch/smokeping
+category: monitoring
+services:
+  smokeping:
+    image: lscr.io/linuxserver/smokeping:latest
+    ports:
+      - 8092:80:web
+    environment:
+      PUID: 1000
+      PGID: 1000
+      CACHE_DIR: /tmp
+      MASTER_URL: http://[accessIP]:[accessPort]/smokeping/
+    volumes:
+      - smokeping/config:/config
+      - smokeping/data:/data
+    restart: unless-stopped

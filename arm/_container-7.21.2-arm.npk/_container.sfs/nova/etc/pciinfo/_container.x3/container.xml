@@ -1,0 +1,8 @@
+<PCI>
+    <DRIVER NAME="gasket" NAME="apex">
+        <DEVICE VENDORID="0x1ac1" DEVICEID="0x089a"/>
+    </DRIVER>
+    <DRIVER NAME="uvcvideo">
+        <DEVICE CLASSID="0x0e" USB="true"/>
+    </DRIVER>
+</PCI>

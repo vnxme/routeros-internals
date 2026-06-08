@@ -1,0 +1,25 @@
+name: partdb
+descr: Part-DB is a web-based tool for organizing parts and components used in electronic circuits
+page: https://github.com/Part-DB/Part-DB-server
+category: productivity
+default-credentials: admin:<check container logs for password>
+services:
+  partdb:
+    image: docker.io/jbtronics/part-db1:latest
+    container_name: partdb
+    environment:
+      DATABASE_URL: sqlite:///%kernel.project_dir%/var/db/app.db
+      APP_ENV: docker
+      DB_AUTOMIGRATE: true
+      DEFAULT_LANG: en
+      DEFAULT_TIMEZONE: Europe/Berlin
+      BASE_CURRENCY: EUR
+      INSTANCE_NAME: Part-DB
+      ALLOW_ATTACHMENT_DOWNLOADS: 0
+      USE_GRAVATAR: 0
+    volumes:
+      - uploads:/var/www/html/uploads
+      - public_media:/var/www/html/public/media
+      - db:/var/www/html/var/db
+    ports:
+      - 8090:80:web

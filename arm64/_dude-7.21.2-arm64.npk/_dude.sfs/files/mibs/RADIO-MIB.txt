@@ -1,0 +1,2152 @@
+RADIO-MIB DEFINITIONS ::= BEGIN
+-- SB3210
+
+IMPORTS
+ smartbridges
+	FROM NEXUS-MIB
+  DisplayString
+	        FROM SNMPv2-TC
+ OBJECT-TYPE
+         FROM RFC-1212;
+
+
+sbRadioBase	OBJECT IDENTIFIER ::= { smartbridges  5 }
+--
+sbRadioBase1       OBJECT IDENTIFIER ::= { sbRadioBase 1  }
+--
+sbRadioBaseDevice	OBJECT IDENTIFIER ::= { sbRadioBase1  1 }
+sbRadioBaseStatistics	OBJECT IDENTIFIER ::= { sbRadioBase1  2 }
+sbRadioBaseServiceSet	OBJECT IDENTIFIER ::= { sbRadioBase1 3 }
+sbRadioBaseSecurity	OBJECT IDENTIFIER ::= { sbRadioBase1 4 }
+sbRadioBaseMACConfig	OBJECT IDENTIFIER ::= { sbRadioBase1 5 }
+sbRadioBaseQoS		OBJECT IDENTIFIER ::= { sbRadioBase1 6 }
+sbRadioBaseClient	OBJECT IDENTIFIER ::= { sbRadioBase1 7 }
+sbRadioBaseStation	OBJECT IDENTIFIER ::= { sbRadioBase1 8 }
+sbRadioBaseMACStats	OBJECT IDENTIFIER ::= { sbRadioBase1 9 }
+sbRadioBaseBSS	OBJECT IDENTIFIER ::= { sbRadioBase1 10 }
+sbRadioBaseLMAC	OBJECT IDENTIFIER ::= { sbRadioBase1 11 }
+sbRadioBaseTunnel	OBJECT IDENTIFIER ::= { sbRadioBase1 12 }
+sbRadioBaseMLME	OBJECT IDENTIFIER ::= { sbRadioBase1 13 }
+sbRadioBasePHY  OBJECT IDENTIFIER ::= { sbRadioBase1 14}
+sbRadioBaseACL  OBJECT IDENTIFIER ::= { sbRadioBase1 22 }
+sbRadioBaseAntenna OBJECT IDENTIFIER ::= { sbRadioBase1 23 }
+sbRadioBaseAssociation	OBJECT IDENTIFIER ::= { sbRadioBase1 24 }
+sbRadioBaseAloft OBJECT IDENTIFIER ::= { sbRadioBase1 25 }
+-- ----------------------------------------------
+--	 Device specific
+-- ----------------------------------------------
+sbaMACAddress OBJECT-TYPE
+	SYNTAX OCTET STRING  (SIZE (6))
+	ACCESS  read-only
+          STATUS  mandatory
+          DESCRIPTION
+	"The MAC address of the device."
+	::= { sbRadioBaseDevice 1 }
+
+
+sbaLinkState  OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+        DESCRIPTION
+	"The object contains the link state of the device. If the
+	 link is up, the object contains the  value of highest
+	 link speed in 500 Kbps units. 0 signals that the link is down."
+	::= { sbRadioBaseDevice 2 }
+
+
+sbaLEDConfig OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+        DESCRIPTION
+	"Configures the LED configuration number."
+	::= { sbRadioBaseDevice 3 } 
+
+sbaMode OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+        DESCRIPTION
+	"Returns the mode of operation of the SoftMAC."
+	::= { sbRadioBaseDevice 4 } 
+
+sbaComponentNr  OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+          DESCRIPTION
+	"Selects information of component nr to retrieve."
+	::= { sbRadioBaseDevice 5 } 
+
+sbaVersion  OBJECT-TYPE
+	SYNTAX  DisplayString (SIZE (0..25))
+	ACCESS  read-only
+        STATUS  mandatory
+        DESCRIPTION
+	"0-terminated string with the textual representation 
+	 of the version of the component selected by aComponentNr."
+	::= { sbRadioBaseDevice 6 } 
+
+
+sbaInterfaceID  OBJECT-TYPE
+	SYNTAX  OCTET STRING  (SIZE (6))
+	ACCESS  read-only
+        STATUS  mandatory
+        DESCRIPTION
+	"Interface identification of the component selected by aComponentNr."
+	::= { sbRadioBaseDevice 7 } 
+
+sbaComponentID  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+        DESCRIPTION
+	"Component identifier of the component selected by aComponentNr."
+	::= { sbRadioBaseDevice 8} 
+
+
+sbaHibernate  OBJECT-TYPE
+	SYNTAX INTEGER { TRUE(1), FALSE(0) }
+	ACCESS  read-write
+        STATUS  mandatory
+        DESCRIPTION
+	"The object configures the radio state. The radio is switched
+	 off and the system is put into a low power state if the
+	 value of the object is TRUE. FALSE enables the radio and 
+	 switches the system to normal operation, unless another object
+	 disabled radio operation."
+	 
+	::= { sbRadioBaseDevice 9} 
+
+sbaFAA OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+        DESCRIPTION
+	"The object signals the state of the FAA switch. TRUE 
+	 indicates that the radio is switched off because of 
+	 the FAA switch. FALSE means the radio is on, unless another
+	 object disabled radio operation (see also aHibernate)."
+	::= { sbRadioBaseDevice 10} 
+
+
+sbaCommit  OBJECT-TYPE
+	  SYNTAX  INTEGER
+	  ACCESS  read-only
+          STATUS  mandatory
+          DESCRIPTION
+	" Writing the object commits settings. For some objects, a set 
+	  operation may not be effective instantaneously. Instead,
+	  the object is latched until this object is written. Objects
+	  latched by this object have a note in the description column 
+	  indicating so. The value written is reserved; use 0 for 
+	  forward compatibility."
+	::= { sbRadioBaseDevice 11} 
+
+sbaOffload OBJECT-TYPE
+	  SYNTAX  INTEGER
+	  ACCESS  read-write
+          STATUS  mandatory
+          DESCRIPTION
+	 "Configures the UMAC to offload the specified functions 
+	  to the driver through the offload mechanism."
+	::= { sbRadioBaseDevice 12}
+
+-- ----------------------------------------------------------
+--	 Statistics 
+-- ----------------------------------------------------------
+
+sbaMSDUTxSuccessful  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+        DESCRIPTION
+	"The number of successfully transmitted unicast MSDUs."
+	::= { sbRadioBaseStatistics  1}
+
+
+sbaMSDUTxMulticast  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+        DESCRIPTION
+	"The number of successfully transmitted multicast MSDUs."
+	::= { sbRadioBaseStatistics  2}
+
+sbaMSDUTxDropped  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+        DESCRIPTION
+	"The number of unicast and multicast MSDUs dropped before a transmission attempt was
+	 made."
+	::= { sbRadioBaseStatistics  3}
+
+sbaMSDUTxFailed  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+        DESCRIPTION
+	"The number of unicast and multicast MSDUs that could not be or were not successfully
+	 transmitted by the device."
+	::= { sbRadioBaseStatistics  4}
+
+sbaMSDURxSuccessful  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+        DESCRIPTION
+	"The number of successfully received unicast MSDUs."
+	::= { sbRadioBaseStatistics  5}
+
+sbaMSDURxMulticast  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+          DESCRIPTION
+	"The number of successfully received multicast MSDUs."
+	::= { sbRadioBaseStatistics  6}
+
+sbaMSDURxDropped OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+          DESCRIPTION
+	"The number of dropped unicast and multicast MSDUs."
+	::= { sbRadioBaseStatistics  7}
+
+sbaMSDURxFailed  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+          DESCRIPTION
+	"The number of partially or erroneously received unitcast and multicast MSDUs."
+	::= { sbRadioBaseStatistics  8}
+
+
+-- --------------------------------------------------------------
+--	Tunnel  specific
+-- --------------------------------------------------------------
+sbaTunnel  OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (12))
+	ACCESS  read-write
+        STATUS  mandatory
+        DESCRIPTION
+	" The object allows for tunneling MIB operations to the implementation. 
+	 This is especially useful for applications that want to manipulate 
+	 objects that are not managed by the driver."
+	::= { sbRadioBaseTunnel 1 }
+
+-- --------------------------------------------------------
+--	 sbBSS  specific
+-- --------------------------------------------------------
+
+sbaBSSType OBJECT-TYPE
+	SYNTAX  INTEGER
+ 	ACCESS  read-write
+        STATUS  mandatory
+        DESCRIPTION
+	"Client: The type of BSS the client must associate with.
+	 If the object is set to DOT11_BSSTYPE_ANY, the client joins
+	 any available BSS that complies with the setting of
+	 aSSID, with a preference for infrastructure over IBSS networks.
+	 If no suitable network can  be found, the client sets up an IBSS
+	 network with the SSID specified by aSSID, unless the SSID is set
+	 to the broadcast SSID (has a length of zero). 
+	 Access point: The object must be set to infrastructure when the
+	 MAC runs in access point mode. This object is latched by the
+	 aCommit object, aSSID object in client mode."
+	::= { sbRadioBaseServiceSet 1 }
+	
+
+sbaBSSID  OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (6))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Client(read): The object contains the BSSID of the BSS the client is joined with. If the
+	object is all zeros, the client is not joined with a BSS.
+	 Client(write): The object configures the infrastructure BSS to join with or the IBSS BSSID
+	 to setup or join. The firmware automatically selects the infrastructure BSS to join with or
+	 the IBSS BSSID, if the object is set to 00-00-00-00-00-00.
+	 Access point(read): The object contains the BSSID of the BSS. This object is latched by the
+	 aCommit object, aSSID object in client mode."
+	::= { sbRadioBaseServiceSet 2 }
+
+sbaSSID OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (36))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Client(read): The object contains the SSID of the BSS the client is associated with. If the
+	 client is not associated or participating in an IBSS network the aSSID object is not valid and
+	 cannot be retrieved.
+	 Client(write): The object configures the SSID the client must join or setup. If the length of
+	 the SSID is 0, the client joins any available BSS (irrespective its SSID) that complies with
+	 the setting of. aBSSType. 
+	Access point(read): The object configures the SSID the access point must use for the BSS."
+	::= { sbRadioBaseServiceSet 3 }
+
+sbaState OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"Client: The authentication/association state of the MAC. "
+	::= { sbRadioBaseServiceSet 4 }
+
+sbaAID OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The AID of the MAC (1-2007). 0 indicates the MAC is not associated. The object is also 0 if
+	 the MAC is participating in an IBSS."
+	::= { sbRadioBaseServiceSet 5 }
+
+sbaSSIDOverride   OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (36))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object allows overriding the content of the SSID element in the beacon for the purpose
+	 of shrouding the SSID. Setting aSSID also sets aSSIDOverride. After aSSID is set,
+	aSSIDOverride can be set to a different string, replacing the real SSID. Note: shrouded
+	 SSIDs should only be used in access point, infrastructure BSSs. It is not recommended to
+	 use shrouded SSIDs in IBSS networks."
+	::= { sbRadioBaseServiceSet 6 }
+
+
+
+sbaMediumLimit  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION 
+	"The object configures the maximum amount of time, in TU, that a point coordinator may
+	control the usage of the wireless medium without relinquishing control for long enough to
+	 allow at least one instance of DCF access to the medium. "
+	::= { sbRadioBaseServiceSet 7 }
+
+
+sbaBeaconPeriod  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION 
+	"If the client is not associated or participating in an IBSS
+	 network the object is not valid and  cannot be retrieved.
+	 Client: The object configures the number of TU that the station
+	 shall use for scheduling beacon transmissions in an IBSS network.
+	 This value is transmitted in beacon and probe response frames.
+	 Access point: The object configures the number of TU that the 
+	 access point shall use for scheduling beacon transmissions. 
+	 This value is transmitted in beacon and probe response
+	 frames. This object is latched by the aCommit object, aSSID object
+	 in client mode."
+	::= { sbRadioBaseServiceSet 8 }
+
+sbaDTIMPeriod  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"Client (read) : The object reflects the number of beacon intervals
+	 that elapse between transmission of beacons frames containing a
+	 TIM element whose DTIM count field is 0. The value is transmitted
+	 in the DTIM period field of beacon frames sent by the access point the
+	 client is associated with.
+	 Access point: The object configures the number of beacon intervals
+	 that elapse between transmission of beacons frames containing a 
+	 TIM element whose DTIM count field is 0. The value is transmitted
+	 in the DTIM period field of beacon frames. This object is latched 
+	 by the aCommit object, aSSID object in client mode."
+	 
+	::= { sbRadioBaseServiceSet 9 }
+
+sbaATIMWindow  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION 
+	"Client: The object configures the ATIM window for IBSS setups. This object is latched by
+	 the aSSID object."
+	::= { sbRadioBaseServiceSet 10 }
+
+sbaListenInterval OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION 
+	"Client: The object is used to indicate to the access point how
+	 often an STA wakes to listen to beacon management frames. 
+	 The value of this parameter is the client's listen interval
+	 parameter and is expressed in units of beacon interval. 
+	 This object is latched by the aSSID  object."
+	::= { sbRadioBaseServiceSet 11 }
+
+
+
+-- --------------------------------------------
+--	 Security
+-- ---------------------------------------------
+
+
+sbaAuthEnable  OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"This object configures which authentication algorithms are enabled.
+	The object represents a bit mask, where a '1' enables the
+	corresponding algorithm, a '0' disables the algorithm.
+	Note: setting aAuthEnable resets aAuthOrder to default values
+	that match the aAuthEnables settings. If both Shared Key and Open
+	System authentication, aAuthOrder is set to { DOT11_AUTHALG_SK,
+	DOT11_AUTHALG_OS }.
+	Nexus: After setting a value for this , need to set sbWEPEnable for settings
+	to be saved and to take effect. "
+
+	::= { sbRadioBaseSecurity 1}
+
+
+sbaPrivacyInvoked  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"The object invokes the specified privacy mechanism. "
+	::= { sbRadioBaseSecurity 2}
+
+sbaExUnencrypted  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object configures the privacy filtering mechanism. When the value is TRUE,
+	 unencrypted MPDUs are filtered and rejected. A value of FALSE accepts unencrypted
+	 MPDUs, independent of the privacy settings. "
+	::= { sbRadioBaseSecurity 3}
+
+sbaDefKeyId OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"The object configures which default key to use for tranmission of encrypted MPDUs. The
+	 range of the object is 0 - 3, corresponding to aDefKey1 to aDefKey4."
+	::= { sbRadioBaseSecurity 4}
+
+sbadefKey1 OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (30))
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"The objects configure the default key number 1.To set a HEX value start the 
+	string with 0x or 0X. To set in ascii value do not prepend anything."
+	::= { sbRadioBaseSecurity 5 }
+
+sbaDefKey2  OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (30))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The objects configure the default key number 2."
+	::= { sbRadioBaseSecurity 6 }
+
+
+sbaDefKey3 OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (30))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The objects configure the default key number 3."
+	::= { sbRadioBaseSecurity 7 }
+
+sbaDefKey4 OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (30))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The objects configure the default key number 4."
+	::= { sbRadioBaseSecurity 8 }
+
+sbaDefKeyLen OBJECT-TYPE
+    SYNTAX INTEGER
+    ACCESS read-write
+    STATUS mandatory
+    DESCRIPTION
+    " The length of keys."
+    ::= { sbRadioBaseSecurity 9 }
+
+
+sbaSTAKey OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (44))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object configures the per-station keys."
+	::= { sbRadioBaseSecurity 14}
+
+sbaSTASC  OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (20))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object allows retrieval and setting the station's privacy sequence counters."
+	::= { sbRadioBaseSecurity 15 }
+
+sbaAuthOrder  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Client: This object configures the order in which authentication algorithms are tried when
+	 authenticating with an access point. Each time the client starts a new authentication
+	 attempt, the authentication algorithms are tried in the order specified. The array must be
+	 terminated by DOT11_AUTHALG_NONE. Note: for backward compatibility reasons,
+	 aAuthOrder is reset by aAuthEnable when aAuthEnable is changed, to match the settings."
+
+	::= { sbRadioBaseSecurity 16 }
+
+
+
+
+sbaPrivTxRejected  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of MPDUs that were not transmitted because no appropriate privacy
+	 configuration was available."
+	::= { sbRadioBaseSecurity 17 }
+
+sbaPrivRxPlain  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of received MPDUs that were rejected because they were unencrypted."
+	::= { sbRadioBaseSecurity 18 }
+
+sbaPrivRxFailed  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of received crypted MPDUs that were rejected because they could not be
+	 successfully decrypted."
+	::= { sbRadioBaseSecurity 19 }
+
+
+
+
+sbaPrivRxNoKey OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+	DESCRIPTION
+	"The number of received crypted MPDUs that could not be decrypted because no key was
+	 available for decryption."
+	::= { sbRadioBaseSecurity 20 }
+
+sbaWEPEnable OBJECT-TYPE
+        SYNTAX  INTEGER
+        ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	" It is used to enable/disable WEP. It is also used to restart the paed and after 
+	changing any of the WEP settings , set this OID in the last for all the settings 
+	to take place."
+
+	::= { sbRadioBaseSecurity 21 }
+
+sbaWPASharedKey OBJECT-TYPE
+	SYNTAX OCTET STRING
+	ACCESS  write-only
+	STATUS  mandatory
+	DESCRIPTION
+	" This is the shared key used with WPA-PSK authentication mode."
+
+	::= { sbRadioBaseSecurity 22 }
+
+
+sbaWPAReKeyTime OBJECT-TYPE
+	SYNTAX OCTET STRING
+	ACCESS  read-write
+	STATUS  mandatory
+	DESCRIPTION
+	" It specifies the time when the key should be rehashed in case of WPA-PSK mode."
+
+	::= { sbRadioBaseSecurity 23 }
+	
+-- --------------------------------------------------------------
+--	 MAC Configuration
+-- --------------------------------------------------------------
+
+sbaRTSThresh  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object configures the RTS/CTS mechanism, as described in clause 9.2.6 of IEEE
+	 802.11."
+	::= { sbRadioBaseMACConfig 1 }
+	
+
+sbaFragThresh  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object configures the fragmentation mechanism as described in clause 9.1.4 of IEEE
+	 802.11."
+	::= { sbRadioBaseMACConfig 2 }
+
+sbaShortRetries  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object configures the maximum number of retries for MPDUs with a length less or
+	 equal than aRTSThresh before an MPDU transmission is signaled as unsuccessful. See also
+9.2.5.3  of IEEE 802.11."
+::= { sbRadioBaseMACConfig 3 }
+
+
+sbaLongRetries OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object configures the maximum number of retries for MPDUs with a length greater
+	 than aRTSThresh before a MPDU transmission is signaled as unsuccessful. See also 9.2.5.3
+	 of IEEE 802.11."
+	::= { sbRadioBaseMACConfig 4 }
+
+sbaMaxTxLifetime  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object configures the elapsed time in TU, after the initial transmission of a fragment of
+	 an MSDU, after which further attempts to transmit the MSDU are terminated."
+	::= { sbRadioBaseMACConfig 5 }
+
+
+sbaMaxRxLifetime  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object configures the elapsed time in TU, after the initial reception of a fragmented
+	 MMPDU or MSDU, after which further attempts to reassemble the MMPDU or MSDU are
+	 terminated."
+	::= { sbRadioBaseMACConfig 6 }
+
+sbaAuthRespTimeout  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object configures the maximum number of TU that a station must wait for the next
+	 frame in the authentication sequence, before it considers the next frame lost."
+	::= { sbRadioBaseMACConfig 7 }
+
+sbaAssocRespTimeout  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"The object configures the maximum number of TUs that a station
+	 must wait for the next frame in the association sequence,
+	 before it consider the next frame lost."
+	::= { sbRadioBaseMACConfig 8 }
+
+-- ------------------------------------------------
+--	 QoS Objects
+-- ------------------------------------------------
+
+sbaVDCF0 OBJECT-TYPE
+	SYNTAX  OCTET STRING ( SIZE (8))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Configures the VDCF parameters for TCs 0."
+	::= { sbRadioBaseQoS 1 }
+
+
+sbaVDCF1 OBJECT-TYPE
+	SYNTAX  OCTET STRING ( SIZE (8))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Configures the VDCF parameters for TCs 1."
+	::= { sbRadioBaseQoS 2 }
+
+sbaVDCF2  OBJECT-TYPE
+	SYNTAX  OCTET STRING ( SIZE (8))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Configures the VDCF parameters for TCs 2."
+	::= { sbRadioBaseQoS 3 }
+
+sbaVDCF3 OBJECT-TYPE
+	SYNTAX  OCTET STRING ( SIZE (8))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	" Configures the VDCF parameters for TCs 3."
+	::= { sbRadioBaseQoS 4 }
+
+
+sbaVDCF4  OBJECT-TYPE
+	SYNTAX  OCTET STRING ( SIZE (8))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Configures the VDCF parameters for TCs 4."
+	::= { sbRadioBaseQoS 5 }
+
+sbaVDCF5 OBJECT-TYPE
+	SYNTAX  OCTET STRING ( SIZE (8))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Configures the VDCF parameters for TCs 5."
+	::= { sbRadioBaseQoS 6 }
+sbaVDCF6 OBJECT-TYPE
+        SYNTAX  OCTET STRING ( SIZE (8))
+        ACCESS  read-write
+        STATUS  mandatory
+        DESCRIPTION
+        "Configures the VDCF parameters for TCs 6."
+        ::= { sbRadioBaseQoS 7 }
+sbaVDCF7 OBJECT-TYPE
+        SYNTAX  OCTET STRING ( SIZE (8))
+        ACCESS  read-write
+        STATUS  mandatory
+        DESCRIPTION
+        "Configures the VDCF parameters for TCs 7."
+        ::= { sbRadioBaseQoS 8 }
+
+sbaMaxFrameBurst OBJECT-TYPE
+        SYNTAX  INTEGER
+        ACCESS  read-write
+        STATUS  mandatory
+        DESCRIPTION
+	"The object configures the maximum frame burst.When set to 1 , frameburst
+	is enabled with value 3000, or when set to 0 , it is disabled"
+	::= { sbRadioBaseQoS 9 }
+						  
+-- --------------------------------------------
+--	Client specific
+-- --------------------------------------------
+sbaPSM OBJECT-TYPE
+	SYNTAX  INTEGER 
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"The object configures the power-management mode of the client.
+	For details about 802.11 power management, refer to section
+	11.2 of IEEE 802.11."
+	::= {sbRadioBaseClient 1 }
+
+
+sbaCAMTimeout  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"Configures the timeout in TU for switching from CAM to PSM,
+	 when aPSM is DOT11_PSM_DYNAMIC. The timeout expires when the 
+	 time between the last send MPDU or MMPDU and the current clock 
+	 exceeds the timeout configured in the aCAMTimeout  object. 
+	 Upon this event, the client switches from CAM to PSM."
+	::= { sbRadioBaseClient 2 }
+
+sbaReceiveDTIMs OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"Truth value that configures whether the MAC must wakup for DTIMs. "
+	::= { sbRadioBaseClient 3 }
+
+sbaRoamPreference OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"Configures the roaming preference."
+	::= { sbRadioBaseClient 4 }
+
+sbaRoamExclude OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (10))
+	ACCESS  read-only
+        STATUS  mandatory
+	DESCRIPTION
+	" Retrieves the list of roaming excluded BSSs."
+	::= { sbRadioBaseClient 5 }
+
+sbaRoamExcludeAdd  OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (10))
+	ACCESS  write-only
+        STATUS  mandatory
+	DESCRIPTION
+	"Adds a BSS to the list of excluded BSSs."
+	::= {sbRadioBaseClient 6 }
+
+
+sbaRoamExcludeRemove OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (10))
+	ACCESS  write-only
+        STATUS  mandatory
+	DESCRIPTION
+	"Removes a BSS from the list of excluded BSSs."
+	::= { sbRadioBaseClient 7 }
+
+sbaScanThreshold OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"Threshold in dBmabove which the background scan is active."
+	::= { sbRadioBaseClient 8 }
+
+
+sbaClientToClientCommunication OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"It controls whether client to client communication should be allowed(1) or not(0)."
+	::= { sbRadioBaseClient 9 }
+
+-- ------------------------------------------
+--	 Station Objects
+-- ------------------------------------------
+
+sbaClients OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+	DESCRIPTION
+	"The maximum number of client objects supported by
+	 this implementation."
+	::= { sbRadioBaseStation 1 }
+
+sbaClientsAssociated  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+	DESCRIPTION
+	"The number of associated clients. "
+	::= { sbRadioBaseStation 2 }
+
+sbaClientTable  OBJECT-TYPE
+	SYNTAX  SEQUENCE OF ClientTableEntry
+	ACCESS  not-accessible
+        STATUS  mandatory
+	DESCRIPTION
+	"The list of associated clients for the Access Point. Valid only for access points."
+	::= { sbRadioBaseStation 3 }
+
+sbaClientTableEntry OBJECT-TYPE
+    SYNTAX  ClientTableEntry
+    ACCESS  not-accessible
+    STATUS  mandatory
+    DESCRIPTION
+    "A single row in the associated clients table."
+    INDEX  { sbClientIndex }
+    ::= { sbaClientTable 1 }
+
+
+ClientTableEntry ::=
+    SEQUENCE {
+        sbClientIndex
+  INTEGER,
+        sbClientMAC
+  OCTET STRING,
+        sbClientState
+  INTEGER,
+  	sbClientRSSI
+  INTEGER,
+  	sbClientQuality
+  INTEGER,
+  	sbClientRate
+  INTEGER,
+  	sbClientAge
+  INTEGER,
+  	sbClientNode
+  INTEGER,
+  	sbClientExt
+  INTEGER
+       }
+
+sbClientIndex OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "An index for the table. Values( 1,2,3 ...)"
+    ::= { sbaClientTableEntry 1 }
+
+
+sbClientMAC OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "Specifies the MAC address of the client."
+    ::= { sbaClientTableEntry 2 }
+
+sbClientState OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+  "State in which the client is. It should be equal to 5 for clients."
+    ::= { sbaClientTableEntry 3 }
+
+sbClientRSSI OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "The age value for particular associated client"
+    ::= { sbaClientTableEntry 4 }
+
+sbClientQuality OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "The quality for the associated client."
+    ::= { sbaClientTableEntry 5 }
+
+
+sbClientRate OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "The quality for the associated client."
+    ::= { sbaClientTableEntry 6 }
+
+sbClientAge OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "The quality for the associated client."
+    ::= { sbaClientTableEntry 7 }
+
+
+sbClientNode OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "The quality for the associated client."
+    ::= { sbaClientTableEntry 8 }
+
+
+sbClientExt OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "The quality for the associated client."
+    ::= { sbaClientTableEntry 9 }
+
+sbaClientFind OBJECT IDENTIFIER  ::= { sbRadioBaseStation 4 }
+
+sbaClientFindMAC OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (20))
+	ACCESS  read-write
+         STATUS  mandatory
+	DESCRIPTION
+	"The object provides a way to find a client structure by its MAC address without traversing
+	 the aClient1 to aClient2007 objects. The address member of the obj_sta structure shall be
+	 set to the MAC address of the client to be found. If a client with the specified MAC address
+	 is found, the result is returned. If a client with the specified MAC address is not found, the
+	 error code SM_EOIDUNK is returned."
+	::= { sbaClientFind 1 }
+
+sbaClientFindRSSI OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+	DESCRIPTION
+	" The RSSI value for the client identified by sbaClientFindMAC."
+	::= { sbaClientFind 2 }
+
+
+sbaClientFindQuality OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+	DESCRIPTION
+	" The Quality value for the client identified by sbaClientFindMAC."
+	::= { sbaClientFind 3 }
+
+
+sbaWDSLinkAdd OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (6))
+	ACCESS  write-only
+          STATUS  mandatory
+	DESCRIPTION
+	"Access point: Adds a MAC address as a WDS link."
+	::= {sbRadioBaseStation 5 }
+
+sbaWDSLinkRemove OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (6))
+	ACCESS  write-only
+          STATUS  mandatory
+	DESCRIPTION
+	"Access point: Removes a MAC address associated with a WDS link."
+	::= {sbRadioBaseStation 6 }
+
+sbaEAPAuthSTA OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (6))
+	ACCESS  write-only
+          STATUS  mandatory
+	DESCRIPTION
+	"Access point: When set, the object opens the 802.1x/EAP port for the station with the given
+	 MAC address for all frames. "
+	::= {sbRadioBaseStation 7 }
+
+sbaEAPUnauthSTA OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (6))
+	ACCESS  write-only
+          STATUS  mandatory
+	DESCRIPTION
+	"Access point: When set, the object closes the 802.1x/EAP port for the station with the given
+	 MAC address for all frames except for 802.1x/EAPOL frames. "
+	::= {sbRadioBaseStation 8 }
+
+sbaDot1xEnable  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Access point: Enables 802.1x filtering. If 802.1x filtering 
+	is enabled, the station's default state is to block all frames,
+	except for 802.1x frames. The station's ports must be explicitely
+	 opened/closed through the objects aEAPAuthSTA and aEAPUnauthSTA. "
+	::= { sbRadioBaseStation 9 }
+
+sbaMICFailure  OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (16))
+	ACCESS  read-write
+        STATUS  current
+	DESCRIPTION
+	"This object is trapped if a MIC failure occurs for a 
+	 particular station. The content of the object specifies 
+	 the station for which the MIC failure occurred."
+	::= {sbRadioBaseStation 10 }
+
+-- --------------------------------------------------------
+--	 MAC Statistics
+-- --------------------------------------------------------
+
+sbaMPDUTxSuccessful  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of successfully transmitted unicast and multicast MPDUs."
+	::= { sbRadioBaseMACStats 1 }
+
+sbaMPDUTxOneRetry  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of unicast MPDUs successfully transmitted after one retry."
+	::= { sbRadioBaseMACStats 2 }
+
+sbaMPDUTxMultipleRetries  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of unicast MPDUs successfully transmitted after two or more retries."
+	::= { sbRadioBaseMACStats 3 }
+
+sbaMPDUTxFailed OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of unicast MPDUs for which the maximum number of retries were exceeded."
+	::= { sbRadioBaseMACStats 4 }
+
+
+sbaMPDURxSuccessful  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of successfully received unicast MPDUs."
+	::= { sbRadioBaseMACStats 5 }
+
+sbaMPDURxDups OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of successfully received unicast MPDUs that were a duplicate of earlier
+	 frames."
+	::= { sbRadioBaseMACStats 6 }
+
+sbaRTSSuccessful OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of CTS frames received in response to an RTS frame. "
+	::= { sbRadioBaseMACStats 7 }
+
+sbaRTSFailed  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of transmitted RTS frames for which no response CTS frame was received."
+	::= { sbRadioBaseMACStats 8 }
+
+sbaACKFailed OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The object counts the number of frame transmissions for which an acknowledgment
+	 response frame was expected but not received. "
+	::= { sbRadioBaseMACStats 9 }
+
+aFrameReceives  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of successfully received frames, before any address and type filtering."
+	::= { sbRadioBaseMACStats 10 }
+
+sbaFrameErrors  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The number of unsuccessfully received frames. "
+	::= { sbRadioBaseMACStats 11 }
+
+sbaFrameAborts  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+	DESCRIPTION
+	"The number of aborted frames."
+	::= { sbRadioBaseMACStats 12 }
+
+sbaFrameAbortsPHY  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+	DESCRIPTION
+	"The number of PHY aborted frames."
+	::= { sbRadioBaseMACStats 13 }
+
+sbaResetStats OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write 
+        STATUS  mandatory
+	DESCRIPTION
+	"Reset all the statistics of the radio to 0."
+	::= { sbRadioBaseMACStats 14 }
+
+-- --------------------------------------------------
+--	 PHY obbects
+-- --------------------------------------------------
+
+sbaSlotTime OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (8))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION 
+	"An array with the PHY slottimes for the 2.4 GHz 
+	band [0] and 5 GHz band [1]."
+	::= { sbRadioBasePHY 1  }
+
+sbaCWMin OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (8))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION 
+	"An array with the PHY CWMin values for the 2.4 GHz band [0] and 5 GHz band [1], as used
+	 by the DCF backoff mechanism. See also 9.2.4 of IEEE 802.11."
+	::= { sbRadioBasePHY 2}
+
+sbaCWMax  OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (8))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION 
+	"An array with the PHY CWMax values for the 2.4 GHz band [0] and 5 GHz band [1], as used
+	 by the DCF backoff mechanism. See also 9.2.4 of IEEE 802.11. "
+	::= { sbRadioBasePHY 3 }
+
+sbaACKWindow  OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (8))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION 
+	"The object configures the timeout within which an acknowledgment frame is expected in
+	 response to a unicast MPDU transmission. The array contains the window in usec, for the
+	 2.4GHz band [0] and 5 GHz band [1]. "
+	::= { sbRadioBasePHY 4 }
+
+sbaAntennaRx  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object configures which antenna is used for reception, the enumeration starts at 0. The
+	 number of antennas is implementation dependent."
+	::= { sbRadioBasePHY 5 }
+
+sbaAntennaTx  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION 
+	"rw The object configures which antenna is used for transmission, the enumeration starts at
+	0 The number of antennas is implementation dependent."
+	::= { sbRadioBasePHY 6 }
+
+
+sbaAntennaDiversity OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION 
+	"The object configures what diversity is used."
+	::= { sbRadioBasePHY 7 }
+
+sbaChannel  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION 
+	"Configures the synthesizer through channel numbers instead of frequencies. For semantics
+	 refer to aFrequency."
+	::= { sbRadioBasePHY 8 }
+
+sbaEDThreshold OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object configures the energy detect threshold being used by the PHY. The value is
+	 implementation dependent."
+	::= { sbRadioBasePHY 9 }
+
+sbaPreambleSettings  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Refer to section on preamble settings for more information. "
+	::= { sbRadioBasePHY 10  }
+
+
+sbaRatesTable OBJECT-TYPE
+	SYNTAX  SEQUENCE OF RatesEntry
+	ACCESS  not-accessible
+        STATUS  mandatory
+	DESCRIPTION
+	"The value of the object specifies the operational rates as used by the MVC when setting up
+	 or joining an IBSS or associating with- or setting up an infrastructure network. The most
+	 significant bit of each rate specifies the whether that rate is to be used as a basic rate (1) or
+	 not (0). The system may only change the content of the object with rates supported by the
+	 PHY (as indicated in the aSupportedRates object). Each rate may only appear once in the
+	object and all rates shall be sorted in ascending order. The array must be null terminated.
+	 The joint set of aRates and aExtendedRates must at least contain 1 rate, and at least one of
+	 the rates must be a basic rate. This object is latched by the aCommit object, aSSID object in
+	 client mode."
+
+	::= { sbRadioBasePHY 11  }
+
+
+sbRatesEntry OBJECT-TYPE
+    SYNTAX  RatesEntry
+    ACCESS  not-accessible
+    STATUS  mandatory
+    DESCRIPTION
+    "A list of rates supported by the current profile along with their enable/disable values."
+    INDEX  { sbRatesIndex }
+    ::= { sbaRatesTable 1 }
+
+
+RatesEntry ::=
+    SEQUENCE {
+        sbRatesIndex
+  INTEGER,
+        sbRates
+  INTEGER,
+        sbRatesStatus
+  INTEGER
+       }
+
+sbRatesIndex OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+  "An index for the table. Values( 1,2,3 ...)"
+
+    ::= { sbRatesEntry 1 }
+
+
+sbRates OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+  "Specifies the rate in Mbps supported by the radio"
+    ::= { sbRatesEntry 2 }
+
+ sbRatesStatus OBJECT-TYPE
+    SYNTAX  INTEGER { Enable(1), Disable(0) }
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+  "Status indicates whether this rate is currently enabled or disabled."
+    ::= { sbRatesEntry 3 }
+
+
+
+
+sbaCCAModeSupported OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"aCCAModeSupported is a bit-significant value, representing all of the CCA modes
+	 supported by the PHY."
+	::= { sbRadioBasePHY 12  }
+
+sbaCCAMode OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object configures the PHY's CCA mode. The value of the object shall be one or a
+	 combination of the bits, as defined for the aCCAModeSupported object. E.g. Combinations
+	 of bits represent an OR operation, e.g. DOT11_CCA_ED and DOT11_CCA_CS both set
+	 means ED or CS. "
+	::= { sbRadioBasePHY 13  }
+
+sbaOutputPower OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	" General outputpower in units of dBm."
+	::= { sbRadioBasePHY 14  }
+
+
+sbaSupportedRates OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (16))
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The object contains the supported rates. The bitrates are specified in units of 500 Kbps.
+	 The most significant bit of each rate specifies the whether that rate is a IEEE 802.11
+	 standards defined basic rate (1) or not (0) for that particular PHY. The array is null
+	 terminated."
+	::= { sbRadioBasePHY 15  }
+
+sbaFrequency OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Client(read): The frequency in kHz the RF synthesizer is configured at. Client(write): The
+	 frequency in kHz of the RF synthesizer to be used for setup of an IBSS. Access point: The
+	 frequency in kHz of the RF synthesizer at which the infrastructure BSS is setup. This object
+	 is latched by the aCommit object, aSSID object in client mode. Note: aFrequency and
+	 aChannel map to the same object. Changing one also changes the other."
+	::= { sbRadioBasePHY 16 }
+
+sbaSupportedFrequencies OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (4))
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"A list of the supported frequencies."
+	::= { sbRadioBasePHY 17 }
+
+sbaNoiseFloor  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+	DESCRIPTION
+	"The object returns the measured noise floor. The value is implementation dependent."
+	::= { sbRadioBasePHY 18 }
+
+sbaNonERPProtection  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Refer to section on non-ERP behavior for more information. "
+	::= { sbRadioBasePHY 19 }
+
+sbaSlotSettings  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Refer to section on Slot settings for more information."
+	::= { sbRadioBasePHY 20 }
+
+sbaNonERPTimeout  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Refer to section on non-ERP behavior for more information. "
+	::= { sbRadioBasePHY 21 }
+
+sbaProfile OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Refer to section on Profiles for more information."
+	::= { sbRadioBasePHY 22 }
+
+
+sbaExtendedRatesTable OBJECT-TYPE
+	SYNTAX  SEQUENCE OF ExtendedRatesEntry
+	ACCESS  not-accessible
+        STATUS  mandatory
+	DESCRIPTION
+	"The value of the object specifies those bit rates that must be treated as Extended Rate PHY
+	 (ERP) bit rates, when setting up or joining an IBSS, associating with- or setting up an
+	 infrastructure network. The rates in this object are put in the Extended Supported Rates
+	 element, instead of the Supported Rates element. The most significant bit of each rate
+	 specifies the whether that rate is to be used as a basic rate (1) or not (0). The object may
+	 only contain rates supported by the PHY (as indicated in the aSupportedRates object). Each
+	 rate may only appear once in the object and all rates shall be sorted in ascending order. The
+	 array must be null terminated. The joint set of aRates and aExtendedRates must at least
+	 contain 1 rate, and at least one of the rates must be a basic rate. This object is latched by
+	 the aCommit object, aSSID object in client mode. "
+	::= { sbRadioBasePHY 23 }
+
+sbExtendedRatesEntry OBJECT-TYPE
+    SYNTAX  ExtendedRatesEntry
+    ACCESS  not-accessible
+    STATUS  mandatory
+    DESCRIPTION
+    "A list of rates supported by the current profile along with their enable/disable values."
+    INDEX  { sbExtendedRatesIndex }
+    ::= { sbaExtendedRatesTable 1 }
+
+
+ExtendedRatesEntry ::=
+    SEQUENCE 
+    {
+        sbExtendedRatesIndex
+  INTEGER,
+        sbExtendedRates
+  INTEGER,
+        sbExtendedRatesStatus   
+  INTEGER
+       }
+
+sbExtendedRatesIndex OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "An index for the table. Values( 1,2,3 ...)"
+    ::= { sbExtendedRatesEntry 1 }
+
+
+sbExtendedRates OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+  "Specifies the rate in Mbps supported by the radio"
+    ::= { sbExtendedRatesEntry 2 }
+
+ sbExtendedRatesStatus OBJECT-TYPE
+    SYNTAX  INTEGER { Enable(1), Disable(0) }
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+  "Status indicates whether this rate is currently enabled or disabled."
+    ::= { sbExtendedRatesEntry 3 }
+
+
+sbaSupportedBands OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"Bitmask indicating the PHY's supported bands. "
+	::= { sbRadioBasePHY 24 }
+
+sbaBandIndex  OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (4))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	""
+	::= { sbRadioBasePHY 25 }
+
+sbSetRates OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	ACCESS  write-only
+        STATUS  mandatory
+	DESCRIPTION
+	" A string which is used to set rates for the radio. It is of the form aloft|rate1|rate2|...|rateN.
+	The rates should be in ascending order. The valid rates changes with profile. "
+	::= { sbRadioBasePHY 26 }
+
+sbSetExtendedRates OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	ACCESS  write-only
+        STATUS  mandatory
+	DESCRIPTION
+	" A string which is used to set the extended rates of the radio."
+	::= { sbRadioBasePHY 27}
+
+sbaNonERPStatus  OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+        STATUS  mandatory
+	DESCRIPTION
+	"Client(infrastructure): The object contains the value of
+	 the ERP information element as  received in the most recent
+	 beacon from the access point associated with.
+	 Client(IBSS): The  object contains the value of the ERP
+	 information element as transmitted by the client in its
+	 beacons.
+	 Access point: The object contains the value of the ERP
+	 information element as transmitted by the access point
+	 in its beacons."
+         ::= { sbRadioBase1 20 }
+
+
+
+-- -----------------------------------------
+--	 MLME specific
+-- -----------------------------------------
+
+sbaDeauthenticate  OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (17))
+	ACCESS  write-only
+        STATUS  current
+	DESCRIPTION
+	""
+	::= { sbRadioBaseMLME 1 }
+
+sbaAuthenticate  OBJECT-TYPE
+	SYNTAX  OCTET STRING ( SIZE (17))
+	ACCESS  write-only
+          STATUS  current
+	DESCRIPTION 
+	""
+	::= { sbRadioBaseMLME 2 }
+
+sbaDisassociate  OBJECT-TYPE
+	SYNTAX  OCTET STRING ( SIZE (17)) 
+	ACCESS  write-only
+          STATUS  current
+	DESCRIPTION 
+	""
+	::= { sbRadioBaseMLME 3 }
+
+sbaAssociate OBJECT-TYPE
+	SYNTAX  OCTET STRING ( SIZE (17)) 
+	ACCESS  write-only
+          STATUS  current
+	DESCRIPTION 
+	""
+	::= { sbRadioBaseMLME 4 }
+
+sbaScan  OBJECT-TYPE
+	SYNTAX  OCTET STRING ( SIZE (12)) 
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION 
+	" Client(read): The background scanning setup. Client(write): If the object is set with a
+	 complete structure, it configures the background scanning parameters of MAC. If the
+	 objects is set as a single 16 bit value, the object forces a background scan that scans the
+	 number a frequencies as specified in the 16 bits. Use -1 to scan all available frequencies."
+	::= { sbRadioBaseMLME 5 }
+
+sbaReassociate OBJECT-TYPE
+	SYNTAX  OCTET STRING ( SIZE (12)) 
+	ACCESS  read-write
+          STATUS  current
+	DESCRIPTION 
+	""
+	::= { sbRadioBaseMLME 6}
+
+
+-- ------------------------------------------------------------------
+--	 BSS Objects
+-- ------------------------------------------------------------------
+
+sbaBSSs OBJECT-TYPE
+	SYNTAX  INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The maximum number of entries supported by the BSS database in this implementation."
+	::= { sbRadioBaseBSS  1 }
+
+sbaBSS1 OBJECT-TYPE
+	SYNTAX  OCTET STRING (SIZE (60))
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	" Note: the implementation may support any lower number of BSS objects than 64."
+	::= { sbRadioBaseBSS  2 }
+
+sbaBSSFind OBJECT-TYPE
+	SYNTAX OCTET STRING (SIZE (60))
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	""
+	::= { sbRadioBaseBSS  3 }
+
+sbaBSSTable OBJECT-TYPE
+     SYNTAX SEQUENCE OF BSSEntry
+     ACCESS not-accessible
+     STATUS mandatory
+     DESCRIPTION
+     "Specifies the BSS list"
+     ::= { sbRadioBaseBSS 4 }
+
+sbBSSEntry OBJECT-TYPE
+     SYNTAX BSSEntry
+     ACCESS not-accessible
+     STATUS mandatory
+     DESCRIPTION
+    "One row of the BSS Table."
+     INDEX  { sbBSSIndex }
+
+    ::= { sbaBSSTable 1 }
+
+BSSEntry ::=
+     SEQUENCE
+     	{
+		sbBSSIndex
+     	INTEGER,
+    	    	sbBSSMAC
+     	OCTET STRING,
+	        sbBSSssid
+	OCTET STRING,
+		sbBSSrssi
+	INTEGER,
+		sbBSSQuality
+	INTEGER,
+	        sbBSSFrequency
+	INTEGER
+      }
+
+sbBSSIndex OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+   "An index for the table. Values( 1,2,3 ...)"
+    ::= { sbBSSEntry 1 }
+
+sbBSSMAC OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "Client MAC address allowed to associate"
+    ::= { sbBSSEntry 2 }
+
+sbBSSssid OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "Client MAC address allowed to associate"
+    ::= { sbBSSEntry 3 }
+
+sbBSSrssi OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+   "The rssi value of the client/ "
+    ::= { sbBSSEntry 4 }
+
+sbBSSQuality OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+   "An index for the table. Values( 1,2,3 ...)"
+    ::= { sbBSSEntry 5 }
+
+sbBSSFrequency OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+   "An index for the table. Values( 1,2,3 ...)"
+    ::= { sbBSSEntry 6 }
+
+
+sbaBSSIterate OBJECT-TYPE
+	SYNTAX OCTET STRING (SIZE (65))
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION 
+	"The object allows retrieval of the BSS list with per-BSS associated frame body information.
+	 Iteration starts by writing to the object (the data is ignored). Each read subsequently
+	 retrieves a BSS structure, until all BSSs have been retrieved. The iteration ends if the
+	 object returns a length of 0 or an error. Iterations must always be completed or reset by
+	 writing to the object. "
+	::= { sbRadioBaseBSS  5 }
+
+
+sbaBandEnable OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"The object enables/disables bands to limit operation to specific bands. This object is latched
+	 by the aCommit object, aSSID object in client mode. "
+	::= { sbRadioBaseBSS  6 }
+
+sbaCountryList OBJECT-TYPE
+	SYNTAX OCTET STRING (SIZE (4))
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION 
+	"Array of CSs certified in the PDA. "
+	::= { sbRadioBaseBSS  7 }
+
+sbaCountry OBJECT-TYPE
+	SYNTAX OCTET STRING (SIZE (8))
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION 
+	"Country String with allowed frequencies. This object is latched by the aCommit object,
+	 aSSID object in client mode."
+	::= { sbRadioBaseBSS  8 }
+
+sbaChannelIssue OBJECT-TYPE
+	SYNTAX OCTET STRING (SIZE (8))
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION 
+	" Reports a channel issue to the driver. Note: the object may also be written to simulate a
+	 specific channel issue for testing purposes."
+	::= { sbRadioBaseBSS  9 }
+
+sbaConformanceMode OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"802.11d conformance mode. The object determins the scanning properties for acquiring
+	 regulary related information on the MAC's operation environment. The moment the first
+	 802.11d information element is received, containing a CS for which the client has an RC, it
+	 adapts this CS. Afterwards, this country setting is held until the UMAC is reconfigured or
+	 restarted. Once the client has adapted a CS, it determines its channel set and output power
+	 limits based on the present RCs from the RT. The client will use active scanning on these
+	 channels. The client only uses the output power limit specified in the received 802.11d
+	 information element in case it is associated to an AP broadcasting this information.
+	 Otherwise, the limits from the RT are used. This object is latched by the aCommit object,
+	 aSSID object in client mode."
+	::= { sbRadioBaseBSS  10 }
+
+sbaWWRMode OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Enabled/disables 802.11d and 802.11h. This object is latched by the aCommit object,
+	 aSSID object in client mode."
+	::= { sbRadioBaseBSS  11 }
+
+sbaChannelMode OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Determins how the access point chooses its operational channel. This object is latched by
+	 the aCommit object, aSSID object in client mode. "
+	::= { sbRadioBaseBSS  12 }
+
+sbaCurrentCountry OBJECT-TYPE
+	SYNTAX OCTET STRING (SIZE(4))
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"The CS currently in use."
+	::= { sbRadioBaseBSS  13 }
+
+sbaNextFrequency OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Used for ETSI channel test mode."
+	::= { sbRadioBaseBSS  14 }
+
+sbaReportRogueAPList  OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	" Client: Instructs the access point to report the roque
+	 access point list."
+	::= { sbRadioBaseBSS  15 }
+
+sbaPPEEnable OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	" Bitmask that enables PRISM's Proprietary Performance
+	 Enhancements."
+	::= { sbRadioBaseBSS  16 }
+
+
+-- ----------------------------------------
+--	 LMAC Objects
+-- ----------------------------------------
+
+sbaGPIOBank  OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	" Selects GPIO bank. "
+	::= { sbRadioBaseLMAC  1 }
+
+sbaGPIOWM OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+        STATUS  mandatory
+	DESCRIPTION
+	"This object configures the GPIO write mask. Only the 
+	 bits set in the mask are changed when writing to the 
+	 aGPIOData object."
+	::= { sbRadioBaseLMAC  2 }
+
+sbaGPIOData  OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Reads or writes the GPIO bank selected by aGPIOBank. Only those bits that have
+	 corresponding bits set in the aGPIOWM object are changed."
+	::= { sbRadioBaseLMAC  3 }
+
+sbaGPIOStatus  OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	"Reads the GPIO Status register of the selected bank."
+	::= { sbRadioBaseLMAC  4 }
+
+sbaGPIODDR OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-only
+          STATUS  mandatory
+	DESCRIPTION
+	" The object configures the GPIO Data Direction Register of the bank selected by the
+	 aGPIOBank object."
+	::= { sbRadioBaseLMAC  5 }
+
+sbaNVID OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Detects and reads or writes the non-volatile ID."
+	::= { sbRadioBaseLMAC  6 }
+
+
+sbaNVOffset OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Sets 0-based offset for operations in non-volatile memory."
+	::= { sbRadioBaseLMAC  7 }
+
+sbaNVSize OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Sets size of operation in non-volatile memory. Offset and size shall not exceed the size of
+	 the non-volatile memory."
+	::= { sbRadioBaseLMAC  8 }
+
+sbaNVData OBJECT-TYPE
+	SYNTAX OCTET STRING
+	ACCESS  read-write
+          STATUS  mandatory
+	DESCRIPTION
+	"Reads or writes data from or to the non-volatile memory device."
+	::= { sbRadioBaseLMAC  9 }
+
+-- ----------------------------------------------------
+-- General
+-- ----------------------------------------------------
+sbaRadioInterfaceName OBJECT-TYPE
+     SYNTAX OCTET STRING
+     ACCESS read-write
+     STATUS mandatory
+     DESCRIPTION
+     "Specifies which radio interface this mib-tree represents."
+     ::= { sbRadioBase1 16 }
+
+
+sbRadioMode OBJECT-TYPE
+        SYNTAX INTEGER { Client-Route(0),Client-Bridge(1), AP-Route(2), AP-Bridge(3), }
+	ACCESS  read-write
+	STATUS  mandatory
+	DESCRIPTION
+        "It is used to set the device into client mode  or access point mode."
+	::= { sbRadioBase1 18 }
+
+sbRadioRSSI OBJECT-TYPE
+        SYNTAX INTEGER
+	ACCESS  read-only
+	STATUS  mandatory
+	DESCRIPTION
+        "In the client mode it gives the RSSI of the access point to which it is associated. "
+	::= { sbRadioBase1 19 }
+
+
+
+
+--  ACL Table Module
+
+
+sbACLMACTable OBJECT-TYPE
+     SYNTAX SEQUENCE OF ACLMACEntry
+     ACCESS not-accessible
+     STATUS mandatory
+     DESCRIPTION
+     "Specifies the MAC for the ACL list.This table is used to set MAC values only in aiHaul and airClient (to set the MAC in
+     WDS mode). In airHaul PRO and airPoint  models use sbACLMACAddEntry to add/delete MAC values"
+     ::= { sbRadioBaseACL 1 }
+
+sbACLMACEntry OBJECT-TYPE
+     SYNTAX ACLMACEntry
+     ACCESS not-accessible
+     STATUS mandatory
+     DESCRIPTION
+    "One row of the MAC ACL Table."
+     INDEX  { sbACLIndex }
+
+    ::= { sbACLMACTable 1 }
+
+ACLMACEntry ::=
+     SEQUENCE
+     	{
+		sbACLIndex
+     	INTEGER,
+    	sbACLMAC
+     	OCTET STRING,
+		sbACLType
+	    OCTET STRING
+      }
+
+sbACLIndex OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+   "An index for the table. Values( 1,2,3 ...)"
+    ::= { sbACLMACEntry 1 }
+
+sbACLMAC OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "Client MAC address  allowed to associate with the AP.It also
+     has a tag to specify whether the client is operating in bridge(b)
+     or routing(r) mode. Example : 00:22:a2:3e:ff:2a|b for a client with 
+     MAC address 00:22:a2:3e:ff:2a operating in bridge and 00:22:a2:3e:ff:2a|r
+     for a client operating as a router. To clear all the entries
+     in the ACL Table , set MAC for 1st row (index 1) to 00:00:00:00:00:00."
+    ::= { sbACLMACEntry 2 }
+
+
+
+
+sbACLMACAddEntry OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "MAC address to be added in the ACL MAC list.To add a ACL entry set it to 'A|11:22:33:44:55:66|R' 
+    and to delete a ACL entry , set it to 'D|11:22:33:44:55:66|R'. This OID is available in airPoint
+    and airHaul PRO. User can add/delete more than one MAC string delimiting by ; as shown in later example.
+    For airHaul PRO an additional field is required - the radio name(eth0/eth1). 
+    Eg. to add a MAC 11:22:33:44:55:66 to eth0 and delete a MAC aa:bb:cc:11:22:33 from eth1 use the 
+    following string 'A|11:22:33:44:55:66|R|eth0;D|aa:bb:cc:11:22:33|B|eth1'."
+    ::= { sbRadioBaseACL 2 }
+
+sbACLMACDelEntry OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "MAC address to be deleted from the  ACL MAC list. This OID has been deprecated."
+    ::= { sbRadioBaseACL 3 }
+
+
+sbACLEnable OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    " It is used to define the security mechanism to be used with airPoint.
+     0 - disable all
+     1 - internal ACL
+     2 - external ACL
+     3 - external_internal
+     4 - WPA_RADIUS
+     5 - WPA_PSK "
+
+    ::= { sbRadioBaseACL 4 }
+
+sbACLSet OBJECT-TYPE
+    SYNTAX  OCTET STRING 
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "A string used to set/edit/delete and ACL entry. "
+    ::= { sbRadioBaseACL 5 }
+			
+
+sbAntennaAlignment OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "When we set this OID to 1 , noise is emitted by the radio which is
+     received by a far-end radio to align its  antenna according to this
+     radio to get better signal quality. ( checking RSSI value). To stop the noise set it to 0."
+   ::= { sbRadioBaseAntenna 1}
+
+sbWDSAssociatedClientMAC OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "This is the MAC address which specifies the WDS client whose association with the
+      AP is to be checked. The result of association is returned in sbWDSAssociatedClientStatus.Incase
+      the device is AP(root bridge) , this MAC specifies a Client (Client bridge) and incase the device is Client(client bridge)
+      this specifies the AP(root bridge) MAC."
+  ::= { sbRadioBaseAssociation 1 }
+
+sbWDSAssociatedClientStatus OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "This OID returns the status 0 / 1 depending on whether the client/ AP(specified with the above MAC )
+    is associated with the device or not."
+   ::= { sbRadioBaseAssociation 2 }
+   
+sbWDSAssociatedClientQuality OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "This OID returns the Quality of the far-end device(specified with the above MAC )"
+   ::= { sbRadioBaseAssociation 3 }
+
+sbWDSAssociatedClientRSSI OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+    "This OID returns the RSSI of the far-end device(specified with the above MAC )"
+   ::= { sbRadioBaseAssociation 4 }
+  
+
+sbRadioBaseAloft OBJECT IDENTIFIER ::= { sbRadioBase1 25 }
+-- ----------------------------------------------
+--	 Aloft settings
+-- ----------------------------------------------
+
+sbDataFrameAloft OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "Deprecated - see sbThroughputOptimizer"
+   ::= { sbRadioBaseAloft 1 }
+
+sbControlFrameAloft OBJECT-TYPE
+    SYNTAX  OCTET STRING
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "Deprecated - see sbThroughputOptimizer"
+   ::= { sbRadioBaseAloft 2 }
+
+sbRetreatThreshold OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "Deprecated - see sbThroughputOptimizer"
+   ::= { sbRadioBaseAloft 3 }
+
+
+sbProgressThreshold OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "Deprecated - see sbThroughputOptimizer"
+   ::= { sbRadioBaseAloft 4 }
+
+sbThroughputOptimizer OBJECT-TYPE
+    SYNTAX  INTEGER
+    ACCESS  read-write
+    STATUS  mandatory
+    DESCRIPTION
+    "A combination of Retreat and Progress. The two values are used to optimize link performance in terms of 
+     stability and throughput. Its values are 0-10. It's value should be changed depending on the
+     link quality to get best performance.
+     0: aloftRetreat = 35; aloftProgress =  5
+     2: aloftRetreat = 38; aloftProgress =  8
+     4: aloftRetreat = 41; aloftProgress = 11
+     6: aloftRetreat = 44; aloftProgress = 14
+     8: aloftRetreat = 47; aloftProgress = 17
+     10: aloftRetreat = 50; aloftProgress =20"
+   ::= { sbRadioBaseAloft 5 }
+
+END

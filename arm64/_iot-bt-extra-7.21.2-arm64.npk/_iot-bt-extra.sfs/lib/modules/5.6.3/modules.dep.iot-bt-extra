@@ -1,0 +1,6 @@
+ecdh_genericrfkill
+btintel:	bluetooth
+btbcm:	bluetooth
+ecdh_generic:	ecc
+btrtl:	bluetooth
+btusb:	bluetooth btbcm btintel btrtl usbcore

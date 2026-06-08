@@ -1,0 +1,17 @@
+name: n8n
+descr: Workflow automation tool for connecting apps and services
+page: https://n8n.io
+category: automation
+default-credentials: web setup
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    ports:
+      - 5678:5678:web
+    environment:
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
+      N8N_RUNNERS_ENABLED: true
+      N8N_USER_FOLDER: /home/node/.n8n
+      N8N_SECURE_COOKIE: false
+    volumes:
+      - data:/home/node/.n8n

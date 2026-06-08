@@ -1,0 +1,63 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        table {
+            font-family: sans-serif;
+            font-size: .9em;
+            text-align: left;
+            line-height: 30px;
+            border: 1px solid #904c49;
+            border-spacing: 0px;
+            width: 100%;
+        }
+
+        td, th {
+            padding: 0 15px 0 20px;
+        }
+
+        thead th {
+            border-bottom: 2px solid #904c49;
+        }
+        tbody tr:last-child td {
+            border: none;
+        }
+        tbody td {
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h2>Report</h2>
+    <img style="position:absolute;top:5;right:5;" src="../../../img/mikrotik_logo.png" />
+    <!-- NOTE  DYNAMIC_START and DYNAMIC_END in Report generation works
+    differently than in Voucher generation. Here the whole content is rewritten
+    between these two tokens, so changing <table> won't affect result.
+    The example table can be used to configure style and see the result
+    style immediatelly. -->
+$(DYNAMIC_START)
+    <table class="flat-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Session start</th>
+                <th>Session end</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>user1</td>
+                <td>2014-01-01 12:00:00</td>
+                <td>2014-01-01 12:04:00</td>
+            </tr>
+            <tr>
+                <td>user2</td>
+                <td>2014-02-01 13:00:00</td>
+                <td>2014-02-01 14:00:00</td>
+            </tr>
+        </tbody>
+    </table>
+$(DYNAMIC_END)
+</body>
+</html>
