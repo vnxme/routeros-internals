@@ -1,0 +1,12 @@
+name: element
+descr: Matrix client focused on usability, accessibility, and broad compatibility
+page: https://element.io
+category: communication
+services:
+  element:
+    image: docker.io/vectorim/element-web:latest
+    environment:
+      ELEMENT_WEB_PORT: "[accessPort]"
+    ports:
+      - 8097:8097:web
+    restart: unless-stopped

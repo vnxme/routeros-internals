@@ -1,0 +1,16 @@
+name: urbackup-server
+descr: Client/Server network backup system with web interface for management
+page: https://www.urbackup.org
+category: storage
+default-credentials: web setup
+services:
+  urbackup:
+    image: docker.io/uroni/urbackup-server:latest
+    volumes:
+      - database:/var/urbackup
+      - backups:/backups
+    ports:
+      - 55414:55414:web
+      - 55413:55413:client-internet
+      - 55415:55415:client-local
+    restart: unless-stopped

@@ -1,0 +1,20 @@
+name: jellyfin
+descr: Free and open-source media server
+page: https://jellyfin.org
+category: media
+icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/jellyfin-logo.png
+default-credentials: web setup
+services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin
+    volumes:
+      - media:/data/media
+      - config:/config
+    ports:
+      - '8096:8096:web'
+    environment:
+      JELLYFIN_PublishedServerUrl: http://[accessIP]
+networks:
+  default:
+    name: lan
+    external: true

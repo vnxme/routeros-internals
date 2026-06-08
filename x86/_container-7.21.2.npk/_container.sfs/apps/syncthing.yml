@@ -1,0 +1,24 @@
+name: syncthing
+descr: continuous file synchronization program. It synchronizes files between two or more computers
+page: https://syncthing.net
+category: file-management
+default-credentials: web setup
+services:
+  syncthing:
+    image: lscr.io/linuxserver/syncthing:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - config:/config
+      - media:/root/Sync
+    ports:
+      - 8384:8384:web
+      - 22000:22000/tcp:sync-tcp-proto
+      - 22000:22000/udp:sync-quic-proto
+      - 21027:21027/udp:discovery-broadcasts
+    restart: unless-stopped
+networks:
+  default:
+    name: lan
+    external: true

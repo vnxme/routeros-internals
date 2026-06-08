@@ -1,0 +1,16 @@
+name: wallabag
+descr: Self-hosted read-it-later application
+page: https://wallabag.org
+category: productivity
+default-credentials: wallabag:wallabag
+services:
+  wallabag:
+    image: docker.io/wallabag/wallabag:latest
+    environment:
+      SYMFONY__ENV__DOMAIN_NAME: "http://[accessIP]:[accessPort]"
+    ports:
+      - 3014:80:web
+    volumes:
+      - data:/var/www/wallabag/data
+      - images:/var/www/wallabag/web/assets/images
+    restart: unless-stopped

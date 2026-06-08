@@ -1,0 +1,36 @@
+What's new in 7.21.2 (2026-Jan-29 11:54):
+
+*) app - added "media-path" and "download-path" setting in /app/settings;
+*) app - added shm_size parameter to apps that require it;
+*) app - calibre-web app auto add db if none exists;
+*) app - fixed Firefox and Webtop to work with https-proxy;
+*) app - fixed fossil app login typo;
+*) bgp - implement revised input error handling per RFC 7606;
+*) container - added support for the shm_size setting;
+*) container - allow non-root user write to SMB share;
+*) container - changed default container registry to docker.io;
+*) container - do not mount tmpfs on /tmp and /run by default;
+*) container - do not start container if any volume is not mounted;
+*) container - fixed nftables/iptables not working with "Message too long" error;
+*) container - made container mounts writable by the user;
+*) defconf - added single port MGMT bridge on CCR/RDS for easier /app configuration;
+*) defconf - improved firewall rule for local traffic to the loopback interface;
+*) disk - fixed issue where mountpoint was not removed after removing the disk;
+*) dns - fixed domain resolution for the ":resolve" command "server" parameter;
+*) lte - fixed issue for Chateau 5G R17 ax (introduced in v7.21.1);
+*) poe-out - firmware update for 802.3at capable boards (the update will cause a brief power interruption to poe-out interfaces);
+*) poe-out - firmware update for 802.3bt capable boards (the update will cause a brief power interruption to poe-out interfaces);
+*) poe-out - fixed occasional firmware update failure on CRS354;
+*) poe-out - fixed PSU state recovery upon unplug/replug on CRS320;
+*) ppp - added initial support for BG770A-GL modem firmware update;
+*) ppp - fixed premature PPP client disconnect on BG77 modems during firmware update;
+*) route - prevent creating routing tables with the same name;
+*) routing-filter - fixed num-set matcher;
+*) sfp - fixed sfp-ignore-rx-loss parameter for RB760iGS;
+*) sfp - improved initialization and linking for some QSFP modules;
+*) snmp - fixed handling of the script "dont-require-permissions" parameter when executing scripts using MIKROTIK-MIB::mtxrScriptRunOutput;
+*) snmp - fixed permission error reporting when executing scripts using MIKROTIK-MIB::mtxrScriptRunOutput (introduced in v7.21);
+*) snmp - fixed script "run-count" update after execution;
+*) system - do not attempt to use FastPath RPS on non-ARM64 devices (introduced in v7.21);
+*) user-manager - properly release database backup file after backup creation;
+*) zerotier - improved route removal;

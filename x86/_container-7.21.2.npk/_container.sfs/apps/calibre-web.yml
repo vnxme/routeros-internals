@@ -1,0 +1,32 @@
+name: calibre-web
+descr: a clean interface for browsing, reading and downloading eBooks using an existing Calibre database
+page: https://github.com/linuxserver/docker-calibre-web
+category: productivity
+default-credentials: admin:admin123
+services:
+  calibre-web:
+    image: lscr.io/linuxserver/calibre-web:latest
+    container_name: calibre-web
+    environment:
+    volumes:
+      - config:/config
+      - library:/app/calibre-web
+    configs:
+      - source: 'init_metadata'
+        target: '/custom-cont-init.d/init-metadata.sh'
+        mode: 0755
+    ports:
+      - 8098:8083:web
+configs:
+  'init_metadata':
+    content: |
+      #!/bin/bash
+      if [ ! -f /app/calibre-web/metadata.db ]; then
+        echo "[init-metadata] Downloading metadata.db..."
+        curl -sL https://raw.githubusercontent.com/janeczku/calibre-web/master/library/metadata.db -o /app/calibre-web/metadata.db
+        chown abc:abc /app/calibre-web/metadata.db
+        chmod 664 /app/calibre-web/metadata.db
+        echo "[init-metadata] metadata.db downloaded and permissions set"
+      else
+        echo "[init-metadata] metadata.db already exists"
+      fi
