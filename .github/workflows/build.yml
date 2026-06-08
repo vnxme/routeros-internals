@@ -518,7 +518,7 @@ jobs:
       - name: Upload release files as attachments
         id: upload_attachments
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && inputs.release_tag_or_artifact }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: "RouterOS ${{ matrix.version }} by ${{ needs.validate.outputs.label }}"
           body_path: "${{ env.tmp }}/description.txt"
@@ -531,7 +531,7 @@ jobs:
       - name: Upload release files as artifacts
         id: upload_artifacts
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' && steps.restore_processed.outputs.cache-hit == 'true' && !inputs.release_tag_or_artifact }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           compression-level: 0
           name: "${{ env.branch }}"
