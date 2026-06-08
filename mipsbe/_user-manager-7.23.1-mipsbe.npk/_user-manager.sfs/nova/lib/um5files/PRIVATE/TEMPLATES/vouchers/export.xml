@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+$(DYNAMIC_START)    <user>
+        <username>$(username)</username>
+        <password>$(password)</password>
+    </user>
+$(DYNAMIC_END)
+</users>

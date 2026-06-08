@@ -1,0 +1,10 @@
+name: myip
+descr: IP information tool that provides detailed information about your IP address and network
+page: https://github.com/jason5ng32/MyIP
+category: networking
+services:
+  myip:
+    image: docker.io/jason5ng32/myip:latest
+    ports:
+      - 18966:18966:web
+    restart: unless-stopped

@@ -1,0 +1,16 @@
+name: birdnet-go
+descr: Realtime BirdNET soundscape analyzer
+page: https://github.com/tphakala/birdnet-go
+category: monitoring
+services:
+  birdnet-go:
+    image: ghcr.io/tphakala/birdnet-go:nightly
+    container_name: birdnet-go
+    restart: unless-stopped
+    ports:
+      - 8079:8080:web
+    volumes:
+      - config:/config
+      - data:/data
+    devices:
+      - /dev/snd

@@ -1,0 +1,247 @@
+-- *****************************************************************
+-- COLUBRIS-802DOT1X-MIB.my: Colubris Networks 802.1x Extension MIB
+-- file
+---
+-- November 2001, Gilbert Moineau - Eric Perie - Denis Belanger
+--
+-- Copyright (c) 2001, 2002  by Colubris Networks, Inc.
+-- All rights reserved.
+-- *****************************************************************
+
+COLUBRIS-802DOT1X-ACCESS-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	MODULE-IDENTITY,
+	OBJECT-TYPE,
+	Unsigned32
+		FROM SNMPv2-SMI
+	TEXTUAL-CONVENTION,
+	TruthValue
+		FROM SNMPv2-TC
+	MODULE-COMPLIANCE,
+	OBJECT-GROUP
+		FROM SNMPv2-CONF
+	colubrisMgmt
+		FROM COLUBRIS-SMI;
+
+colubris802Dot1xMIB  MODULE-IDENTITY
+	LAST-UPDATED "200112040000Z"
+	ORGANIZATION "Colubris Networks, Inc."
+	CONTACT-INFO
+		"	Colubris Networks
+			Customer Service
+
+		Postal: 420 Armand-Frappier, Suite 200
+			Laval, QC  H7V 4B4
+			CANADA
+
+		   Tel: +1 450 680-1661
+
+		E-mail: cn-snmp@colubris.com"
+	DESCRIPTION
+		"Initial version of 802.1x extension MIB module."
+	::= { colubrisMgmt 8 }
+
+coPaeMIBObjects OBJECT IDENTIFIER ::= { colubris802Dot1xMIB 1 }
+
+coDot1xPaeSystem        OBJECT IDENTIFIER ::= { coPaeMIBObjects 1 }
+coDot1xPaeAuthenticator OBJECT IDENTIFIER ::= { coPaeMIBObjects 2 }
+
+-- ---------------------------------------------------------- --
+-- The colubris PAE System Group
+-- ---------------------------------------------------------- --
+
+coDot1xPaeSystemModifyKey OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"Enable/disable the modification of the transmit WEP keys
+	(#2 and #3) at regular interval. This feature will be
+	supported in the future."
+    DEFVAL { false }
+    ::= { coDot1xPaeSystem 1 }
+
+coDot1xPaeSystemModifyKeyInterval OBJECT-TYPE
+    SYNTAX      Unsigned32 (30..65535)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"Interval, in seconds, between two modifications of the
+	transmit WEP keys."
+    DEFVAL { 900 }
+    ::= { coDot1xPaeSystem 2 }
+
+coDot1xPaeSystemRequestIdentityDelay OBJECT-TYPE
+    SYNTAX      Unsigned32 (0..60)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"Delay, in secondes, between the reception of a EAPOL-Start
+	and the transmission of a request identity message."
+    DEFVAL { 10 }
+    ::= { coDot1xPaeSystem 3 }
+
+-- ---------------------------------------------------------- --
+-- The colubris PAE Authenticator Group
+-- ---------------------------------------------------------- --
+
+coDot1xAuthQuietPeriod OBJECT-TYPE
+    SYNTAX      Unsigned32 (0..65535)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"Specifies the initial value, in seconds, of the quietPeriod
+	constant used by the Authenticator PAE state
+	machine."
+    DEFVAL { 60 }
+    ::= { coDot1xPaeAuthenticator 1 }
+
+coDot1xAuthTxPeriod OBJECT-TYPE
+    SYNTAX      Unsigned32 (1..65535)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"Specifies the initial value, in seconds, of the txPeriod
+	constant used by the Authenticator PAE state
+	machine."
+    DEFVAL { 30 }
+    ::= { coDot1xPaeAuthenticator 2 }
+
+coDot1xAuthSuppTimeout OBJECT-TYPE
+    SYNTAX      Unsigned32 (1..65535)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"Specifies the initial value, in seconds, of the suppTimeout
+	constant used by the Backend Authentication state
+	machine."
+    DEFVAL { 30 }
+    ::= { coDot1xPaeAuthenticator 3 }
+
+coDot1xAuthServerTimeout OBJECT-TYPE
+    SYNTAX      Unsigned32 (1..65535)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"Specifies the initial value, in seconds, of the serverTimeout
+	constant used by the Backend Authentication state
+	machine."
+    DEFVAL { 30 }
+    ::= { coDot1xPaeAuthenticator 4 }
+
+coDot1xAuthMaxReq OBJECT-TYPE
+    SYNTAX      Unsigned32 (1..10)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"Specifies the initial value of the maxReq constant used by
+	the Backend Authentication state machine."
+    DEFVAL { 2 }
+    ::= { coDot1xPaeAuthenticator 5 }
+
+coDot1xAuthReAuthPeriod OBJECT-TYPE
+    SYNTAX      Unsigned32 (1..65535)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"Specifies the initial value, in seconds, of the reAuthPeriod
+	constant used by the Reauthentication Timer state
+	machine."
+    DEFVAL { 3600 }
+    ::= { coDot1xPaeAuthenticator 6 }
+
+coDot1xAuthReAuthEnabled OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"Specifies the enable/disable control used by the Reauthentication
+	Timer state machine (8.5.5.1)."
+    DEFVAL { false }
+    ::= { coDot1xPaeAuthenticator 7 }
+
+coDot1xAuthKeyTxEnabled OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"Specifies the initial value of the keyTransmissionEnabled
+	constant used by the Authenticator PAE state
+	machine."
+    DEFVAL { true }
+    ::= { coDot1xPaeAuthenticator 8 }
+
+coDot1xAuthReAuthMax OBJECT-TYPE
+    SYNTAX      Unsigned32 (1..65535)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"Specifies the number of reauthentication attempts that are
+	permitted before the Port becomes Unauthorized."
+    DEFVAL { 5 }
+    ::= { coDot1xPaeAuthenticator 9 }
+
+-- ---------------------------------------------------------- --
+-- COLUBIRS 802.1X Extension MIB - Conformance Information
+-- ---------------------------------------------------------- --
+
+coDot1xPaeConformance OBJECT IDENTIFIER ::= { colubris802Dot1xMIB 2 }
+
+coDot1xPaeGroups OBJECT IDENTIFIER ::= { coDot1xPaeConformance 1 }
+
+coDot1xPaeCompliances OBJECT IDENTIFIER ::= { coDot1xPaeConformance 2 }
+
+-- ---------------------------------------------------------- --
+-- units of conformance
+-- ---------------------------------------------------------- --
+
+coDot1xPaeSystemGroup OBJECT-GROUP
+    OBJECTS {
+	coDot1xPaeSystemModifyKey,
+	coDot1xPaeSystemModifyKeyInterval,
+	coDot1xPaeSystemRequestIdentityDelay
+	}
+    STATUS      current
+    DESCRIPTION
+	"A collection of objects providing extended system
+	information about, and control over, a PAE."
+    ::= { coDot1xPaeGroups 1 }
+
+coDot1xPaeAuthenticatorGroup OBJECT-GROUP
+    OBJECTS {
+	coDot1xAuthQuietPeriod,
+	coDot1xAuthTxPeriod,
+	coDot1xAuthSuppTimeout,
+	coDot1xAuthServerTimeout,
+	coDot1xAuthMaxReq,
+	coDot1xAuthReAuthPeriod,
+	coDot1xAuthReAuthEnabled,
+	coDot1xAuthKeyTxEnabled,
+	coDot1xAuthReAuthMax
+	}
+    STATUS      current
+    DESCRIPTION
+	"A collection of objects providing configuration
+	information about all Authenticator PAE."
+    ::= { coDot1xPaeGroups 2 }
+
+-- ---------------------------------------------------------- --
+-- compliance statements
+-- ---------------------------------------------------------- --
+
+coDot1xPaeCompliance MODULE-COMPLIANCE
+    STATUS  current
+    DESCRIPTION
+	"The compliance statement for extended device support
+	of Port Access Control."
+
+    MODULE
+    MANDATORY-GROUPS {
+	coDot1xPaeSystemGroup,
+	coDot1xPaeAuthenticatorGroup
+	}
+
+    ::= { coDot1xPaeCompliances 1 }
+
+END

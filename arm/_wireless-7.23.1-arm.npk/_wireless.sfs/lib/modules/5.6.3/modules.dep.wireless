@@ -1,0 +1,9 @@
+a9300:	wlan ath flash
+qca9984_pci:	wlan ath flash
+ipq4019_ahb:	wlan ath flash
+a9300_pci:	a9300 flash
+capsman:	capsmanglue packet_hook
+wlan:	packet_hook capsmanglue
+ar9888_pci:	wlan ath
+wil6210:	packet_hook flash wlan
+ath:	wlan packet_hook

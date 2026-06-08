@@ -1,0 +1,4 @@
+dot11ah:	cfg80211
+morse:	cfg80211 dot11ah mac80211
+libarc4cfg80211
+rfkill

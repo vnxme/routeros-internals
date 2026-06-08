@@ -1,0 +1,18 @@
+name: docker-with-dockge
+descr: Fancy, easy-to-use and reactive self-hosted docker compose.yaml stack-oriented manager.
+page: https://github.com/louislam/dockge
+category: productivity
+default-credentials: web setup
+services:
+  dockge:
+    image: docker.io/mikrotik/dockge-with-docker:latest
+    ports:
+      - 5001:5001:web
+    restart: unless-stopped
+    volumes:
+      - data:/opt/data
+      - stacks:/opt/stacks
+networks:
+  default:
+    name: lan
+    external: true

@@ -1,0 +1,30 @@
+name: odoo
+descr: "Odoo is a suite of open source business apps that cover all your company needs: CRM, eCommerce, accounting, inventory, point of sale, project management, etc."
+page: https://www.odoo.com/
+category: business
+default-credentials: web setup
+services:
+  web:
+    image: docker.io/odoo
+    depends_on:
+      - db
+    ports:
+      - "8069:8069:web"
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - web-config:/etc/odoo
+      - web-addons:/mnt/extra-addons
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=bK13wmvmNnYO3w8ZQBCXrsE1oNDKzKQ3
+    command: --proxy-mode
+  db:
+    image: docker.io/postgres:15
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=bK13wmvmNnYO3w8ZQBCXrsE1oNDKzKQ3
+      - POSTGRES_USER=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data/pgdata

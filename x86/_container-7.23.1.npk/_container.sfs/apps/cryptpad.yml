@@ -1,0 +1,32 @@
+name: cryptpad
+descr: CryptPad is a collaborative office suite that is end-to-end encrypted and open-source.
+page: https://cryptpad.org/
+category: productivity
+credentials: web setup
+services:
+  cryptpad:
+    image: "docker.io/cryptpad/cryptpad:version-2026.2.0"
+    hostname: cryptpad
+
+    environment:
+      - CPAD_MAIN_DOMAIN=[accessProto]://[accessIP]
+      - CPAD_SANDBOX_DOMAIN=[accessProto]://[accessIP]
+      - CPAD_CONF=/cryptpad/config/config.js
+
+    volumes:
+      - ./data/blob:/cryptpad/blob
+      - ./data/block:/cryptpad/block
+      - ./customize:/cryptpad/customize
+      - ./data/data:/cryptpad/data
+      - ./data/files:/cryptpad/datastore
+      - ./onlyoffice-dist:/cryptpad/www/common/onlyoffice/dist
+      - ./onlyoffice-conf:/cryptpad/onlyoffice-conf
+
+    ports:
+      - "3020:3000"
+      - "3021:3003"
+
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000

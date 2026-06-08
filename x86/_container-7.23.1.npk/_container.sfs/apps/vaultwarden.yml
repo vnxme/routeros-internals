@@ -1,0 +1,11 @@
+name: vaultwarden
+descr: An alternative server implementation of the Bitwarden Client API, written in Rust and compatible with official Bitwarden clients
+page: https://github.com/dani-garcia/vaultwarden
+category: security
+services:
+  vaultwarden:
+    image: docker.io/vaultwarden/server:latest
+    volumes:
+      - data:/data
+    ports:
+      - 3006:80:web

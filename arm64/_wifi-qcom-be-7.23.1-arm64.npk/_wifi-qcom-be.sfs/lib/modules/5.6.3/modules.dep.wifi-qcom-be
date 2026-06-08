@@ -1,0 +1,24 @@
+qcom_sysmon:	compat remoteproc
+qcom_common:	qcom_glink_smem qcom_smd remoteproc qcom_glink
+qrtr-mhi_bp:	mhi compat
+qcom_glink:	compat
+ath12k_wifi7:	ath12k compat cfg80211 mac80211 mhi mdt_loader
+ath12k:	cfg80211 ath ath_debug remoteproc compat mac80211 mdt_loader mhi qcom_common
+qcom_q6v5_wcss_sec:	compat remoteproc qcom_q6v5_upd qcom_common mdt_loader qcom_q6v5
+ath11k:	cfg80211 compat mac80211 mhi
+ath:	cfg80211 mac80211
+cfg80211:	compat rfkill
+mac80211:	cfg80211 libarc4 compat
+qrtr-smd_bp:	compat
+ath_debug:	compat
+mhi_pci_generic:	compat mhi
+qcom_q6v5_mpd:	compat qcom_q6v5 remoteproc mdt_loader qcom_common
+qcom_glink_smem:	qcom_glink
+ath11k_pci:	ath11k compat mhi
+remoteproc:	compat
+qcom_smd:	compat
+qcom_q6v5:	remoteproc qcom_sysmon
+qcom_q6v5_upd:	compat remoteproc qcom_common mdt_loader
+mhi_fuse_blower_mod:	compat
+mhi:	compat
+ath11k_ahb:	ath11k compat remoteproc qcom_common

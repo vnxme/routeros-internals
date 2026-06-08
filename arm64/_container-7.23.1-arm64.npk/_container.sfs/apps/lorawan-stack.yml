@@ -1,0 +1,135 @@
+name: lorawan-stack
+page: https://hub.docker.com/r/thethingsnetwork/lorawan-stack/
+descr: an open source LoRaWAN network stack suitable for large, global and geo-distributed public and private networks as well as smaller networks
+default-credentials: admin:[lorawan-stack__admin_password]
+category: networking
+services:
+  postgres:
+    image: docker.io/postgres:14
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=root
+      - POSTGRES_DB=ttn_lorawan
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: docker.io/redis:7
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  stack:
+    image: docker.io/thethingsnetwork/lorawan-stack:latest
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - postgres
+    volumes:
+      - blob:/srv/ttn-lorawan/public/blob
+      - data:/srv/data
+      - secrets:/srv/secrets
+    configs:
+      - source: 'ttn-lw-stack-docker.yml'
+        target: 'config/ttn-lw-stack-docker.yml'
+    secrets:
+      - lorawan-stack__admin_password
+    environment:
+      # TTN_LW_IS_ADMIN_RIGHTS_ALL: true
+      # TTN_LW_IS_EMAIL_DIR: .dev/email
+      TTN_LW_IS_EMAIL_PROVIDER: dir
+      TTN_LW_LOG_LEVEL: debug
+      TTN_LW_PLUGINS_SOURCE: directory
+      TTN_LW_IS_DATABASE_URI: postgres://root:root@postgres:5432/ttn_lorawan?sslmode=disable
+      TTN_LW_IS_OAUTH_UI_CANONICAL_URL: "[accessProto]://[accessIP]:[accessPort]/oauth"
+      TTN_LW_IS_OAUTH_UI_IS_BASE_URL: "[accessProto]://[accessIP]:[accessPort]/api/v3"
+      TTN_LW_CONSOLE_OAUTH_AUTHORIZE_URL: "[accessProto]://[accessIP]:[accessPort]/oauth/authorize"
+      TTN_LW_CONSOLE_OAUTH_LOGOUT_URL: "[accessProto]://[accessIP]:[accessPort]/oauth/logout"
+      TTN_LW_CONSOLE_OAUTH_TOKEN_URL: "[accessProto]://[accessIP]:[accessPort]/oauth/token"
+      TTN_LW_CONSOLE_UI_CANONICAL_URL: "[accessProto]://[accessIP]:[accessPort]/console"
+      TTN_LW_CONSOLE_UI_IS_BASE_URL: "[accessProto]://[accessIP]:[accessPort]/api/v3"
+      TTN_LW_CONSOLE_UI_GS_BASE_URL: "[accessProto]://[accessIP]:[accessPort]/api/v3"
+      TTN_LW_CONSOLE_UI_NS_BASE_URL: "[accessProto]://[accessIP]:[accessPort]/api/v3"
+      TTN_LW_CONSOLE_UI_AS_BASE_URL: "[accessProto]://[accessIP]:[accessPort]/api/v3"
+      TTN_LW_CONSOLE_UI_JS_BASE_URL: "[accessProto]://[accessIP]:[accessPort]/api/v3"
+      TTN_LW_CONSOLE_UI_EDTC_BASE_URL: "[accessProto]://[accessIP]:[accessPort]/api/v3"
+      TTN_LW_CONSOLE_UI_QRG_BASE_URL: "[accessProto]://[accessIP]:[accessPort]/api/v3"
+      TTN_LW_CONSOLE_UI_GCS_BASE_URL: "[accessProto]://[accessIP]:[accessPort]/api/v3"
+      TTN_LW_CONSOLE_UI_DCS_BASE_URL: "[accessProto]://[accessIP]:[accessPort]/api/v3"
+      TTN_LW_CONSOLE_UI_ACCOUNT_URL: "[accessProto]://[accessIP]:[accessPort]/oauth"
+    ports:
+      # If deploying on a public server:
+      - "1881:1881:gateway-server-mqtt-v2"
+      - "8881:8881:gateway-server-mqtt-v2-tls"
+      - "1882:1882:gateway-server-mqtt"
+      - "8882:8882:gateway-server-mqtt-tls"
+      - "1883:1883:app-server-mqtt"
+      - "8883:8883:app-server-mqtt-tls"
+      - "1884:1884:grpc"
+      - "8884:8884:grpc-tls"
+      - "1885:1885:web"
+      - "8885:8885:web-tls"
+      - "1886:1886:interop"
+      - "8886:8886:interop-tls"
+      - "1887:1887:web-sockets"
+      - "8887:8887:web-sockets-tls"
+      - "8889:8889:web-sockets"
+      - "1700:1700/udp"
+    entrypoint: /bin/sh
+    command: >
+      -c "
+        if [ ! -f /config/.is-db_initialized ]; then
+          # is-db setup
+          while true; do
+            stack is-db migrate
+            ret=$?
+            if [ $ret -eq 0 ]; then
+              break
+            else
+              sleep 5
+            fi
+          done
+
+          ADMIN_PASSWORD=$(cat /run/secrets/lorawan-stack__admin_password)
+
+          stack is-db create-admin-user --id admin --email admin@localhost --password $ADMIN_PASSWORD
+          stack is-db create-oauth-client --id cli --name 'Command Line Interface' --owner admin --no-secret --redirect-uri 'local-callback' --redirect-uri 'code'
+          stack is-db create-oauth-client \\
+            --id 'console' \\
+            --name 'Console' \\
+            --owner 'admin' \\
+            --secret 'console' \\
+            --redirect-uri 'http://stack:1885/console/oauth/callback' \\
+            --redirect-uri '/console/oauth/callback' \\
+            --logout-redirect-uri 'http://stack:1885/console' \\
+            --logout-redirect-uri '/console'
+
+          unset ADMIN_PASSWORD
+          touch /config/.is-db_initialized
+        fi
+        exec ttn-lw-stack -c '/config/ttn-lw-stack-docker.yml' start
+      "
+configs:
+  'ttn-lw-stack-docker.yml':
+    content: |
+      tls:
+        source: acme
+        acme:
+          enabled: false
+          dir: /var/lib/acme
+          email: "you@localhost"
+          hosts: ["localhost"]
+          default-host: "localhost"
+      console:
+        ui:
+          account-url: "/oauth"
+          canonical-url: "/console"
+          noc-url: "/noc"
+        oauth:
+          authorize-url: "/oauth/authorize"
+          token-url: "/oauth/token"
+          logout-url: "/oauth/logout"
+          client-id: "console"
+          client-secret: "console"

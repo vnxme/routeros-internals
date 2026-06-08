@@ -1,0 +1,7 @@
+snd-usbmidi-lib:	snd snd-rawmidi usbcore
+snd-hwdep:	snd
+snd-rawmidi:	snd
+snd-pcm:	snd
+snd:	soundcore
+snd-usb-audio:	snd-usbmidi-lib snd snd-hwdep snd-pcm usbcore
+overlay:	exportfs

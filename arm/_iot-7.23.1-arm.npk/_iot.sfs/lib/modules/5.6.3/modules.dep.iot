@@ -1,0 +1,5 @@
+ecdh_genericrfkill
+ecdh_generic:	ecc
+bt_interface:	bluetooth
+nrf52_uart:	bluetooth
+bt_rproc:	bt_interface

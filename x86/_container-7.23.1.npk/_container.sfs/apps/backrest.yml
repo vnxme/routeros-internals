@@ -1,0 +1,22 @@
+name: backrest
+descr: Web-based backup solution with support for local and cloud storage backends
+page: https://github.com/garethgeorge/backrest
+category: storage
+default-credentials: web setup
+services:
+  backrest:
+    image: docker.io/garethgeorge/backrest:latest
+    environment:
+      - BACKREST_DATA=/data
+      - BACKREST_CONFIG=/config/config.json
+      - XDG_CACHE_HOME=/cache
+      - TMPDIR=/tmp
+    volumes:
+      - data:/data
+      - config:/config
+      - cache:/cache
+      - tmp:/tmp
+      - rclone:/root/.config/rclone
+    ports:
+      - 9898:9898:web
+    restart: unless-stopped

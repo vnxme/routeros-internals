@@ -1,0 +1,15 @@
+name: openwebui-ollama
+descr: User-friendly WebUI for LLMs (formerly Ollama WebUI) bundled with Ollama
+page: https://github.com/open-webui/open-webui
+category: ai
+default-credentials: web setup
+services:
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:ollama
+    ports:
+      - 3003:8080:web
+    volumes:
+      - data:/app/backend/data
+      - ollama-data:/root/.ollama
+    environment:
+      OPENAI_API_KEY: your_secret_key
