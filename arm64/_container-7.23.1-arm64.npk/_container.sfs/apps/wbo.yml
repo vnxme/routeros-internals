@@ -1,0 +1,11 @@
+name: wbo
+descr: WBO is an online collaborative whiteboard that is simple, easy to use and open-source
+page: https://wbo.ophir.dev/
+category: productivity
+services:
+  server:
+    image: docker.io/lovasoa/wbo:latest
+    ports:
+      - 5001:80:web
+    volumes:
+      - wbo-boards:/opt/app/server-data

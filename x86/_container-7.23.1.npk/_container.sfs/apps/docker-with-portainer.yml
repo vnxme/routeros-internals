@@ -1,0 +1,18 @@
+name: docker-with-portainer
+descr: Portainer Community Edition (CE) is a lightweight platform that effortlessly delivers containerized applications.
+page: https://github.com/portainer/portainer
+category: productivity
+default-credentials: web setup
+services:
+  portainer:
+    image: docker.io/mikrotik/portainer-with-docker:latest
+    ports:
+      - 9000:9000:web
+      - 8000:8000:agent
+    restart: unless-stopped
+    volumes:
+      - data:/data
+networks:
+  default:
+    name: lan
+    external: true

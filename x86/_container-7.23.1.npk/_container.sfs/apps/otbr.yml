@@ -1,0 +1,30 @@
+name: otbr
+descr: OpenThread Border Router optimized for use with hAP be Media
+page: https://openthread.io
+category: home-automation
+icon: https://openthread.io/static/images/ot-icon-toprow-ot.png
+services:
+  otbr:
+    image: docker.io/openthread/otbr
+    entrypoint: /bin/bash
+    command: >
+      -c "rm -f /var/run/otbr-agent.pid /var/run/dbus/* &&
+      exec /app/etc/docker/test/docker_entrypoint.sh"
+    environment:
+      - FIREWALL=0
+      - RADIO_URL=spinel+hdlc+uart:///dev/ttyACM0
+      - BACKBONE_INTERFACE=[containerInterface]
+      - NAT64=1
+      - TUN_INTERFACE_NAME=wpan0
+      - HTTP_HOST=0.0.0.0
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
+    volumes:
+      - otbr-data:/var/lib/thread
+    ports:
+      - 80:80:web
+      - 8081:8081:rest
+networks:
+  default:
+    name: lan
+    external: true

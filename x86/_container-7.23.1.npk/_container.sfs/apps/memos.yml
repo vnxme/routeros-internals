@@ -1,0 +1,13 @@
+name: memos
+descr: A modern, open-source, self-hosted knowledge management and note-taking platform designed for privacy-conscious users and organizations.
+page: https://usememos.com
+category: productivity
+default-credentials: demo:demo
+services:
+  memos:
+    image: docker.io/neosmemo/memos:stable
+    container_name: memos
+    volumes:
+      - memos:/var/opt/memos
+    ports:
+      - 5230:5230:web

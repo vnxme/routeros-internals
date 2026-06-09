@@ -1,0 +1,12 @@
+name: trip
+descr: Minimalist POI map tracker and trip planner
+page: https://github.com/itskovacs/trip
+category: productivity
+services:
+  app:
+    image: ghcr.io/itskovacs/trip:1
+    ports:
+      - "8078:8000:web"
+    command: ["fastapi", "run", "/app/trip/main.py", "--host", "0.0.0.0"]
+    volumes:
+      - 'storage:/app/storage'

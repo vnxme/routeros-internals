@@ -1,0 +1,11 @@
+name: metube
+descr: Web GUI for youtube-dl (using the yt-dlp fork) with playlist support. Allows you to download videos from YouTube and dozens of other sites.
+page: https://github.com/alexta69/metube
+category: media
+services:
+  server:
+    image: ghcr.io/alexta69/metube
+    ports:
+      - 8105:8081
+    volumes:
+      - download:/downloads

@@ -1,0 +1,36 @@
+name: home-assistant
+descr: Home automation software
+page: https://home-assistant.io
+category: home-automation
+icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/homeassistant-logo.png
+default-credentials: web setup
+services:
+  home-assistant:
+    image: docker.io/homeassistant/home-assistant
+    ports:
+      - '8123:8123:web'
+    volumes:
+      - config:/config
+    configs:
+      - source: 'configuration'
+        target: '/config/configuration_new.yaml'
+    command: >
+      sh -c "
+        cp -n /config/configuration_new.yaml /config/configuration.yaml &&
+        exec python -m homeassistant --config /config
+      "
+
+configs:
+  'configuration':
+    content: |
+      default_config:
+      frontend:
+      homeassistant:
+      http:
+        use_x_forwarded_for: true
+        trusted_proxies:
+          - 0.0.0.0/0
+networks:
+  default:
+    name: lan
+    external: true

@@ -1,0 +1,14 @@
+name: livebook
+descr: Automate code & data workflows with interactive Elixir notebooks
+page: https://livebook.dev
+category: development
+default-credentials: <no_username>:securesecret
+services:
+  livebook:
+    image: ghcr.io/livebook-dev/livebook:latest
+    environment:
+      - LIVEBOOK_PASSWORD=securesecret
+    ports:
+      - 8096:8080:web
+      - 8097:8081:distribution
+    restart: unless-stopped

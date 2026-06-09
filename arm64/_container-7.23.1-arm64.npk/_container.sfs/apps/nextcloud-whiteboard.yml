@@ -1,0 +1,12 @@
+name: nextcloud-whiteboard
+descr: The official whiteboard app for Nextcloud. Create and share whiteboards with real-time collaboration.
+page: https://github.com/nextcloud/whiteboard
+category: productivity
+services:
+  server:
+    image: ghcr.io/nextcloud-releases/whiteboard:release
+    ports:
+      - 3019:3002:web
+    environment:
+      JWT_SECRET_KEY: lnbtxvYIEJnq53r92aPhc0zuKNTaFJbe
+      STORAGE_STRATEGY: lru

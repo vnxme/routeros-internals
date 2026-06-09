@@ -1,0 +1,21 @@
+name: stalwart
+descr: The open-source powerhouse combining modern email and collaboration features with unmatched security, speed, and scalability.
+page: https://github.com/stalwartlabs/stalwart
+category: networking
+default-credentials: /container/log/print where container=app-stalwart
+services:
+  stalwart:
+    image: docker.io/stalwartlabs/stalwart:latest
+    ports:
+      - 8103:8080:web:tcp
+      - 25:25:smtp:tcp
+      - 587:587:sendmail:tcp
+      - 465:465:smtps:tcp
+      - 143:143:imap:tcp
+      - 993:993:imaps:tcp
+      - 4190:4190:sieve:tcp
+      - 110:110:pop3:tcp
+      - 995:995:pop3s:tcp
+    restart: unless-stopped
+    volumes:
+      - stalwart:/opt/stalwart

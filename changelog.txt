@@ -1,0 +1,18 @@
+What's new in 7.23.1 (2026-Jun-02 12:25):
+
+*) app - fixed bogus configuration export;
+*) app - fixed making empty directories when running configuration export;
+*) bgp - fixed memory leak;
+*) bridge - fixed stability issue when using DHCPv4 snooping;
+*) disk - avoid reading SCSI stats all the time to allow disks to go to sleep;
+*) disk - improved error message when a swap file is created without "file-size" specified;
+*) ethernet - fixed stability issue with TSO on Alpine CPUs;
+*) firewall - improved system stability;
+*) ipsec,ike2 - improved TSi validation to prevent modecfg address conflicts;
+*) ipv6 - do not disable IPv6 FastPath when Traffic Flow is enabled;
+*) ospf - added missing interface parameters;
+*) ospf - fixed unresolved route problem when "routing-table" setting is used;
+*) ptp - rename "smpte" to "smpte-2059";
+*) route - improved overall stability;
+*) route - removed deprecated "/routing/route/rule" menu;
+*) switch - fixed rare possibility of tx-timeout or simultaneous flap of all switch ports on devices with Alpine CPUs;

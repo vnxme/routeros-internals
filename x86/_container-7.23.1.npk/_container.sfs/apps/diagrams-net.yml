@@ -1,0 +1,9 @@
+name: diagrams-net
+descr: diagrams.net (formerly draw.io) is free self-hosted diagram software.
+page: https://www.drawio.com/
+category: productivity
+services:
+  server:
+    image: docker.io/jgraph/drawio
+    ports:
+      - 4444:8080:web
