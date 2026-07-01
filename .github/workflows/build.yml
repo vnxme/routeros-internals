@@ -198,7 +198,7 @@ jobs:
     steps:
       - name: Look up downloaded files in cache
         id: lookup
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           key: "${{ env.dkey }}"
           lookup-only: true
@@ -214,7 +214,7 @@ jobs:
       - name: Checkout 'main' branch into '${{ env.app }}' directory
         id: checkout_repository
         if: ${{ fromJSON(inputs.extras).download_force == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: "${{ env.app }}"
 
@@ -253,7 +253,7 @@ jobs:
       - name: Save downloaded files from '${{ env.box }}' directory to cache
         id: save_cache
         if: ${{ fromJSON(inputs.extras).download_force == 'true' || steps.lookup.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           key: "${{ env.dkey }}"
           path: 
@@ -274,7 +274,7 @@ jobs:
     steps:
       - name: Look up processed files in cache
         id: lookup_processed
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           key: "${{ env.pkey }}"
           lookup-only: 'true'
@@ -290,7 +290,7 @@ jobs:
       - name: Restore an archive with downloaded files from cache into '${{ env.tmp }}' directory
         id: restore_downloaded
         if: ${{ fromJSON(inputs.extras).process_force == 'true' || steps.lookup_processed.outputs.cache-hit != 'true' }}
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           key: "${{ env.dkey }}"
           path:
@@ -306,7 +306,7 @@ jobs:
       - name: Checkout 'main' branch into '${{ env.app }}' directory
         id: checkout_repository
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: "${{ env.app }}"
 
@@ -355,7 +355,7 @@ jobs:
       - name: Save processed files from '${{ env.box }}' directory to cache
         id: save_cache
         if: ${{ steps.restore_downloaded.outputs.cache-hit == 'true' }}
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           key: "${{ env.pkey }}"
           path:
@@ -384,7 +384,7 @@ jobs:
 
       - name: Checkout 'main' branch into '${{ env.box }}' directory
         id: checkout_repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: "${{ env.box }}"
 
@@ -395,7 +395,7 @@ jobs:
 
 #      - name: Checkout '${{ env.branch }}' branch into '${{ env.box }}' directory
 #        id: checkout_repository
-#        uses: actions/checkout@v6
+#        uses: actions/checkout@v7
 #        with:
 #          path: "${{ env.box }}"
 #          ref: "${{ env.branch }}"
@@ -407,7 +407,7 @@ jobs:
 
       - name: Restore an archive with downloaded files from cache into '${{ env.tmp }}' directory
         id: restore_downloaded
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           key: "${{ env.dkey }}"
           path:
@@ -415,7 +415,7 @@ jobs:
 
       - name: Restore an archive with processed files from cache into '${{ env.tmp }}' directory
         id: restore_processed
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           key: "${{ env.pkey }}"
           path:
